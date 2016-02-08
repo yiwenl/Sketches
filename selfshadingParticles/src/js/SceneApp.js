@@ -17,13 +17,14 @@ class SceneApp extends alfrid.Scene {
 		super();
 
 
-		this.lightPosition = [1, 10, 1];
+		this.lightPosition = [.5, 10, 1];
+		this._vLight.position = this.lightPosition;
 		this.shadowMatrix  = mat4.create();
 		
 		this.cameraLight   = new alfrid.CameraPerspective();
-		let fov            = 45*Math.PI/180;
+		let fov            = 90*Math.PI/180;
 		let near           = .5;
-		let far            = 100;
+		let far            = 400;
 		this.camera.setPerspective(fov, GL.aspectRatio, near, far);
 		this.cameraLight.setPerspective(fov*3, GL.aspectRatio, near, far);
 		this.cameraLight.lookAt(this.lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
@@ -31,8 +32,7 @@ class SceneApp extends alfrid.Scene {
 
 		this.orbitalControl._rx.value = .6;
 		this.orbitalControl._ry.value = -.8;
-		this.orbitalControl.radius.value = 40.3;
-		this.orbitalControl.positionOffset = [0, -15, 0];
+		this.orbitalControl.radius.value = 15.3;
 		this._count = 0;
 	}
 
@@ -125,8 +125,9 @@ class SceneApp extends alfrid.Scene {
 
 		this._fboShadowMap.bind();
 		GL.clear(1, 1, 1, 1);
+		GL.gl.depthFunc(GL.gl.LEQUAL);
 		GL.setMatrices(this.cameraLight);
-		this._vFloor.render();
+		// this._vFloor.render();
 		this._vRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p);
 		this._fboShadowMap.unbind();
 
@@ -138,15 +139,19 @@ class SceneApp extends alfrid.Scene {
 		// this._bAxis.draw();
 		// this._bDotsPlane.draw();
 		// this._vLight.render();
-		this._vFloor.render(this.shadowMatrix, this.lightPosition, this._fboShadowMap.getDepthTexture());
-		this._vShadowRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, this._fboShadowMap.getDepthTexture(), this.shadowMatrix, this.lightPosition);
+		this._vFloor.render(this.shadowMatrix, this.lightPosition, this._fboShadowMap.getTexture());
+		this._vShadowRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, this._fboShadowMap.getTexture(), this.shadowMatrix, this.lightPosition);
 
-
-		// GL.setMatrices(this.cameraOrtho);
-		// GL.disable(GL.DEPTH_TEST);
-		// GL.viewport(0, 0, 100, 100/GL.aspectRatio);
-		// this._bCopy.draw(this._fboShadowMap.getDepthTexture());
-		// GL.enable(GL.DEPTH_TEST);
+		/*/
+		GL.setMatrices(this.cameraOrtho);
+		GL.disable(GL.DEPTH_TEST);
+		let size = 256;
+		GL.viewport(0, 0, size, size/GL.aspectRatio);
+		this._bCopy.draw(this._fboShadowMap.getDepthTexture());
+		GL.viewport(size, 0, size, size/GL.aspectRatio);
+		this._bCopy.draw(this._fboShadowMap.getTexture());
+		GL.enable(GL.DEPTH_TEST);
+		/*/
 	}
 }
 

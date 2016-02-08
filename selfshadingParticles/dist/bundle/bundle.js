@@ -4476,13 +4476,14 @@ var SceneApp = function (_alfrid$Scene) {
 
 		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SceneApp).call(this));
 
-		_this.lightPosition = [1, 10, 1];
+		_this.lightPosition = [.5, 10, 1];
+		_this._vLight.position = _this.lightPosition;
 		_this.shadowMatrix = mat4.create();
 
 		_this.cameraLight = new _alfrid2.default.CameraPerspective();
-		var fov = 45 * Math.PI / 180;
+		var fov = 90 * Math.PI / 180;
 		var near = .5;
-		var far = 100;
+		var far = 400;
 		_this.camera.setPerspective(fov, GL.aspectRatio, near, far);
 		_this.cameraLight.setPerspective(fov * 3, GL.aspectRatio, near, far);
 		_this.cameraLight.lookAt(_this.lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
@@ -4490,8 +4491,7 @@ var SceneApp = function (_alfrid$Scene) {
 
 		_this.orbitalControl._rx.value = .6;
 		_this.orbitalControl._ry.value = -.8;
-		_this.orbitalControl.radius.value = 40.3;
-		_this.orbitalControl.positionOffset = [0, -15, 0];
+		_this.orbitalControl.radius.value = 15.3;
 		_this._count = 0;
 		return _this;
 	}
@@ -4582,8 +4582,9 @@ var SceneApp = function (_alfrid$Scene) {
 
 			this._fboShadowMap.bind();
 			GL.clear(1, 1, 1, 1);
+			GL.gl.depthFunc(GL.gl.LEQUAL);
 			GL.setMatrices(this.cameraLight);
-			this._vFloor.render();
+			// this._vFloor.render();
 			this._vRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p);
 			this._fboShadowMap.unbind();
 
@@ -4595,14 +4596,19 @@ var SceneApp = function (_alfrid$Scene) {
 			// this._bAxis.draw();
 			// this._bDotsPlane.draw();
 			// this._vLight.render();
-			this._vFloor.render(this.shadowMatrix, this.lightPosition, this._fboShadowMap.getDepthTexture());
-			this._vShadowRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, this._fboShadowMap.getDepthTexture(), this.shadowMatrix, this.lightPosition);
+			this._vFloor.render(this.shadowMatrix, this.lightPosition, this._fboShadowMap.getTexture());
+			this._vShadowRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, this._fboShadowMap.getTexture(), this.shadowMatrix, this.lightPosition);
 
-			// GL.setMatrices(this.cameraOrtho);
-			// GL.disable(GL.DEPTH_TEST);
-			// GL.viewport(0, 0, 100, 100/GL.aspectRatio);
-			// this._bCopy.draw(this._fboShadowMap.getDepthTexture());
-			// GL.enable(GL.DEPTH_TEST);
+			/*/
+   GL.setMatrices(this.cameraOrtho);
+   GL.disable(GL.DEPTH_TEST);
+   let size = 256;
+   GL.viewport(0, 0, size, size/GL.aspectRatio);
+   this._bCopy.draw(this._fboShadowMap.getDepthTexture());
+   GL.viewport(size, 0, size, size/GL.aspectRatio);
+   this._bCopy.draw(this._fboShadowMap.getTexture());
+   GL.enable(GL.DEPTH_TEST);
+   /*/
 		}
 	}]);
 
@@ -4646,7 +4652,7 @@ var ViewCube = function (_alfrid$View) {
 		_this.color = color;
 		_this.size = size;
 		_this.position = position;
-		_this.shaderShadow = new _alfrid2.default.GLShader("#define GLSLIFY 1\n// generalShadow.vert\n\n// shadow.vert\n\n#define SHADER_NAME SHADOW_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\nuniform mat3 uNormalMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\nvarying vec4 vShadowCoord;\nvarying vec4 vPosition;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nvoid main(void) {\n\tvec3 pos        = aVertexPosition * scale;\n\tpos \t\t\t+= position;\n\tvec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tgl_Position     = uProjectionMatrix * mvPosition;\n\tvPosition       = mvPosition;\n\tvTextureCoord   = aTextureCoord;\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix * uModelMatrix ) * vec4(pos, 1.0);;\n}", "#define GLSLIFY 1\n// shadow.frag\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nvarying vec4 vPosition;\nvarying vec4 vShadowCoord;\n\nuniform vec3 color;\nuniform sampler2D textureDepth;\n\nvoid main(void) {\n\t\n\tvec4 ShadowCoord\t= vShadowCoord / vShadowCoord.w;\n\tvec4 Shadow\t\t= vec4(1.0);\n\n\tif ( ShadowCoord.z > -1.0 && ShadowCoord.z < 1.0 ) {\n\t\tShadow = texture2DProj( textureDepth, ShadowCoord, -0.00005 );\t\t\n\t}\n\n\tfloat bias = .0001;\n\tfloat visibility = 1.0;\n\tfloat descrease = .1;\n\n\tif ( texture2D( textureDepth, ShadowCoord.xy + vec2( -0.94201624, -0.39906216 )/700.0 ).z  <  ShadowCoord.z-bias ){\t\tvisibility-=descrease;}\n\tif ( texture2D( textureDepth, ShadowCoord.xy + vec2( 0.94558609, -0.768907256 )/700.0 ).z  <  ShadowCoord.z-bias ){\t\tvisibility-=descrease;}\n\tif ( texture2D( textureDepth, ShadowCoord.xy + vec2( -0.094184101, -0.92938870 )/700.0 ).z  <  ShadowCoord.z-bias ){\tvisibility-=descrease;}\n\tif ( texture2D( textureDepth, ShadowCoord.xy + vec2( 0.34495938, 0.29387760 )/700.0 ).z  <  ShadowCoord.z-bias ){\t\tvisibility-=descrease;}\n\n\tgl_FragColor = vec4( color, 1.0) * Shadow;\n\n/*\n\tfloat bias = 0.005*tan(acos(NdotL)); // cosTheta is dot( n,l ), clamped between 0 and 1\n\tbias = clamp(bias, 0.0, 0.01);\n\tfloat visibility = 1.0;\n\tif ( texture2D( textureDepth, ShadowCoord.xy ).z  <  ShadowCoord.z-bias){\n\t\tvisibility = 0.5;\n\t}\n\n    gl_FragColor = vec4(( Diffuse * visibility + Ambient ) * color, 1.0);\n*/  \n}");
+		_this.shaderShadow = new _alfrid2.default.GLShader("#define GLSLIFY 1\n// generalShadow.vert\n\n// shadow.vert\n\n#define SHADER_NAME SHADOW_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\nuniform mat3 uNormalMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\nvarying vec4 vShadowCoord;\nvarying vec4 vPosition;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nvoid main(void) {\n\tvec3 pos        = aVertexPosition * scale;\n\tpos \t\t\t+= position;\n\tvec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tgl_Position     = uProjectionMatrix * mvPosition;\n\tvPosition       = mvPosition;\n\tvTextureCoord   = aTextureCoord;\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix * uModelMatrix ) * vec4(pos, 1.0);;\n}", "#define GLSLIFY 1\n// shadow.frag\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nvarying vec4 vPosition;\nvarying vec4 vShadowCoord;\n\nuniform vec3 color;\nuniform sampler2D textureDepth;\n\nfloat pcfSoftShadow(sampler2D shadowMap) {\n\tconst float shadowMapSize  = 1024.0;\n\tconst float shadowBias     = .00005;\n\tconst float shadowDarkness = .2;\n\tfloat shadow = 0.0;\n\tfloat texelSizeX =  1.0 / shadowMapSize;\n\tfloat texelSizeY =  1.0 / shadowMapSize;\n\tvec4 shadowCoord\t= vShadowCoord / vShadowCoord.w;\n\n\tbvec4 inFrustumVec = bvec4 ( shadowCoord.x >= 0.0, shadowCoord.x <= 1.0, shadowCoord.y >= 0.0, shadowCoord.y <= 1.0 );\n\tbool inFrustum = all( inFrustumVec );\n\n\tbvec2 frustumTestVec = bvec2( inFrustum, shadowCoord.z <= 1.0 );\n\n\tbool frustumTest = all( frustumTestVec );\n\t\n\n\tif ( frustumTest ) {\n\t\tshadowCoord.z += shadowBias;\n\t\tfloat xPixelOffset = texelSizeX;\n\t\tfloat yPixelOffset = texelSizeY;\n\n\t\tfloat dx0 = - 1.0 * xPixelOffset;\n\t\tfloat dy0 = - 1.0 * yPixelOffset;\n\t\tfloat dx1 = 1.0 * xPixelOffset;\n\t\tfloat dy1 = 1.0 * yPixelOffset;\n\n\t\tmat3 shadowKernel;\n\t\tmat3 depthKernel;\n\n\t\tdepthKernel[ 0 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy0 ) ).r ;\n\t\tdepthKernel[ 0 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, 0.0 ) ).r ;\n\t\tdepthKernel[ 0 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy1 ) ).r ;\n\t\tdepthKernel[ 1 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( 0.0, dy0 ) ).r ;\n\t\tdepthKernel[ 1 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy ).r ;\n\t\tdepthKernel[ 1 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( 0.0, dy1 ) ).r ;\n\t\tdepthKernel[ 2 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, dy0 ) ).r ;\n\t\tdepthKernel[ 2 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, 0.0 ) ).r ;\n\t\tdepthKernel[ 2 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, dy1 ) ).r ;\n\n\t\tvec3 shadowZ = vec3( shadowCoord.z );\n\t\tshadowKernel[ 0 ] = vec3( lessThan( depthKernel[ 0 ], shadowZ ) );\n\t\tshadowKernel[ 0 ] *= vec3( 0.25 );\n\n\t\tshadowKernel[ 1 ] = vec3( lessThan( depthKernel[ 1 ], shadowZ ) );\n\t\tshadowKernel[ 1 ] *= vec3( 0.25 );\n\n\t\tshadowKernel[ 2 ] = vec3( lessThan( depthKernel[ 2 ], shadowZ ) );\n\t\tshadowKernel[ 2 ] *= vec3( 0.25 );\n\n\t\tvec2 fractionalCoord = 1.0 - fract( shadowCoord.xy * shadowMapSize );\n\n\t\tshadowKernel[ 0 ] = mix( shadowKernel[ 1 ], shadowKernel[ 0 ], fractionalCoord.x );\n\t\tshadowKernel[ 1 ] = mix( shadowKernel[ 2 ], shadowKernel[ 1 ], fractionalCoord.x );\n\n\t\tvec4 shadowValues;\n\t\tshadowValues.x = mix( shadowKernel[ 0 ][ 1 ], shadowKernel[ 0 ][ 0 ], fractionalCoord.y );\n\t\tshadowValues.y = mix( shadowKernel[ 0 ][ 2 ], shadowKernel[ 0 ][ 1 ], fractionalCoord.y );\n\t\tshadowValues.z = mix( shadowKernel[ 1 ][ 1 ], shadowKernel[ 1 ][ 0 ], fractionalCoord.y );\n\t\tshadowValues.w = mix( shadowKernel[ 1 ][ 2 ], shadowKernel[ 1 ][ 1 ], fractionalCoord.y );\n\n\t\tshadow = dot( shadowValues, vec4( 1.0 ) ) * shadowDarkness;\n\n\t}\n\n\treturn shadow;\n}\n\nvec4 textureProjOffset(sampler2D uShadowMap, vec4 sc, vec2 offset) {\n\tconst float shadowBias     = .00005;\n\tvec4 scCopy = sc;\n\tscCopy.xy += offset;\n\treturn texture2DProj(uShadowMap, scCopy, shadowBias);\n}\n\nvec4 pcfShadow(sampler2D uShadowMap) {\n\tvec4 sc                   = vShadowCoord / vShadowCoord.w;\n\tconst float shadowMapSize = 1024.0;\n\tconst float s             = 1.0/shadowMapSize;\n\tvec4 shadow              = vec4(0.0);\n\tshadow += textureProjOffset( uShadowMap, sc, vec2(-s,-s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2(-s, 0) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2(-s, s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( 0,-s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( 0, 0) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( 0, s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( s,-s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( s, 0) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( s, s) );\n\treturn shadow/9.0;\n}\n\nvoid main(void) {\n\tfloat pcf = pcfSoftShadow(textureDepth);\n\tpcf = 1.0 - smoothstep(0.0, .55, pcf);\n\tgl_FragColor = vec4( color*pcf, 1.0);\n\n\t// vec4 ShadowCoord\t= vShadowCoord / vShadowCoord.w;\n\t// vec4 Shadow\t\t= vec4(1.0);\n\n\t// if ( ShadowCoord.z > -1.0 && ShadowCoord.z < 1.0 ) {\n\t// \tShadow = texture2DProj( textureDepth, ShadowCoord, -0.00005 );\t\t\n\t// }\n\n\t// gl_FragColor = vec4( color, 1.0) * Shadow;\n\n\t// vec4 shadow = pcfShadow(textureDepth);\n\t// gl_FragColor = vec4( color, 1.0)*shadow;\n}");
 		return _this;
 	}
 
@@ -4715,7 +4721,7 @@ var ViewRender = function (_alfrid$View) {
 		_classCallCheck(this, ViewRender);
 
 		GL = _alfrid2.default.GL;
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewRender).call(this, "#define GLSLIFY 1\n// render.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nvarying vec4 vColor;\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy * .5;\n\tvec3 currPos = texture2D(texture, uv).rgb;\n\tvec3 nextPos = texture2D(textureNext, uv).rgb;\n\tvec3 pos     = mix(currPos, nextPos, percent);\n\tgl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tgl_PointSize = 1.0;\n\t\n\tfloat d      = length(pos);\n\tfloat a      = smoothstep(3.0, 4.5, d);\n\tvColor       = vec4(1.0, 1.0, 1.0, 1.0);\n\n\tgl_PointSize = 2.0;\n\n\tif(length(currPos) - length(nextPos) > 1.0) vColor.a = 0.0;\n}", "#define GLSLIFY 1\n// render.frag\n\n// save.frag\n\nprecision highp float;\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewRender).call(this, "#define GLSLIFY 1\n// render.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nvarying vec4 vColor;\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy * .5;\n\tvec3 currPos = texture2D(texture, uv).rgb;\n\tvec3 nextPos = texture2D(textureNext, uv).rgb;\n\tvec3 pos     = mix(currPos, nextPos, percent);\n\tvec4 V       = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tgl_Position  = V;\n\tgl_PointSize = 2.0;\n\n\tfloat d \t = V.z/V.w;\n\td \t\t\t = d*.5 + .5;\n\tvColor       = vec4(d, d, d, 1.0);\n\n\tif(length(currPos) - length(nextPos) > 1.0) vColor.a = 0.0;\n}", "#define GLSLIFY 1\n// render.frag\n\n// save.frag\n\nprecision highp float;\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
 	}
 
 	_createClass(ViewRender, [{
@@ -4881,7 +4887,7 @@ var ViewShadowRender = function (_alfrid$View) {
 	function ViewShadowRender() {
 		_classCallCheck(this, ViewShadowRender);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewShadowRender).call(this, "#define GLSLIFY 1\n// shadow.vert\n\n// render.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nvarying vec4 vColor;\n\nvarying vec4 vShadowCoord;\nvarying vec4 vPosition;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy * .5;\n\tvec3 currPos = texture2D(texture, uv).rgb;\n\tvec3 nextPos = texture2D(textureNext, uv).rgb;\n\tvec3 pos     = mix(currPos, nextPos, percent);\n\n\tvec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\n\tgl_Position     = uProjectionMatrix * mvPosition;\n\tvPosition       = mvPosition;\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);;\n\t\n\tfloat d      = length(pos);\n\tfloat a      = smoothstep(3.0, 4.5, d);\n\tvColor       = vec4(1.0, 1.0, 1.0, 1.0);\n\n\tgl_PointSize = 2.0;\n\n\tif(length(currPos) - length(nextPos) > 1.0) vColor.a = 0.0;\n}", "#define GLSLIFY 1\n// shadow.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec4 vPosition;\nvarying vec4 vShadowCoord;\nvarying vec4 vColor;\n\nuniform vec3 color;\nuniform mat4 uViewMatrix;\nuniform mat4 uModelMatrix;\nuniform vec3 lightPosition;\nuniform sampler2D textureDepth;\n\nconst float shadowMapSize = 1024.0;\n/*\nconst vec2 poissonDisk[4] = vec2[](\n\tvec2( -0.94201624, -0.39906216 ),\n\tvec2( 0.94558609, -0.76890725 ),\n\tvec2( -0.094184101, -0.92938870 ),\n\tvec2( 0.34495938, 0.29387760 )\n);\n*/\nvoid main(void) {\n\tif(vColor.a <= 0.0) discard;\n\n\tvec4 ShadowCoord\t= vShadowCoord / vShadowCoord.w;\n\n\tfloat bias = .0001;\n\tfloat visibility = 1.0;\n\tfloat descrease = .1;\n\n\tif ( texture2D( textureDepth, ShadowCoord.xy + vec2( -0.94201624, -0.39906216 )/700.0 ).z  <  ShadowCoord.z-bias ){\t\tvisibility-=descrease;}\n\tif ( texture2D( textureDepth, ShadowCoord.xy + vec2( 0.94558609, -0.768907256 )/700.0 ).z  <  ShadowCoord.z-bias ){\t\tvisibility-=descrease;}\n\tif ( texture2D( textureDepth, ShadowCoord.xy + vec2( -0.094184101, -0.92938870 )/700.0 ).z  <  ShadowCoord.z-bias ){\tvisibility-=descrease;}\n\tif ( texture2D( textureDepth, ShadowCoord.xy + vec2( 0.34495938, 0.29387760 )/700.0 ).z  <  ShadowCoord.z-bias ){\t\tvisibility-=descrease;}\n\n\t\n\t// visibility = mix(visibility, 1.0, .25);\t\t\n\n\tvec4 color = vColor;\n\tcolor.rgb *= visibility;\n\tgl_FragColor = color;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewShadowRender).call(this, "#define GLSLIFY 1\n// shadow.vert\n\n// render.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nvarying vec4 vColor;\n\nvarying vec4 vShadowCoord;\nvarying vec4 vPosition;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy * .5;\n\tvec3 currPos = texture2D(texture, uv).rgb;\n\tvec3 nextPos = texture2D(textureNext, uv).rgb;\n\tvec3 pos     = mix(currPos, nextPos, percent);\n\n\tvec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\n\tgl_Position     = uProjectionMatrix * mvPosition;\n\tvPosition       = mvPosition;\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);;\n\t\n\tfloat d      = length(pos);\n\tfloat a      = smoothstep(3.0, 4.5, d);\n\tvColor       = vec4(1.0, 1.0, 1.0, 1.0);\n\n\tgl_PointSize = 2.0;\n\n\tif(length(currPos) - length(nextPos) > 1.0) vColor.a = 0.0;\n}", "#define GLSLIFY 1\n// shadow.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec4 vPosition;\nvarying vec4 vShadowCoord;\nvarying vec4 vColor;\n\nuniform vec3 color;\nuniform mat4 uViewMatrix;\nuniform mat4 uModelMatrix;\nuniform vec3 lightPosition;\nuniform sampler2D textureDepth;\nuniform float uShadowStrength;\nuniform float uShadowThreshold;\n\nfloat pcfSoftShadow(sampler2D shadowMap) {\n\tconst float shadowMapSize  = 1024.0;\n\tconst float shadowBias     = .00005;\n\tfloat shadow = 0.0;\n\tfloat texelSizeX =  1.0 / shadowMapSize;\n\tfloat texelSizeY =  1.0 / shadowMapSize;\n\tvec4 shadowCoord\t= vShadowCoord / vShadowCoord.w;\n\n\tbvec4 inFrustumVec = bvec4 ( shadowCoord.x >= 0.0, shadowCoord.x <= 1.0, shadowCoord.y >= 0.0, shadowCoord.y <= 1.0 );\n\tbool inFrustum = all( inFrustumVec );\n\n\tbvec2 frustumTestVec = bvec2( inFrustum, shadowCoord.z <= 1.0 );\n\n\tbool frustumTest = all( frustumTestVec );\n\t\n\n\tif ( frustumTest ) {\n\t\tshadowCoord.z += shadowBias;\n\t\tfloat xPixelOffset = texelSizeX;\n\t\tfloat yPixelOffset = texelSizeY;\n\n\t\tfloat dx0 = - 1.0 * xPixelOffset;\n\t\tfloat dy0 = - 1.0 * yPixelOffset;\n\t\tfloat dx1 = 1.0 * xPixelOffset;\n\t\tfloat dy1 = 1.0 * yPixelOffset;\n\n\t\tmat3 shadowKernel;\n\t\tmat3 depthKernel;\n\n\t\tdepthKernel[ 0 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy0 ) ).r ;\n\t\tdepthKernel[ 0 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, 0.0 ) ).r ;\n\t\tdepthKernel[ 0 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy1 ) ).r ;\n\t\tdepthKernel[ 1 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( 0.0, dy0 ) ).r ;\n\t\tdepthKernel[ 1 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy ).r ;\n\t\tdepthKernel[ 1 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( 0.0, dy1 ) ).r ;\n\t\tdepthKernel[ 2 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, dy0 ) ).r ;\n\t\tdepthKernel[ 2 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, 0.0 ) ).r ;\n\t\tdepthKernel[ 2 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, dy1 ) ).r ;\n\n\t\tvec3 shadowZ = vec3( shadowCoord.z );\n\t\tshadowKernel[ 0 ] = vec3( lessThan( depthKernel[ 0 ], shadowZ ) );\n\t\tshadowKernel[ 0 ] *= vec3( 0.25 );\n\n\t\tshadowKernel[ 1 ] = vec3( lessThan( depthKernel[ 1 ], shadowZ ) );\n\t\tshadowKernel[ 1 ] *= vec3( 0.25 );\n\n\t\tshadowKernel[ 2 ] = vec3( lessThan( depthKernel[ 2 ], shadowZ ) );\n\t\tshadowKernel[ 2 ] *= vec3( 0.25 );\n\n\t\tvec2 fractionalCoord = 1.0 - fract( shadowCoord.xy * shadowMapSize );\n\n\t\tshadowKernel[ 0 ] = mix( shadowKernel[ 1 ], shadowKernel[ 0 ], fractionalCoord.x );\n\t\tshadowKernel[ 1 ] = mix( shadowKernel[ 2 ], shadowKernel[ 1 ], fractionalCoord.x );\n\n\t\tvec4 shadowValues;\n\t\tshadowValues.x = mix( shadowKernel[ 0 ][ 1 ], shadowKernel[ 0 ][ 0 ], fractionalCoord.y );\n\t\tshadowValues.y = mix( shadowKernel[ 0 ][ 2 ], shadowKernel[ 0 ][ 1 ], fractionalCoord.y );\n\t\tshadowValues.z = mix( shadowKernel[ 1 ][ 1 ], shadowKernel[ 1 ][ 0 ], fractionalCoord.y );\n\t\tshadowValues.w = mix( shadowKernel[ 1 ][ 2 ], shadowKernel[ 1 ][ 1 ], fractionalCoord.y );\n\n\t\tshadow = dot( shadowValues, vec4( 1.0 ) ) * uShadowStrength;\n\n\t}\n\n\treturn shadow;\n}\n\nvec4 textureProjOffset(sampler2D uShadowMap, vec4 sc, vec2 offset) {\n\tconst float shadowBias     = .00005;\n\tvec4 scCopy = sc;\n\tscCopy.xy += offset;\n\treturn texture2DProj(uShadowMap, scCopy, shadowBias);\n}\n\nvec4 pcfShadow(sampler2D uShadowMap) {\n\tvec4 sc                   = vShadowCoord / vShadowCoord.w;\n\tconst float shadowMapSize = 1024.0;\n\tconst float s             = 1.0/shadowMapSize;\n\tvec4 shadow              = vec4(0.0);\n\tshadow += textureProjOffset( uShadowMap, sc, vec2(-s,-s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2(-s, 0) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2(-s, s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( 0,-s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( 0, 0) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( 0, s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( s,-s) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( s, 0) );\n\tshadow += textureProjOffset( uShadowMap, sc, vec2( s, s) );\n\treturn shadow/9.0;\n}\n\nvoid main(void) {\n\tif(vColor.a <= 0.0) discard;\n\tfloat pcf    = pcfSoftShadow(textureDepth);\n\tpcf = 1.0 - smoothstep(0.0, uShadowThreshold, pcf);\n\n\t// float pcf = pcfShadow(textureDepth).r;\n\t// pcf = 1.0 - smoothstep(0.0, uShadowThreshold, pcf);\n\t// pcf = smoothstep(1.0, .9, pcf);\n\t\n\tvec4 color   = vColor;\n\tcolor.rgb *= pcf;\n\tgl_FragColor = color;\n\n}"));
 	}
 
 	_createClass(ViewShadowRender, [{
@@ -4923,6 +4929,8 @@ var ViewShadowRender = function (_alfrid$View) {
 			this.shader.uniform("lightPosition", "uniform3fv", lightPosition);
 			this.shader.uniform("uShadowMatrix", "uniformMatrix4fv", shadowMatrix);
 			this.shader.uniform("textureDepth", "uniform1i", 2);
+			this.shader.uniform("uShadowStrength", "uniform1f", params.shadowStrength);
+			this.shader.uniform("uShadowThreshold", "uniform1f", params.shadowThreshold);
 			textureDepth.bind(2);
 		}
 	}]);
@@ -5093,9 +5101,13 @@ var _datGui2 = _interopRequireDefault(_datGui);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+window.alfrid = _alfrid2.default;
+
 window.params = {
 	numParticles: 512 * 2,
-	skipCount: 5
+	skipCount: 5,
+	shadowStrength: .35,
+	shadowThreshold: .55
 };
 
 if (document.body) {
@@ -5121,6 +5133,8 @@ function _init() {
 	var scene = new _SceneApp2.default();
 
 	// let gui = new dat.GUI({width:300});
+	// gui.add(params, 'shadowStrength', 0, 1);
+	// gui.add(params, 'shadowThreshold', 0, 1);
 }
 
 },{"./SceneApp":4,"./libs/alfrid.js":12,"dat-gui":1}],12:[function(require,module,exports){

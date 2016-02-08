@@ -47,6 +47,8 @@ class ViewShadowRender extends alfrid.View {
 		this.shader.uniform("lightPosition", "uniform3fv", lightPosition);
 		this.shader.uniform("uShadowMatrix", "uniformMatrix4fv", shadowMatrix);
 		this.shader.uniform("textureDepth", "uniform1i", 2);
+		this.shader.uniform("uShadowStrength", "uniform1f", params.shadowStrength);
+		this.shader.uniform("uShadowThreshold", "uniform1f", params.shadowThreshold);
 		textureDepth.bind(2);
 	}
 

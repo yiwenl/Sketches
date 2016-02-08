@@ -17,15 +17,13 @@ void main(void) {
 	vec3 currPos = texture2D(texture, uv).rgb;
 	vec3 nextPos = texture2D(textureNext, uv).rgb;
 	vec3 pos     = mix(currPos, nextPos, percent);
-	gl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
-	
-	gl_PointSize = 1.0;
-	
-	float d      = length(pos);
-	float a      = smoothstep(3.0, 4.5, d);
-	vColor       = vec4(1.0, 1.0, 1.0, 1.0);
-
+	vec4 V       = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
+	gl_Position  = V;
 	gl_PointSize = 2.0;
+
+	float d 	 = V.z/V.w;
+	d 			 = d*.5 + .5;
+	vColor       = vec4(d, d, d, 1.0);
 
 	if(length(currPos) - length(nextPos) > 1.0) vColor.a = 0.0;
 }
