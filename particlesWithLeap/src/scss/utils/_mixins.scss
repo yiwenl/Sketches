@@ -1,0 +1,173 @@
+@import "compass/utilities/sprites";
+@import "compass/css3/background-size";
+
+// Define the sprites here. Notice that I've added an optional spacing.
+$sprites: sprite-map("1x/sprites/*.png", $spacing: 10px);
+$sprites2x: sprite-map("2x/sprites/*.png", $spacing: 20px);
+
+// Now let's define the sprite mixin.
+// This delegates to the reusable retina-sprite mixin.
+@mixin sprite($name){
+  @include retina-sprite($name, $sprites, $sprites2x);
+}
+
+// The general purpose retina sprite mixin.
+//
+//    @include retina-sprite(name, $spritemap1, $spritemap2)
+//    @include retina-sprite(name, $spritemap1, $spritemap2[, $dimensions: true, $pad: 0])
+//
+//    If `dimensions` is true, then width/height will also be set.
+//
+//    if `pad` is non-zero, then that's how much padding the element will have (requires
+//    $spacing on the sprite maps). Great for iPhone interfaces to make hit areas bigger.
+
+@mixin retina-sprite($name, $sprites, $sprites2x, $dimensions: true, $pad: 0) {
+  @if $dimensions == true {
+    @include sprite-dimensions($sprites, $name);
+  }
+  background-image: sprite-url($sprites);
+  background-position: sprite-position($sprites, $name, -$pad, -$pad);
+  background-repeat: no-repeat;
+  @if $pad > 0 {
+    padding: $pad;
+  }
+  @media (#{-webkit-min-device-pixel-ratio}: #{1.6}), (#{min--moz-device-pixel-ratio}: #{1.6}), (#{-o-min-device-pixel-ratio}: #{3 / 2}), (#{min-device-pixel-ratio}: #{1.6}) {
+    & {
+      $pos: sprite-position($sprites2x, $name, -$pad * 2, -$pad * 2);
+      background-image: sprite-url($sprites2x);
+      background-position: nth($pos, 1) nth($pos, 2) / 2;
+      @include background-size(ceil(image-width(sprite-path($sprites2x)) / 2), auto);
+      // ^-- this is the "smarter" way to do this.
+      //     sprite-path() returns the path of the generated sprite sheet, which
+      //     image-width() calculates the width of. the ceil() is in place in case
+      //     you have sprites that have an odd-number of pixels in width (which
+      //     you shouldn't in the first place)
+
+    }
+  }
+}
+
+@mixin sprite-centered($name){
+  margin-top: (image-height(sprite-file($sprites, $name))/-2);
+  margin-left: (image-width(sprite-file($sprites, $name))/-2);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  @media (#{-webkit-min-device-pixel-ratio}: #{1.6}), (#{min--moz-device-pixel-ratio}: #{1.6}), (#{-o-min-device-pixel-ratio}: #{3 / 2}), (#{min-device-pixel-ratio}: #{1.6}) {
+    & {
+      margin-top: (image-height(sprite-file($sprites2x, $name))/-2);
+      margin-left: (image-height(sprite-file($sprites2x, $name))/-2);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+    }
+  }
+}
+
+@mixin absPositionMaximumSize{
+  position: absolute;
+  top:0px;
+  left:0px;
+  width:100%;
+  height:100%;
+}
+
+@mixin absCenteredVertical($height){
+  position: absolute;
+  top:50%;
+  margin-top:($height / -2);
+  height:$height;
+}
+
+@mixin absCenteredHorizontal($width){
+  position: absolute;
+  left:50%;
+  margin-left:($width / -2);
+  width:$width;
+}
+
+@mixin absCentered($height, $width){
+  position: absolute;
+  top:50%;
+  left:50%;
+  margin-left:($width / -2);
+  margin-top:($height / -2);
+  width:$width;
+  height:$height;
+}
+
+@mixin clear-floats{
+  content: ".";
+  visibility: hidden;
+  display: block;
+  height: 0;
+  clear: both;
+}
+
+/*
+ * Clearfix: contain floats
+ *
+ * For modern browsers
+ * 1. The space content is one way to avoid an Opera bug when the
+ *    `contenteditable` attribute is included anywhere else in the document.
+ *    Otherwise it causes space to appear at the top and bottom of elements
+ *    that receive the `clearfix` class.
+ * 2. The use of `table` rather than `block` is only necessary if using
+ *    `:before` to contain the top-margins of child elements.
+ */
+
+@mixin clearfix{
+
+    &:before,
+    &:after {
+        content: " "; /* 1 */
+        display: table; /* 2 */
+    }
+
+    &:after {
+        clear: both;
+    }
+
+    /*
+     * For IE 6/7 only
+     * Include this rule to trigger hasLayout and contain floats.
+     */
+    *zoom: 1;
+}
+%clearfix { @include clearfix(); }
+
+@mixin breakpoint($point){
+  @if $point == mobile {
+    @media (max-width: $mobile) {@content;}
+  }
+
+  @if $point == tablet {
+    @media (max-width: $tablet) {@content;}
+  }
+}
+
+
+@mixin scrollbar($bg-color, $scrollbar-width, $thumb-color){
+
+  &::-webkit-scrollbar-track{
+    background-color: $bg-color;
+  }
+  &::-webkit-scrollbar{
+    width: $scrollbar-width;
+    background-color: $bg-color;
+  }
+  &::-webkit-scrollbar-thumb{
+    background-color: $thumb-color;
+  }
+  &::-moz-scrollbar-track{
+    background-color: $bg-color;
+  }
+  &::-moz-scrollbar{
+    width: $scrollbar-width;
+    background-color: $bg-color;
+  }
+  &::-moz-scrollbar-thumb{
+    background-color: $thumb-color;
+  }
+
+}
