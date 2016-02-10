@@ -4,6 +4,8 @@
 
 precision highp float;
 varying vec2 vTextureCoord;
+
+uniform mat3 uNormalMatrix;
 uniform sampler2D texture;
 uniform float time;
 uniform float skipCount;
@@ -171,8 +173,9 @@ void main(void) {
 
       const float minTouchRadius = 1.0;
       float maxTouchRadius = 3.0 + pinchStrengthRight;
-      float distToTouch = distance(pos, uTouchRight);
-      vec3 dirToTouch = normalize(uTouchRight - pos);
+      vec3 touch = uNormalMatrix * uTouchRight;
+      float distToTouch = distance(pos, touch);
+      vec3 dirToTouch = normalize(touch - pos);
       float f;
 
       if(distToTouch < maxTouchRadius) {
@@ -182,6 +185,7 @@ void main(void) {
       }
 
       maxTouchRadius = {{BASE_RADIUS}} + pinchStrengthLeft;
+      touch = uNormalMatrix * uTouchLeft;
       distToTouch = distance(pos, uTouchLeft);
       dirToTouch = normalize(uTouchLeft - pos);
 
