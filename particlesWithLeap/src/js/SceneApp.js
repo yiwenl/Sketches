@@ -44,6 +44,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl._rx.value = .6;
 		// this.orbitalControl._ry.value = -.8;
 		this.orbitalControl.radius.value = 15.3;
+		this.orbitalControl.lockZoom(true);
 		this._count = 0;
 	}
 
@@ -107,7 +108,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._fboTarget.bind();
 		GL.clear(0, 0, 0, 0);
-		this._vSim.render(this._fboCurrent.getTexture(), this.touchRight, this.pinchStrengthRight, this.touchLeft, this.pinchStrengthLeft);
+		this._vSim.render(this._fboCurrent.getTexture(), this.touchRight, this.pinchStrengthRight+2, this.touchLeft, this.pinchStrengthLeft+2);
 		this._fboTarget.unbind();
 		GL.viewport(0, 0, GL.width, GL.height);
 		GL.setMatrices(this.camera);
