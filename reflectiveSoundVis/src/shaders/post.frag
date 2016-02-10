@@ -118,12 +118,20 @@ void main(void) {
 		float t = (float(i)+rnd) / float(num_iter-1);
 		vec3 w = spectrum_offset( t );
 		sumw += w;
-		sumcol += w * srgb2lin(texture2D( texture, distort(uv, t, min_distort, max_distort ) ).rgb);
+		vec3 texel = texture2D( texture, distort(uv, t, min_distort, max_distort ) ).rgb;
+		if(vTextureCoord.x > .5) {
+			float gap = .1;
+			texel = floor(texel/gap) * gap;
+			// texel = 1.0 -texel;
+		}
+		sumcol += w * srgb2lin(texel);
 	}
 
 	sumcol.rgb  /= sumw;
 	vec3 outcol = lin2srgb(sumcol.rgb);
 	outcol      += rnd/255.0;
+
+
 
 	// float ao = ssao(vTextureCoord, textureDepth);
 	// outcol *= ao;
