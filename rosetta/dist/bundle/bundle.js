@@ -5395,6 +5395,10 @@ var _ViewShip = require('./ViewShip');
 
 var _ViewShip2 = _interopRequireDefault(_ViewShip);
 
+var _ViewBall = require('./ViewBall');
+
+var _ViewBall2 = _interopRequireDefault(_ViewBall);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -5404,6 +5408,38 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // SceneApp.js
 
 var GL = undefined;
+
+var BALLS = [{
+	position: [0, 0, 0],
+	scale: 2.0
+}, {
+	position: [0, 2.95, 1],
+	scale: 1.1
+}, {
+	position: [1.5, -0.1, 0],
+	scale: 1.35
+}, {
+	position: [3, -0.1, 0],
+	scale: 1.35
+}, {
+	position: [4.5, -0.1, 0],
+	scale: 1.35
+}, {
+	position: [6, -0.1, 0],
+	scale: 1.35
+}, {
+	position: [-1.5, -0.1, 0],
+	scale: 1.35
+}, {
+	position: [-3, -0.1, 0],
+	scale: 1.35
+}, {
+	position: [-4.5, -0.1, 0],
+	scale: 1.35
+}, {
+	position: [-6, -0.1, 0],
+	scale: 1.35
+}];
 
 var SceneApp = function (_alfrid$Scene) {
 	_inherits(SceneApp, _alfrid$Scene);
@@ -5491,6 +5527,7 @@ var SceneApp = function (_alfrid$Scene) {
 			this._vPlanes = new _ViewPlanes2.default();
 			this._vSim = new _ViewSimulation2.default();
 			this._vShip = new _ViewShip2.default();
+			this._vBall = new _ViewBall2.default();
 
 			//	SAVE INIT POSITIONS
 			this._vSave = new _ViewSave2.default();
@@ -5544,6 +5581,11 @@ var SceneApp = function (_alfrid$Scene) {
 			this._vPlanes.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, this._flip);
 
 			this._vShip.render(this._textureRad, this._textureIrr, this._textureAO, this._fboTarget.getTexture());
+
+			for (var i = 0; i < BALLS.length; i++) {
+				var b = BALLS[i];
+				this._vBall.render(b.position, [b.scale, b.scale, b.scale], [1, 0, 0]);
+			}
 		}
 	}]);
 
@@ -5552,7 +5594,62 @@ var SceneApp = function (_alfrid$Scene) {
 
 exports.default = SceneApp;
 
-},{"./ViewPlanes":12,"./ViewRender":13,"./ViewSave":14,"./ViewShip":15,"./ViewSimulation":16,"./libs/alfrid.js":18}],12:[function(require,module,exports){
+},{"./ViewBall":12,"./ViewPlanes":13,"./ViewRender":14,"./ViewSave":15,"./ViewShip":16,"./ViewSimulation":17,"./libs/alfrid.js":19}],12:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _alfrid = require("./libs/alfrid.js");
+
+var _alfrid2 = _interopRequireDefault(_alfrid);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // ViewBall.js
+
+var GL = _alfrid2.default.GL;
+
+
+var ViewBall = function (_alfrid$View) {
+	_inherits(ViewBall, _alfrid$View);
+
+	function ViewBall() {
+		_classCallCheck(this, ViewBall);
+
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBall).call(this, _alfrid2.default.ShaderLibs.generalVert, _alfrid2.default.ShaderLibs.simpleColorFrag));
+	}
+
+	_createClass(ViewBall, [{
+		key: "_init",
+		value: function _init() {
+			this.mesh = _alfrid2.default.Geom.sphere(1, 30);
+		}
+	}, {
+		key: "render",
+		value: function render(position, scale, color) {
+			this.shader.bind();
+			this.shader.uniform("position", "uniform3fv", position);
+			this.shader.uniform("scale", "uniform3fv", scale);
+			this.shader.uniform("color", "uniform3fv", color);
+			this.shader.uniform("opacity", "uniform1f", 1);
+			GL.draw(this.mesh);
+		}
+	}]);
+
+	return ViewBall;
+}(_alfrid2.default.View);
+
+exports.default = ViewBall;
+
+},{"./libs/alfrid.js":19}],13:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5673,7 +5770,7 @@ var ViewPlanes = function (_alfrid$View) {
 
 exports.default = ViewPlanes;
 
-},{"./libs/alfrid.js":18}],13:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5751,7 +5848,7 @@ var ViewRender = function (_alfrid$View) {
 
 exports.default = ViewRender;
 
-},{"./libs/alfrid.js":18}],14:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],15:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5841,7 +5938,7 @@ var ViewSave = function (_alfrid$View) {
 
 exports.default = ViewSave;
 
-},{"./libs/alfrid.js":18}],15:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],16:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5941,7 +6038,7 @@ var ViewShip = function (_alfrid$View) {
 
 exports.default = ViewShip;
 
-},{"./libs/alfrid.js":18}],16:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],17:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -6005,7 +6102,7 @@ var ViewSimulation = function (_alfrid$View) {
 
 exports.default = ViewSimulation;
 
-},{"./libs/alfrid.js":18}],17:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],18:[function(require,module,exports){
 'use strict';
 
 var _alfrid = require('./libs/alfrid.js');
@@ -6084,7 +6181,7 @@ function _init3D() {
 	var scene = new _SceneApp2.default();
 }
 
-},{"./SceneApp":11,"./libs/alfrid.js":18,"assets-loader":4,"dat-gui":7}],18:[function(require,module,exports){
+},{"./SceneApp":11,"./libs/alfrid.js":19,"assets-loader":4,"dat-gui":7}],19:[function(require,module,exports){
 (function (global){
 "use strict";var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol?"symbol":typeof obj;};(function(f){if((typeof exports==="undefined"?"undefined":_typeof(exports))==="object"&&typeof module!=="undefined"){module.exports=f();}else if(typeof define==="function"&&define.amd){define([],f);}else {var g;if(typeof window!=="undefined"){g=window;}else if(typeof global!=="undefined"){g=global;}else if(typeof self!=="undefined"){g=self;}else {g=this;}g.alfrid=f();}})(function(){var define,module,exports;return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f;}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e);},l,l.exports,e,t,n,r);}return n[o].exports;}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++){s(r[o]);}return s;}({1:[function(_dereq_,module,exports){ /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
@@ -8022,6 +8119,6 @@ break;}}this._highTasks=this._highTasks.concat(this._nextTasks);this._nextTasks=
 'use strict';Object.defineProperty(exports,"__esModule",{value:true});var ShaderLibs={simpleColorFrag:"#define GLSLIFY 1\n// simpleColor.frag\n\n#define SHADER_NAME SIMPLE_COLOR\n\nprecision highp float;\n\nuniform vec3 color;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = vec4(color, opacity);\n}",bigTriangleVert:"#define GLSLIFY 1\n// bigTriangle.vert\n\n#define SHADER_NAME BIG_TRIANGLE_VERTEX\n\nprecision highp float;\nattribute vec2 aPosition;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = vec4(aPosition, 0.0, 1.0);\n    vTextureCoord = aPosition * .5 + .5;\n}",generalVert:"#define GLSLIFY 1\n// general.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n}",generalNormalVert:"#define GLSLIFY 1\n// generalWithNormal.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat3 uNormalMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tvTextureCoord = aTextureCoord;\n\tvNormal       = normalize(uNormalMatrix * aNormal);\n}"};exports.default=ShaderLibs;},{}]},{},[11])(11);}); 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[17]);
+},{}]},{},[18]);
 
 //# sourceMappingURL=bundle.js.map

@@ -5,8 +5,53 @@ import ViewRender from './ViewRender';
 import ViewSimulation from './ViewSimulation';
 import ViewPlanes from './ViewPlanes';
 import ViewShip from './ViewShip';
+import ViewBall from './ViewBall';
 
 let GL;
+
+const BALLS = [
+	{
+		position:[0, 0, 0],
+		scale:2.0
+	},
+	{
+		position:[0, 2.95, 1],
+		scale:1.1
+	},
+	{
+		position:[1.5, -0.1, 0],
+		scale:1.35
+	},
+	{
+		position:[3, -0.1, 0],
+		scale:1.35
+	},
+	{
+		position:[4.5, -0.1, 0],
+		scale:1.35
+	},
+	{
+		position:[6, -0.1, 0],
+		scale:1.35
+	},
+	{
+		position:[-1.5, -0.1, 0],
+		scale:1.35
+	},
+	{
+		position:[-3, -0.1, 0],
+		scale:1.35
+	},
+	{
+		position:[-4.5, -0.1, 0],
+		scale:1.35
+	},
+	{
+		position:[-6, -0.1, 0],
+		scale:1.35
+	}
+
+]
 
 class SceneApp extends alfrid.Scene {
 	constructor() {
@@ -90,6 +135,7 @@ class SceneApp extends alfrid.Scene {
 		this._vPlanes 	 = new ViewPlanes();
 		this._vSim		 = new ViewSimulation();
 		this._vShip 	 = new ViewShip();
+		this._vBall 	 = new ViewBall();
 
 		//	SAVE INIT POSITIONS
 		this._vSave = new ViewSave();
@@ -143,6 +189,11 @@ class SceneApp extends alfrid.Scene {
 		this._vPlanes.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, this._flip);
 		
 		this._vShip.render(this._textureRad, this._textureIrr, this._textureAO, this._fboTarget.getTexture());
+
+		for(let i=0; i<BALLS.length; i++) {
+			let b = BALLS[i];
+			this._vBall.render(b.position, [b.scale, b.scale, b.scale], [1, 0, 0]);
+		}
 	}
 }
 
