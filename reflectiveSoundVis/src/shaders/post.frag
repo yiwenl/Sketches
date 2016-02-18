@@ -5,19 +5,11 @@
 precision highp float;
 varying vec2 vTextureCoord;
 uniform sampler2D texture;
-uniform sampler2D textureDepth;
+uniform sampler2D textureSSAO;
 uniform vec2 resolution;
 uniform float time;
-
-//	SSAO
-uniform vec2 textureSize;
-uniform float near;
-uniform float far;
-uniform float strength;
-uniform float offset;
-const int samples = 5;
-const int rings = 5;
-
+uniform float textureWidth;
+uniform float textureHeight;
 
 
 const float PI = 3.141592657;
@@ -99,6 +91,7 @@ float nrand( vec2 n )
 	return fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
 }
 
+
 void main(void) {
 	vec2 uv                 = vTextureCoord;
 	
@@ -119,11 +112,11 @@ void main(void) {
 		vec3 w = spectrum_offset( t );
 		sumw += w;
 		vec3 texel = texture2D( texture, distort(uv, t, min_distort, max_distort ) ).rgb;
-		if(vTextureCoord.x > .5) {
-			float gap = .1;
-			texel = floor(texel/gap) * gap;
-			// texel = 1.0 -texel;
-		}
+		vec3 texelSSAO = texture2D( textureSSAO, distort(uv, t, min_distort, max_distort ) ).rgb;
+
+		// texel = mix(texel, texelSSAO, .95);
+		texel *= texelSSAO;
+
 		sumcol += w * srgb2lin(texel);
 	}
 
@@ -132,10 +125,8 @@ void main(void) {
 	outcol      += rnd/255.0;
 
 
-
-	// float ao = ssao(vTextureCoord, textureDepth);
+	// float ao = texture2D(textureSSAO, vTextureCoord).r;
 	// outcol *= ao;
-	// outcol = vec3(ao);
 
     gl_FragColor = vec4( outcol, 1.0);
 }

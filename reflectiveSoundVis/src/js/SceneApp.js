@@ -20,6 +20,7 @@ class SceneApp extends alfrid.Scene {
 		this._rotationY = new alfrid.EaseNumber(0.01, .05);
 		this._rotationX = new alfrid.EaseNumber(0.0, .005);
 
+		this.camera.setPerspective(Math.PI/4, GL.aspectRatio, 1, 100);
 		this.cameraCube = new alfrid.CameraCube();
 		this.orbitalControl.lockZoom(true);
 
@@ -56,6 +57,7 @@ class SceneApp extends alfrid.Scene {
 		this._textureLight = new alfrid.GLTexture(imgStudio);
 
 		this._fboRender    = new alfrid.FrameBuffer(GL.width, GL.height, {minFilter:GL.LINEAR, magFilter:GL.LINEAR});
+		this._fboSSAO 	   = new alfrid.FrameBuffer(GL.width, GL.height, {minFilter:GL.LINEAR, magFilter:GL.LINEAR});
 	}
 
 
@@ -132,9 +134,14 @@ class SceneApp extends alfrid.Scene {
 
 
 		GL.setMatrices(this.cameraOrtho);
+		
+		this._fboSSAO.bind();
 		GL.clear(0, 0, 0, 0);
-		this._vPost.render(this._fboRender.getTexture(), this._fboRender.getDepthTexture(), p, h);
-		// this._vSSAO.render(this._fboRender.getTexture(), this._fboRender.getDepthTexture(), p, h);
+		this._vSSAO.render(this._fboRender.getDepthTexture());
+		this._fboSSAO.unbind();
+
+		GL.clear(0, 0, 0, 0);
+		this._vPost.render(this._fboRender.getTexture(), this._fboSSAO.getTexture());
 
 	}
 }

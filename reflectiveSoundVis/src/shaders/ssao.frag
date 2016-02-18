@@ -4,126 +4,86 @@
 
 precision highp float;
 varying vec2 vTextureCoord;
-uniform vec2 resolution;
-uniform float time;
 uniform sampler2D texture;
-uniform sampler2D textureDepth;
+
+uniform float textureWidth;
+uniform float textureHeight;
 
 
-float nrand( vec2 n )
+const float near = 1.0;
+const float far = 100.0;
+const float PI = 3.141592657;
+
+const int samples = 5; //samples on the first ring (4-8)
+const int rings = 3; //ring count (3-6)
+
+vec2 rand(in vec2 coord) //generating random noise
 {
-	return fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
+	float noiseX = (fract(sin(dot(coord ,vec2(12.9898,78.233))) * 43758.5453));
+	float noiseY = (fract(sin(dot(coord ,vec2(12.9898,78.233)*2.0)) * 43758.5453));
+	return vec2(noiseX,noiseY)*0.004;
+}
+
+float readDepth(in vec2 coord)
+{
+	return (2.0 * near) / (far + near - texture2D(texture, coord ).x * (far-near));        
 }
 
 
-float nrand(float x, float y) {
-	return nrand(vec2(x, y));
+float compareDepths( in float depth1, in float depth2 )
+{
+        float aoCap = 1.0;
+        float aoMultiplier = 100.0;
+        float depthTolerance = 0.0000;
+        float aorange = 60.0;// units in space the AO effect extends to (this gets divided by the camera far range
+        float diff = sqrt(clamp(1.0-(depth1-depth2) / (aorange/(far-near)),0.0,1.0));
+        float ao = min(aoCap,max(0.0,depth1-depth2-depthTolerance) * aoMultiplier) * diff;
+        return ao;
 }
 
+float ssao() {
 
-vec2 camerarange = vec2(1.0, 1024.0);
+	float depth = readDepth(vTextureCoord);
+	float d;
+	float aspect = textureWidth/textureHeight;
+	vec2 noise = rand(vTextureCoord);
 
-float readDepth(in vec2 coord)   {  
-	if (coord.x<0.0||coord.y<0.0) return 1.0;
-	float nearZ = camerarange.x;  
-	float farZ = camerarange.y;  
-	float posZ = texture2D(textureDepth, coord).x;   
-	return (2.0 * nearZ) / (nearZ + farZ - posZ * (farZ - nearZ));  
-}   
+	float w = (1.0 / textureWidth)/clamp(depth,0.05,1.0)+(noise.x*(1.0-noise.x));
+    float h = (1.0 / textureHeight)/clamp(depth,0.05,1.0)+(noise.y*(1.0-noise.y));
+   
+    float pw;
+    float ph;
+
+    float ao;       
+    float s;
+    float fade = 4.0;
 
 
-float compareDepths(in float depth1, in float depth2,inout int far)  {  
+    for (int i = 0 ; i < rings; i += 1) {
+    	fade *= 0.5;
+        for (int j = 0 ; j < samples*rings; j += 1) {
+        	if (j >= samples*i) break;
+            float step = PI*2.0 / (float(samples)*float(i));
+            pw = (cos(float(j)*step)*float(i));
+            ph = (sin(float(j)*step)*float(i))*aspect;
+            d = readDepth( vec2(vTextureCoord.s+pw*w,vTextureCoord.t+ph*h));
+            ao += compareDepths(depth,d)*fade;     
+            s += 1.0*fade;
+        }
+    }
+   
+    ao /= s;
+    ao = 1.0 - ao;
+    float offset = .5;
+    ao = offset + (1.0 - offset) * ao;
+    ao = pow(ao, 3.0);
 
-	float diff = (depth1 - depth2)*100.0; //depth difference (0-100)
-	float gdisplace = 0.2; //gauss bell center
-	float garea = 2.0; //gauss bell width 2
-
-	//reduce left bell width to avoid self-shadowing
-	if (diff<gdisplace){ 
-		garea = 0.1;
-	}else{
-		far = 1;
-	}
-	float gauss = pow(2.7182,-2.0*(diff-gdisplace)*(diff-gdisplace)/(garea*garea));
-
-	return gauss;
+	return ao;
 }
-
-
-float calAO(float depth,float dw, float dh)  {  
-	float temp = 0.0;
-	float temp2 = 0.0;
-	float coordw = vTextureCoord.x + dw/depth;
-	float coordh = vTextureCoord.y + dh/depth;
-	float coordw2 = vTextureCoord.x - dw/depth;
-	float coordh2 = vTextureCoord.y - dh/depth;
-
-	if (coordw  < 1.0 && coordw  > 0.0 && coordh < 1.0 && coordh  > 0.0){
-		vec2 coord = vec2(coordw , coordh);
-		vec2 coord2 = vec2(coordw2, coordh2);
-		int far = 0;
-		temp = compareDepths(depth, readDepth(coord),far);
-
-		//DEPTH EXTRAPOLATION:
-		if (far > 0){
-			temp2 = compareDepths(readDepth(coord2),depth,far);
-			temp += (1.0-temp)*temp2; 
-		}
-	}
-
-	return temp;  
-} 
-
-
-
 
 void main(void) {
-	float range = 1.0;
-	float pw = range/resolution.x*0.5;    
-	float ph = range/resolution.y*0.5;  
-	float r = 100.0;
-	vec2 fres = vec2(r,r);
-	// vec3 random = vec3(nrand(vTextureCoord.x, time), nrand(vTextureCoord.y, time), nrand(vTextureCoord.yx+vec2(time)));
-	vec3 random = vec3(nrand(vTextureCoord.xx+time), nrand(vTextureCoord.yy+time), nrand(vTextureCoord.yx+vec2(time)));
-	random = random*2.0-vec3(1.0);
-
-	//initialize stuff:
-	float depth = readDepth(vTextureCoord);
-	float ao = 0.0;
-	float samplingScaling = 1.17;
-	float randomScaling = 0.007;
-
-	for(int i=0; i<4; ++i) 
-	{  
-		//calculate color bleeding and ao:
-		ao+=calAO(depth,  pw, ph);  
-		ao+=calAO(depth,  pw, -ph);  
-		ao+=calAO(depth,  -pw, ph);  
-		ao+=calAO(depth,  -pw, -ph);
-
-		ao+=calAO(depth,  pw*1.2, 0.0);  
-		ao+=calAO(depth,  -pw*1.2, 0.0);  
-		ao+=calAO(depth,  0.0, ph*1.2);  
-		ao+=calAO(depth,  0.0, -ph*1.2);
-
-		//sample jittering:
-		pw += random.x*randomScaling;
-		ph += random.y*randomScaling;
-
-		//increase sampling area:
-		pw *= samplingScaling;  
-		ph *= samplingScaling;    
-	}         
-
-	//final values, some adjusting:
-	float finalAO = 1.0-(ao/32.0);
-	finalAO = smoothstep(.8, 1.0, finalAO);
-	// finalAO = mix(finalAO, 1.0, .7);
-	vec4 color = texture2D(texture, vTextureCoord);
-	color.rgb *= finalAO;
-	color.rgb = vec3(finalAO);
-
-	// gl_FragColor = vec4(0.3+finalAO*0.7,1.0);  
-	// gl_FragColor.rgb *= color;
-    gl_FragColor = color;
+	float ao = ssao();
+	// ao = smoothstep(0.5, 1.0, ao);
+    gl_FragColor = vec4(vec3(ao), 1.0);
+    // gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
 }

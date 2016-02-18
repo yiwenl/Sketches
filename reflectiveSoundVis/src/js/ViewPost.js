@@ -17,7 +17,7 @@ class ViewPost extends alfrid.View {
 	}
 
 
-	render(texture, textureDepth, proj, projScale) {
+	render(texture, textureSSAO) {
 
 		this.shader.bind();
 		this.shader.uniform("time", "uniform1f", this.time);
@@ -25,12 +25,9 @@ class ViewPost extends alfrid.View {
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
 
-		this.shader.uniform("textureDepth", "uniform1i", 1);
-		textureDepth.bind(1);
-
-		this.shader.uniform("uProj", "uniform4fv", proj);
-		this.shader.uniform("uProjScale", "uniform1f", projScale);
-
+		this.shader.uniform("textureSSAO", "uniform1i", 1);
+		textureSSAO.bind(1);
+		
 		GL.draw(this.mesh);
 	}
 

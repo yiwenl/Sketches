@@ -42,7 +42,7 @@ class BeatDetector extends alfrid.EventDispatcher {
 	_loadSound() {
 		this.sound = Sono.load({
 		    url: this._url,
-		    volume: .0,
+		    volume: 1.0,
 		    loop: true,
 		    onComplete: (sound) => this._onSoundLoaded(sound)
 		});

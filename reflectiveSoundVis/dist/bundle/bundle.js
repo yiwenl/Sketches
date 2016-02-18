@@ -116,7 +116,7 @@ var BeatDetector = function (_alfrid$EventDispatch) {
 
 			this.sound = Sono.load({
 				url: this._url,
-				volume: .0,
+				volume: 1.0,
 				loop: true,
 				onComplete: function onComplete(sound) {
 					return _this2._onSoundLoaded(sound);
@@ -264,6 +264,7 @@ var SceneApp = function (_alfrid$Scene) {
 		_this._rotationY = new _alfrid2.default.EaseNumber(0.01, .05);
 		_this._rotationX = new _alfrid2.default.EaseNumber(0.0, .005);
 
+		_this.camera.setPerspective(Math.PI / 4, GL.aspectRatio, 1, 100);
 		_this.cameraCube = new _alfrid2.default.CameraCube();
 		_this.orbitalControl.lockZoom(true);
 
@@ -309,6 +310,7 @@ var SceneApp = function (_alfrid$Scene) {
 			this._textureLight = new _alfrid2.default.GLTexture(imgStudio);
 
 			this._fboRender = new _alfrid2.default.FrameBuffer(GL.width, GL.height, { minFilter: GL.LINEAR, magFilter: GL.LINEAR });
+			this._fboSSAO = new _alfrid2.default.FrameBuffer(GL.width, GL.height, { minFilter: GL.LINEAR, magFilter: GL.LINEAR });
 		}
 	}, {
 		key: '_initViews',
@@ -382,9 +384,14 @@ var SceneApp = function (_alfrid$Scene) {
 			p[3] = 1.0 + m[6] / m[5];
 
 			GL.setMatrices(this.cameraOrtho);
+
+			this._fboSSAO.bind();
 			GL.clear(0, 0, 0, 0);
-			this._vPost.render(this._fboRender.getTexture(), this._fboRender.getDepthTexture(), p, h);
-			// this._vSSAO.render(this._fboRender.getTexture(), this._fboRender.getDepthTexture(), p, h);
+			this._vSSAO.render(this._fboRender.getDepthTexture());
+			this._fboSSAO.unbind();
+
+			GL.clear(0, 0, 0, 0);
+			this._vPost.render(this._fboRender.getTexture(), this._fboSSAO.getTexture());
 		}
 	}]);
 
@@ -601,7 +608,7 @@ var ViewPost = function (_alfrid$View) {
 	function ViewPost() {
 		_classCallCheck(this, ViewPost);
 
-		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPost).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// post.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureDepth;\nuniform vec2 resolution;\nuniform float time;\n\n//\tSSAO\nuniform vec2 textureSize;\nuniform float near;\nuniform float far;\nuniform float strength;\nuniform float offset;\nconst int samples = 5;\nconst int rings = 5;\n\nconst float PI = 3.141592657;\n\nfloat linterp( float t ) {\n\treturn clamp( 1.0 - abs( 2.0*t - 1.0 ), 0.0, 1.0 );\n}\n\nfloat remap( float t, float a, float b ) {\n\treturn clamp( (t - a) / (b - a), 0.0, 1.0 );\n}\nvec2 remap( vec2 t, vec2 a, vec2 b ) {\n\treturn clamp( (t - a) / (b - a), 0.0, 1.0 );\n}\n\nvec3 spectrum_offset_rgb( float t ) {\n\tvec3 ret;\n\tfloat lo = step(t,0.5);\n\tfloat hi = 1.0-lo;\n\tfloat w = linterp( remap( t, 1.0/6.0, 5.0/6.0 ) );\n\tret = vec3(lo,1.0,hi) * vec3(1.0-w, w, 1.0-w);\n\n\treturn pow( ret, vec3(1.0/2.2) );\n}\n\nconst float gamma = 2.2;\nvec3 lin2srgb( vec3 c )\n{\n    return pow( c, vec3(gamma) );\n}\nvec3 srgb2lin( vec3 c )\n{\n    return pow( c, vec3(1.0/gamma));\n}\n\nvec2 barrelDistortion( vec2 p, vec2 amt )\n{\n    p = 2.0 * p - 1.0;\n\n    const float maxBarrelPower = sqrt(5.0);\n    float radius = dot(p,p); //faster but doesn't match above accurately\n    p *= pow(vec2(radius), maxBarrelPower * amt);\n\t/* */\n\n    return p * 0.5 + 0.5;\n}\n\nvec2 brownConradyDistortion(vec2 uv, float dist)\n{\n    uv = uv * 2.0 - 1.0;\n    float barrelDistortion1 = 0.1 * dist; // K1 in text books\n    float barrelDistortion2 = -0.025 * dist; // K2 in text books\n\n    float r2 = dot(uv,uv);\n    uv *= 1.0 + barrelDistortion1 * r2 + barrelDistortion2 * r2 * r2;\n    return uv * 0.5 + 0.5;\n}\n\nvec2 distort( vec2 uv, float t, vec2 min_distort, vec2 max_distort )\n{\n    vec2 dist = mix( min_distort, max_distort, t );\n    return brownConradyDistortion( uv, 75.0 * dist.x );\n}\n\n// ====\n\nvec3 spectrum_offset( float t )\n{\n    return spectrum_offset_rgb( t );\n}\n\n// ====\n\nfloat nrand( vec2 n )\n{\n\treturn fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);\n}\n\nvoid main(void) {\n\tvec2 uv                 = vTextureCoord;\n\t\n\tconst float MAX_DIST_PX = 20.0;\n\tfloat max_distort_px    = MAX_DIST_PX * .5;\n\tvec2 max_distort        = vec2(max_distort_px) / resolution.xy;\n\tvec2 min_distort        = 0.5 * max_distort;\n\t\n\tvec2 oversiz            = distort( vec2(1.0), 1.0, min_distort, max_distort );\n\tuv                      = remap( uv, 1.0-oversiz, oversiz );\n\t\n\tvec3 sumcol             = vec3(0.0);\n\tvec3 sumw               = vec3(0.0);\n\tfloat rnd               = nrand( uv + fract(time) );\n    const int num_iter = 6;\n\tfor ( int i=0; i<num_iter;++i ){\n\t\tfloat t = (float(i)+rnd) / float(num_iter-1);\n\t\tvec3 w = spectrum_offset( t );\n\t\tsumw += w;\n\t\tvec3 texel = texture2D( texture, distort(uv, t, min_distort, max_distort ) ).rgb;\n\t\tif(vTextureCoord.x > .5) {\n\t\t\tfloat gap = .1;\n\t\t\ttexel = floor(texel/gap) * gap;\n\t\t\t// texel = 1.0 -texel;\n\t\t}\n\t\tsumcol += w * srgb2lin(texel);\n\t}\n\n\tsumcol.rgb  /= sumw;\n\tvec3 outcol = lin2srgb(sumcol.rgb);\n\toutcol      += rnd/255.0;\n\n\t// float ao = ssao(vTextureCoord, textureDepth);\n\t// outcol *= ao;\n\t// outcol = vec3(ao);\n\n    gl_FragColor = vec4( outcol, 1.0);\n}"));
+		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPost).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// post.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureSSAO;\nuniform vec2 resolution;\nuniform float time;\nuniform float textureWidth;\nuniform float textureHeight;\n\nconst float PI = 3.141592657;\n\nfloat linterp( float t ) {\n\treturn clamp( 1.0 - abs( 2.0*t - 1.0 ), 0.0, 1.0 );\n}\n\nfloat remap( float t, float a, float b ) {\n\treturn clamp( (t - a) / (b - a), 0.0, 1.0 );\n}\nvec2 remap( vec2 t, vec2 a, vec2 b ) {\n\treturn clamp( (t - a) / (b - a), 0.0, 1.0 );\n}\n\nvec3 spectrum_offset_rgb( float t ) {\n\tvec3 ret;\n\tfloat lo = step(t,0.5);\n\tfloat hi = 1.0-lo;\n\tfloat w = linterp( remap( t, 1.0/6.0, 5.0/6.0 ) );\n\tret = vec3(lo,1.0,hi) * vec3(1.0-w, w, 1.0-w);\n\n\treturn pow( ret, vec3(1.0/2.2) );\n}\n\nconst float gamma = 2.2;\nvec3 lin2srgb( vec3 c )\n{\n    return pow( c, vec3(gamma) );\n}\nvec3 srgb2lin( vec3 c )\n{\n    return pow( c, vec3(1.0/gamma));\n}\n\nvec2 barrelDistortion( vec2 p, vec2 amt )\n{\n    p = 2.0 * p - 1.0;\n\n    const float maxBarrelPower = sqrt(5.0);\n    float radius = dot(p,p); //faster but doesn't match above accurately\n    p *= pow(vec2(radius), maxBarrelPower * amt);\n\t/* */\n\n    return p * 0.5 + 0.5;\n}\n\nvec2 brownConradyDistortion(vec2 uv, float dist)\n{\n    uv = uv * 2.0 - 1.0;\n    float barrelDistortion1 = 0.1 * dist; // K1 in text books\n    float barrelDistortion2 = -0.025 * dist; // K2 in text books\n\n    float r2 = dot(uv,uv);\n    uv *= 1.0 + barrelDistortion1 * r2 + barrelDistortion2 * r2 * r2;\n    return uv * 0.5 + 0.5;\n}\n\nvec2 distort( vec2 uv, float t, vec2 min_distort, vec2 max_distort )\n{\n    vec2 dist = mix( min_distort, max_distort, t );\n    return brownConradyDistortion( uv, 75.0 * dist.x );\n}\n\n// ====\n\nvec3 spectrum_offset( float t )\n{\n    return spectrum_offset_rgb( t );\n}\n\n// ====\n\nfloat nrand( vec2 n )\n{\n\treturn fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);\n}\n\nvoid main(void) {\n\tvec2 uv                 = vTextureCoord;\n\t\n\tconst float MAX_DIST_PX = 20.0;\n\tfloat max_distort_px    = MAX_DIST_PX * .5;\n\tvec2 max_distort        = vec2(max_distort_px) / resolution.xy;\n\tvec2 min_distort        = 0.5 * max_distort;\n\t\n\tvec2 oversiz            = distort( vec2(1.0), 1.0, min_distort, max_distort );\n\tuv                      = remap( uv, 1.0-oversiz, oversiz );\n\t\n\tvec3 sumcol             = vec3(0.0);\n\tvec3 sumw               = vec3(0.0);\n\tfloat rnd               = nrand( uv + fract(time) );\n    const int num_iter = 6;\n\tfor ( int i=0; i<num_iter;++i ){\n\t\tfloat t = (float(i)+rnd) / float(num_iter-1);\n\t\tvec3 w = spectrum_offset( t );\n\t\tsumw += w;\n\t\tvec3 texel = texture2D( texture, distort(uv, t, min_distort, max_distort ) ).rgb;\n\t\tvec3 texelSSAO = texture2D( textureSSAO, distort(uv, t, min_distort, max_distort ) ).rgb;\n\n\t\t// texel = mix(texel, texelSSAO, .95);\n\t\ttexel *= texelSSAO;\n\n\t\tsumcol += w * srgb2lin(texel);\n\t}\n\n\tsumcol.rgb  /= sumw;\n\tvec3 outcol = lin2srgb(sumcol.rgb);\n\toutcol      += rnd/255.0;\n\n\t// float ao = texture2D(textureSSAO, vTextureCoord).r;\n\t// outcol *= ao;\n\n    gl_FragColor = vec4( outcol, 1.0);\n}"));
 
 		_this.time = Math.random() * 1000;
 		return _this;
@@ -614,7 +621,7 @@ var ViewPost = function (_alfrid$View) {
 		}
 	}, {
 		key: 'render',
-		value: function render(texture, textureDepth, proj, projScale) {
+		value: function render(texture, textureSSAO) {
 
 			this.shader.bind();
 			this.shader.uniform("time", "uniform1f", this.time);
@@ -622,11 +629,8 @@ var ViewPost = function (_alfrid$View) {
 			this.shader.uniform("texture", "uniform1i", 0);
 			texture.bind(0);
 
-			this.shader.uniform("textureDepth", "uniform1i", 1);
-			textureDepth.bind(1);
-
-			this.shader.uniform("uProj", "uniform4fv", proj);
-			this.shader.uniform("uProjScale", "uniform1f", projScale);
+			this.shader.uniform("textureSSAO", "uniform1i", 1);
+			textureSSAO.bind(1);
 
 			GL.draw(this.mesh);
 		}
@@ -664,19 +668,10 @@ var GL = _alfrid2.default.GL;
 var ViewSSAO = function (_alfrid$View) {
 	_inherits(ViewSSAO, _alfrid$View);
 
-	function ViewSSAO(mProj) {
+	function ViewSSAO() {
 		_classCallCheck(this, ViewSSAO);
 
-		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSSAO).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// ssao2.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureDepth;\n\nuniform vec2 resolution;\nuniform float time;\n\n//------------------------------------------\n//general stuff\n\n//make sure that these two values are the same for your camera, otherwise distances will be wrong.\n\nfloat znear = 0.1; //Z-near\nfloat zfar = 100.0; //Z-far\n\n//user variables\nint samples = 16; //ao sample count\n\nfloat radius = 3.0; //ao radius\nfloat aoclamp = 0.25; //depth clamp - reduces haloing at screen edges\nbool noise = true; //use noise instead of pattern for sample dithering\nfloat noiseamount = 0.0002; //dithering amount\n\nfloat diffarea = 0.4; //self-shadowing reduction\nfloat gdisplace = 0.4; //gauss bell center\n\nbool mist = true; //use mist?\nfloat miststart = 0.0; //mist start\nfloat mistend = 16.0; //mist end\n\nbool onlyAO = false; //use only ambient occlusion pass?\nfloat lumInfluence = 0.7; //how much luminance affects occlusion\n\n//--------------------------------------------------------\n\nvec2 rand(vec2 coord) //generating noise/pattern texture for dithering\n{\n\tfloat noiseX = ((fract(1.0-coord.s*(resolution.x/2.0))*0.25)+(fract(coord.t*(resolution.y/2.0))*0.75))*2.0-1.0;\n\tfloat noiseY = ((fract(1.0-coord.s*(resolution.x/2.0))*0.75)+(fract(coord.t*(resolution.y/2.0))*0.25))*2.0-1.0;\n\t\n\tif (noise)\n\t{\n\t\tnoiseX = clamp(fract(sin(dot(coord ,vec2(12.9898,78.233))) * 43758.5453),0.0,1.0)*2.0-1.0;\n\t\tnoiseY = clamp(fract(sin(dot(coord ,vec2(12.9898,78.233)*2.0)) * 43758.5453),0.0,1.0)*2.0-1.0;\n\t}\n\treturn vec2(noiseX,noiseY)*noiseamount;\n}\n\nfloat doMist()\n{\n\tfloat zdepth = texture2D(textureDepth,vTextureCoord.xy).x;\n\tfloat depth = -zfar * znear / (zdepth * (zfar - znear) - zfar);\n\treturn clamp((depth-miststart)/mistend,0.0,1.0);\n}\n\nfloat readDepth(in vec2 coord) \n{\n\tif (vTextureCoord.x<0.0||vTextureCoord.y<0.0) return 1.0;\n\treturn (2.0 * znear) / (zfar + znear - texture2D(textureDepth, coord ).x * (zfar-znear));\n}\n\nfloat compareDepths(in float depth1, in float depth2,inout int far)\n{   \n\tfloat garea = 2.0; //gauss bell width    \n\tfloat diff = (depth1 - depth2)*100.0; //depth difference (0-100)\n\t//reduce left bell width to avoid self-shadowing \n\tif (diff<gdisplace)\n\t{\n\tgarea = diffarea;\n\t}else{\n\tfar = 1;\n\t}\n\t\n\tfloat gauss = pow(2.7182,-2.0*(diff-gdisplace)*(diff-gdisplace)/(garea*garea));\n\treturn gauss;\n}  \n\nfloat calAO(float depth,float dw, float dh)\n{   \n\tfloat dd = (1.0-depth)*radius;\n\t\n\tfloat temp = 0.0;\n\tfloat temp2 = 0.0;\n\tfloat coordw = vTextureCoord.x + dw*dd;\n\tfloat coordh = vTextureCoord.y + dh*dd;\n\tfloat coordw2 = vTextureCoord.x - dw*dd;\n\tfloat coordh2 = vTextureCoord.y - dh*dd;\n\t\n\tvec2 coord = vec2(coordw , coordh);\n\tvec2 coord2 = vec2(coordw2, coordh2);\n\t\n\tint far = 0;\n\ttemp = compareDepths(depth, readDepth(coord),far);\n\t//DEPTH EXTRAPOLATION:\n\tif (far > 0)\n\t{\n\t\ttemp2 = compareDepths(readDepth(coord2),depth,far);\n\t\ttemp += (1.0-temp)*temp2;\n\t}\n\t\n\treturn temp;\n} \n\nvoid main(void) {\n    gl_FragColor = texture2D(texture, vTextureCoord) * 1.0;\n}"));
-
-		var n = .1;
-		var f = 100;
-
-		_this.projectionParams = [f / (f - n), -f * n / (f - n)];
-		_this.projMarixInverse = mat4.clone(mProj);
-
-		mat4.invert(_this.projMarixInverse, _this.projMarixInverse);
-		return _this;
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSSAO).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// ssao.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\n\nuniform float textureWidth;\nuniform float textureHeight;\n\nconst float near = 1.0;\nconst float far = 100.0;\nconst float PI = 3.141592657;\n\nconst int samples = 5; //samples on the first ring (4-8)\nconst int rings = 3; //ring count (3-6)\n\nvec2 rand(in vec2 coord) //generating random noise\n{\n\tfloat noiseX = (fract(sin(dot(coord ,vec2(12.9898,78.233))) * 43758.5453));\n\tfloat noiseY = (fract(sin(dot(coord ,vec2(12.9898,78.233)*2.0)) * 43758.5453));\n\treturn vec2(noiseX,noiseY)*0.004;\n}\n\nfloat readDepth(in vec2 coord)\n{\n\treturn (2.0 * near) / (far + near - texture2D(texture, coord ).x * (far-near));        \n}\n\nfloat compareDepths( in float depth1, in float depth2 )\n{\n        float aoCap = 1.0;\n        float aoMultiplier = 100.0;\n        float depthTolerance = 0.0000;\n        float aorange = 60.0;// units in space the AO effect extends to (this gets divided by the camera far range\n        float diff = sqrt(clamp(1.0-(depth1-depth2) / (aorange/(far-near)),0.0,1.0));\n        float ao = min(aoCap,max(0.0,depth1-depth2-depthTolerance) * aoMultiplier) * diff;\n        return ao;\n}\n\nfloat ssao() {\n\n\tfloat depth = readDepth(vTextureCoord);\n\tfloat d;\n\tfloat aspect = textureWidth/textureHeight;\n\tvec2 noise = rand(vTextureCoord);\n\n\tfloat w = (1.0 / textureWidth)/clamp(depth,0.05,1.0)+(noise.x*(1.0-noise.x));\n    float h = (1.0 / textureHeight)/clamp(depth,0.05,1.0)+(noise.y*(1.0-noise.y));\n   \n    float pw;\n    float ph;\n\n    float ao;       \n    float s;\n    float fade = 4.0;\n\n    for (int i = 0 ; i < rings; i += 1) {\n    \tfade *= 0.5;\n        for (int j = 0 ; j < samples*rings; j += 1) {\n        \tif (j >= samples*i) break;\n            float step = PI*2.0 / (float(samples)*float(i));\n            pw = (cos(float(j)*step)*float(i));\n            ph = (sin(float(j)*step)*float(i))*aspect;\n            d = readDepth( vec2(vTextureCoord.s+pw*w,vTextureCoord.t+ph*h));\n            ao += compareDepths(depth,d)*fade;     \n            s += 1.0*fade;\n        }\n    }\n   \n    ao /= s;\n    ao = 1.0 - ao;\n    float offset = .5;\n    ao = offset + (1.0 - offset) * ao;\n    ao = pow(ao, 3.0);\n\n\treturn ao;\n}\n\nvoid main(void) {\n\tfloat ao = ssao();\n\t// ao = smoothstep(0.5, 1.0, ao);\n    gl_FragColor = vec4(vec3(ao), 1.0);\n    // gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);\n}"));
 	}
 
 	_createClass(ViewSSAO, [{
@@ -686,22 +681,12 @@ var ViewSSAO = function (_alfrid$View) {
 		}
 	}, {
 		key: 'render',
-		value: function render(texture, textureDepth, proj, projScale) {
-
+		value: function render(texture) {
 			this.shader.bind();
-			this.shader.uniform("time", "uniform1f", this.time);
-			this.shader.uniform("resolution", "uniform2fv", [GL.width, GL.height]);
+			this.shader.uniform("textureWidth", "uniform1f", GL.width);
+			this.shader.uniform("textureHeight", "uniform1f", GL.height);
 			this.shader.uniform("texture", "uniform1i", 0);
 			texture.bind(0);
-
-			this.shader.uniform("textureDepth", "uniform1i", 1);
-			textureDepth.bind(1);
-
-			this.shader.uniform("uProj", "uniform4fv", proj);
-			this.shader.uniform("uProjScale", "uniform1f", projScale);
-			this.shader.uniform("uProjectionParams", "uniform2fv", this.projectionParams);
-			this.shader.uniform("uProjMatrixInverse", "uniformMatrix4fv", this.projMarixInverse);
-
 			GL.draw(this.mesh);
 		}
 	}]);
