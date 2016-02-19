@@ -11,8 +11,13 @@ window.params = {
 	color:[255, 255, 255],
 	gamma:2.2,
 	exposure:5,
+	maxRange:15,
 
-	numParticles:16*2,
+	numParticles:32,
+	particleLightDensity:.35,
+	particleAvoidingForce:.2,
+	particleAvoidingDistance:.3,
+
 	skipCount:1
 };
 
@@ -63,6 +68,10 @@ function _onImageLoaded(o) {
 	gui.add(params, 'offset', 0, 1).listen();
 	gui.add(params, 'gamma', 1, 10);
 	gui.add(params, 'exposure', 1, 30);
+	gui.add(params, 'particleLightDensity', 0, 1);
+	gui.add(params, 'particleAvoidingForce', 0, 1);
+	gui.add(params, 'particleAvoidingDistance', 0.2, 1);
+	gui.add(params, 'maxRange', 10, 50);
 }
 
 

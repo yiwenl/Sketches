@@ -17,6 +17,7 @@ uniform float		uSpecular;
 
 uniform float		uExposure;
 uniform float		uGamma;
+uniform float		particleLightDensity;
 
 varying vec3        vNormal;
 varying vec3        vPosition;
@@ -99,8 +100,8 @@ vec3 getDiffuse(vec3 N, vec3 L, vec3 C) {
 float getParticleLight(vec3 pos) {
 	float light = 0.0;
 
-	const float R = 3.0;
-	const float light_density = .15;
+	const float R = 2.0;
+	float light_density = particleLightDensity;
 	vec2 uv;
 	vec3 posParticle;
 
@@ -112,7 +113,7 @@ float getParticleLight(vec3 pos) {
 			float d = distance(pos, posParticle);
 			if(d < R) {
 				d = 1.0 - d/R;
-				light += d * light_density;
+				light += d * light_density * getDiffuse(vWsNormal, (posParticle - pos));
 			}
 		}
 	}
@@ -156,7 +157,7 @@ void main() {
 	
 	float ao 			= texture2D(textureAO, vTextureCoord).r;
 	color 				*= ao;
-	color 				*= 1.0+particleLight;
+	color 				*= .5 + particleLight;
 
 	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );
@@ -166,7 +167,7 @@ void main() {
 	// gamma correction
 	color				= pow( color, vec3( 1.0 / uGamma ) );
 
-	vec3 colorGray 		= grayscale(color);
+	// vec3 colorGray 		= grayscale(color);
 	// color 				= mix(color, colorGray, .5);
 	// color 				*= 1.3;
 
@@ -175,7 +176,7 @@ void main() {
 
 	float l = length(color.rgb) / length(vec3(1.0));
 	vec3 colorGradient = mix(GRD_COLOR_0, GRD_COLOR_1, l);
-	color = mix(color, colorGradient, .5);
+	// color = mix(color, colorGradient, .5);
 
 
 	// output the fragment color

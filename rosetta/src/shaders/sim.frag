@@ -7,6 +7,12 @@ varying vec2 vTextureCoord;
 uniform sampler2D texture;
 uniform float time;
 uniform float skipCount;
+uniform float particleAvoidingForce;
+uniform float particleAvoidingDistance;
+uniform float maxRange;
+
+const int NUM_BALLS = {{NUM_BALLS}};
+uniform vec4 balls[NUM_BALLS];
 
 vec3 mod289(vec3 x) {	return x - floor(x * (1.0 / 289.0)) * 289.0;	}
 
@@ -111,7 +117,30 @@ vec3 curlNoise( vec3 p ){
 
 }
 
-const float maxRadius = 10.0;
+
+vec3 getAvoidForce(vec3 pos) {
+  vec3 avoid = vec3(0.0);
+  float R = particleAvoidingDistance;
+  vec4 ball;
+  vec3 posBall, dir;
+  float radius, dist, f;
+
+  for(int i=0; i<NUM_BALLS; i++) {
+    ball    = balls[i];
+    posBall = ball.xyz;
+    radius  = ball.w + R;
+
+    dist = distance(pos, posBall);
+    if(dist < radius) {
+      dir = normalize(pos - posBall);
+      f = (radius - dist) * particleAvoidingForce;
+      avoid += f * dir;
+    }
+
+  }
+
+  return avoid;
+}
 
 void main(void) {
 
@@ -124,8 +153,8 @@ void main(void) {
         vec3 extra   = texture2D(texture, uvExtra).rgb;
     		pos += vel;
 
-        if(pos.z < -maxRadius) {
-          pos.z += maxRadius * 2.0;
+        if(pos.z < -maxRange) {
+          pos.z += maxRange * 2.0;
           pos.xy *= .5;
         }
     		gl_FragColor = vec4(pos, 1.0);
@@ -142,13 +171,17 @@ void main(void) {
 			
 			vel += acc * .001 * (skipCount+1.0);
 
-      const float maxXYRadius = 5.0;
+      const float maxXYRadius = 6.0;
       float d = length(pos.xy);
       if(d > maxXYRadius) {
         vec2 dir = normalize(pos.xy);
         float f = (d - maxXYRadius) * .1;
         vel.xy -= dir * f;
       }
+
+
+      vec3 fAvoid = getAvoidForce(pos);
+      vel += fAvoid;
 
 			const float decrease = .936;
 			vel *= decrease;

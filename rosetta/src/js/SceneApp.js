@@ -6,6 +6,7 @@ import ViewSimulation from './ViewSimulation';
 import ViewPlanes from './ViewPlanes';
 import ViewShip from './ViewShip';
 import ViewBall from './ViewBall';
+import ViewSkybox from './ViewSkybox';
 
 let GL;
 
@@ -35,6 +36,10 @@ const BALLS = [
 		scale:1.35
 	},
 	{
+		position:[7.5, -0.1, 0],
+		scale:1.35
+	},
+	{
 		position:[-1.5, -0.1, 0],
 		scale:1.35
 	},
@@ -49,9 +54,13 @@ const BALLS = [
 	{
 		position:[-6, -0.1, 0],
 		scale:1.35
+	},
+	{
+		position:[-7.5, -0.1, 0],
+		scale:1.35
 	}
 
-]
+];
 
 class SceneApp extends alfrid.Scene {
 	constructor() {
@@ -59,21 +68,12 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 		super();
 
-		this.camera.setPerspective(Math.PI * .5, GL.aspectRatio, 1, 200);
+		this.camera.setPerspective(Math.PI * .35, GL.aspectRatio, 1, 200);
 		this.orbitalControl._rx.value = .3;
+		this.orbitalControl.radius.value = 25.0;
+		this.orbitalControl.radius.limit(20, 30);
 		this._count = 0;
 		this._flip = 0;
-
-		let r = 18;
-		this.lightPosition = [0, r, 1];
-		this.shadowMatrix  = mat4.create();
-		this.cameraLight   = new alfrid.CameraPerspective();
-		let fov            = 90*Math.PI/180;
-		let near           = 1;
-		let far            = 400;
-		this.cameraLight.setPerspective(fov*3, GL.aspectRatio, near, far);
-		this.cameraLight.lookAt(this.lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
-		mat4.multiply(this.shadowMatrix, this.cameraLight.projection, this.cameraLight.viewMatrix);
 	}
 
 
@@ -87,7 +87,6 @@ class SceneApp extends alfrid.Scene {
 				}
 			}
 		}
-
 
 		let irr_posx = alfrid.HDRLoader.parse(getAsset('irr_posx'))
 		let irr_negx = alfrid.HDRLoader.parse(getAsset('irr_negx'))
@@ -127,15 +126,12 @@ class SceneApp extends alfrid.Scene {
 
 	_initViews() {
 		console.log('Init Views');
-		this._bAxis      = new alfrid.BatchAxis();
-		this._bDotsPlane = new alfrid.BatchDotsPlane();
-		this._bCopy 	 = new alfrid.BatchCopy();
-
 		this._vRender	 = new ViewRender();
 		this._vPlanes 	 = new ViewPlanes();
-		this._vSim		 = new ViewSimulation();
+		this._vSim		 = new ViewSimulation(BALLS);
 		this._vShip 	 = new ViewShip();
 		this._vBall 	 = new ViewBall();
+		this._vSkybox 	 = new ViewSkybox();
 
 		//	SAVE INIT POSITIONS
 		this._vSave = new ViewSave();
@@ -169,11 +165,20 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		//	CAMERA MOVEMENT
+		this.orbitalControl._ry.value += .01;
+
+
+		//	PBR STUFF
+
 		params.roughness = params.offset;
 		params.metallic = 1.0 - params.roughness;
 		params.specular = (1.0 - params.roughness) * .9 + .1;
 		params.specular *= .5;
 		
+
+		//	UPDATE PARTICLES POSITION
+
 		let p = 0;
 
 		if(this._count % params.skipCount === 0) {
@@ -182,18 +187,24 @@ class SceneApp extends alfrid.Scene {
 		}
 		p = this._count / params.skipCount;
 		this._count ++;
-
-		this.orbitalControl._ry.value += -.01;
-
 		this._flip = this._flip == 0 ? 1 : 0;
+
+
+		//	RENDERS
+
+		// GL.setMatrices(this.cameraSkybox);
+		this._vSkybox.render(this._textureRad);
+
+		GL.setMatrices(this.camera);
 		this._vPlanes.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, this._flip);
-		
 		this._vShip.render(this._textureRad, this._textureIrr, this._textureAO, this._fboTarget.getTexture());
 
+		/*/
 		for(let i=0; i<BALLS.length; i++) {
 			let b = BALLS[i];
 			this._vBall.render(b.position, [b.scale, b.scale, b.scale], [1, 0, 0]);
 		}
+		//*/
 	}
 }
 

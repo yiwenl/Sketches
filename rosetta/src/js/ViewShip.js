@@ -57,6 +57,7 @@ class ViewShip extends alfrid.View {
 
 		this.shader.uniform("uExposure", "uniform1f", params.exposure);
 		this.shader.uniform("uGamma", "uniform1f", params.gamma);
+		this.shader.uniform("particleLightDensity", "uniform1f", params.particleLightDensity);
 
 		this.shader.uniform("position", "uniform3fv", [this.x, this.y, this.z]);
 		this.shader.uniform("scale", "uniform3fv", [this.scale, this.scale, this.scale]);

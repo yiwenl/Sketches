@@ -82,6 +82,7 @@ class ViewPlanes extends alfrid.View {
 		textureNext.bind(1);
 		shader.uniform("percent", "uniform1f", percent);
 		shader.uniform("flip", "uniform1f", flip);
+		this.shader.uniform("maxRange", "uniform1f", params.maxRange);
 
 		
 

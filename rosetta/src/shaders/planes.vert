@@ -16,12 +16,14 @@ uniform sampler2D texture;
 uniform sampler2D textureNext;
 uniform float percent;
 uniform float flip;
+uniform float maxRange;
 
 varying vec3 vNormal;
 varying vec3 vVertex;
 varying vec3 vExtra;
 varying float vDepth;
 varying vec4 vShadowCoord;
+varying float vOpacity;
 
 const mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,
 							  0.0, 0.5, 0.0, 0.0,
@@ -53,6 +55,7 @@ void main(void) {
 	vNormal         = aNormal;
 	vVertex         = pos;
 	vExtra          = aExtra;
+	vOpacity 		= smoothstep(maxRange, maxRange-2.0, abs(pos.z));
 	
 	vDepth          = V.z/V.w;
 }
