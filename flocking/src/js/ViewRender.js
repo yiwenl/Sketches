@@ -37,13 +37,10 @@ class ViewRender extends alfrid.View {
 	}
 
 
-	render(texture, textureNext, percent) {
+	render(texture) {
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
-		this.shader.uniform("textureNext", "uniform1i", 1);
-		textureNext.bind(1);
-		this.shader.uniform("percent", "uniform1f", percent);
 		GL.draw(this.mesh);
 	}
 }

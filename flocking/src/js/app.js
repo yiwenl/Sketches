@@ -2,14 +2,13 @@ import alfrid from './libs/alfrid.js';
 import SceneApp from './SceneApp';
 import dat from 'dat-gui';
 
-window.alfrid = alfrid;
-
 
 window.params = {
-	numParticles:256*2,
+	numParticles:256*0.25,
 	skipCount:5,
 	shadowStrength:.35,
-	shadowThreshold:.55
+	shadowThreshold:.55,
+	numSlides:2*2
 };
 
 if(document.body) {
@@ -33,7 +32,6 @@ function _init() {
 	let scene = new SceneApp();
 
 
-	// let gui = new dat.GUI({width:300});
-	// gui.add(params, 'shadowStrength', 0, 1);
-	// gui.add(params, 'shadowThreshold', 0, 1);
+	let gui = new dat.GUI({width:300});
+
 }

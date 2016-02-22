@@ -3,17 +3,16 @@
 #define SHADER_NAME SIMPLE_TEXTURE
 
 precision highp float;
-varying vec4 vPosition;
 varying vec4 vShadowCoord;
-varying vec4 vColor;
+varying vec3 vVertex;
+varying vec3 vExtra;
 
-uniform vec3 color;
-uniform mat4 uViewMatrix;
-uniform mat4 uModelMatrix;
 uniform vec3 lightPosition;
 uniform sampler2D textureDepth;
 uniform float uShadowStrength;
 uniform float uShadowThreshold;
+uniform mat3 uNormalMatrix;
+
 
 float pcfSoftShadow(sampler2D shadowMap) {
 	const float shadowMapSize  = 1024.0;
@@ -83,20 +82,24 @@ float pcfSoftShadow(sampler2D shadowMap) {
 }
 
 
+float diffuse(vec3 N, vec3 L) {
+	return max(dot(N, normalize(L)), .0);
+}
 
 
 void main(void) {
-	if(vColor.a <= 0.0) discard;
-	float pcf    = pcfSoftShadow(textureDepth);
-	pcf = 1.0 - smoothstep(0.0, uShadowThreshold, pcf);
-
-
-	// float pcf = pcfShadow(textureDepth).r;
+	// float pcf    = pcfSoftShadow(textureDepth);
 	// pcf = 1.0 - smoothstep(0.0, uShadowThreshold, pcf);
-	// pcf = smoothstep(1.0, .9, pcf);
-	
-	vec4 color   = vColor;
+
+	/*
+	vec4 color   = vec4(1.0);
 	color.rgb *= pcf;
 	gl_FragColor = color;
+	*/
 
+	vec3 N = uNormalMatrix * normalize(vVertex + vExtra);
+	float _diffuse = diffuse(N, lightPosition);
+	_diffuse = mix(_diffuse, 1.0, 0.13);
+
+    gl_FragColor = vec4(vec3(_diffuse), 1.0);
 }

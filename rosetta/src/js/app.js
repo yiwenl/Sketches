@@ -13,7 +13,7 @@ window.params = {
 	exposure:5,
 	maxRange:15,
 
-	numParticles:32,
+	numParticles:512,
 	particleLightDensity:.35,
 	particleAvoidingForce:.2,
 	particleAvoidingDistance:.3,

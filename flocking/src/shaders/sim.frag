@@ -7,9 +7,6 @@ varying vec2 vTextureCoord;
 uniform sampler2D texture;
 uniform float time;
 uniform float skipCount;
-uniform vec3 uTouch;
-
-const float PI = 3.141592657;
 
 vec3 mod289(vec3 x) {	return x - floor(x * (1.0 / 289.0)) * 289.0;	}
 
@@ -137,11 +134,6 @@ void main(void) {
         vec3 vel     = texture2D(texture, uvVel).rgb;
         vec3 extra   = texture2D(texture, uvExtra).rgb;
     		pos += vel;
-    		// 
-    		// if(length(pos) > maxRadius) {
-    		// 	// pos *= .001;
-      //     pos = curlNoise(pos*extra) * .1 * extra.b;
-    		// }
     		gl_FragColor = vec4(pos, 1.0);
 		} else {
 			
@@ -150,39 +142,19 @@ void main(void) {
       vec3 pos        = texture2D(texture, uvPos).rgb;
       vec3 vel        = texture2D(texture, vTextureCoord).rgb;
       vec3 extra      = texture2D(texture, uvExtra).rgb;
-      float posOffset = (0.5 + extra.r * 0.25) * .2;
-
+      float posOffset = (0.5 + extra.r * 0.02) * .5;
 			vec3 acc = curlNoise(pos * posOffset + time * .3);
+			
+			vel += acc * .001 * (skipCount+1.0);
 
-
-      const float maxRadius = 2.5;
-      float d = length(pos);
-      if(d > maxRadius) {
-        vec3 dir = normalize(pos);
-        float f = d * .1;
-        acc -= dir * f;
+      const float maxRadius = 5.0;
+      float dist = length(pos);
+      if(dist > maxRadius) {
+        float f = (dist - maxRadius) * .01;
+        vel -= normalize(pos) * f;
       }
 
-			vel += acc * .003 * (skipCount+1.0);
-
-      const float maxTouchRadius = 3.0;
-      const float minTouchRadius = 1.0;
-      float distToTouch = distance(pos, uTouch);
-      vec3 dirToTouch = normalize(uTouch - pos);
-      float f;
-
-      if(distToTouch < minTouchRadius) {
-        f = 1.0 / distToTouch;
-        vel += dirToTouch * f * .2;
-      } else if(distToTouch < maxTouchRadius) {
-        f = (distToTouch - minTouchRadius) / (maxTouchRadius - minTouchRadius);
-        f = sin(f*PI);
-        vel += dirToTouch * f * .2;
-      }
-
-
-
-			const float decrease = .9;
+			const float decrease = .936;
 			vel *= decrease;
 
 			gl_FragColor = vec4(vel, 1.0);

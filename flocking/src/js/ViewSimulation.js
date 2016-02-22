@@ -22,14 +22,13 @@ class ViewSimulation extends alfrid.View {
 	}
 
 
-	render(texture, touch=[0,0,0]) {
+	render(texture) {
 		this.time += .01;
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
 		this.shader.uniform("time", "uniform1f", this.time);
 		this.shader.uniform("skipCount", "uniform1f", params.skipCount);
-		this.shader.uniform("uTouch", "uniform3fv", touch);
 
 		GL.draw(this.mesh);
 	}

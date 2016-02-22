@@ -1,15 +1,9 @@
 // SceneApp.js
 import alfrid from './libs/alfrid.js';
-import ViewCube from './ViewCube';
 import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSimulation from './ViewSimulation';
-import ViewTestRender from './ViewTestRender';
-import ViewShadowRender from './ViewShadowRender';
-import ViewSphere from './ViewSphere';
-
-var Leap = require("leapjs");
-
+import ViewAddVel from './ViewAddVel';
 
 let GL;
 
@@ -18,31 +12,6 @@ class SceneApp extends alfrid.Scene {
 		GL = alfrid.GL;
 		GL.enableAlphaBlending();
 		super();
-
-		console.log(Leap);
-		Leap.loop((frame)=>this._onLeapFrame(frame));
-
-
-		this.lightPosition = [.5, 10, 1];
-		this._vLight.position = this.lightPosition;
-		this.shadowMatrix  = mat4.create();
-
-		this.touch = [1000, 0, 0];
-		this.time = 0;
-		
-		this.cameraLight   = new alfrid.CameraPerspective();
-		let fov            = 90*Math.PI/180;
-		let near           = .5;
-		let far            = 400;
-		this.camera.setPerspective(fov, GL.aspectRatio, near, far);
-		this.cameraLight.setPerspective(fov*3, GL.aspectRatio, near, far);
-		this.cameraLight.lookAt(this.lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
-		mat4.multiply(this.shadowMatrix, this.cameraLight.projection, this.cameraLight.viewMatrix);
-
-		this.orbitalControl._rx.value = .6;
-		// this.orbitalControl._ry.value = -.8;
-		this.orbitalControl.radius.value = 15.3;
-		this._count = 0;
 	}
 
 
@@ -55,141 +24,86 @@ class SceneApp extends alfrid.Scene {
 			minFilter:GL.NEAREST,
 			magFilter:GL.NEAREST
 		}
-		this._fboCurrent = new alfrid.FrameBuffer(numParticles*2, numParticles*2, o);
-		this._fboTarget  = new alfrid.FrameBuffer(numParticles*2, numParticles*2, o);
-		
-		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
-		this._fboShadowMap = new alfrid.FrameBuffer(1024, 1024);
+
+		function clearFbo(fbo) {
+			fbo.bind();
+			GL.clear(0, 0, 0, 0);
+			fbo.unbind();
+		}
+
+		this._fboCurrentPos = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+
+		clearFbo(this._fboCurrentPos);
+		clearFbo(this._fboTargetPos);
+		clearFbo(this._fboCurrentVel);
+		clearFbo(this._fboTargetVel);
 	}
 	
 
 	_initViews() {
 		console.log('Init Views');
-		this._bAxis         = new alfrid.BatchAxis();
-		this._bDotsPlane    = new alfrid.BatchDotsPlane();
-		this._bCopy         = new alfrid.BatchCopy();
-		
-		this._vSim          = new ViewSimulation();
-		this._vRender       = new ViewRender();
-		this._vShadowRender = new ViewShadowRender();
-		this._vCube         = new ViewCube([0, 0, 0], [1, 1, 1], [1, 1, .5]);
-		this._vLight        = new ViewCube([1, 15, 1], [.2, .2, .2], [1, 0, 0]);
-		let grey            = .9
-		this._vFloor        = new ViewCube([0, -7, 0], [25, 0.1, 25], [grey, grey, grey * .98]);
-		this._vSphere       = new ViewSphere();
+		this._bAxis      = new alfrid.BatchAxis();
+		this._bDotsPlane = new alfrid.BatchDotsPlane();
+		this._bCopy 	 = new alfrid.BatchCopy();
 
-		
-
-		this._vTestRender = new ViewTestRender();
+		this._vRender	 = new ViewRender();
+		this._vSim		 = new ViewSimulation();
+		this._vAddVel	 = new ViewAddVel();
 
 		//	SAVE INIT POSITIONS
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
 
-		this._fboCurrent.bind();
-		GL.clear(0, 0, 0, 0);
+		this._fboCurrentPos.bind();
 		this._vSave.render();
+		this._fboCurrentPos.unbind();
 
-		this._fboCurrent.unbind();
-		GL.viewport(0, 0, GL.width, GL.height);
 		GL.setMatrices(this.camera);
-
-
-		this.meshSphere = alfrid.Geom.sphere(1, 24);
-		this.shaderColor = new alfrid.GLShader(alfrid.ShaderLibs.generalVert, alfrid.ShaderLibs.simpleColorFrag);
 	}
 
 
 	updateFbo() {
-		GL.setMatrices(this.cameraOrtho);
+		//	Update Velocity : bind target Velocity, render simulation with current velocity / current position
+		this._fboTargetVel.bind();
+		this._vSim.render(this._fboCurrentVel, this._fboCurrentPos);
+		this._fboTargetVel.unbind();
 
-		this._fboTarget.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vSim.render(this._fboCurrent.getTexture(), this.touch);
-		this._fboTarget.unbind();
-		GL.viewport(0, 0, GL.width, GL.height);
-		GL.setMatrices(this.camera);
 
-		//	PING PONG
-		var tmp = this._fboTarget;
-		this._fboTarget = this._fboCurrent;
-		this._fboCurrent = tmp;
-	}
+		//	Update position : bind target Position, render addVel with current position / target velocity;
+		this._fboTargetPos.bind();
+		this._vAddVel.render(this._fboCurrentPos, this._fboTargetVel);
+		this._fboTargetPos.unbind();
 
-	_onLeapFrame(frame) {
-
-		function map(value, sx, sy, tx, ty ) {
-			let p = (value - sx) / (sy - sx);
-			// p = Math.min(Math.max(p, 0.0), 1.0);
-			if(p < 0.0) p = 0.0;
-			else if(p > 1.0) p = 1.0;
-
-			return tx + p * (ty - tx);
+		//	SWAPPING : PING PONG
+		function swap(a, b) {
+			let tmp = a;
+			a = b;
+			b = tmp;
 		}
-		
-		if(frame.hands.length > 0) {
-			let pos = frame.hands[0].palmPosition;
-			let range = 8;
-			let x = map(pos[0], -250, 250, -range, range);
-			let y = map(pos[1], 50, 450, -range, range);
-			let z = map(pos[2], -200, 200, -range, range);
-			this.touch = [x, y, z];
-		} else {
-			this.touch = [999, 999, 999];
-		}
+
+		swap(this._fboCurrentPos, this._fboTargetPos);
+		swap(this._fboCurrentVel, this._fboTargetVel);
+
 	}
 
 
 	render() {
-		
-		this.time += .01;
-		let r = 6 + Math.cos(Math.sin(this.time)) * 2;
-		// this.touch[0] = Math.cos(this.time) * r;
-		// this.touch[1] = Math.sin(Math.cos(this.time*1.89356398) * .5) * 3;
-		// this.touch[2] = Math.sin(this.time) * r;
 
-		let p = 0;
+		this.orbitalControl._ry.value += -.01;
 
-		if(this._count % params.skipCount === 0) {
-			this._count = 0;
-			this.updateFbo();
-		}
-		p = this._count / params.skipCount;
-		this._count ++;
 
-		// this.orbitalControl._ry.value += -.01;
+		this._bAxis.draw();
+		this._bDotsPlane.draw();
+		this._vRender.render(this._fboCurrentPos.getTexture());
 
-		
-		//	DRAW SHADOW MAP
 
-		this._fboShadowMap.bind();
-		GL.clear(1, 1, 1, 1);
-		GL.gl.depthFunc(GL.gl.LEQUAL);
-		GL.setMatrices(this.cameraLight);
-		this._vRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p);
-		this._fboShadowMap.unbind();
-
-		//	DRAW WITH SHADOW MAP
-
-		GL.viewport(0, 0, GL.width, GL.height);
-		GL.setMatrices(this.camera);
-		
-		this._vFloor.render(this.shadowMatrix, this.lightPosition, this._fboShadowMap.getTexture());
-		this._vShadowRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, this._fboShadowMap.getTexture(), this.shadowMatrix, this.lightPosition);
-		// this._vSphere.render([0, 0, 0], 1, [1, 0, 0], .5);
-		this._vSphere.render(this.touch, 3, this.lightPosition);
-
-		/*/
-		GL.setMatrices(this.cameraOrtho);
-		GL.disable(GL.DEPTH_TEST);
-		let size = 256;
-		GL.viewport(0, 0, size, size/GL.aspectRatio);
-		this._bCopy.draw(this._fboShadowMap.getDepthTexture());
-		GL.viewport(size, 0, size, size/GL.aspectRatio);
-		this._bCopy.draw(this._fboShadowMap.getTexture());
-		GL.enable(GL.DEPTH_TEST);
-		/*/
+		GL.viewport(0, 0, 256, 256);
+		this._bCopy.draw(this._fboCurrentPos.getTexture());
 	}
+
 }
 
 
