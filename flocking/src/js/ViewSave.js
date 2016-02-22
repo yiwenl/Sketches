@@ -2,9 +2,9 @@
 
 import alfrid from './libs/alfrid.js';
 
-var glslify = require("glslify");
+let glslify = require("glslify");
 
-var random = function(min, max) { return min + Math.random() * (max - min);	}
+let random = function(min, max) { return min + Math.random() * (max - min);	}
 
 let GL;
 
@@ -19,24 +19,31 @@ class ViewSave extends alfrid.View {
 
 
 	_init() {
-		
+		//	SAVE FOR POSITION
+		//	SAVE FOR RANDOM
 
-		var positions = [];
-		var coords = [];
-		var indices = []; 
-		var count = 0;
+		let positions = [];
+		let coords = [];
+		let indices = []; 
+		let extras = [];
+		let speedLimit = [];
+		let count = 0;
 
-		var numParticles = params.numParticles;
-		var totalParticles = numParticles * numParticles;
-		var ux, uy;
-		var range = 1.5;
+		let numParticles = params.numParticles;
+		let totalParticles = numParticles * numParticles;
+		let ux, uy;
+		let range = 3.5;
+		let speedScale = .0015;
 
-		for(var j=0; j<numParticles; j++) {
-			for(var i=0; i<numParticles; i++) {
+		for(let j=0; j<numParticles; j++) {
+			for(let i=0; i<numParticles; i++) {
 				positions.push([random(-range, range), random(-range, range), random(-range, range)]);
 
 				ux = i/numParticles*2.0-1.0;
 				uy = j/numParticles*2.0-1.0;
+
+				extras.push([Math.random(), Math.random(), Math.random()]);
+				speedLimit.push([random(1, 3)*speedScale, random(5, 10)*speedScale, 0.0]);
 				coords.push([ux, uy]);
 				indices.push(count);
 				count ++;
@@ -49,13 +56,30 @@ class ViewSave extends alfrid.View {
 		this.mesh.bufferVertex(positions);
 		this.mesh.bufferTexCoords(coords);
 		this.mesh.bufferIndices(indices);
+
+		this.meshExtra = new alfrid.Mesh(GL.POINTS);
+		this.meshExtra.bufferVertex(extras);
+		this.meshExtra.bufferTexCoords(coords);
+		this.meshExtra.bufferIndices(indices);
+
+		this.meshSpeed = new alfrid.Mesh(GL.POINTS);
+		this.meshSpeed.bufferVertex(speedLimit);
+		this.meshSpeed.bufferTexCoords(coords);
+		this.meshSpeed.bufferIndices(indices);
 	}
 
 
-	render() {
+	render(state=0) {
 
 		this.shader.bind();
-		GL.draw(this.mesh);
+		if(state == 0) {
+			GL.draw(this.mesh);
+		} else if(state == 1) {
+			GL.draw(this.meshExtra);
+		} else {
+			GL.draw(this.meshSpeed);
+		}
+		
 		
 	}
 

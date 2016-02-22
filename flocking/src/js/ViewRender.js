@@ -37,10 +37,13 @@ class ViewRender extends alfrid.View {
 	}
 
 
-	render(texture) {
+	render(texture, textureExtra) {
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
+
+		this.shader.uniform("textureExtra", "uniform1i", 1);
+		textureExtra.bind(1);
 		GL.draw(this.mesh);
 	}
 }

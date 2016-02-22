@@ -12,6 +12,7 @@ class SceneApp extends alfrid.Scene {
 		GL = alfrid.GL;
 		GL.enableAlphaBlending();
 		super();
+		this.orbitalControl._rx.value = 0.3;
 	}
 
 
@@ -35,11 +36,16 @@ class SceneApp extends alfrid.Scene {
 		this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboSpeed  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetPos.id = 1;
 
 		clearFbo(this._fboCurrentPos);
 		clearFbo(this._fboTargetPos);
 		clearFbo(this._fboCurrentVel);
 		clearFbo(this._fboTargetVel);
+		clearFbo(this._fboExtra);
+		clearFbo(this._fboSpeed);
 	}
 	
 
@@ -58,8 +64,16 @@ class SceneApp extends alfrid.Scene {
 		GL.setMatrices(this.cameraOrtho);
 
 		this._fboCurrentPos.bind();
-		this._vSave.render();
+		this._vSave.render(0);
 		this._fboCurrentPos.unbind();
+
+		this._fboExtra.bind();
+		this._vSave.render(1);
+		this._fboExtra.unbind();
+
+		this._fboSpeed.bind();
+		this._vSave.render(2);
+		this._fboSpeed.unbind();
 
 		GL.setMatrices(this.camera);
 	}
@@ -68,40 +82,63 @@ class SceneApp extends alfrid.Scene {
 	updateFbo() {
 		//	Update Velocity : bind target Velocity, render simulation with current velocity / current position
 		this._fboTargetVel.bind();
-		this._vSim.render(this._fboCurrentVel, this._fboCurrentPos);
+		GL.clear(0, 0, 0, 1);
+		this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), this._fboSpeed.getTexture() );
 		this._fboTargetVel.unbind();
 
 
 		//	Update position : bind target Position, render addVel with current position / target velocity;
 		this._fboTargetPos.bind();
-		this._vAddVel.render(this._fboCurrentPos, this._fboTargetVel);
+		GL.clear(0, 0, 0, 1);
+		this._vAddVel.render(this._fboCurrentPos.getTexture(), this._fboTargetVel.getTexture());
 		this._fboTargetPos.unbind();
 
 		//	SWAPPING : PING PONG
-		function swap(a, b) {
-			let tmp = a;
-			a = b;
-			b = tmp;
-		}
+		let tmpVel          = this._fboCurrentVel;
+		this._fboCurrentVel = this._fboTargetVel;
+		this._fboTargetVel  = tmpVel;
 
-		swap(this._fboCurrentPos, this._fboTargetPos);
-		swap(this._fboCurrentVel, this._fboTargetVel);
+		let tmpPos          = this._fboCurrentPos;
+		this._fboCurrentPos = this._fboTargetPos;
+		this._fboTargetPos  = tmpPos;
 
 	}
 
 
 	render() {
+		let traceTime = true;
+		// let time = new Date().getTime()
+		// if(traceTime) console.time('rendering');
+		this._doRender();
+		// if(traceTime) console.timeEnd('rendering');
+		// let endTime = new Date().getTime();
+		// if(Math.random() > .9) console.log('Time Elapsed for rendering : ', (endTime - time), endTime);
+	}
+
+
+	_doRender() {
+		this.updateFbo();
 
 		this.orbitalControl._ry.value += -.01;
 
 
 		this._bAxis.draw();
 		this._bDotsPlane.draw();
-		this._vRender.render(this._fboCurrentPos.getTexture());
+		this._vRender.render(this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
 
+		let debugSize = 256/2;
 
-		GL.viewport(0, 0, 256, 256);
+		GL.viewport(0, 0, debugSize, debugSize);
 		this._bCopy.draw(this._fboCurrentPos.getTexture());
+
+		GL.viewport(debugSize, 0, debugSize, debugSize);
+		this._bCopy.draw(this._fboTargetVel.getTexture());
+
+		GL.viewport(debugSize*2, 0, debugSize, debugSize);
+		this._bCopy.draw(this._fboExtra.getTexture());
+
+		GL.viewport(debugSize*3, 0, debugSize, debugSize);
+		this._bCopy.draw(this._fboSpeed.getTexture());
 	}
 
 }

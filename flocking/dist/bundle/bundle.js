@@ -4465,7 +4465,11 @@ var SceneApp = function (_alfrid$Scene) {
 
 		GL = _alfrid2.default.GL;
 		GL.enableAlphaBlending();
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(SceneApp).call(this));
+
+		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SceneApp).call(this));
+
+		_this.orbitalControl._rx.value = 0.3;
+		return _this;
 	}
 
 	_createClass(SceneApp, [{
@@ -4490,11 +4494,16 @@ var SceneApp = function (_alfrid$Scene) {
 			this._fboTargetPos = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
 			this._fboCurrentVel = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
 			this._fboTargetVel = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
+			this._fboExtra = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
+			this._fboSpeed = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
+			this._fboTargetPos.id = 1;
 
 			clearFbo(this._fboCurrentPos);
 			clearFbo(this._fboTargetPos);
 			clearFbo(this._fboCurrentVel);
 			clearFbo(this._fboTargetVel);
+			clearFbo(this._fboExtra);
+			clearFbo(this._fboSpeed);
 		}
 	}, {
 		key: '_initViews',
@@ -4513,8 +4522,16 @@ var SceneApp = function (_alfrid$Scene) {
 			GL.setMatrices(this.cameraOrtho);
 
 			this._fboCurrentPos.bind();
-			this._vSave.render();
+			this._vSave.render(0);
 			this._fboCurrentPos.unbind();
+
+			this._fboExtra.bind();
+			this._vSave.render(1);
+			this._fboExtra.unbind();
+
+			this._fboSpeed.bind();
+			this._vSave.render(2);
+			this._fboSpeed.unbind();
 
 			GL.setMatrices(this.camera);
 		}
@@ -4523,36 +4540,60 @@ var SceneApp = function (_alfrid$Scene) {
 		value: function updateFbo() {
 			//	Update Velocity : bind target Velocity, render simulation with current velocity / current position
 			this._fboTargetVel.bind();
-			this._vSim.render(this._fboCurrentVel, this._fboCurrentPos);
+			GL.clear(0, 0, 0, 1);
+			this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), this._fboSpeed.getTexture());
 			this._fboTargetVel.unbind();
 
 			//	Update position : bind target Position, render addVel with current position / target velocity;
 			this._fboTargetPos.bind();
-			this._vAddVel.render(this._fboCurrentPos, this._fboTargetVel);
+			GL.clear(0, 0, 0, 1);
+			this._vAddVel.render(this._fboCurrentPos.getTexture(), this._fboTargetVel.getTexture());
 			this._fboTargetPos.unbind();
 
 			//	SWAPPING : PING PONG
-			function swap(a, b) {
-				var tmp = a;
-				a = b;
-				b = tmp;
-			}
+			var tmpVel = this._fboCurrentVel;
+			this._fboCurrentVel = this._fboTargetVel;
+			this._fboTargetVel = tmpVel;
 
-			swap(this._fboCurrentPos, this._fboTargetPos);
-			swap(this._fboCurrentVel, this._fboTargetVel);
+			var tmpPos = this._fboCurrentPos;
+			this._fboCurrentPos = this._fboTargetPos;
+			this._fboTargetPos = tmpPos;
 		}
 	}, {
 		key: 'render',
 		value: function render() {
+			var traceTime = true;
+			// let time = new Date().getTime()
+			// if(traceTime) console.time('rendering');
+			this._doRender();
+			// if(traceTime) console.timeEnd('rendering');
+			// let endTime = new Date().getTime();
+			// if(Math.random() > .9) console.log('Time Elapsed for rendering : ', (endTime - time), endTime);
+		}
+	}, {
+		key: '_doRender',
+		value: function _doRender() {
+			this.updateFbo();
 
 			this.orbitalControl._ry.value += -.01;
 
 			this._bAxis.draw();
 			this._bDotsPlane.draw();
-			this._vRender.render(this._fboCurrentPos.getTexture());
+			this._vRender.render(this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
 
-			GL.viewport(0, 0, 256, 256);
+			var debugSize = 256 / 2;
+
+			GL.viewport(0, 0, debugSize, debugSize);
 			this._bCopy.draw(this._fboCurrentPos.getTexture());
+
+			GL.viewport(debugSize, 0, debugSize, debugSize);
+			this._bCopy.draw(this._fboTargetVel.getTexture());
+
+			GL.viewport(debugSize * 2, 0, debugSize, debugSize);
+			this._bCopy.draw(this._fboExtra.getTexture());
+
+			GL.viewport(debugSize * 3, 0, debugSize, debugSize);
+			this._bCopy.draw(this._fboSpeed.getTexture());
 		}
 	}]);
 
@@ -4651,7 +4692,7 @@ var ViewRender = function (_alfrid$View) {
 		_classCallCheck(this, ViewRender);
 
 		GL = _alfrid2.default.GL;
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewRender).call(this, "#define GLSLIFY 1\n// render.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform sampler2D texture;\nvarying vec4 vColor;\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy;\n\tvec3 pos     = texture2D(texture, uv).rgb;\n\tgl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tgl_PointSize = 2.0;\n\t\n\tvColor \t\t= vec4(1.0);\n}", "#define GLSLIFY 1\n// render.frag\n\n// save.frag\n\nprecision highp float;\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewRender).call(this, "#define GLSLIFY 1\n// render.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform sampler2D texture;\nuniform sampler2D textureExtra;\nvarying vec4 vColor;\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy;\n\tvec3 pos     = texture2D(texture, uv).rgb;\n\tvec3 extra   = texture2D(textureExtra, uv).rgb;\n\tgl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tgl_PointSize = 1.0 + extra.r * 2.0;\n\t\n\tvColor \t\t= vec4(vec3(extra.b), 1.0);\n}", "#define GLSLIFY 1\n// render.frag\n\n// save.frag\n\nprecision highp float;\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
 	}
 
 	_createClass(ViewRender, [{
@@ -4681,10 +4722,13 @@ var ViewRender = function (_alfrid$View) {
 		}
 	}, {
 		key: 'render',
-		value: function render(texture) {
+		value: function render(texture, textureExtra) {
 			this.shader.bind();
 			this.shader.uniform("texture", "uniform1i", 0);
 			texture.bind(0);
+
+			this.shader.uniform("textureExtra", "uniform1i", 1);
+			textureExtra.bind(1);
 			GL.draw(this.mesh);
 		}
 	}]);
@@ -4737,16 +4781,22 @@ var ViewSave = function (_alfrid$View) {
 	_createClass(ViewSave, [{
 		key: '_init',
 		value: function _init() {
+			//	SAVE FOR POSITION
+			//	SAVE FOR RANDOM
 
 			var positions = [];
 			var coords = [];
 			var indices = [];
+			var extras = [];
+			var speedLimit = [];
 			var count = 0;
 
 			var numParticles = params.numParticles;
 			var totalParticles = numParticles * numParticles;
-			var ux, uy;
-			var range = 1.5;
+			var ux = undefined,
+			    uy = undefined;
+			var range = 3.5;
+			var speedScale = .0015;
 
 			for (var j = 0; j < numParticles; j++) {
 				for (var i = 0; i < numParticles; i++) {
@@ -4754,6 +4804,9 @@ var ViewSave = function (_alfrid$View) {
 
 					ux = i / numParticles * 2.0 - 1.0;
 					uy = j / numParticles * 2.0 - 1.0;
+
+					extras.push([Math.random(), Math.random(), Math.random()]);
+					speedLimit.push([random(1, 3) * speedScale, random(5, 10) * speedScale, 0.0]);
 					coords.push([ux, uy]);
 					indices.push(count);
 					count++;
@@ -4764,13 +4817,30 @@ var ViewSave = function (_alfrid$View) {
 			this.mesh.bufferVertex(positions);
 			this.mesh.bufferTexCoords(coords);
 			this.mesh.bufferIndices(indices);
+
+			this.meshExtra = new _alfrid2.default.Mesh(GL.POINTS);
+			this.meshExtra.bufferVertex(extras);
+			this.meshExtra.bufferTexCoords(coords);
+			this.meshExtra.bufferIndices(indices);
+
+			this.meshSpeed = new _alfrid2.default.Mesh(GL.POINTS);
+			this.meshSpeed.bufferVertex(speedLimit);
+			this.meshSpeed.bufferTexCoords(coords);
+			this.meshSpeed.bufferIndices(indices);
 		}
 	}, {
 		key: 'render',
 		value: function render() {
+			var state = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 
 			this.shader.bind();
-			GL.draw(this.mesh);
+			if (state == 0) {
+				GL.draw(this.mesh);
+			} else if (state == 1) {
+				GL.draw(this.meshExtra);
+			} else {
+				GL.draw(this.meshSpeed);
+			}
 		}
 	}]);
 
@@ -4810,7 +4880,10 @@ var ViewSimulation = function (_alfrid$View) {
 	function ViewSimulation() {
 		_classCallCheck(this, ViewSimulation);
 
-		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSimulation).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float time;\nuniform float skipCount;\n\nvec3 mod289(vec3 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 mod289(vec4 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 permute(vec4 x) {\treturn mod289(((x*34.0)+1.0)*x);\t}\n\nvec4 taylorInvSqrt(vec4 r) {\treturn 1.79284291400159 - 0.85373472095314 * r;}\n\nfloat snoise(vec3 v) { \n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);\n\n// First corner\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n// Other corners\n  vec3 g = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g;\n  vec3 i1 = min( g.xyz, l.zxy );\n  vec3 i2 = max( g.xyz, l.zxy );\n\n  //   x0 = x0 - 0.0 + 0.0 * C.xxx;\n  //   x1 = x0 - i1  + 1.0 * C.xxx;\n  //   x2 = x0 - i2  + 2.0 * C.xxx;\n  //   x3 = x0 - 1.0 + 3.0 * C.xxx;\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n// Permutations\n  i = mod289(i); \n  vec4 p = permute( permute( permute( \n             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n           + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) \n           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n// Gradients: 7x7 points over a square, mapped onto an octahedron.\n// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D.wyz - D.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;\n  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1.xy,h.z);\n  vec3 p3 = vec3(a1.zw,h.w);\n\n//Normalise gradients\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n// Mix final noise value\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), \n                                dot(p2,x2), dot(p3,x3) ) );\n}\n\nvec3 snoiseVec3( vec3 x ){\n\n  float s  = snoise(vec3( x ));\n  float s1 = snoise(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));\n  float s2 = snoise(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));\n  vec3 c = vec3( s , s1 , s2 );\n  return c;\n\n}\n\nvec3 curlNoise( vec3 p ){\n  \n  const float e = .1;\n  vec3 dx = vec3( e   , 0.0 , 0.0 );\n  vec3 dy = vec3( 0.0 , e   , 0.0 );\n  vec3 dz = vec3( 0.0 , 0.0 , e   );\n\n  vec3 p_x0 = snoiseVec3( p - dx );\n  vec3 p_x1 = snoiseVec3( p + dx );\n  vec3 p_y0 = snoiseVec3( p - dy );\n  vec3 p_y1 = snoiseVec3( p + dy );\n  vec3 p_z0 = snoiseVec3( p - dz );\n  vec3 p_z1 = snoiseVec3( p + dz );\n\n  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;\n  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;\n  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;\n\n  const float divisor = 1.0 / ( 2.0 * e );\n  return normalize( vec3( x , y , z ) * divisor );\n\n}\n\nvoid main(void) {\n\n    if(vTextureCoord.y < .5) {\n    \tif(vTextureCoord.x < .5) {\n        vec2 uvVel   = vTextureCoord + vec2(.5, .0);\n        vec2 uvExtra = vTextureCoord + vec2(.5, .5);\n        vec3 pos     = texture2D(texture, vTextureCoord).rgb;\n        vec3 vel     = texture2D(texture, uvVel).rgb;\n        vec3 extra   = texture2D(texture, uvExtra).rgb;\n    \t\tpos += vel;\n    \t\tgl_FragColor = vec4(pos, 1.0);\n\t\t} else {\n\t\t\t\n      vec2 uvPos      = vTextureCoord - vec2(.5, .0);\n      vec2 uvExtra    = vTextureCoord + vec2(-.5, .5);\n      vec3 pos        = texture2D(texture, uvPos).rgb;\n      vec3 vel        = texture2D(texture, vTextureCoord).rgb;\n      vec3 extra      = texture2D(texture, uvExtra).rgb;\n      float posOffset = (0.5 + extra.r * 0.02) * .5;\n\t\t\tvec3 acc = curlNoise(pos * posOffset + time * .3);\n\t\t\t\n\t\t\tvel += acc * .001 * (skipCount+1.0);\n\n      const float maxRadius = 5.0;\n      float dist = length(pos);\n      if(dist > maxRadius) {\n        float f = (dist - maxRadius) * .01;\n        vel -= normalize(pos) * f;\n      }\n\n\t\t\tconst float decrease = .936;\n\t\t\tvel *= decrease;\n\n\t\t\tgl_FragColor = vec4(vel, 1.0);\n\t\t}\n\t} else {\n\t\tgl_FragColor = texture2D(texture, vTextureCoord);\n\t}\n}"));
+		var fs = "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform sampler2D textureSpeed;\nuniform float time;\n\nconst float NUM = {{NUM_PARTICLES}};\nconst float PI = 3.1415926;\nconst float PI_2 = 3.1415926*2.0;\n\nfloat map(float value, float sx, float sy, float tx, float ty) {\n\tfloat p = (value - sx) / (sy - sx);\n\tp = clamp(p, 0.0, 1.0);\n\treturn tx + (ty - tx) * p;\n}\n\nvoid main(void) {\n\tvec3 pos        = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel        = texture2D(textureVel, vTextureCoord).rgb;\n\tvec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;\n\tvec3 speeds      = texture2D(textureSpeed, vTextureCoord).rgb;\n\n\tvec2 uvParticles;\n\tvec3 posParticle, velParticle;\n\tfloat percent;\n\tvec3 dirToParticle;\n\tfloat f, delta, forceApply;\n\n\tfloat RANGE = .75 * mix(extra.x, 1.0, .5);\n\tfloat forceOffset = mix(extra.y, 1.0, .5);\n\tconst float minThreshold = 0.4;\n\tconst float maxThreshold = 0.7;\n\tconst float decrease = 0.9;\n\n\tconst float repelStrength = 0.03;\n\tconst float attractStrength = 0.0001;\n\tconst float orientStrength = 0.01;\n\n\tfor(float y=0.0; y<NUM; y++) {\n\t\tfor(float x=0.0; x<NUM; x++) {\n\t\t\tif(x <= y) continue;\n\n\t\t\tuvParticles = vec2(x, y)/NUM;\n\t\t\tposParticle = texture2D(texturePos, uvParticles).rgb;\n\t\t\tpercent = distance(pos, posParticle) / RANGE;\n\t\t\tforceApply = 1.0 - step(1.0, percent);\n\t\t\tforceApply *= forceOffset;\n\t\t\tdirToParticle = normalize(posParticle - pos);\n\n\t\t\tif(percent < minThreshold) {\n\t\t\t\tf = (minThreshold/percent - 1.0) * repelStrength;\n\t\t\t\tvel -= f * dirToParticle * forceApply;\n\t\t\t} else if(percent < maxThreshold) {\n\t\t\t\tvelParticle = texture2D(textureVel, uvParticles).rgb;\n\t\t\t\tdelta = map(percent, minThreshold, maxThreshold, 0.0, 1.0);\n\t\t\t\tvec3 avgDir = (vel + velParticle) * .5;\n\t\t\t\tif(length(avgDir) > 0.0) {\n\t\t\t\t\tavgDir = normalize(avgDir);\n\t\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * 0.5 + 0.5 );\n\t\t\t\t\tvel += avgDir * f * orientStrength * forceApply;\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdelta = map(percent, maxThreshold, 1.0, 0.0, 1.0);\n\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * -0.5 + 0.5 );\n\t\t\t\tvel += dirToParticle * f * attractStrength * forceApply;\n\t\t\t}\n\n\t\t}\n\n\t}\n\n\tconst float maxRadius = 2.0;\n\tconst float minRadius = 1.25;\n\tfloat dist = length(pos);\n\tif(dist > maxRadius) {\n\t\tfloat f = (dist - maxRadius) * .005;\n\t\tvel -= normalize(pos) * f * forceOffset;\n\t}\n\n\tif(dist < minRadius) {\n\t\tfloat f = (1.0-dist/minRadius) * 1.5;\n\t\tvel += normalize(pos) * f * forceOffset;\n\t}\n\n\tvec3 velDir = normalize(vel);\n\tfloat speed = length(vel);\n\tif(speed < speeds.x) {\t\t//\tmin speed\n\t\tvel = velDir * speeds.x;\n\t} \n\n\tif(speed > speeds.y) {\t\t//\tmax speed;\n\t\tvel = velDir * speeds.y;\n\t}\n\n\t// vel *= decrease;\n\n\tgl_FragColor = vec4(vel, 1.0);\n}";
+		fs = fs.replace('{{NUM_PARTICLES}}', params.numParticles.toFixed(1));
+
+		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSimulation).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, fs));
 
 		_this.time = Math.random() * 0xFF;
 
@@ -4826,13 +4899,19 @@ var ViewSimulation = function (_alfrid$View) {
 		}
 	}, {
 		key: 'render',
-		value: function render(texture) {
+		value: function render(textureVel, texturePos, textureExtra, textureSpeed) {
 			this.time += .01;
 			this.shader.bind();
-			this.shader.uniform("texture", "uniform1i", 0);
-			texture.bind(0);
+			this.shader.uniform("textureVel", "uniform1i", 0);
+			textureVel.bind(0);
+			this.shader.uniform("texturePos", "uniform1i", 1);
+			texturePos.bind(1);
+			this.shader.uniform("textureExtra", "uniform1i", 2);
+			textureExtra.bind(2);
+			this.shader.uniform("textureSpeed", "uniform1i", 3);
+			textureSpeed.bind(3);
+
 			this.shader.uniform("time", "uniform1f", this.time);
-			this.shader.uniform("skipCount", "uniform1f", params.skipCount);
 
 			GL.draw(this.mesh);
 		}
@@ -4861,7 +4940,7 @@ var _datGui2 = _interopRequireDefault(_datGui);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 window.params = {
-	numParticles: 256 * 0.25,
+	numParticles: 100,
 	skipCount: 5,
 	shadowStrength: .35,
 	shadowThreshold: .55,
