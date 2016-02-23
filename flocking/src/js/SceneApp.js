@@ -4,6 +4,10 @@ import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSimulation from './ViewSimulation';
 import ViewAddVel from './ViewAddVel';
+import ViewBall from './ViewBall';
+import ClusterChecker from './ClusterChecker';
+
+let clusterfck = require("clusterfck");
 
 let GL;
 
@@ -13,6 +17,9 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 		super();
 		this.orbitalControl._rx.value = 0.3;
+		let size             = params.numParticles;
+		this.pixels          = new Float32Array(4 * size * size);
+		this._clusterChecker = new ClusterChecker();
 	}
 
 
@@ -58,6 +65,7 @@ class SceneApp extends alfrid.Scene {
 		this._vRender	 = new ViewRender();
 		this._vSim		 = new ViewSimulation();
 		this._vAddVel	 = new ViewAddVel();
+		this._vBall		 = new ViewBall();
 
 		//	SAVE INIT POSITIONS
 		this._vSave = new ViewSave();
@@ -106,13 +114,62 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
-		let traceTime = true;
-		// let time = new Date().getTime()
-		// if(traceTime) console.time('rendering');
+		let traceTime = false;
+		if(traceTime) console.time('read pixels');
+		this._readPositions();
+		if(traceTime) console.timeEnd('read pixels');
+		if(traceTime) console.time('rendering');
 		this._doRender();
-		// if(traceTime) console.timeEnd('rendering');
-		// let endTime = new Date().getTime();
-		// if(Math.random() > .9) console.log('Time Elapsed for rendering : ', (endTime - time), endTime);
+		if(traceTime) console.timeEnd('rendering');
+		if(traceTime) console.time('clustering');
+		this._clustering();
+		if(traceTime) console.timeEnd('clustering');
+	}
+
+
+	_clustering() {
+		// let particles = [];
+		// let num = params.numParticles * params.numParticles;
+		// for(let i=0; i<num; i+= 4) {
+		// 	particles.push([this.pixels[i], this.pixels[i+1], this.pixels[i+2]]);
+		// }
+
+		this._clusterChecker.check(this.pixels)
+
+/*
+		let clusters = clusterfck.kmeans(particles, 5);
+
+
+
+		for(let i=0; i<clusters.length ; i++ ) {
+			let cluster = clusters[i];
+			let center = [0, 0, 0];
+			for(let j=0; j<cluster.length; j++) {
+				let p = cluster[j];
+
+				center[0] += p[0];
+				center[1] += p[1];
+				center[2] += p[2];
+			}
+
+			center[0]/= cluster.length;
+			center[1]/= cluster.length;
+			center[2]/= cluster.length;
+			this._vBall.render(center, 1 + cluster.length/200, [1, 0, 0]);	
+		}
+		*/
+		// this._vBall.render(particles[1], .2, [1, 0, 0], .5);
+	}
+
+
+
+	_readPositions() {
+		let size = this._fboCurrentPos.width;
+		let gl = GL.gl;
+		this._fboCurrentPos.bind();
+		gl.readPixels(0, 0, size, size, gl.RGBA, gl.FLOAT, this.pixels);
+		this._fboCurrentPos.unbind();
+
 	}
 
 
@@ -128,6 +185,7 @@ class SceneApp extends alfrid.Scene {
 
 		let debugSize = 256/2;
 
+		/*
 		GL.viewport(0, 0, debugSize, debugSize);
 		this._bCopy.draw(this._fboCurrentPos.getTexture());
 
@@ -139,6 +197,7 @@ class SceneApp extends alfrid.Scene {
 
 		GL.viewport(debugSize*3, 0, debugSize, debugSize);
 		this._bCopy.draw(this._fboSpeed.getTexture());
+		*/
 	}
 
 }

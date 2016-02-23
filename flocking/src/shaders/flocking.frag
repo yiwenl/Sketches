@@ -39,7 +39,7 @@ void main(void) {
 	const float decrease = 0.9;
 
 	const float repelStrength = 0.03;
-	const float attractStrength = 0.0001;
+	const float attractStrength = 0.0002;
 	const float orientStrength = 0.01;
 
 	for(float y=0.0; y<NUM; y++) {
@@ -84,7 +84,7 @@ void main(void) {
 	}
 
 	if(dist < minRadius) {
-		float f = (1.0-dist/minRadius) * 1.5;
+		float f = (1.0-dist/minRadius) * 1.0;
 		vel += normalize(pos) * f * forceOffset;
 	}
 

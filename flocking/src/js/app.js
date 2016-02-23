@@ -4,7 +4,7 @@ import dat from 'dat-gui';
 
 
 window.params = {
-	numParticles:100,
+	numParticles:64,
 	skipCount:5,
 	shadowStrength:.35,
 	shadowThreshold:.55,
