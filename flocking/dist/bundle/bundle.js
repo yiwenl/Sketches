@@ -4743,21 +4743,36 @@ var Cluster = function () {
 	function Cluster(position, strength) {
 		_classCallCheck(this, Cluster);
 
-		console.log(position, strength);
 		this._position = position;
-		this._strength = new _alfrid2.default.EaseNumber(0, .1);
+		this.easing = .1;
+		this._strength = new _alfrid2.default.EaseNumber(0, this.easing);
+		this._life = new _alfrid2.default.EaseNumber(1, this.easing);
 		this._strength.value = strength;
 	}
 
 	_createClass(Cluster, [{
 		key: 'update',
 		value: function update(position, mStrength) {
-			this._position = position;
+			// this._position = position;
+
+			this._position[0] += (position[0] - this._position[0]) * this.easing;
+			this._position[1] += (position[1] - this._position[1]) * this.easing;
+			this._position[2] += (position[2] - this._position[2]) * this.easing;
 			this._strength.value = mStrength;
+			this._life.value = 1;
+		}
+	}, {
+		key: 'setStrength',
+		value: function setStrength(mStrength) {
+			this._strength.value = mStrength;
+			this._life.value = 0;
 		}
 	}, {
 		key: 'distance',
 		value: function distance(position) {
+			if (this.isNearDead) {
+				return 999;
+			}
 			var x = position[0] - this._position[0];
 			var y = position[1] - this._position[1];
 			var z = position[2] - this._position[2];
@@ -4770,9 +4785,19 @@ var Cluster = function () {
 			return this._position;
 		}
 	}, {
+		key: 'strength',
+		get: function get() {
+			return this._strength.value * this._life.value;
+		}
+	}, {
+		key: 'isNearDead',
+		get: function get() {
+			return this._life.value < .25;
+		}
+	}, {
 		key: 'isDead',
 		get: function get() {
-			return this._strength.value < .3;
+			return this._life.value < .1;
 		}
 	}]);
 
@@ -4800,6 +4825,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var clusterfck = require("clusterfck");
 
+var MAX_NUM = 600;
+var MAX_DISTANCE = 1.0;
+
 var ClusterChecker = function () {
 	function ClusterChecker() {
 		_classCallCheck(this, ClusterChecker);
@@ -4813,15 +4841,15 @@ var ClusterChecker = function () {
 		value: function check(pixels) {
 			var particles = [];
 			var num = params.numParticles * params.numParticles;
-			for (var i = 0; i < num; i += 4) {
-				particles.push([pixels[i], pixels[i + 1], pixels[i + 2]]);
+			for (var _i = 0; _i < num; _i += 4) {
+				particles.push([pixels[_i], pixels[_i + 1], pixels[_i + 2]]);
 			}
 
 			var clusters = clusterfck.kmeans(particles, 5);
 			var newClusters = [];
 
-			for (var i = 0; i < clusters.length; i++) {
-				var cluster = clusters[i];
+			for (var _i2 = 0; _i2 < clusters.length; _i2++) {
+				var cluster = clusters[_i2];
 				var center = [0, 0, 0];
 				for (var j = 0; j < cluster.length; j++) {
 					var p = cluster[j];
@@ -4846,19 +4874,21 @@ var ClusterChecker = function () {
 					position: center,
 					num: cluster.length,
 					distances: distances,
+					linkedIndex: -1,
 					picked: false
 				});
 
 				if (cluster.length > this._maxSize) {
 					this._maxSize = cluster.length;
-					console.debug('Max Size : ', this._maxSize, distances);
 				}
 			}
 
+			//	FIRST TIME CREATION
+
 			if (this._clusters.length === 0) {
-				for (var i = 0; i < newClusters.length; i++) {
-					var cluster = newClusters[i];
-					var strength = cluster.num / 600;
+				for (var _i3 = 0; _i3 < newClusters.length; _i3++) {
+					var cluster = newClusters[_i3];
+					var strength = cluster.num / MAX_NUM;
 					var c = new _Cluster2.default(cluster.position, strength);
 
 					this._clusters.push(c);
@@ -4867,7 +4897,9 @@ var ClusterChecker = function () {
 				return;
 			}
 
-			var threshold = 2.0;
+			//	CHECK DISTANCES
+
+			var threshold = MAX_DISTANCE;
 
 			var needToCheck = true;
 			var minDist = 0.0;
@@ -4879,40 +4911,77 @@ var ClusterChecker = function () {
 				minDist = -1;
 				for (var j = 0; j < newClusters.length; j++) {
 					var c = newClusters[j];
-					if (c.picked) continue;
-
-					var distances = c.distances;
-					for (var i = 0; i < distances.length; i++) {
-						var d = distances[i];
-						if (minDist < 0) {
-							minDist = d;
-							ia = j;
-							ib = i;
-						} else {
-							if (d < minDist) {
+					if (!c.picked) {
+						var distances = c.distances;
+						for (var _i4 = 0; _i4 < distances.length; _i4++) {
+							var d = distances[_i4];
+							if (minDist < 0) {
 								minDist = d;
-
 								ia = j;
-								ib = i;
+								ib = _i4;
+							} else {
+								if (d < minDist) {
+									minDist = d;
+
+									ia = j;
+									ib = _i4;
+								}
 							}
 						}
 					}
 				}
 
 				//	removing
+				if (minDist < threshold) {
+					newClusters[ia].picked = true;
+					newClusters[ia].linkedIndex = ib;
+				}
 
 				if (minDist > threshold) {
+					// console.debug('all checked');
 					needToCheck = false;
 				}
 				if (minDist < 0) {
-					console.debug('no distance');
+					// console.debug('no distance');
 					needToCheck = false;
 				}
 
 				if (cnt++ > 100) {
+					console.debug('Overflow');
 					needToCheck = false;
 				}
 			}
+
+			//	UPDATE CLUSTER / NEW CLUSTER
+			var pickedIndices = [];
+			var tmp = [];
+			for (var _i5 = 0; _i5 < newClusters.length; _i5++) {
+				var cluster = newClusters[_i5];
+				if (cluster.linkedIndex >= 0) {
+					this._clusters[cluster.linkedIndex].update(cluster.position, cluster.num / MAX_NUM);
+					pickedIndices.push(_i5);
+				} else {
+					var c = new _Cluster2.default(cluster.position, cluster.num / MAX_NUM);
+					tmp.push(c);
+				}
+			}
+
+			//	FADE CLUSTERS THAT NOT EXIST ANYMORE
+			for (var _i6 = 0; _i6 < this._clusters.length; _i6++) {
+				if (pickedIndices.indexOf(_i6) < 0) {
+					this._clusters[_i6].setStrength(0);
+				}
+			}
+
+			//	REMOVE CLUSTERS THAT DIED
+			var i = this._clusters.length;
+			while (i--) {
+				if (this._clusters[i].isDead) {
+					this._clusters.splice(i, 1);
+				}
+			}
+
+			this._clusters = this._clusters.concat(tmp);
 		}
 	}, {
 		key: 'clusters',
@@ -5098,37 +5167,12 @@ var SceneApp = function (_alfrid$Scene) {
 	}, {
 		key: '_clustering',
 		value: function _clustering() {
-			// let particles = [];
-			// let num = params.numParticles * params.numParticles;
-			// for(let i=0; i<num; i+= 4) {
-			// 	particles.push([this.pixels[i], this.pixels[i+1], this.pixels[i+2]]);
-			// }
 
 			this._clusterChecker.check(this.pixels);
-
-			/*
-   		let clusters = clusterfck.kmeans(particles, 5);
-   
-   
-   
-   		for(let i=0; i<clusters.length ; i++ ) {
-   			let cluster = clusters[i];
-   			let center = [0, 0, 0];
-   			for(let j=0; j<cluster.length; j++) {
-   				let p = cluster[j];
-   
-   				center[0] += p[0];
-   				center[1] += p[1];
-   				center[2] += p[2];
-   			}
-   
-   			center[0]/= cluster.length;
-   			center[1]/= cluster.length;
-   			center[2]/= cluster.length;
-   			this._vBall.render(center, 1 + cluster.length/200, [1, 0, 0]);	
-   		}
-   		*/
-			// this._vBall.render(particles[1], .2, [1, 0, 0], .5);
+			for (var i = 0; i < this._clusterChecker.clusters.length; i++) {
+				var cluster = this._clusterChecker.clusters[i];
+				this._vBall.render(cluster.position, .02 + cluster.strength * 2.0, [1, 0, 0]);
+			}
 		}
 	}, {
 		key: '_readPositions',
@@ -5229,7 +5273,7 @@ var ViewAddVel = function (_alfrid$View) {
 exports.default = ViewAddVel;
 
 },{"./libs/alfrid.js":17}],12:[function(require,module,exports){
-"use strict";
+'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -5237,7 +5281,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _alfrid = require("./libs/alfrid.js");
+var _alfrid = require('./libs/alfrid.js');
 
 var _alfrid2 = _interopRequireDefault(_alfrid);
 
@@ -5258,16 +5302,19 @@ var ViewBall = function (_alfrid$View) {
 	function ViewBall() {
 		_classCallCheck(this, ViewBall);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBall).call(this, _alfrid2.default.ShaderLibs.generalVert, _alfrid2.default.ShaderLibs.simpleColorFrag));
+		// super(alfrid.ShaderLibs.generalVert, alfrid.ShaderLibs.simpleColorFrag);
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBall).call(this, _alfrid2.default.ShaderLibs.generalNormalVert, "#define GLSLIFY 1\n// sphere.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nuniform mat3 uNormalMatrix;\n\nfloat diffuse(vec3 N, vec3 L) {\n\treturn max(dot(N, normalize(L)), 0.0);\n}\n\nvec3 diffuse(vec3 N, vec3 L, vec3 C) {\n\treturn diffuse(N, L) * C;\n}\n\nconst float fade = 0.95;\nconst vec3 L0 = vec3(1.0, 1.0, 1.0);\nconst vec3 L1 = vec3(-1.0, -.5, 1.0);\nconst vec3 LC0 = vec3(1.0, 1.0, fade);\nconst vec3 LC1 = vec3(fade, fade, 1.0);\n\nvoid main(void) {\n    vec3 d0 = diffuse(vNormal, L0, LC0) * .5;\n    vec3 d1 = diffuse(vNormal, L1, LC1) * .5;\n\n    vec3 color = .3 + d0 + d1;\n    gl_FragColor = vec4(color * vec3(1.0, .95, .9), 1.0);\n\n}"));
 	}
 
 	_createClass(ViewBall, [{
-		key: "_init",
+		key: '_init',
 		value: function _init() {
-			this.mesh = _alfrid2.default.Geom.sphere(.24, 32);
+			this.mesh = _alfrid2.default.Geom.sphere(.24, 32, true);
+
+			console.log(_alfrid2.default.Geom.sphere);
 		}
 	}, {
-		key: "render",
+		key: 'render',
 		value: function render() {
 			var pos = arguments.length <= 0 || arguments[0] === undefined ? [0, 0, 0] : arguments[0];
 			var scale = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
@@ -5597,7 +5644,7 @@ function _init() {
 	//	INIT SCENE
 	var scene = new _SceneApp2.default();
 
-	var gui = new _datGui2.default.GUI({ width: 300 });
+	// let gui = new dat.GUI({width:300});
 }
 
 },{"./SceneApp":10,"./libs/alfrid.js":17,"dat-gui":5}],17:[function(require,module,exports){

@@ -2,6 +2,9 @@
 import Cluster from './Cluster';
 let clusterfck = require("clusterfck");
 
+const MAX_NUM = 600;
+const MAX_DISTANCE = 1.0;
+
 class ClusterChecker {
 	constructor() {
 		this._clusters = [];
@@ -46,20 +49,22 @@ class ClusterChecker {
 				position:center,
 				num:cluster.length,
 				distances:distances,
+				linkedIndex:-1,
 				picked:false
 			});
 
 			if(cluster.length > this._maxSize) {
 				this._maxSize = cluster.length;
-				console.debug('Max Size : ', this._maxSize, distances);
 			}
 		}
 
 
+		//	FIRST TIME CREATION
+
 		if(this._clusters.length === 0) {
 			for(let i=0; i<newClusters.length; i++) {
 				let cluster = newClusters[i];
-				let strength = cluster.num / 600;
+				let strength = cluster.num / MAX_NUM;
 				let c = new Cluster(cluster.position, strength);
 
 				this._clusters.push(c);
@@ -69,7 +74,9 @@ class ClusterChecker {
 		}
 
 
-		const threshold = 2.0;
+		//	CHECK DISTANCES
+
+		const threshold = MAX_DISTANCE;
 
 		let needToCheck = true;
 		let minDist = 0.0;
@@ -80,44 +87,85 @@ class ClusterChecker {
 			minDist = -1;
 			for(let j=0; j<newClusters.length; j++) {
 				let c = newClusters[j];
-				if(c.picked) continue;
-
-				let distances = c.distances;
-				for(let i=0; i<distances.length; i++) {
-					let d = distances[i];
-					if(minDist < 0) {
-						minDist = d;
-						ia = j;
-						ib = i;
-					} else {
-						if(d < minDist) {
+				if(!c.picked) {
+					let distances = c.distances;
+					for(let i=0; i<distances.length; i++) {
+						let d = distances[i];
+						if(minDist < 0 ) {
 							minDist = d;
-
 							ia = j;
 							ib = i;
-						}
-					}
+						} else {
+							if(d < minDist) {
+								minDist = d;
 
+								ia = j;
+								ib = i;
+							}
+						}
+
+					}	
 				}
 			}
 
 
+
 			//	removing
+			if(minDist < threshold) {
+				newClusters[ia].picked = true;
+				newClusters[ia].linkedIndex = ib;	
+			}
 
 
-
-			
-			if(minDist > threshold) {	needToCheck = false;	}
+			if(minDist > threshold) {	
+				// console.debug('all checked');
+				needToCheck = false;	
+			}
 			if(minDist < 0) {	
-				console.debug('no distance');
+				// console.debug('no distance');
 				needToCheck = false;	
 			}
 
 			if(cnt ++ > 100) {
+				console.debug('Overflow');
 				needToCheck = false;
 			}
 		}
-		
+
+
+
+		//	UPDATE CLUSTER / NEW CLUSTER
+		let pickedIndices = [];
+		let tmp = [];
+		for(let i=0; i<newClusters.length; i++) {
+			let cluster = newClusters[i];
+			if(cluster.linkedIndex >= 0) {
+				this._clusters[cluster.linkedIndex].update(cluster.position, cluster.num/MAX_NUM);
+				pickedIndices.push(i);
+			} else {
+				let c = new Cluster(cluster.position, cluster.num/MAX_NUM);
+				tmp.push(c);
+			}
+		}
+
+		//	FADE CLUSTERS THAT NOT EXIST ANYMORE
+		for(let i=0; i<this._clusters.length; i++) {
+			if(pickedIndices.indexOf(i) < 0) {
+				this._clusters[i].setStrength(0);
+			}
+		}
+
+
+		//	REMOVE CLUSTERS THAT DIED
+		let i = this._clusters.length;
+		while(i--) {
+			if(this._clusters[i].isDead){
+				this._clusters.splice(i, 1);
+			}
+		}
+
+
+		this._clusters = this._clusters.concat(tmp);
 
 	}
 

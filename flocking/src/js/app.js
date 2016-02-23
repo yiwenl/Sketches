@@ -32,6 +32,6 @@ function _init() {
 	let scene = new SceneApp();
 
 
-	let gui = new dat.GUI({width:300});
+	// let gui = new dat.GUI({width:300});
 
 }

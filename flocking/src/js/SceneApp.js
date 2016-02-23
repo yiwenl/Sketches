@@ -128,37 +128,13 @@ class SceneApp extends alfrid.Scene {
 
 
 	_clustering() {
-		// let particles = [];
-		// let num = params.numParticles * params.numParticles;
-		// for(let i=0; i<num; i+= 4) {
-		// 	particles.push([this.pixels[i], this.pixels[i+1], this.pixels[i+2]]);
-		// }
 
 		this._clusterChecker.check(this.pixels)
-
-/*
-		let clusters = clusterfck.kmeans(particles, 5);
-
-
-
-		for(let i=0; i<clusters.length ; i++ ) {
-			let cluster = clusters[i];
-			let center = [0, 0, 0];
-			for(let j=0; j<cluster.length; j++) {
-				let p = cluster[j];
-
-				center[0] += p[0];
-				center[1] += p[1];
-				center[2] += p[2];
-			}
-
-			center[0]/= cluster.length;
-			center[1]/= cluster.length;
-			center[2]/= cluster.length;
-			this._vBall.render(center, 1 + cluster.length/200, [1, 0, 0]);	
+		for(let i=0; i<this._clusterChecker.clusters.length ; i++ ) {
+			let cluster = this._clusterChecker.clusters[i];
+			this._vBall.render(cluster.position, .02 + cluster.strength * 2.0, [1, 0, 0]);	
 		}
-		*/
-		// this._vBall.render(particles[1], .2, [1, 0, 0], .5);
+
 	}
 
 

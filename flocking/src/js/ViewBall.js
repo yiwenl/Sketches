@@ -7,12 +7,15 @@ var glslify = require("glslify");
 class ViewBall extends alfrid.View {
 	
 	constructor() {
-		super(alfrid.ShaderLibs.generalVert, alfrid.ShaderLibs.simpleColorFrag);
+		// super(alfrid.ShaderLibs.generalVert, alfrid.ShaderLibs.simpleColorFrag);
+		super(alfrid.ShaderLibs.generalNormalVert, glslify('../shaders/sphere.frag'));
 	}
 
 
 	_init() {
-		this.mesh = alfrid.Geom.sphere(.24, 32);
+		this.mesh = alfrid.Geom.sphere(.24, 32, true);
+
+		console.log(alfrid.Geom.sphere);
 	}
 
 
