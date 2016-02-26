@@ -33,7 +33,7 @@ class ViewSave extends alfrid.View {
 		let totalParticles = numParticles * numParticles;
 		let ux, uy;
 		let range = 3.5;
-		let speedScale = .0015;
+		let speedScale = .0007;
 
 		for(let j=0; j<numParticles; j++) {
 			for(let i=0; i<numParticles; i++) {
@@ -43,7 +43,7 @@ class ViewSave extends alfrid.View {
 				uy = j/numParticles*2.0-1.0;
 
 				extras.push([Math.random(), Math.random(), Math.random()]);
-				speedLimit.push([random(1, 3)*speedScale, random(5, 15)*speedScale, 0.0]);
+				speedLimit.push([random(1, 3)*speedScale, random(5, 18)*speedScale, 0.0]);
 				coords.push([ux, uy]);
 				indices.push(count);
 				count ++;

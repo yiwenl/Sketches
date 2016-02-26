@@ -1,12 +1,12 @@
 import alfrid from './libs/alfrid.js';
 import SceneApp from './SceneApp';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 
 window.alfrid = alfrid;
 
 
 window.params = {
-	numParticles:512*2,
+	numParticles:512,
 	skipCount:5,
 	shadowStrength:.35,
 	shadowThreshold:.55

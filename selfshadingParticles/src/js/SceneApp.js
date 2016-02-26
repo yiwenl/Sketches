@@ -33,6 +33,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl._rx.value = .6;
 		this.orbitalControl._ry.value = -.8;
 		this.orbitalControl.radius.value = 15.3;
+		this.orbitalControl._rx.limit(-.2, .7);
 		this._count = 0;
 	}
 

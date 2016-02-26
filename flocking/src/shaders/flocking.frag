@@ -32,15 +32,15 @@ void main(void) {
 	vec3 dirToParticle;
 	float f, delta, forceApply;
 
-	float RANGE = .75 * mix(extra.x, 1.0, .5);
+	float RANGE = .65 * mix(extra.x, 1.0, .5);
 	float forceOffset = mix(extra.y, 1.0, .5);
-	const float minThreshold = 0.4;
-	const float maxThreshold = 0.7;
-	const float decrease = 0.9;
+	const float minThreshold    = 0.4;
+	const float maxThreshold    = 0.7;
 
-	const float repelStrength = 0.03;
-	const float attractStrength = 0.0002;
-	const float orientStrength = 0.01;
+	const float speedScale      = 0.15;
+	const float repelStrength   = 0.04 * speedScale;
+	const float attractStrength = 0.0002 * speedScale;
+	const float orientStrength  = 0.02 * speedScale;
 
 	for(float y=0.0; y<NUM; y++) {
 		for(float x=0.0; x<NUM; x++) {
@@ -75,7 +75,7 @@ void main(void) {
 
 	}
 
-	const float maxRadius = 2.0;
+	const float maxRadius = 3.0;
 	const float minRadius = 1.25;
 	float dist = length(pos);
 	if(dist > maxRadius) {
@@ -97,8 +97,6 @@ void main(void) {
 	if(speed > speeds.y) {		//	max speed;
 		vel = velDir * speeds.y;
 	}
-
-	// vel *= decrease;
 
 
 	gl_FragColor = vec4(vel, 1.0);

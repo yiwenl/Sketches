@@ -5,7 +5,9 @@ import ViewRender from './ViewRender';
 import ViewSimulation from './ViewSimulation';
 import ViewAddVel from './ViewAddVel';
 import ViewBall from './ViewBall';
+import ViewPlanes from './ViewPlanes';
 import ClusterChecker from './ClusterChecker';
+import AudioPlayer from './AudioPlayer';
 
 let clusterfck = require("clusterfck");
 
@@ -17,9 +19,11 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 		super();
 		this.orbitalControl._rx.value = 0.3;
+
 		let size             = params.numParticles;
 		this.pixels          = new Float32Array(4 * size * size);
-		this._clusterChecker = new ClusterChecker();
+		this._clusterChecker = new ClusterChecker( (num)=>this._onClusterCreated(num));
+		this._audioPlayer    = new AudioPlayer();
 	}
 
 
@@ -87,6 +91,12 @@ class SceneApp extends alfrid.Scene {
 	}
 
 
+	_onClusterCreated(num) {
+		for(let i=0; i<num; i++) {
+			// this._audioPlayer.playNextNote();
+		}
+	}
+
 	updateFbo() {
 		//	Update Velocity : bind target Velocity, render simulation with current velocity / current position
 		this._fboTargetVel.bind();
@@ -130,13 +140,16 @@ class SceneApp extends alfrid.Scene {
 	_clustering() {
 
 		this._clusterChecker.check(this.pixels)
-		for(let i=0; i<this._clusterChecker.clusters.length ; i++ ) {
-			let cluster = this._clusterChecker.clusters[i];
-			this._vBall.render(cluster.position, .02 + cluster.strength * 2.0, [1, 0, 0]);	
+
+		if(params.showCenteroid) {
+			for(let i=0; i<this._clusterChecker.clusters.length ; i++ ) {
+				let cluster = this._clusterChecker.clusters[i];
+				this._vBall.render(cluster.position, .0 + cluster.strength * 2.0, [1, 0, 0]);	
+			}	
 		}
+		
 
 	}
-
 
 
 	_readPositions() {
@@ -152,7 +165,7 @@ class SceneApp extends alfrid.Scene {
 	_doRender() {
 		this.updateFbo();
 
-		this.orbitalControl._ry.value += -.01;
+		this.orbitalControl._ry.value += -.003;
 
 
 		this._bAxis.draw();
