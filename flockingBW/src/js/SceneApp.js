@@ -8,8 +8,6 @@ import ViewBall from './ViewBall';
 import ViewPlanes from './ViewPlanes';
 import ViewFloor from './ViewFloor';
 import ViewDome from './ViewDome';
-import ViewBlur from './ViewBlur';
-import ViewDof from './ViewDof';
 
 let clusterfck = require("clusterfck");
 
@@ -82,8 +80,6 @@ class SceneApp extends alfrid.Scene {
 		this._vFloor  = new ViewFloor();
 		this._vDome   = new ViewDome();
 		this._vPlanes = new ViewPlanes();
-		this._vBlur   = new ViewBlur();
-		this._vDof 	  = new ViewDof();
 
 		//	SAVE INIT POSITIONS
 		this._vSave = new ViewSave();
@@ -154,27 +150,12 @@ class SceneApp extends alfrid.Scene {
 		this._fboRender.bind();
 		GL.clear(0, 0, 0, 0);
 		this._vPlanes.render(this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
-		// this._vRender.render(this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
 		this._vFloor.render();
 		this._vDome.render();
 		this._fboRender.unbind();
 
 
 		this._bCopy.draw(this._fboRender.getDepthTexture());
-/*
-		this._fboPost0.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vBlur.render(this._fboRender.getDepthTexture(), true);
-		this._fboPost0.unbind();
-
-		this._fboPost1.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vBlur.render(this._fboPost0.getTexture(), false);
-		this._fboPost1.unbind();
-
-		GL.clear(0, 0, 0, 0);
-		this._vDof.render(this._fboRender.getDepthTexture(), this._fboPost1.getTexture());
-*/
 	}
 
 }

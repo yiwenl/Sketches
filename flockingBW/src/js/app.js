@@ -8,7 +8,10 @@ window.params = {
 	skipCount:5,
 	range:1.00,
 	speed:.15,
-	focus:.79
+	focus:.79,
+	focusDepth:0.5,
+	focalLength:0.5,
+	fstop:0.5
 };
 
 if(document.body) {
@@ -36,5 +39,8 @@ function _init() {
 	gui.add(params, 'focus', 0, 1);
 	gui.add(params, 'range', 0, 2);
 	gui.add(params, 'speed', 0, .5);
+	gui.add(params, 'focusDepth', 0, 10);
+	gui.add(params, 'focalLength', 0, 10);
+	gui.add(params, 'fstop', 0, 10);
 	// gui.add(params, 'showCenteroid');
 }

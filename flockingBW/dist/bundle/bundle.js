@@ -4767,14 +4767,6 @@ var _ViewDome = require('./ViewDome');
 
 var _ViewDome2 = _interopRequireDefault(_ViewDome);
 
-var _ViewBlur = require('./ViewBlur');
-
-var _ViewBlur2 = _interopRequireDefault(_ViewBlur);
-
-var _ViewDof = require('./ViewDof');
-
-var _ViewDof2 = _interopRequireDefault(_ViewDof);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4862,8 +4854,6 @@ var SceneApp = function (_alfrid$Scene) {
 			this._vFloor = new _ViewFloor2.default();
 			this._vDome = new _ViewDome2.default();
 			this._vPlanes = new _ViewPlanes2.default();
-			this._vBlur = new _ViewBlur2.default();
-			this._vDof = new _ViewDof2.default();
 
 			//	SAVE INIT POSITIONS
 			this._vSave = new _ViewSave2.default();
@@ -4932,26 +4922,11 @@ var SceneApp = function (_alfrid$Scene) {
 			this._fboRender.bind();
 			GL.clear(0, 0, 0, 0);
 			this._vPlanes.render(this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
-			// this._vRender.render(this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
 			this._vFloor.render();
 			this._vDome.render();
 			this._fboRender.unbind();
 
 			this._bCopy.draw(this._fboRender.getDepthTexture());
-			/*
-   		this._fboPost0.bind();
-   		GL.clear(0, 0, 0, 0);
-   		this._vBlur.render(this._fboRender.getDepthTexture(), true);
-   		this._fboPost0.unbind();
-   
-   		this._fboPost1.bind();
-   		GL.clear(0, 0, 0, 0);
-   		this._vBlur.render(this._fboPost0.getTexture(), false);
-   		this._fboPost1.unbind();
-   
-   		GL.clear(0, 0, 0, 0);
-   		this._vDof.render(this._fboRender.getDepthTexture(), this._fboPost1.getTexture());
-   */
 		}
 	}]);
 
@@ -4960,7 +4935,7 @@ var SceneApp = function (_alfrid$Scene) {
 
 exports.default = SceneApp;
 
-},{"./ViewAddVel":9,"./ViewBall":10,"./ViewBlur":11,"./ViewDof":12,"./ViewDome":13,"./ViewFloor":14,"./ViewPlanes":15,"./ViewRender":16,"./ViewSave":17,"./ViewSimulation":18,"./libs/alfrid.js":20,"clusterfck":1}],9:[function(require,module,exports){
+},{"./ViewAddVel":9,"./ViewBall":10,"./ViewDome":11,"./ViewFloor":12,"./ViewPlanes":13,"./ViewRender":14,"./ViewSave":15,"./ViewSimulation":16,"./libs/alfrid.js":18,"clusterfck":1}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5018,7 +4993,7 @@ var ViewAddVel = function (_alfrid$View) {
 
 exports.default = ViewAddVel;
 
-},{"./libs/alfrid.js":20}],10:[function(require,module,exports){
+},{"./libs/alfrid.js":18}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5078,118 +5053,7 @@ var ViewBall = function (_alfrid$View) {
 
 exports.default = ViewBall;
 
-},{"./libs/alfrid.js":20}],11:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _alfrid = require('./libs/alfrid.js');
-
-var _alfrid2 = _interopRequireDefault(_alfrid);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // ViewBlur.js
-
-var GL = _alfrid2.default.GL;
-
-
-var ViewBlur = function (_alfrid$View) {
-	_inherits(ViewBlur, _alfrid$View);
-
-	function ViewBlur() {
-		_classCallCheck(this, ViewBlur);
-
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBlur).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// blur.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform vec2 resolution;\nuniform vec2 direction;\n\nvec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) {\n\tvec4 color = vec4(0.0);\n\tvec2 off1 = vec2(1.411764705882353) * direction;\n\tvec2 off2 = vec2(3.2941176470588234) * direction;\n\tvec2 off3 = vec2(5.176470588235294) * direction;\n\tcolor += texture2D(image, uv) * 0.1964825501511404;\n\tcolor += texture2D(image, uv + (off1 / resolution)) * 0.2969069646728344;\n\tcolor += texture2D(image, uv - (off1 / resolution)) * 0.2969069646728344;\n\tcolor += texture2D(image, uv + (off2 / resolution)) * 0.09447039785044732;\n\tcolor += texture2D(image, uv - (off2 / resolution)) * 0.09447039785044732;\n\tcolor += texture2D(image, uv + (off3 / resolution)) * 0.010381362401148057;\n\tcolor += texture2D(image, uv - (off3 / resolution)) * 0.010381362401148057;\n\treturn color;\n}\n\nvoid main(void) {\n    gl_FragColor = blur13(texture, vTextureCoord, resolution, direction);\n}"));
-	}
-
-	_createClass(ViewBlur, [{
-		key: '_init',
-		value: function _init() {
-			this.mesh = _alfrid2.default.Geom.bigTriangle();
-		}
-	}, {
-		key: 'render',
-		value: function render(texture, isVertical) {
-			this.shader.bind();
-			this.shader.uniform("texture", "uniform1i", 0);
-			texture.bind(0);
-			this.shader.uniform("direction", "uniform2fv", isVertical ? [0, 1] : [1, 0]);
-			this.shader.uniform("resolution", "uniform2fv", [GL.width, GL.height]);
-			GL.draw(this.mesh);
-		}
-	}]);
-
-	return ViewBlur;
-}(_alfrid2.default.View);
-
-exports.default = ViewBlur;
-
-},{"./libs/alfrid.js":20}],12:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _alfrid = require('./libs/alfrid.js');
-
-var _alfrid2 = _interopRequireDefault(_alfrid);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // ViewDof.js
-
-var GL = _alfrid2.default.GL;
-
-
-var ViewDof = function (_alfrid$View) {
-	_inherits(ViewDof, _alfrid$View);
-
-	function ViewDof() {
-		_classCallCheck(this, ViewDof);
-
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewDof).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// post.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureBlur;\nuniform float focus;\n\nfloat map(float value, float tx, float ty, float sx, float sy) {\n\tfloat p = (value - tx) / (ty - tx);\n\treturn sx + (sy - sx) * p;\n}\n\nvoid main(void) {\n    // gl_FragColor = texture2D(texture, vTextureCoord);\n    vec3 colorDepth = texture2D(texture, vTextureCoord).rgb;\n    vec3 colorBlur = texture2D(textureBlur, vTextureCoord).rgb;\n\n    float offset;\n    if(colorDepth.r < focus) {\n    \toffset = map(colorDepth.r, 0.0, focus, 0.0, 1.0);\n    } else {\n    \toffset = map(colorDepth.r, focus, 1.0, 1.0, 0.0);\n    }\n\n    offset = pow(offset, 2.0);\n    offset = smoothstep(0.0, 1.0, offset);\n\n    gl_FragColor = vec4(mix(colorBlur, colorDepth, offset), 1.0);\n    // gl_FragColor = vec4(vec3(offset), 1.0);\n\n    // gl_FragColor = texture2D(texture, vTextureCoord);\n}"));
-	}
-
-	_createClass(ViewDof, [{
-		key: '_init',
-		value: function _init() {
-			this.mesh = _alfrid2.default.Geom.bigTriangle();
-		}
-	}, {
-		key: 'render',
-		value: function render(texture, textureBlur) {
-			this.shader.bind();
-			this.shader.uniform("texture", "uniform1i", 0);
-			texture.bind(0);
-			this.shader.uniform("textureBlur", "uniform1i", 1);
-			textureBlur.bind(1);
-			this.shader.uniform("focus", "uniform1f", params.focus);
-			GL.draw(this.mesh);
-		}
-	}]);
-
-	return ViewDof;
-}(_alfrid2.default.View);
-
-exports.default = ViewDof;
-
-},{"./libs/alfrid.js":20}],13:[function(require,module,exports){
+},{"./libs/alfrid.js":18}],11:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5242,7 +5106,7 @@ var ViewDome = function (_alfrid$View) {
 
 exports.default = ViewDome;
 
-},{"./libs/alfrid.js":20}],14:[function(require,module,exports){
+},{"./libs/alfrid.js":18}],12:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5344,7 +5208,7 @@ var ViewFloor = function (_alfrid$View) {
 
 exports.default = ViewFloor;
 
-},{"./libs/alfrid.js":20}],15:[function(require,module,exports){
+},{"./libs/alfrid.js":18}],13:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5441,7 +5305,7 @@ var ViewPlanes = function (_alfrid$View) {
 
 exports.default = ViewPlanes;
 
-},{"./libs/alfrid.js":20}],16:[function(require,module,exports){
+},{"./libs/alfrid.js":18}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5519,7 +5383,7 @@ var ViewRender = function (_alfrid$View) {
 
 exports.default = ViewRender;
 
-},{"./libs/alfrid.js":20}],17:[function(require,module,exports){
+},{"./libs/alfrid.js":18}],15:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5630,7 +5494,7 @@ var ViewSave = function (_alfrid$View) {
 
 exports.default = ViewSave;
 
-},{"./libs/alfrid.js":20}],18:[function(require,module,exports){
+},{"./libs/alfrid.js":18}],16:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5705,7 +5569,7 @@ var ViewSimulation = function (_alfrid$View) {
 
 exports.default = ViewSimulation;
 
-},{"./libs/alfrid.js":20}],19:[function(require,module,exports){
+},{"./libs/alfrid.js":18}],17:[function(require,module,exports){
 'use strict';
 
 var _alfrid = require('./libs/alfrid.js');
@@ -5727,7 +5591,10 @@ window.params = {
 	skipCount: 5,
 	range: 1.00,
 	speed: .15,
-	focus: .79
+	focus: .79,
+	focusDepth: 0.5,
+	focalLength: 0.5,
+	fstop: 0.5
 };
 
 if (document.body) {
@@ -5756,10 +5623,13 @@ function _init() {
 	gui.add(params, 'focus', 0, 1);
 	gui.add(params, 'range', 0, 2);
 	gui.add(params, 'speed', 0, .5);
+	gui.add(params, 'focusDepth', 0, 10);
+	gui.add(params, 'focalLength', 0, 10);
+	gui.add(params, 'fstop', 0, 10);
 	// gui.add(params, 'showCenteroid');
 }
 
-},{"./SceneApp":8,"./libs/alfrid.js":20,"dat-gui":5}],20:[function(require,module,exports){
+},{"./SceneApp":8,"./libs/alfrid.js":18,"dat-gui":5}],18:[function(require,module,exports){
 (function (global){
 "use strict";var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol?"symbol":typeof obj;};(function(f){if((typeof exports==="undefined"?"undefined":_typeof(exports))==="object"&&typeof module!=="undefined"){module.exports=f();}else if(typeof define==="function"&&define.amd){define([],f);}else {var g;if(typeof window!=="undefined"){g=window;}else if(typeof global!=="undefined"){g=global;}else if(typeof self!=="undefined"){g=self;}else {g=this;}g.alfrid=f();}})(function(){var define,module,exports;return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f;}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e);},l,l.exports,e,t,n,r);}return n[o].exports;}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++){s(r[o]);}return s;}({1:[function(_dereq_,module,exports){ /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
@@ -7697,6 +7567,6 @@ break;}}this._highTasks=this._highTasks.concat(this._nextTasks);this._nextTasks=
 'use strict';Object.defineProperty(exports,"__esModule",{value:true});var ShaderLibs={simpleColorFrag:"#define GLSLIFY 1\n// simpleColor.frag\n\n#define SHADER_NAME SIMPLE_COLOR\n\nprecision highp float;\n\nuniform vec3 color;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = vec4(color, opacity);\n}",bigTriangleVert:"#define GLSLIFY 1\n// bigTriangle.vert\n\n#define SHADER_NAME BIG_TRIANGLE_VERTEX\n\nprecision highp float;\nattribute vec2 aPosition;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = vec4(aPosition, 0.0, 1.0);\n    vTextureCoord = aPosition * .5 + .5;\n}",generalVert:"#define GLSLIFY 1\n// general.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n}",generalNormalVert:"#define GLSLIFY 1\n// generalWithNormal.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat3 uNormalMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tvTextureCoord = aTextureCoord;\n\tvNormal       = normalize(uNormalMatrix * aNormal);\n}"};exports.default=ShaderLibs;},{}]},{},[11])(11);}); 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[19]);
+},{}]},{},[17]);
 
 //# sourceMappingURL=bundle.js.map
