@@ -9,6 +9,8 @@ uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
 uniform sampler2D textureSpeed;
 uniform float time;
+uniform float range;
+uniform float speedScale;
 
 const float NUM = {{NUM_PARTICLES}};
 const float PI = 3.1415926;
@@ -21,10 +23,10 @@ float map(float value, float sx, float sy, float tx, float ty) {
 }
 
 void main(void) {
-	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
-	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
-	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
-	vec3 speeds      = texture2D(textureSpeed, vTextureCoord).rgb;
+	vec3 pos    = texture2D(texturePos, vTextureCoord).rgb;
+	vec3 vel    = texture2D(textureVel, vTextureCoord).rgb;
+	vec3 extra  = texture2D(textureExtra, vTextureCoord).rgb;
+	vec3 speeds = texture2D(textureSpeed, vTextureCoord).rgb;
 
 	vec2 uvParticles;
 	vec3 posParticle, velParticle;
@@ -32,15 +34,14 @@ void main(void) {
 	vec3 dirToParticle;
 	float f, delta, forceApply;
 
-	float RANGE = .75 * mix(extra.x, 1.0, .5);
+	float _range = range * mix(extra.x, 1.0, .5);
 	float forceOffset = mix(extra.y, 1.0, .5);
 	const float minThreshold    = 0.4;
 	const float maxThreshold    = 0.7;
 
-	const float speedScale      = 0.15;
-	const float repelStrength   = 0.04 * speedScale;
-	const float attractStrength = 0.0002 * speedScale;
-	const float orientStrength  = 0.02 * speedScale;
+	float repelStrength   = 0.04 * speedScale;
+	float attractStrength = 0.0002 * speedScale;
+	float orientStrength  = 0.02 * speedScale;
 
 	for(float y=0.0; y<NUM; y++) {
 		for(float x=0.0; x<NUM; x++) {
@@ -48,7 +49,7 @@ void main(void) {
 
 			uvParticles = vec2(x, y)/NUM;
 			posParticle = texture2D(texturePos, uvParticles).rgb;
-			percent = distance(pos, posParticle) / RANGE;
+			percent = distance(pos, posParticle) / _range;
 			forceApply = 1.0 - step(1.0, percent);
 			forceApply *= forceOffset;
 			dirToParticle = normalize(posParticle - pos);

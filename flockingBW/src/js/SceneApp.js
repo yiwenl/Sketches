@@ -148,7 +148,7 @@ class SceneApp extends alfrid.Scene {
 	_doRender() {
 		this.updateFbo();
 
-		this.orbitalControl._ry.value += -.003;
+		this.orbitalControl._ry.value += -.02;
 
 
 		this._fboRender.bind();

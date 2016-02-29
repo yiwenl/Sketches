@@ -6,11 +6,8 @@ import dat from 'dat-gui';
 window.params = {
 	numParticles:64,
 	skipCount:5,
-	shadowStrength:.35,
-	shadowThreshold:.55,
-	numSlides:2*2,
-	numClusters:7,
-	showCenteroid:false,
+	range:1.00,
+	speed:.15,
 	focus:.79
 };
 
@@ -37,5 +34,7 @@ function _init() {
 
 	let gui = new dat.GUI({width:300});
 	gui.add(params, 'focus', 0, 1);
+	gui.add(params, 'range', 0, 2);
+	gui.add(params, 'speed', 0, .5);
 	// gui.add(params, 'showCenteroid');
 }
