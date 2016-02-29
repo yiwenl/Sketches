@@ -6,6 +6,7 @@ import ViewAddVel from './ViewAddVel';
 import ViewPlanes from './ViewPlanes';
 import ViewFloor from './ViewFloor';
 import ViewDome from './ViewDome';
+import ViewPost from './ViewPost';
 
 let clusterfck = require("clusterfck");
 
@@ -18,7 +19,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl._rx.value = 0.0;
 		this.orbitalControl._rx.limit(0, .36);
 		this.orbitalControl.radius.setTo(10);
-		this.orbitalControl.radius.value = 8;
+		this.orbitalControl.radius.value = 10;
 		this.orbitalControl.radius.limit(1, 15);
 		this.orbitalControl.center[1] = 3;
 
@@ -71,6 +72,7 @@ class SceneApp extends alfrid.Scene {
 		this._vFloor  = new ViewFloor();
 		this._vDome   = new ViewDome();
 		this._vPlanes = new ViewPlanes();
+		this._vPost   = new ViewPost();
 
 		//	SAVE INIT POSITIONS
 		this._vSave = new ViewSave();
@@ -87,6 +89,10 @@ class SceneApp extends alfrid.Scene {
 		this._fboSpeed.bind();
 		this._vSave.render(2);
 		this._fboSpeed.unbind();
+
+		this._fboTargetPos.bind();
+		this._bCopy.draw(this._fboCurrentPos.getTexture());
+		this._fboTargetPos.unbind();
 
 		GL.setMatrices(this.camera);
 	}
@@ -119,14 +125,6 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
-		let traceTime = false;
-		if(traceTime) console.time('rendering');
-		this._doRender();
-		if(traceTime) console.timeEnd('rendering');
-	}
-
-
-	_doRender() {
 		this._count ++;
 		if(this._count % params.skipCount == 0) {
 			this._count = 0;
@@ -135,7 +133,7 @@ class SceneApp extends alfrid.Scene {
 
 		let p = this._count/params.skipCount;
 
-		this.orbitalControl._ry.value += -.02;
+		this.orbitalControl._ry.value += -.01;
 
 
 		this._fboRender.bind();
@@ -146,7 +144,8 @@ class SceneApp extends alfrid.Scene {
 		this._fboRender.unbind();
 
 
-		this._bCopy.draw(this._fboRender.getDepthTexture());
+		// this._bCopy.draw(this._fboRender.getDepthTexture());
+		this._vPost.render(this._fboRender.getDepthTexture());
 	}
 
 }

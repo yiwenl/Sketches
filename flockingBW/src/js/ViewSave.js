@@ -32,12 +32,12 @@ class ViewSave extends alfrid.View {
 		let numParticles = params.numParticles;
 		let totalParticles = numParticles * numParticles;
 		let ux, uy;
-		let range = 4;
+		let range = 5;
 		let speedScale = .0005 * params.skipCount;
 
 		for(let j=0; j<numParticles; j++) {
 			for(let i=0; i<numParticles; i++) {
-				positions.push([random(-range, range), random(1, range), random(-range, range)]);
+				positions.push([random(-range, range), random(1.5, range), random(-range, range)]);
 
 				ux = i/numParticles*2.0-1.0;
 				uy = j/numParticles*2.0-1.0;

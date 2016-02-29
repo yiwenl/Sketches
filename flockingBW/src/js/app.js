@@ -1,14 +1,17 @@
 import alfrid from './libs/alfrid.js';
 import SceneApp from './SceneApp';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 
 
 window.params = {
 	numParticles:100,
 	skipCount:10,
-	range:1.70,
+	range:1.2,
 	speed:10.5,
-	focus:.79
+	focus:.79,
+	minThreshold:.55,
+	maxThreshold:.85,
+	isInvert:false
 };
 
 if(document.body) {
@@ -31,10 +34,24 @@ function _init() {
 	//	INIT SCENE
 	let scene = new SceneApp();
 
-
+	/*/
 	let gui = new dat.GUI({width:300});
 	gui.add(params, 'focus', 0, 1);
 	gui.add(params, 'range', 0, 2);
 	gui.add(params, 'speed', 0, 100.5);
-	// gui.add(params, 'showCenteroid');
+	gui.add(params, 'minThreshold', 0, 1);
+	gui.add(params, 'maxThreshold', 0, 1);	
+	//*/
+	
+
+	window.addEventListener('keydown', (e)=>_onKey(e));		
+
+}
+
+
+function _onKey(e) {
+	if(e.keyCode == 32) {
+		//	SPACE KEY TO TOGGLE COLOUR THEME
+		params.isInvert = !params.isInvert;
+	}
 }

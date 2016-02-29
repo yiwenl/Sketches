@@ -12,6 +12,8 @@ uniform float time;
 uniform float range;
 uniform float speedScale;
 uniform float skipCount;
+uniform float minThreshold;
+uniform float maxThreshold;
 
 const float NUM = {{NUM_PARTICLES}};
 const float PI = 3.1415926;
@@ -30,15 +32,10 @@ void main(void) {
 	vec3 speeds = texture2D(textureSpeed, vTextureCoord).rgb;
 
 	vec2 uvParticles;
-	vec3 posParticle, velParticle;
-	float percent;
-	vec3 dirToParticle;
-	float f, delta, forceApply;
-
+	vec3 posParticle, velParticle, dirToParticle, avgDir;
+	float percent, f, delta, forceApply;
 	float _range = range * mix(extra.x, 1.0, .5);
 	float forceOffset = mix(extra.y, 1.0, .5);
-	const float minThreshold    = 0.4;
-	const float maxThreshold    = 0.7;
 
 	float repelStrength   = 0.04 * speedScale;
 	float attractStrength = 0.0002 * speedScale;
@@ -61,7 +58,7 @@ void main(void) {
 			} else if(percent < maxThreshold) {
 				velParticle = texture2D(textureVel, uvParticles).rgb;
 				delta = map(percent, minThreshold, maxThreshold, 0.0, 1.0);
-				vec3 avgDir = (vel + velParticle) * .5;
+				avgDir = (vel + velParticle) * .5;
 				if(length(avgDir) > 0.0) {
 					avgDir = normalize(avgDir);
 					f = ( 1.0 - cos( delta * PI_2 ) * 0.5 + 0.5 );
@@ -77,24 +74,6 @@ void main(void) {
 
 	}
 
-	const float maxRadius = 6.0;
-	const float minRadius = 1.25;
-	float dist = length(pos);
-	if(dist > maxRadius) {
-		float f = (dist - maxRadius) * .05;
-		vel -= normalize(pos) * f * forceOffset;
-	}
-
-	if(dist < minRadius) {
-		float f = (1.0-dist/minRadius) * 1.0;
-		vel += normalize(pos) * f * forceOffset;
-	}
-
-	const float minY = 1.5;
-	if(pos.y < minY) {
-		float f = (minY - pos.y) * .03;
-		vel.y += f;
-	}
 
 	vec3 velDir = normalize(vel);
 	float speed = length(vel);
@@ -104,6 +83,27 @@ void main(void) {
 
 	if(speed > speeds.y) {		//	max speed;
 		vel = velDir * speeds.y;
+	}
+
+
+	const float maxRadius = 7.0;
+	const float minRadius = 1.25;
+	float dist = length(pos);
+	if(dist > maxRadius) {
+		float f = (dist - maxRadius) * .02;
+		vel -= normalize(pos) * f * forceOffset;
+	}
+
+	if(dist < minRadius) {
+		float f = (1.0-dist/minRadius) * .015;
+		vel += normalize(pos) * f * forceOffset;
+	}
+
+
+	const float minY = .75;
+	if(pos.y < minY) {
+		float f = (minY - pos.y) * .02;
+		vel.y += f;
 	}
 
 

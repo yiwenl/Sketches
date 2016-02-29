@@ -12,7 +12,7 @@ class ViewFloor extends alfrid.View {
 
 
 	_init() {
-		const offset = .125;
+		const offset = .16;
 
 		let positions = [];
 		let coords = [];
@@ -21,13 +21,22 @@ class ViewFloor extends alfrid.View {
 		let numSeg = 50;
 		let size = 40;
 
+
+		function leng(x, y) {
+			return Math.sqrt(x*x + y*y);
+		}
+
 		function getPos(i, j, y = 0) {
 			let x = (i/numSeg-.5) * size;
 			let z = (j/numSeg-.5) * size;
+			let p = leng(x, z) / size;
+			if(p > 1) p = 1;
+			p = 1.0 - p;
+			// p = Math.cos(p * Math.PI * 2.0);
 
-			let n = Perlin.noise(x*offset, 0, z*offset);
+			let n = Perlin.noise(x*offset, 0, z*offset) * p;
 
-			return [x, y+n*2.0, z];
+			return [x, y+n*2.20, z];
 		}
 
 		let y = -3;
@@ -59,14 +68,15 @@ class ViewFloor extends alfrid.View {
 		this.mesh.bufferVertex(positions);
 		this.mesh.bufferTexCoords(coords);
 		this.mesh.bufferIndices(indices);
+
+		this.shader.bind();
+		this.shader.uniform("color", "uniform3fv", [1, 1, 1]);
+		this.shader.uniform("opacity", "uniform1f", 1);
 	}
 
 
 	render() {
 		this.shader.bind();
-
-		this.shader.uniform("color", "uniform3fv", [1, 1, 1]);
-		this.shader.uniform("opacity", "uniform1f", 1);
 		GL.draw(this.mesh);
 	}
 
