@@ -368,8 +368,9 @@ var SceneApp = function (_alfrid$Scene) {
 		_this.orbitalControl._rx.limit(0, .36);
 		_this.orbitalControl.radius.setTo(10);
 		_this.orbitalControl.radius.value = 10;
-		_this.orbitalControl.radius.limit(1, 15);
+		_this.orbitalControl.radius.limit(1, 11);
 		_this.orbitalControl.center[1] = 3;
+		_this.orbitalControl.positionOffset[1] = -.5;
 
 		_this._count = 0;
 		return _this;
@@ -481,7 +482,7 @@ var SceneApp = function (_alfrid$Scene) {
 
 			var p = this._count / params.skipCount;
 
-			this.orbitalControl._ry.value += -.01;
+			// this.orbitalControl._ry.value += -.01;
 
 			this._fboRender.bind();
 			GL.clear(0, 0, 0, 0);
@@ -594,7 +595,7 @@ var ViewDome = function (_alfrid$View) {
 	_createClass(ViewDome, [{
 		key: "_init",
 		value: function _init() {
-			this.mesh = _alfrid2.default.Geom.sphere(15, 30, false, true);
+			this.mesh = _alfrid2.default.Geom.sphere(11, 30, false, true);
 
 			this.shader.bind();
 			this.shader.uniform("color", "uniform3fv", [1, 1, 1]);
@@ -855,7 +856,7 @@ var ViewPost = function (_alfrid$View) {
 	function ViewPost() {
 		_classCallCheck(this, ViewPost);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPost).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// post.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float invert;\n\nconst vec3 COLOR0 = vec3(5.0, 5.0, 15.0)/ 255.0;\nconst vec3 COLOR1 = vec3(251.0, 248.0, 242.0)/ 255.0;\n#define LENG length(vec3(1.0))\n\nvec3 gradientMap(vec3 color) {\n\tfloat l = length(color) / LENG;\n\n\treturn mix(COLOR0, COLOR1, l);\n}\n\nfloat contrast(float mValue, float mScale, float mMidPoint) {\n\treturn clamp( (mValue - mMidPoint) * mScale + mMidPoint, 0.0, 1.0);\n}\n\nfloat contrast(float mValue, float mScale) {\n\treturn contrast(mValue,  mScale, .5);\n}\n\nvec3 contrast(vec3 mValue, float mScale, float mMidPoint) {\n\treturn vec3( contrast(mValue.r, mScale, mMidPoint), contrast(mValue.g, mScale, mMidPoint), contrast(mValue.b, mScale, mMidPoint) );\n}\n\nvec3 contrast(vec3 mValue, float mScale) {\n\treturn contrast(mValue, mScale, .5);\n}\n\nvoid main(void) {\n\tvec3 color = texture2D(texture, vTextureCoord).rgb;\n\n\tif(invert > .5) {\n\t\tcolor = 1.0 - color;\n\t}\n\n\tcolor = gradientMap(color);\n\tgl_FragColor = vec4(color, 1.0);\n}\n"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPost).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// post.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float invert;\n\nconst vec3 COLOR0 = vec3(5.0, 5.0, 15.0)/ 255.0;\nconst vec3 COLOR1 = vec3(255.0, 252.0, 248.0)/ 255.0;\n#define LENG length(vec3(1.0))\n\nvec3 gradientMap(vec3 color) {\n\tfloat l = length(color) / LENG;\n\n\treturn mix(COLOR0, COLOR1, l);\n}\n\nfloat contrast(float mValue, float mScale, float mMidPoint) {\n\treturn clamp( (mValue - mMidPoint) * mScale + mMidPoint, 0.0, 1.0);\n}\n\nfloat contrast(float mValue, float mScale) {\n\treturn contrast(mValue,  mScale, .5);\n}\n\nvec3 contrast(vec3 mValue, float mScale, float mMidPoint) {\n\treturn vec3( contrast(mValue.r, mScale, mMidPoint), contrast(mValue.g, mScale, mMidPoint), contrast(mValue.b, mScale, mMidPoint) );\n}\n\nvec3 contrast(vec3 mValue, float mScale) {\n\treturn contrast(mValue, mScale, .5);\n}\n\nvoid main(void) {\n\tvec3 color = texture2D(texture, vTextureCoord).rgb;\n\n\tif(invert > .5) {\n\t\tcolor = 1.0 - color;\n\t}\n\n\tcolor = gradientMap(color);\n\tgl_FragColor = vec4(color, 1.0);\n}\n"));
 	}
 
 	_createClass(ViewPost, [{
@@ -1093,8 +1094,8 @@ window.params = {
 	range: 1.2,
 	speed: 10.5,
 	focus: .79,
-	minThreshold: .55,
-	maxThreshold: .85,
+	minThreshold: .50,
+	maxThreshold: .80,
 	isInvert: false
 };
 

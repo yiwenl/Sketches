@@ -9,8 +9,8 @@ window.params = {
 	range:1.2,
 	speed:10.5,
 	focus:.79,
-	minThreshold:.55,
-	maxThreshold:.85,
+	minThreshold:.50,
+	maxThreshold:.80,
 	isInvert:false
 };
 

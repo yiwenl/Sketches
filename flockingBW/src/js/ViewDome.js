@@ -12,7 +12,7 @@ class ViewDome extends alfrid.View {
 
 
 	_init() {
-		this.mesh = alfrid.Geom.sphere(15, 30, false, true);
+		this.mesh = alfrid.Geom.sphere(11, 30, false, true);
 
 		this.shader.bind();
 		this.shader.uniform("color", "uniform3fv", [1, 1, 1]);

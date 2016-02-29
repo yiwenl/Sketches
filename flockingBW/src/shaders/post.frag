@@ -10,7 +10,7 @@ uniform float invert;
 
 
 const vec3 COLOR0 = vec3(5.0, 5.0, 15.0)/ 255.0;
-const vec3 COLOR1 = vec3(251.0, 248.0, 242.0)/ 255.0;
+const vec3 COLOR1 = vec3(255.0, 252.0, 248.0)/ 255.0;
 #define LENG length(vec3(1.0))
 
 
