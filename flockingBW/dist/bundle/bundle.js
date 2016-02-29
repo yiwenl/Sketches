@@ -401,8 +401,6 @@ var SceneApp = function (_alfrid$Scene) {
 			this._fboExtra = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
 			this._fboSpeed = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
 			this._fboRender = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
-			this._fboPost0 = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
-			this._fboPost1 = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
 
 			clearFbo(this._fboCurrentPos);
 			clearFbo(this._fboTargetPos);
@@ -492,6 +490,15 @@ var SceneApp = function (_alfrid$Scene) {
 			this._fboRender.unbind();
 
 			this._vPost.render(this._fboRender.getDepthTexture());
+		}
+	}, {
+		key: 'resize',
+		value: function resize() {
+			console.log('Resizing');
+			GL.setSize(window.innerWidth, window.innerHeight);
+			this.camera.setAspectRatio(GL.aspectRatio);
+
+			this._fboRender = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
 		}
 	}]);
 
