@@ -11,6 +11,7 @@ uniform sampler2D textureSpeed;
 uniform float time;
 uniform float range;
 uniform float speedScale;
+uniform float skipCount;
 
 const float NUM = {{NUM_PARTICLES}};
 const float PI = 3.1415926;
@@ -76,11 +77,11 @@ void main(void) {
 
 	}
 
-	const float maxRadius = 7.0;
+	const float maxRadius = 6.0;
 	const float minRadius = 1.25;
 	float dist = length(pos);
 	if(dist > maxRadius) {
-		float f = (dist - maxRadius) * .005;
+		float f = (dist - maxRadius) * .05;
 		vel -= normalize(pos) * f * forceOffset;
 	}
 
@@ -89,9 +90,9 @@ void main(void) {
 		vel += normalize(pos) * f * forceOffset;
 	}
 
-	const float minY = 1.0;
+	const float minY = 1.5;
 	if(pos.y < minY) {
-		float f = (minY - pos.y) * .01;
+		float f = (minY - pos.y) * .03;
 		vel.y += f;
 	}
 

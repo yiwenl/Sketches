@@ -1,23 +1,18 @@
 // SceneApp.js
 import alfrid from './libs/alfrid.js';
 import ViewSave from './ViewSave';
-import ViewRender from './ViewRender';
 import ViewSimulation from './ViewSimulation';
 import ViewAddVel from './ViewAddVel';
-import ViewBall from './ViewBall';
 import ViewPlanes from './ViewPlanes';
 import ViewFloor from './ViewFloor';
 import ViewDome from './ViewDome';
 
 let clusterfck = require("clusterfck");
 
-let GL;
+let GL = alfrid.GL;;
 
 class SceneApp extends alfrid.Scene {
 	constructor() {
-		GL = alfrid.GL;
-		GL.enableAlphaBlending();
-		GL.disable(GL.CULL_FACE);
 		super();
 		this.camera.setPerspective(Math.PI * .65, GL.aspectRatio, 1, 100);
 		this.orbitalControl._rx.value = 0.0;
@@ -26,10 +21,8 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.radius.value = 8;
 		this.orbitalControl.radius.limit(1, 15);
 		this.orbitalControl.center[1] = 3;
-		// this.orbitalControl.positionOffset[1] = -.5;
 
-		let size             = params.numParticles;
-		this.pixels          = new Float32Array(4 * size * size);
+		this._count = 0;
 	}
 
 
@@ -73,10 +66,8 @@ class SceneApp extends alfrid.Scene {
 		console.log('Init Views');
 		this._bCopy   = new alfrid.BatchCopy();
 		
-		this._vRender = new ViewRender();
 		this._vSim    = new ViewSimulation();
 		this._vAddVel = new ViewAddVel();
-		this._vBall   = new ViewBall();
 		this._vFloor  = new ViewFloor();
 		this._vDome   = new ViewDome();
 		this._vPlanes = new ViewPlanes();
@@ -100,12 +91,6 @@ class SceneApp extends alfrid.Scene {
 		GL.setMatrices(this.camera);
 	}
 
-
-	_onClusterCreated(num) {
-		for(let i=0; i<num; i++) {
-			// this._audioPlayer.playNextNote();
-		}
-	}
 
 	updateFbo() {
 		//	Update Velocity : bind target Velocity, render simulation with current velocity / current position
@@ -142,14 +127,20 @@ class SceneApp extends alfrid.Scene {
 
 
 	_doRender() {
-		this.updateFbo();
+		this._count ++;
+		if(this._count % params.skipCount == 0) {
+			this._count = 0;
+			this.updateFbo();
+		}
+
+		let p = this._count/params.skipCount;
 
 		this.orbitalControl._ry.value += -.02;
 
 
 		this._fboRender.bind();
 		GL.clear(0, 0, 0, 0);
-		this._vPlanes.render(this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
+		this._vPlanes.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), p);
 		this._vFloor.render();
 		this._vDome.render();
 		this._fboRender.unbind();

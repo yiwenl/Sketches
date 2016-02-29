@@ -4,14 +4,11 @@ import dat from 'dat-gui';
 
 
 window.params = {
-	numParticles:64,
-	skipCount:5,
-	range:1.00,
-	speed:.15,
-	focus:.79,
-	focusDepth:0.5,
-	focalLength:0.5,
-	fstop:0.5
+	numParticles:100,
+	skipCount:10,
+	range:1.70,
+	speed:10.5,
+	focus:.79
 };
 
 if(document.body) {
@@ -38,9 +35,6 @@ function _init() {
 	let gui = new dat.GUI({width:300});
 	gui.add(params, 'focus', 0, 1);
 	gui.add(params, 'range', 0, 2);
-	gui.add(params, 'speed', 0, .5);
-	gui.add(params, 'focusDepth', 0, 10);
-	gui.add(params, 'focalLength', 0, 10);
-	gui.add(params, 'fstop', 0, 10);
+	gui.add(params, 'speed', 0, 100.5);
 	// gui.add(params, 'showCenteroid');
 }

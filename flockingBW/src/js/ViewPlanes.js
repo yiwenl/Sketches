@@ -39,12 +39,12 @@ class ViewPlanes extends alfrid.View {
 				pointCoords.push([1, 1]);
 				pointCoords.push([0, 1]);
 
-				indices.push(count*4 + 0);
-				indices.push(count*4 + 1);
-				indices.push(count*4 + 2);
-				indices.push(count*4 + 0);
-				indices.push(count*4 + 2);
 				indices.push(count*4 + 3);
+				indices.push(count*4 + 2);
+				indices.push(count*4 + 0);
+				indices.push(count*4 + 2);
+				indices.push(count*4 + 1);
+				indices.push(count*4 + 0);
 
 				count ++;
 			}
@@ -59,13 +59,15 @@ class ViewPlanes extends alfrid.View {
 	}
 
 
-	render(texture, textureExtra) {
+	render(texture, textureNext, textureExtra, percent) {
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
-
-		this.shader.uniform("textureExtra", "uniform1i", 1);
-		textureExtra.bind(1);
+		this.shader.uniform("textureNext", "uniform1i", 1);
+		textureNext.bind(1);
+		this.shader.uniform("textureExtra", "uniform1i", 2);
+		textureExtra.bind(2);
+		this.shader.uniform("percent", "uniform1f", percent);
 		GL.draw(this.mesh);
 	}
 

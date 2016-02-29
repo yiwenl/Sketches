@@ -33,7 +33,7 @@ class ViewSave extends alfrid.View {
 		let totalParticles = numParticles * numParticles;
 		let ux, uy;
 		let range = 4;
-		let speedScale = .0007;
+		let speedScale = .0005 * params.skipCount;
 
 		for(let j=0; j<numParticles; j++) {
 			for(let i=0; i<numParticles; i++) {

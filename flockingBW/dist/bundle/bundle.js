@@ -4739,10 +4739,6 @@ var _ViewSave = require('./ViewSave');
 
 var _ViewSave2 = _interopRequireDefault(_ViewSave);
 
-var _ViewRender = require('./ViewRender');
-
-var _ViewRender2 = _interopRequireDefault(_ViewRender);
-
 var _ViewSimulation = require('./ViewSimulation');
 
 var _ViewSimulation2 = _interopRequireDefault(_ViewSimulation);
@@ -4750,10 +4746,6 @@ var _ViewSimulation2 = _interopRequireDefault(_ViewSimulation);
 var _ViewAddVel = require('./ViewAddVel');
 
 var _ViewAddVel2 = _interopRequireDefault(_ViewAddVel);
-
-var _ViewBall = require('./ViewBall');
-
-var _ViewBall2 = _interopRequireDefault(_ViewBall);
 
 var _ViewPlanes = require('./ViewPlanes');
 
@@ -4777,17 +4769,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var clusterfck = require("clusterfck");
 
-var GL = undefined;
+var GL = _alfrid2.default.GL;;
 
 var SceneApp = function (_alfrid$Scene) {
 	_inherits(SceneApp, _alfrid$Scene);
 
 	function SceneApp() {
 		_classCallCheck(this, SceneApp);
-
-		GL = _alfrid2.default.GL;
-		GL.enableAlphaBlending();
-		GL.disable(GL.CULL_FACE);
 
 		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SceneApp).call(this));
 
@@ -4798,10 +4786,8 @@ var SceneApp = function (_alfrid$Scene) {
 		_this.orbitalControl.radius.value = 8;
 		_this.orbitalControl.radius.limit(1, 15);
 		_this.orbitalControl.center[1] = 3;
-		// this.orbitalControl.positionOffset[1] = -.5;
 
-		var size = params.numParticles;
-		_this.pixels = new Float32Array(4 * size * size);
+		_this._count = 0;
 		return _this;
 	}
 
@@ -4847,10 +4833,8 @@ var SceneApp = function (_alfrid$Scene) {
 			console.log('Init Views');
 			this._bCopy = new _alfrid2.default.BatchCopy();
 
-			this._vRender = new _ViewRender2.default();
 			this._vSim = new _ViewSimulation2.default();
 			this._vAddVel = new _ViewAddVel2.default();
-			this._vBall = new _ViewBall2.default();
 			this._vFloor = new _ViewFloor2.default();
 			this._vDome = new _ViewDome2.default();
 			this._vPlanes = new _ViewPlanes2.default();
@@ -4872,13 +4856,6 @@ var SceneApp = function (_alfrid$Scene) {
 			this._fboSpeed.unbind();
 
 			GL.setMatrices(this.camera);
-		}
-	}, {
-		key: '_onClusterCreated',
-		value: function _onClusterCreated(num) {
-			for (var i = 0; i < num; i++) {
-				// this._audioPlayer.playNextNote();
-			}
 		}
 	}, {
 		key: 'updateFbo',
@@ -4915,13 +4892,19 @@ var SceneApp = function (_alfrid$Scene) {
 	}, {
 		key: '_doRender',
 		value: function _doRender() {
-			this.updateFbo();
+			this._count++;
+			if (this._count % params.skipCount == 0) {
+				this._count = 0;
+				this.updateFbo();
+			}
+
+			var p = this._count / params.skipCount;
 
 			this.orbitalControl._ry.value += -.02;
 
 			this._fboRender.bind();
 			GL.clear(0, 0, 0, 0);
-			this._vPlanes.render(this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
+			this._vPlanes.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), p);
 			this._vFloor.render();
 			this._vDome.render();
 			this._fboRender.unbind();
@@ -4935,7 +4918,7 @@ var SceneApp = function (_alfrid$Scene) {
 
 exports.default = SceneApp;
 
-},{"./ViewAddVel":9,"./ViewBall":10,"./ViewDome":11,"./ViewFloor":12,"./ViewPlanes":13,"./ViewRender":14,"./ViewSave":15,"./ViewSimulation":16,"./libs/alfrid.js":18,"clusterfck":1}],9:[function(require,module,exports){
+},{"./ViewAddVel":9,"./ViewDome":10,"./ViewFloor":11,"./ViewPlanes":12,"./ViewSave":13,"./ViewSimulation":14,"./libs/alfrid.js":16,"clusterfck":1}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4993,67 +4976,7 @@ var ViewAddVel = function (_alfrid$View) {
 
 exports.default = ViewAddVel;
 
-},{"./libs/alfrid.js":18}],10:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _alfrid = require('./libs/alfrid.js');
-
-var _alfrid2 = _interopRequireDefault(_alfrid);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // ViewBall.js
-
-var GL = _alfrid2.default.GL;
-
-
-var ViewBall = function (_alfrid$View) {
-	_inherits(ViewBall, _alfrid$View);
-
-	function ViewBall() {
-		_classCallCheck(this, ViewBall);
-
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBall).call(this, _alfrid2.default.ShaderLibs.generalNormalVert, "#define GLSLIFY 1\n// sphere.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nuniform mat3 uNormalMatrix;\n\nfloat diffuse(vec3 N, vec3 L) {\n\treturn max(dot(N, normalize(L)), 0.0);\n}\n\nvec3 diffuse(vec3 N, vec3 L, vec3 C) {\n\treturn diffuse(N, L) * C;\n}\n\nconst float fade = 0.95;\nconst vec3 L0 = vec3(1.0, 1.0, 1.0);\nconst vec3 L1 = vec3(-1.0, -.5, 1.0);\nconst vec3 LC0 = vec3(1.0, 1.0, fade);\nconst vec3 LC1 = vec3(fade, fade, 1.0);\n\nvoid main(void) {\n    vec3 d0 = diffuse(vNormal, L0, LC0) * .5;\n    vec3 d1 = diffuse(vNormal, L1, LC1) * .5;\n\n    vec3 color = .3 + d0 + d1;\n    gl_FragColor = vec4(color * vec3(1.0, .95, .9), 1.0);\n\n}"));
-	}
-
-	_createClass(ViewBall, [{
-		key: '_init',
-		value: function _init() {
-			this.mesh = _alfrid2.default.Geom.sphere(.24, 32, true);
-		}
-	}, {
-		key: 'render',
-		value: function render() {
-			var pos = arguments.length <= 0 || arguments[0] === undefined ? [0, 0, 0] : arguments[0];
-			var scale = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
-			var color = arguments.length <= 2 || arguments[2] === undefined ? [1, 0, 0] : arguments[2];
-			var opacity = arguments.length <= 3 || arguments[3] === undefined ? 1 : arguments[3];
-
-			this.shader.bind();
-			this.shader.uniform("position", "uniform3fv", pos);
-			this.shader.uniform("scale", "uniform3fv", [scale, scale, scale]);
-			this.shader.uniform("color", "uniform3fv", color);
-			this.shader.uniform("opacity", "uniform1f", opacity);
-			GL.draw(this.mesh);
-		}
-	}]);
-
-	return ViewBall;
-}(_alfrid2.default.View);
-
-exports.default = ViewBall;
-
-},{"./libs/alfrid.js":18}],11:[function(require,module,exports){
+},{"./libs/alfrid.js":16}],10:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5106,7 +5029,7 @@ var ViewDome = function (_alfrid$View) {
 
 exports.default = ViewDome;
 
-},{"./libs/alfrid.js":18}],12:[function(require,module,exports){
+},{"./libs/alfrid.js":16}],11:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5208,7 +5131,7 @@ var ViewFloor = function (_alfrid$View) {
 
 exports.default = ViewFloor;
 
-},{"./libs/alfrid.js":18}],13:[function(require,module,exports){
+},{"./libs/alfrid.js":16}],12:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5238,7 +5161,7 @@ var ViewPlanes = function (_alfrid$View) {
 	function ViewPlanes() {
 		_classCallCheck(this, ViewPlanes);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPlanes).call(this, "#define GLSLIFY 1\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec2 aPointCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureExtra;\n\nvarying vec4 vColor;\nvarying vec2 vPointCoord;\n\nvoid main(void) {\n\tvec3 pos        = texture2D(texture, aTextureCoord).rgb;\n\tvec3 extra      = texture2D(textureExtra, aTextureCoord).rgb;\n\t\n\tvec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tmvPosition.xyz  += aVertexPosition;\n\t\n\tgl_Position     = uProjectionMatrix * mvPosition;\n\t\n\tvColor          = vec4(1.0, 0.0, 0.0, 1.0);\n\tvPointCoord \t= aPointCoord;\n\t// vColor          = vec4(vec3(extra.b), 1.0);\n}", "#define GLSLIFY 1\n// render.frag\n\nprecision highp float;\n\nvarying vec4 vColor;\nvarying vec2 vPointCoord;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n\tif(distance(vPointCoord, vec2(.5)) > .5) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPlanes).call(this, "#define GLSLIFY 1\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec2 aPointCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform sampler2D textureExtra;\n\nuniform float percent;\n\nvarying vec4 vColor;\nvarying vec2 vPointCoord;\n\nvoid main(void) {\n\tvec3 posCurr    = texture2D(texture, aTextureCoord).rgb;\n\tvec3 posNext    = texture2D(textureNext, aTextureCoord).rgb;\n\tvec3 pos        = mix(posCurr, posNext, percent);\n\tvec3 extra      = texture2D(textureExtra, aTextureCoord).rgb;\n\t\n\tvec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tmvPosition.xyz  += aVertexPosition;\n\t\n\tgl_Position     = uProjectionMatrix * mvPosition;\n\t\n\tvColor          = vec4(1.0, 0.0, 0.0, 1.0);\n\tvPointCoord     = aPointCoord;\n\t// vColor          = vec4(vec3(extra.b), 1.0);\n}", "#define GLSLIFY 1\n// render.frag\n\nprecision highp float;\n\nvarying vec4 vColor;\nvarying vec2 vPointCoord;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n\tif(distance(vPointCoord, vec2(.5)) > .5) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
 	}
 
 	_createClass(ViewPlanes, [{
@@ -5270,12 +5193,12 @@ var ViewPlanes = function (_alfrid$View) {
 					pointCoords.push([1, 1]);
 					pointCoords.push([0, 1]);
 
-					indices.push(count * 4 + 0);
-					indices.push(count * 4 + 1);
-					indices.push(count * 4 + 2);
-					indices.push(count * 4 + 0);
-					indices.push(count * 4 + 2);
 					indices.push(count * 4 + 3);
+					indices.push(count * 4 + 2);
+					indices.push(count * 4 + 0);
+					indices.push(count * 4 + 2);
+					indices.push(count * 4 + 1);
+					indices.push(count * 4 + 0);
 
 					count++;
 				}
@@ -5289,13 +5212,15 @@ var ViewPlanes = function (_alfrid$View) {
 		}
 	}, {
 		key: 'render',
-		value: function render(texture, textureExtra) {
+		value: function render(texture, textureNext, textureExtra, percent) {
 			this.shader.bind();
 			this.shader.uniform("texture", "uniform1i", 0);
 			texture.bind(0);
-
-			this.shader.uniform("textureExtra", "uniform1i", 1);
-			textureExtra.bind(1);
+			this.shader.uniform("textureNext", "uniform1i", 1);
+			textureNext.bind(1);
+			this.shader.uniform("textureExtra", "uniform1i", 2);
+			textureExtra.bind(2);
+			this.shader.uniform("percent", "uniform1f", percent);
 			GL.draw(this.mesh);
 		}
 	}]);
@@ -5305,85 +5230,7 @@ var ViewPlanes = function (_alfrid$View) {
 
 exports.default = ViewPlanes;
 
-},{"./libs/alfrid.js":18}],14:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _alfrid = require('./libs/alfrid.js');
-
-var _alfrid2 = _interopRequireDefault(_alfrid);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // ViewRender.js
-
-
-
-var GL = undefined;
-
-var ViewRender = function (_alfrid$View) {
-	_inherits(ViewRender, _alfrid$View);
-
-	function ViewRender() {
-		_classCallCheck(this, ViewRender);
-
-		GL = _alfrid2.default.GL;
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewRender).call(this, "#define GLSLIFY 1\n// render.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform sampler2D texture;\nuniform sampler2D textureExtra;\nvarying vec4 vColor;\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy;\n\tvec3 pos     = texture2D(texture, uv).rgb;\n\tvec3 extra   = texture2D(textureExtra, uv).rgb;\n\tgl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tgl_PointSize = 1.0 + extra.r * 2.0;\n\t\n\tvColor \t\t= vec4(vec3(extra.b), 1.0);\n}", "#define GLSLIFY 1\n// render.frag\n\n// save.frag\n\nprecision highp float;\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
-	}
-
-	_createClass(ViewRender, [{
-		key: '_init',
-		value: function _init() {
-			var positions = [];
-			var coords = [];
-			var indices = [];
-			var count = 0;
-			var numParticles = params.numParticles;
-			var ux = undefined,
-			    uy = undefined;
-
-			for (var j = 0; j < numParticles; j++) {
-				for (var i = 0; i < numParticles; i++) {
-					ux = i / numParticles;
-					uy = j / numParticles;
-					positions.push([ux, uy, 0]);
-					indices.push(count);
-					count++;
-				}
-			}
-
-			this.mesh = new _alfrid2.default.Mesh(GL.POINTS);
-			this.mesh.bufferVertex(positions);
-			this.mesh.bufferIndices(indices);
-		}
-	}, {
-		key: 'render',
-		value: function render(texture, textureExtra) {
-			this.shader.bind();
-			this.shader.uniform("texture", "uniform1i", 0);
-			texture.bind(0);
-
-			this.shader.uniform("textureExtra", "uniform1i", 1);
-			textureExtra.bind(1);
-			GL.draw(this.mesh);
-		}
-	}]);
-
-	return ViewRender;
-}(_alfrid2.default.View);
-
-exports.default = ViewRender;
-
-},{"./libs/alfrid.js":18}],15:[function(require,module,exports){
+},{"./libs/alfrid.js":16}],13:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5441,7 +5288,7 @@ var ViewSave = function (_alfrid$View) {
 			var ux = undefined,
 			    uy = undefined;
 			var range = 4;
-			var speedScale = .0007;
+			var speedScale = .0005 * params.skipCount;
 
 			for (var j = 0; j < numParticles; j++) {
 				for (var i = 0; i < numParticles; i++) {
@@ -5494,7 +5341,7 @@ var ViewSave = function (_alfrid$View) {
 
 exports.default = ViewSave;
 
-},{"./libs/alfrid.js":18}],16:[function(require,module,exports){
+},{"./libs/alfrid.js":16}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5525,7 +5372,7 @@ var ViewSimulation = function (_alfrid$View) {
 	function ViewSimulation() {
 		_classCallCheck(this, ViewSimulation);
 
-		var fs = "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform sampler2D textureSpeed;\nuniform float time;\nuniform float range;\nuniform float speedScale;\n\nconst float NUM = {{NUM_PARTICLES}};\nconst float PI = 3.1415926;\nconst float PI_2 = 3.1415926*2.0;\n\nfloat map(float value, float sx, float sy, float tx, float ty) {\n\tfloat p = (value - sx) / (sy - sx);\n\tp = clamp(p, 0.0, 1.0);\n\treturn tx + (ty - tx) * p;\n}\n\nvoid main(void) {\n\tvec3 pos    = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel    = texture2D(textureVel, vTextureCoord).rgb;\n\tvec3 extra  = texture2D(textureExtra, vTextureCoord).rgb;\n\tvec3 speeds = texture2D(textureSpeed, vTextureCoord).rgb;\n\n\tvec2 uvParticles;\n\tvec3 posParticle, velParticle;\n\tfloat percent;\n\tvec3 dirToParticle;\n\tfloat f, delta, forceApply;\n\n\tfloat _range = range * mix(extra.x, 1.0, .5);\n\tfloat forceOffset = mix(extra.y, 1.0, .5);\n\tconst float minThreshold    = 0.4;\n\tconst float maxThreshold    = 0.7;\n\n\tfloat repelStrength   = 0.04 * speedScale;\n\tfloat attractStrength = 0.0002 * speedScale;\n\tfloat orientStrength  = 0.02 * speedScale;\n\n\tfor(float y=0.0; y<NUM; y++) {\n\t\tfor(float x=0.0; x<NUM; x++) {\n\t\t\tif(x <= y) continue;\n\n\t\t\tuvParticles = vec2(x, y)/NUM;\n\t\t\tposParticle = texture2D(texturePos, uvParticles).rgb;\n\t\t\tpercent = distance(pos, posParticle) / _range;\n\t\t\tforceApply = 1.0 - step(1.0, percent);\n\t\t\tforceApply *= forceOffset;\n\t\t\tdirToParticle = normalize(posParticle - pos);\n\n\t\t\tif(percent < minThreshold) {\n\t\t\t\tf = (minThreshold/percent - 1.0) * repelStrength;\n\t\t\t\tvel -= f * dirToParticle * forceApply;\n\t\t\t} else if(percent < maxThreshold) {\n\t\t\t\tvelParticle = texture2D(textureVel, uvParticles).rgb;\n\t\t\t\tdelta = map(percent, minThreshold, maxThreshold, 0.0, 1.0);\n\t\t\t\tvec3 avgDir = (vel + velParticle) * .5;\n\t\t\t\tif(length(avgDir) > 0.0) {\n\t\t\t\t\tavgDir = normalize(avgDir);\n\t\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * 0.5 + 0.5 );\n\t\t\t\t\tvel += avgDir * f * orientStrength * forceApply;\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdelta = map(percent, maxThreshold, 1.0, 0.0, 1.0);\n\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * -0.5 + 0.5 );\n\t\t\t\tvel += dirToParticle * f * attractStrength * forceApply;\n\t\t\t}\n\n\t\t}\n\n\t}\n\n\tconst float maxRadius = 7.0;\n\tconst float minRadius = 1.25;\n\tfloat dist = length(pos);\n\tif(dist > maxRadius) {\n\t\tfloat f = (dist - maxRadius) * .005;\n\t\tvel -= normalize(pos) * f * forceOffset;\n\t}\n\n\tif(dist < minRadius) {\n\t\tfloat f = (1.0-dist/minRadius) * 1.0;\n\t\tvel += normalize(pos) * f * forceOffset;\n\t}\n\n\tconst float minY = 1.0;\n\tif(pos.y < minY) {\n\t\tfloat f = (minY - pos.y) * .01;\n\t\tvel.y += f;\n\t}\n\n\tvec3 velDir = normalize(vel);\n\tfloat speed = length(vel);\n\tif(speed < speeds.x) {\t\t//\tmin speed\n\t\tvel = velDir * speeds.x;\n\t} \n\n\tif(speed > speeds.y) {\t\t//\tmax speed;\n\t\tvel = velDir * speeds.y;\n\t}\n\n\tgl_FragColor = vec4(vel, 1.0);\n}";
+		var fs = "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform sampler2D textureSpeed;\nuniform float time;\nuniform float range;\nuniform float speedScale;\nuniform float skipCount;\n\nconst float NUM = {{NUM_PARTICLES}};\nconst float PI = 3.1415926;\nconst float PI_2 = 3.1415926*2.0;\n\nfloat map(float value, float sx, float sy, float tx, float ty) {\n\tfloat p = (value - sx) / (sy - sx);\n\tp = clamp(p, 0.0, 1.0);\n\treturn tx + (ty - tx) * p;\n}\n\nvoid main(void) {\n\tvec3 pos    = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel    = texture2D(textureVel, vTextureCoord).rgb;\n\tvec3 extra  = texture2D(textureExtra, vTextureCoord).rgb;\n\tvec3 speeds = texture2D(textureSpeed, vTextureCoord).rgb;\n\n\tvec2 uvParticles;\n\tvec3 posParticle, velParticle;\n\tfloat percent;\n\tvec3 dirToParticle;\n\tfloat f, delta, forceApply;\n\n\tfloat _range = range * mix(extra.x, 1.0, .5);\n\tfloat forceOffset = mix(extra.y, 1.0, .5);\n\tconst float minThreshold    = 0.4;\n\tconst float maxThreshold    = 0.7;\n\n\tfloat repelStrength   = 0.04 * speedScale;\n\tfloat attractStrength = 0.0002 * speedScale;\n\tfloat orientStrength  = 0.02 * speedScale;\n\n\tfor(float y=0.0; y<NUM; y++) {\n\t\tfor(float x=0.0; x<NUM; x++) {\n\t\t\tif(x <= y) continue;\n\n\t\t\tuvParticles = vec2(x, y)/NUM;\n\t\t\tposParticle = texture2D(texturePos, uvParticles).rgb;\n\t\t\tpercent = distance(pos, posParticle) / _range;\n\t\t\tforceApply = 1.0 - step(1.0, percent);\n\t\t\tforceApply *= forceOffset;\n\t\t\tdirToParticle = normalize(posParticle - pos);\n\n\t\t\tif(percent < minThreshold) {\n\t\t\t\tf = (minThreshold/percent - 1.0) * repelStrength;\n\t\t\t\tvel -= f * dirToParticle * forceApply;\n\t\t\t} else if(percent < maxThreshold) {\n\t\t\t\tvelParticle = texture2D(textureVel, uvParticles).rgb;\n\t\t\t\tdelta = map(percent, minThreshold, maxThreshold, 0.0, 1.0);\n\t\t\t\tvec3 avgDir = (vel + velParticle) * .5;\n\t\t\t\tif(length(avgDir) > 0.0) {\n\t\t\t\t\tavgDir = normalize(avgDir);\n\t\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * 0.5 + 0.5 );\n\t\t\t\t\tvel += avgDir * f * orientStrength * forceApply;\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdelta = map(percent, maxThreshold, 1.0, 0.0, 1.0);\n\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * -0.5 + 0.5 );\n\t\t\t\tvel += dirToParticle * f * attractStrength * forceApply;\n\t\t\t}\n\n\t\t}\n\n\t}\n\n\tconst float maxRadius = 6.0;\n\tconst float minRadius = 1.25;\n\tfloat dist = length(pos);\n\tif(dist > maxRadius) {\n\t\tfloat f = (dist - maxRadius) * .05;\n\t\tvel -= normalize(pos) * f * forceOffset;\n\t}\n\n\tif(dist < minRadius) {\n\t\tfloat f = (1.0-dist/minRadius) * 1.0;\n\t\tvel += normalize(pos) * f * forceOffset;\n\t}\n\n\tconst float minY = 1.5;\n\tif(pos.y < minY) {\n\t\tfloat f = (minY - pos.y) * .03;\n\t\tvel.y += f;\n\t}\n\n\tvec3 velDir = normalize(vel);\n\tfloat speed = length(vel);\n\tif(speed < speeds.x) {\t\t//\tmin speed\n\t\tvel = velDir * speeds.x;\n\t} \n\n\tif(speed > speeds.y) {\t\t//\tmax speed;\n\t\tvel = velDir * speeds.y;\n\t}\n\n\tgl_FragColor = vec4(vel, 1.0);\n}";
 		fs = fs.replace('{{NUM_PARTICLES}}', params.numParticles.toFixed(1));
 
 		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSimulation).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, fs));
@@ -5558,7 +5405,8 @@ var ViewSimulation = function (_alfrid$View) {
 
 			this.shader.uniform("time", "uniform1f", this.time);
 			this.shader.uniform("range", "uniform1f", params.range);
-			this.shader.uniform("speedScale", "uniform1f", params.speed);
+			this.shader.uniform("skipCount", "uniform1f", params.skipCount);
+			this.shader.uniform("speedScale", "uniform1f", params.speed * params.skipCount);
 
 			GL.draw(this.mesh);
 		}
@@ -5569,7 +5417,7 @@ var ViewSimulation = function (_alfrid$View) {
 
 exports.default = ViewSimulation;
 
-},{"./libs/alfrid.js":18}],17:[function(require,module,exports){
+},{"./libs/alfrid.js":16}],15:[function(require,module,exports){
 'use strict';
 
 var _alfrid = require('./libs/alfrid.js');
@@ -5587,14 +5435,11 @@ var _datGui2 = _interopRequireDefault(_datGui);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 window.params = {
-	numParticles: 64,
-	skipCount: 5,
-	range: 1.00,
-	speed: .15,
-	focus: .79,
-	focusDepth: 0.5,
-	focalLength: 0.5,
-	fstop: 0.5
+	numParticles: 100,
+	skipCount: 10,
+	range: 1.70,
+	speed: 10.5,
+	focus: .79
 };
 
 if (document.body) {
@@ -5622,14 +5467,11 @@ function _init() {
 	var gui = new _datGui2.default.GUI({ width: 300 });
 	gui.add(params, 'focus', 0, 1);
 	gui.add(params, 'range', 0, 2);
-	gui.add(params, 'speed', 0, .5);
-	gui.add(params, 'focusDepth', 0, 10);
-	gui.add(params, 'focalLength', 0, 10);
-	gui.add(params, 'fstop', 0, 10);
+	gui.add(params, 'speed', 0, 100.5);
 	// gui.add(params, 'showCenteroid');
 }
 
-},{"./SceneApp":8,"./libs/alfrid.js":18,"dat-gui":5}],18:[function(require,module,exports){
+},{"./SceneApp":8,"./libs/alfrid.js":16,"dat-gui":5}],16:[function(require,module,exports){
 (function (global){
 "use strict";var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol?"symbol":typeof obj;};(function(f){if((typeof exports==="undefined"?"undefined":_typeof(exports))==="object"&&typeof module!=="undefined"){module.exports=f();}else if(typeof define==="function"&&define.amd){define([],f);}else {var g;if(typeof window!=="undefined"){g=window;}else if(typeof global!=="undefined"){g=global;}else if(typeof self!=="undefined"){g=self;}else {g=this;}g.alfrid=f();}})(function(){var define,module,exports;return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f;}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e);},l,l.exports,e,t,n,r);}return n[o].exports;}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++){s(r[o]);}return s;}({1:[function(_dereq_,module,exports){ /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
@@ -7567,6 +7409,6 @@ break;}}this._highTasks=this._highTasks.concat(this._nextTasks);this._nextTasks=
 'use strict';Object.defineProperty(exports,"__esModule",{value:true});var ShaderLibs={simpleColorFrag:"#define GLSLIFY 1\n// simpleColor.frag\n\n#define SHADER_NAME SIMPLE_COLOR\n\nprecision highp float;\n\nuniform vec3 color;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = vec4(color, opacity);\n}",bigTriangleVert:"#define GLSLIFY 1\n// bigTriangle.vert\n\n#define SHADER_NAME BIG_TRIANGLE_VERTEX\n\nprecision highp float;\nattribute vec2 aPosition;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = vec4(aPosition, 0.0, 1.0);\n    vTextureCoord = aPosition * .5 + .5;\n}",generalVert:"#define GLSLIFY 1\n// general.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n}",generalNormalVert:"#define GLSLIFY 1\n// generalWithNormal.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat3 uNormalMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tvTextureCoord = aTextureCoord;\n\tvNormal       = normalize(uNormalMatrix * aNormal);\n}"};exports.default=ShaderLibs;},{}]},{},[11])(11);}); 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[17]);
+},{}]},{},[15]);
 
 //# sourceMappingURL=bundle.js.map
