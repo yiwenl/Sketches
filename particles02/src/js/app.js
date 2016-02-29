@@ -4,14 +4,11 @@ import dat from 'dat-gui';
 
 
 window.params = {
-	numParticles:64,
+	numParticles:256*2,
 	skipCount:5,
 	shadowStrength:.35,
 	shadowThreshold:.55,
-	numSlides:2*2,
-	numClusters:7,
-	showCenteroid:false,
-	focus:.79
+	numSlides:2*4
 };
 
 if(document.body) {
@@ -36,6 +33,5 @@ function _init() {
 
 
 	let gui = new dat.GUI({width:300});
-	gui.add(params, 'focus', 0, 1);
-	// gui.add(params, 'showCenteroid');
+
 }

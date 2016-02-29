@@ -8,6 +8,8 @@ import ViewBall from './ViewBall';
 import ViewPlanes from './ViewPlanes';
 import ViewFloor from './ViewFloor';
 import ViewDome from './ViewDome';
+import ViewBlur from './ViewBlur';
+import ViewDof from './ViewDof';
 
 let clusterfck = require("clusterfck");
 
@@ -53,12 +55,11 @@ class SceneApp extends alfrid.Scene {
 		this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
-		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
-		this._fboSpeed  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
-		this._fboTargetPos.id = 1;
-
-
-		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboExtra      = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboSpeed      = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboRender     = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost0      = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost1      = new alfrid.FrameBuffer(GL.width, GL.height);
 
 		clearFbo(this._fboCurrentPos);
 		clearFbo(this._fboTargetPos);
@@ -81,6 +82,8 @@ class SceneApp extends alfrid.Scene {
 		this._vFloor  = new ViewFloor();
 		this._vDome   = new ViewDome();
 		this._vPlanes = new ViewPlanes();
+		this._vBlur   = new ViewBlur();
+		this._vDof 	  = new ViewDof();
 
 		//	SAVE INIT POSITIONS
 		this._vSave = new ViewSave();
@@ -156,24 +159,22 @@ class SceneApp extends alfrid.Scene {
 		this._vDome.render();
 		this._fboRender.unbind();
 
-		GL.clear(0, 0, 0, 0);
+
 		this._bCopy.draw(this._fboRender.getDepthTexture());
+/*
+		this._fboPost0.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vBlur.render(this._fboRender.getDepthTexture(), true);
+		this._fboPost0.unbind();
 
-		// let debugSize = 256/2;
+		this._fboPost1.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vBlur.render(this._fboPost0.getTexture(), false);
+		this._fboPost1.unbind();
 
-		/*
-		GL.viewport(0, 0, debugSize, debugSize);
-		this._bCopy.draw(this._fboCurrentPos.getTexture());
-
-		GL.viewport(debugSize, 0, debugSize, debugSize);
-		this._bCopy.draw(this._fboTargetVel.getTexture());
-
-		GL.viewport(debugSize*2, 0, debugSize, debugSize);
-		this._bCopy.draw(this._fboExtra.getTexture());
-
-		GL.viewport(debugSize*3, 0, debugSize, debugSize);
-		this._bCopy.draw(this._fboSpeed.getTexture());
-		*/
+		GL.clear(0, 0, 0, 0);
+		this._vDof.render(this._fboRender.getDepthTexture(), this._fboPost1.getTexture());
+*/
 	}
 
 }

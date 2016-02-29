@@ -32,7 +32,7 @@ void main(void) {
 	vec3 dirToParticle;
 	float f, delta, forceApply;
 
-	float RANGE = .65 * mix(extra.x, 1.0, .5);
+	float RANGE = .75 * mix(extra.x, 1.0, .5);
 	float forceOffset = mix(extra.y, 1.0, .5);
 	const float minThreshold    = 0.4;
 	const float maxThreshold    = 0.7;
