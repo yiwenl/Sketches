@@ -39,8 +39,8 @@ class ViewSave extends alfrid.View {
 			for(let i=0; i<numParticles; i++) {
 				positions.push([random(-range, range), random(1.5, range), random(-range, range)]);
 
-				ux = i/numParticles*2.0-1.0;
-				uy = j/numParticles*2.0-1.0;
+				ux = i/numParticles*2.0-1.0+.5/numParticles;
+				uy = j/numParticles*2.0-1.0+.5/numParticles;
 
 				extras.push([Math.random(), Math.random(), Math.random()]);
 				speedLimit.push([random(1, 3)*speedScale, random(5, 18)*speedScale, 0.0]);

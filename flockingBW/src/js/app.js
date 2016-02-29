@@ -7,7 +7,7 @@ window.params = {
 	numParticles:100,
 	skipCount:10,
 	range:1.2,
-	speed:10.5,
+	speed:1.5,
 	focus:.79,
 	minThreshold:.50,
 	maxThreshold:.80,

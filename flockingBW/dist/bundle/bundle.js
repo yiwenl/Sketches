@@ -367,7 +367,7 @@ var SceneApp = function (_alfrid$Scene) {
 		_this.orbitalControl._rx.value = 0.0;
 		_this.orbitalControl._rx.limit(0, .36);
 		_this.orbitalControl.radius.setTo(10);
-		_this.orbitalControl.radius.value = 10;
+		_this.orbitalControl.radius.value = 8;
 		_this.orbitalControl.radius.limit(1, 11);
 		_this.orbitalControl.center[1] = 3;
 		_this.orbitalControl.positionOffset[1] = -.5;
@@ -482,7 +482,7 @@ var SceneApp = function (_alfrid$Scene) {
 
 			var p = this._count / params.skipCount;
 
-			// this.orbitalControl._ry.value += -.01;
+			this.orbitalControl._ry.value += -.01;
 
 			this._fboRender.bind();
 			GL.clear(0, 0, 0, 0);
@@ -491,7 +491,6 @@ var SceneApp = function (_alfrid$Scene) {
 			this._vDome.render();
 			this._fboRender.unbind();
 
-			// this._bCopy.draw(this._fboRender.getDepthTexture());
 			this._vPost.render(this._fboRender.getDepthTexture());
 		}
 	}]);
@@ -944,8 +943,8 @@ var ViewSave = function (_alfrid$View) {
 				for (var i = 0; i < numParticles; i++) {
 					positions.push([random(-range, range), random(1.5, range), random(-range, range)]);
 
-					ux = i / numParticles * 2.0 - 1.0;
-					uy = j / numParticles * 2.0 - 1.0;
+					ux = i / numParticles * 2.0 - 1.0 + .5 / numParticles;
+					uy = j / numParticles * 2.0 - 1.0 + .5 / numParticles;
 
 					extras.push([Math.random(), Math.random(), Math.random()]);
 					speedLimit.push([random(1, 3) * speedScale, random(5, 18) * speedScale, 0.0]);
@@ -1022,7 +1021,7 @@ var ViewSimulation = function (_alfrid$View) {
 	function ViewSimulation() {
 		_classCallCheck(this, ViewSimulation);
 
-		var fs = "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform sampler2D textureSpeed;\nuniform float time;\nuniform float range;\nuniform float speedScale;\nuniform float skipCount;\nuniform float minThreshold;\nuniform float maxThreshold;\n\nconst float NUM = {{NUM_PARTICLES}};\nconst float PI = 3.1415926;\nconst float PI_2 = 3.1415926*2.0;\n\nfloat map(float value, float sx, float sy, float tx, float ty) {\n\tfloat p = (value - sx) / (sy - sx);\n\tp = clamp(p, 0.0, 1.0);\n\treturn tx + (ty - tx) * p;\n}\n\nvoid main(void) {\n\tvec3 pos    = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel    = texture2D(textureVel, vTextureCoord).rgb;\n\tvec3 extra  = texture2D(textureExtra, vTextureCoord).rgb;\n\tvec3 speeds = texture2D(textureSpeed, vTextureCoord).rgb;\n\n\tvec2 uvParticles;\n\tvec3 posParticle, velParticle, dirToParticle, avgDir;\n\tfloat percent, f, delta, forceApply;\n\tfloat _range = range * mix(extra.x, 1.0, .5);\n\tfloat forceOffset = mix(extra.y, 1.0, .5);\n\n\tfloat repelStrength   = 0.04 * speedScale;\n\tfloat attractStrength = 0.0002 * speedScale;\n\tfloat orientStrength  = 0.02 * speedScale;\n\n\tfor(float y=0.0; y<NUM; y++) {\n\t\tfor(float x=0.0; x<NUM; x++) {\n\t\t\tif(x <= y) continue;\n\n\t\t\tuvParticles = vec2(x, y)/NUM;\n\t\t\tposParticle = texture2D(texturePos, uvParticles).rgb;\n\t\t\tpercent = distance(pos, posParticle) / _range;\n\t\t\tforceApply = 1.0 - step(1.0, percent);\n\t\t\tforceApply *= forceOffset;\n\t\t\tdirToParticle = normalize(posParticle - pos);\n\n\t\t\tif(percent < minThreshold) {\n\t\t\t\tf = (minThreshold/percent - 1.0) * repelStrength;\n\t\t\t\tvel -= f * dirToParticle * forceApply;\n\t\t\t} else if(percent < maxThreshold) {\n\t\t\t\tvelParticle = texture2D(textureVel, uvParticles).rgb;\n\t\t\t\tdelta = map(percent, minThreshold, maxThreshold, 0.0, 1.0);\n\t\t\t\tavgDir = (vel + velParticle) * .5;\n\t\t\t\tif(length(avgDir) > 0.0) {\n\t\t\t\t\tavgDir = normalize(avgDir);\n\t\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * 0.5 + 0.5 );\n\t\t\t\t\tvel += avgDir * f * orientStrength * forceApply;\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdelta = map(percent, maxThreshold, 1.0, 0.0, 1.0);\n\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * -0.5 + 0.5 );\n\t\t\t\tvel += dirToParticle * f * attractStrength * forceApply;\n\t\t\t}\n\n\t\t}\n\n\t}\n\n\tvec3 velDir = normalize(vel);\n\tfloat speed = length(vel);\n\tif(speed < speeds.x) {\t\t//\tmin speed\n\t\tvel = velDir * speeds.x;\n\t} \n\n\tif(speed > speeds.y) {\t\t//\tmax speed;\n\t\tvel = velDir * speeds.y;\n\t}\n\n\tconst float maxRadius = 7.0;\n\tconst float minRadius = 1.25;\n\tfloat dist = length(pos);\n\tif(dist > maxRadius) {\n\t\tfloat f = (dist - maxRadius) * .02;\n\t\tvel -= normalize(pos) * f * forceOffset;\n\t}\n\n\tif(dist < minRadius) {\n\t\tfloat f = (1.0-dist/minRadius) * .015;\n\t\tvel += normalize(pos) * f * forceOffset;\n\t}\n\n\tconst float minY = .75;\n\tif(pos.y < minY) {\n\t\tfloat f = (minY - pos.y) * .02;\n\t\tvel.y += f;\n\t}\n\n\tgl_FragColor = vec4(vel, 1.0);\n}";
+		var fs = "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform sampler2D textureSpeed;\nuniform float time;\nuniform float range;\nuniform float speedScale;\nuniform float skipCount;\nuniform float minThreshold;\nuniform float maxThreshold;\n\nconst float NUM = {{NUM_PARTICLES}};\nconst float PI = 3.1415926;\nconst float PI_2 = 3.1415926*2.0;\n\nfloat map(float value, float sx, float sy, float tx, float ty) {\n\tfloat p = (value - sx) / (sy - sx);\n\tp = clamp(p, 0.0, 1.0);\n\treturn tx + (ty - tx) * p;\n}\n\nvoid main(void) {\n\tvec3 pos    = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel    = texture2D(textureVel, vTextureCoord).rgb;\n\tvec3 extra  = texture2D(textureExtra, vTextureCoord).rgb;\n\tvec3 speeds = texture2D(textureSpeed, vTextureCoord).rgb;\n\n\tvec2 uvParticles;\n\tvec3 posParticle, velParticle, dirToParticle, avgDir;\n\tfloat percent, f, delta, forceApply;\n\tfloat _range = range * mix(extra.x, 1.0, .5);\n\tfloat forceOffset = mix(extra.y, 1.0, .5);\n\n\tfloat repelStrength   = 0.04 * speedScale;\n\tfloat attractStrength = 0.0002 * speedScale;\n\tfloat orientStrength  = 0.02 * speedScale;\n\n\tconst float minPercent = 0.001;\n\n\tfor(float y=0.0; y<NUM; y++) {\n\t\tfor(float x=0.0; x<NUM; x++) {\n\t\t\tif(x <= y) continue;\n\n\t\t\tuvParticles = vec2(x, y)/NUM;\n\t\t\tposParticle = texture2D(texturePos, uvParticles).rgb;\n\t\t\tpercent = distance(pos, posParticle) / _range;\n\t\t\tif(percent <= minPercent) percent = minPercent;\n\n\t\t\tforceApply = 1.0 - step(1.0, percent);\n\t\t\tforceApply *= forceOffset;\n\t\t\tdirToParticle = normalize(posParticle - pos);\n\n\t\t\tif(percent < minThreshold) {\n\t\t\t\tf = (minThreshold/percent - 1.0) * repelStrength;\n\t\t\t\tvel -= f * dirToParticle * forceApply;\n\t\t\t} else if(percent < maxThreshold) {\n\t\t\t\tvelParticle = texture2D(textureVel, uvParticles).rgb;\n\t\t\t\tdelta = map(percent, minThreshold, maxThreshold, 0.0, 1.0);\n\t\t\t\tavgDir = (vel + velParticle) * .5;\n\t\t\t\tif(length(avgDir) > 0.0) {\n\t\t\t\t\tavgDir = normalize(avgDir);\n\t\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * 0.5 + 0.5 );\n\t\t\t\t\tvel += avgDir * f * orientStrength * forceApply;\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdelta = map(percent, maxThreshold, 1.0, 0.0, 1.0);\n\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * -0.5 + 0.5 );\n\t\t\t\tvel += dirToParticle * f * attractStrength * forceApply;\n\t\t\t}\t\n\t\t}\n\n\t}\n\n\tvec3 velDir = normalize(vel);\n\tfloat speed = length(vel);\n\tif(speed < speeds.x) {\t\t//\tmin speed\n\t\tvel = velDir * speeds.x;\n\t} \n\n\tif(speed > speeds.y) {\t\t//\tmax speed;\n\t\tvel = velDir * speeds.y;\n\t}\n\n\tconst float maxRadius = 7.0;\n\tfloat dist = length(pos);\n\tif(dist > maxRadius) {\n\t\tfloat f = (dist - maxRadius) * .02;\n\t\tvel -= normalize(pos) * f * forceOffset;\n\t}\n\n\tconst float minY = .75;\n\tif(pos.y < minY) {\n\t\tfloat f = (minY - pos.y) * .02;\n\t\tvel.y += f;\n\t}\n\n\tgl_FragColor = vec4(vel, 1.0);\n}";
 		fs = fs.replace('{{NUM_PARTICLES}}', params.numParticles.toFixed(1));
 
 		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSimulation).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, fs));
@@ -1092,7 +1091,7 @@ window.params = {
 	numParticles: 100,
 	skipCount: 10,
 	range: 1.2,
-	speed: 10.5,
+	speed: 1.5,
 	focus: .79,
 	minThreshold: .50,
 	maxThreshold: .80,

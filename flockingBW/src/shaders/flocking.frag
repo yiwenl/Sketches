@@ -41,6 +41,8 @@ void main(void) {
 	float attractStrength = 0.0002 * speedScale;
 	float orientStrength  = 0.02 * speedScale;
 
+	const float minPercent = 0.001;
+
 	for(float y=0.0; y<NUM; y++) {
 		for(float x=0.0; x<NUM; x++) {
 			if(x <= y) continue;
@@ -48,6 +50,8 @@ void main(void) {
 			uvParticles = vec2(x, y)/NUM;
 			posParticle = texture2D(texturePos, uvParticles).rgb;
 			percent = distance(pos, posParticle) / _range;
+			if(percent <= minPercent) percent = minPercent;
+
 			forceApply = 1.0 - step(1.0, percent);
 			forceApply *= forceOffset;
 			dirToParticle = normalize(posParticle - pos);
@@ -68,8 +72,7 @@ void main(void) {
 				delta = map(percent, maxThreshold, 1.0, 0.0, 1.0);
 				f = ( 1.0 - cos( delta * PI_2 ) * -0.5 + 0.5 );
 				vel += dirToParticle * f * attractStrength * forceApply;
-			}
-
+			}	
 		}
 
 	}
@@ -87,16 +90,10 @@ void main(void) {
 
 
 	const float maxRadius = 7.0;
-	const float minRadius = 1.25;
 	float dist = length(pos);
 	if(dist > maxRadius) {
 		float f = (dist - maxRadius) * .02;
 		vel -= normalize(pos) * f * forceOffset;
-	}
-
-	if(dist < minRadius) {
-		float f = (1.0-dist/minRadius) * .015;
-		vel += normalize(pos) * f * forceOffset;
 	}
 
 

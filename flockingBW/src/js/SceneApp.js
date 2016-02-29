@@ -19,7 +19,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl._rx.value = 0.0;
 		this.orbitalControl._rx.limit(0, .36);
 		this.orbitalControl.radius.setTo(10);
-		this.orbitalControl.radius.value = 10;
+		this.orbitalControl.radius.value = 8;
 		this.orbitalControl.radius.limit(1, 11);
 		this.orbitalControl.center[1] = 3;
 		this.orbitalControl.positionOffset[1] = -.5;
@@ -134,7 +134,7 @@ class SceneApp extends alfrid.Scene {
 
 		let p = this._count/params.skipCount;
 
-		// this.orbitalControl._ry.value += -.01;
+		this.orbitalControl._ry.value += -.01;
 
 
 		this._fboRender.bind();
@@ -144,8 +144,6 @@ class SceneApp extends alfrid.Scene {
 		this._vDome.render();
 		this._fboRender.unbind();
 
-
-		// this._bCopy.draw(this._fboRender.getDepthTexture());
 		this._vPost.render(this._fboRender.getDepthTexture());
 	}
 
