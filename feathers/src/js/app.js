@@ -5,11 +5,11 @@ import AssetsLoader from 'assets-loader';
 
 
 window.params = {
-	numParticles:256,
-	skipCount:5,
+	numParticles:128 * 3,
+	skipCount:2,
 	shadowStrength:.35,
 	shadowThreshold:.55,
-	numSlides:2*4,
+	numSlides:6,
 	gamma:2.2,
 	exposure:1
 };

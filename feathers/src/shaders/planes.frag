@@ -75,18 +75,25 @@ vec3 correctGamma(vec3 color, float g) {
 
 
 void main(void) {
+	const float offset = 0.05;
+	float _roughness  = saturate(vExtra.r*offset);
+	float _roughness4 = pow(_roughness, 4.0);
+	float _specular   = saturate(1.0 - vExtra.r*offset);
+	float _metallic   = saturate(1.0 - vExtra.r*offset);
+
+
     vec3 N 				= normalize( vWsNormal );
 	vec3 V 				= normalize( vEyePosition );
 	
 	// deduce the diffuse and specular color from the baseColor and how metallic the material is
-	vec3 diffuseColor	= uBaseColor - uBaseColor * uMetallic;
-	vec3 specularColor	= mix( vec3( 0.08 * uSpecular ), uBaseColor, uMetallic );
+	vec3 diffuseColor	= uBaseColor - uBaseColor * _metallic;
+	vec3 specularColor	= mix( vec3( 0.08 * _specular ), uBaseColor, _metallic );
 	
 	vec3 color;
 	
 	// sample the pre-filtered cubemap at the corresponding mipmap level
 	float numMips		= 6.0;
-	float mip			= numMips - 1.0 + log2(uRoughness);
+	float mip			= numMips - 1.0 + log2(_roughness);
 	vec3 lookup			= -reflect( V, N );
 	lookup				= fix_cube_lookup( lookup, 512.0, mip );
 	vec3 radiance		= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );
@@ -94,7 +101,7 @@ void main(void) {
 	
 	// get the approximate reflectance
 	float NoV			= saturate( dot( N, V ) );
-	vec3 reflectance	= EnvBRDFApprox( specularColor, uRoughness4, NoV );
+	vec3 reflectance	= EnvBRDFApprox( specularColor, _roughness4, NoV );
 	
 	// combine the specular IBL and the BRDF
     vec3 diffuse  		= diffuseColor * irradiance;

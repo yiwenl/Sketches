@@ -138,6 +138,8 @@ class SceneApp extends alfrid.Scene {
 		for(let i=0; i<total; i++) {
 			this._vPlanes.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, i, this._flip, this.shadowMatrix, this._textureRad, this._textureIrr);
 		}
+
+		// this._vRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p);
 		
 
 

@@ -29,7 +29,6 @@ class ViewPlanes extends alfrid.View {
 		let numParticles = params.numParticles;
 		let ux, uy;
 		
-		const angler     = Math.PI*2 / 3;
 		let NUM_SLIDES   = params.numSlides;
 		// const MAX_COUNT  = 15000;
 
@@ -38,7 +37,7 @@ class ViewPlanes extends alfrid.View {
 				ux = i/numParticles;
 				uy = j/numParticles;
 				let size       = random(.03, .05);
-				let ratio 	   = random(2, 3);
+				let ratio 	   = random(3, 5);
 				let r = [random(-1, 1), random(-1, 1), random(-1, 1)];
 
 				positions.push([0, -size, -size*ratio]);
