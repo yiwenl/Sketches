@@ -22,6 +22,7 @@ window.params = {
 	blurRange:.5,
 	numBlur:1,
 	multiply:1,
+	debug:false
 
 };
 
@@ -82,14 +83,9 @@ function _onImageLoaded(o) {
 
 	let gui = new dat.GUI({width:300});
 	gui.add(params, 'offset', 0, 1).listen();
-	// gui.add(params, 'metallic', 0, 1).listen();
-	// gui.add(params, 'roughness', 0, 1).listen();
-	// gui.add(params, 'specular', 0.15, 1).listen();
-	gui.add(params, 'gamma', 1, 10);
-	gui.add(params, 'exposure', 1, 3);
-	gui.add(params, 'threshold', 0, 1);
-	gui.add(params, 'blurRange', 0, 1);
-	gui.add(params, 'multiply', 0, 1);
-	// gui.add(params, 'numBlur', 0, 5).step(1);
+	gui.add(params, 'threshold', 0.5, 1);
+	gui.add(params, 'blurRange', 0.5, 1);
+	gui.add(params, 'debug');
+	gui.close();
 }
 

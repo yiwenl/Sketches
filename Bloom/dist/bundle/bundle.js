@@ -5365,11 +5365,11 @@ function isUndefined(arg) {
 },{}],11:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5405,6 +5405,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
+
 var GL = _alfrid2.default.GL;
 
 var SceneApp = function (_alfrid$Scene) {
@@ -5424,6 +5425,7 @@ var SceneApp = function (_alfrid$Scene) {
 		var orbitalControl = new _alfrid2.default.OrbitalControl(_this.cameraCubemap, window, 15);
 		orbitalControl.lockZoom(true);
 		orbitalControl.radius.value = .1;
+		_this.orbitalControlCube = orbitalControl;
 		_this._count = 0;
 		return _this;
 	}
@@ -5461,9 +5463,7 @@ var SceneApp = function (_alfrid$Scene) {
 
 			this._fboRender = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
 			this._fboPost0 = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
-			this._fboPost0.id = 'fbo0';
 			this._fboPost1 = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
-			this._fboPost1.id = 'fbo1';
 		}
 	}, {
 		key: '_initViews',
@@ -5486,18 +5486,23 @@ var SceneApp = function (_alfrid$Scene) {
 				document.body.classList.remove('isLoading');
 			}
 
+			var rotation = 0.02;
+			this.orbitalControl._ry.value += rotation;
+			this.orbitalControlCube._ry.value += rotation;
+
 			this._fboRender.bind();
 			GL.clear(0, 0, 0, 0);
-			this._vHead.render(this._textureRad, this._textureIrr, this._textureAO);
-			this._fboRender.unbind();
 
 			GL.setMatrices(this.cameraCubemap);
 			this._vSkybox.render(this._textureRad);
+			GL.setMatrices(this.camera);
+			this._vHead.render(this._textureRad, this._textureIrr, this._textureAO);
+			this._fboRender.unbind();
 
 			GL.disable(GL.DEPTH_TEST);
 
 			this._fboPost0.bind();
-			GL.clear(0, 0, 0, 0);
+			GL.clear(0, 0, 0, 1);
 			this._vThreshold.render(this._fboRender.getTexture());
 			this._fboPost0.unbind();
 
@@ -5519,6 +5524,13 @@ var SceneApp = function (_alfrid$Scene) {
 
 			// this._bCopy.draw(this._fboPost0.getTexture());
 			this._vBloom.render(this._fboRender.getTexture(), this._fboPost0.getTexture());
+
+			var size = 350;
+			GL.viewport(0, 0, size, size / GL.aspectRatio);
+			if (params.debug) {
+				this._bCopy.draw(this._fboPost0.getTexture());
+			}
+
 			GL.enable(GL.DEPTH_TEST);
 		}
 	}, {
@@ -5528,6 +5540,16 @@ var SceneApp = function (_alfrid$Scene) {
 			var tmp = this._fboPost0;
 			this._fboPost0 = this._fboPost1;
 			this._fboPost1 = tmp;
+		}
+	}, {
+		key: 'resize',
+		value: function resize() {
+			GL.setSize(window.innerWidth, window.innerHeight);
+			this.camera.setAspectRatio(GL.aspectRatio);
+
+			this._fboRender = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
+			this._fboPost0 = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
+			this._fboPost1 = new _alfrid2.default.FrameBuffer(GL.width, GL.height);
 		}
 	}]);
 
@@ -5539,11 +5561,11 @@ exports.default = SceneApp;
 },{"./ViewBloom":12,"./ViewBlur":13,"./ViewHead":14,"./ViewSkybox":15,"./ViewTreshold":16,"./libs/alfrid.js":18}],12:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5595,11 +5617,11 @@ exports.default = ViewBloom;
 },{"./libs/alfrid.js":18}],13:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5650,11 +5672,11 @@ exports.default = ViewBlur;
 },{"./libs/alfrid.js":18}],14:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5738,11 +5760,11 @@ exports.default = ViewHead;
 },{"./libs/alfrid.js":18}],15:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5793,11 +5815,11 @@ exports.default = ViewSkybox;
 },{"./libs/alfrid.js":18}],16:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5883,7 +5905,8 @@ window.params = {
 	threshold: .85,
 	blurRange: .5,
 	numBlur: 1,
-	multiply: 1
+	multiply: 1,
+	debug: false
 
 };
 
@@ -5927,15 +5950,10 @@ function _onImageLoaded(o) {
 
 	var gui = new _datGui2.default.GUI({ width: 300 });
 	gui.add(params, 'offset', 0, 1).listen();
-	// gui.add(params, 'metallic', 0, 1).listen();
-	// gui.add(params, 'roughness', 0, 1).listen();
-	// gui.add(params, 'specular', 0.15, 1).listen();
-	gui.add(params, 'gamma', 1, 10);
-	gui.add(params, 'exposure', 1, 3);
-	gui.add(params, 'threshold', 0, 1);
-	gui.add(params, 'blurRange', 0, 1);
-	gui.add(params, 'multiply', 0, 1);
-	// gui.add(params, 'numBlur', 0, 5).step(1);
+	gui.add(params, 'threshold', 0.5, 1);
+	gui.add(params, 'blurRange', 0.5, 1);
+	gui.add(params, 'debug');
+	gui.close();
 }
 
 },{"./SceneApp":11,"./libs/alfrid.js":18,"assets-loader":4,"dat-gui":7}],18:[function(require,module,exports){

@@ -22,6 +22,7 @@ class SceneApp extends alfrid.Scene {
 		let orbitalControl = new alfrid.OrbitalControl(this.cameraCubemap, window, 15);
 		orbitalControl.lockZoom(true);
 		orbitalControl.radius.value = .1;
+		this.orbitalControlCube = orbitalControl;
 		this._count = 0;
 	}
 
@@ -58,9 +59,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 		this._fboPost0 = new alfrid.FrameBuffer(GL.width, GL.height);
-		this._fboPost0.id = 'fbo0';
 		this._fboPost1 = new alfrid.FrameBuffer(GL.width, GL.height);
-		this._fboPost1.id = 'fbo1';
 	}
 	
 
@@ -83,21 +82,24 @@ class SceneApp extends alfrid.Scene {
 			document.body.classList.remove('isLoading');
 		}
 
-
+		let rotation = 0.02;
+		this.orbitalControl._ry.value += rotation;
+		this.orbitalControlCube._ry.value += rotation;
 
 		this._fboRender.bind();
 		GL.clear(0, 0, 0, 0);
+
+		GL.setMatrices(this.cameraCubemap);
+		this._vSkybox.render(this._textureRad);
+		GL.setMatrices(this.camera);
 		this._vHead.render(this._textureRad, this._textureIrr, this._textureAO);
 		this._fboRender.unbind();
 
 
-		GL.setMatrices(this.cameraCubemap);
-		this._vSkybox.render(this._textureRad);
-
 		GL.disable(GL.DEPTH_TEST);
 
 		this._fboPost0.bind();
-		GL.clear(0, 0, 0, 0);
+		GL.clear(0, 0, 0, 1);
 		this._vThreshold.render(this._fboRender.getTexture());
 		this._fboPost0.unbind();
 
@@ -120,6 +122,13 @@ class SceneApp extends alfrid.Scene {
 		
 		// this._bCopy.draw(this._fboPost0.getTexture());
 		this._vBloom.render(this._fboRender.getTexture(), this._fboPost0.getTexture());
+
+		let size = 350;
+		GL.viewport(0, 0, size, size / GL.aspectRatio);
+		if(params.debug) {
+			this._bCopy.draw(this._fboPost0.getTexture());	
+		}
+		
 		GL.enable(GL.DEPTH_TEST);
 	}
 
@@ -129,6 +138,16 @@ class SceneApp extends alfrid.Scene {
 		let tmp = this._fboPost0;
 		this._fboPost0 = this._fboPost1;
 		this._fboPost1 = tmp;
+	}
+
+
+	resize() {
+		GL.setSize(window.innerWidth, window.innerHeight);
+		this.camera.setAspectRatio(GL.aspectRatio);
+
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost0 = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost1 = new alfrid.FrameBuffer(GL.width, GL.height);
 	}
 }
 
