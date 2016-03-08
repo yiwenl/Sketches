@@ -14,15 +14,17 @@ window.params = {
 	metallic:1,
 	roughness:0,
 	specular:1,
-	offset:.0,
+	offset:.95,
 
 	gamma:2.2,
-	exposure:1,
+	exposure:1.0,
 	threshold:.85,
 	blurRange:.5,
 	numBlur:1,
-	multiply:1,
-	debug:false
+	multiply:1.0,
+	debug:false,
+
+	showWires:false
 
 };
 
@@ -63,6 +65,12 @@ function _init() {
 		loader.style.width = (p * 100).toFixed(2) + '%';
 	}).on('complete', _onImageLoaded)
 	.start();
+
+	window.addEventListener('keydown', (e)=>{
+		if(e.keyCode == 87) {
+			params.showWires = !params.showWires
+		}
+	});
 }
 
 
@@ -84,7 +92,7 @@ function _onImageLoaded(o) {
 	let gui = new dat.GUI({width:300});
 	gui.add(params, 'offset', 0, 1).listen();
 	gui.add(params, 'threshold', 0.5, 1);
-	gui.add(params, 'blurRange', 0.5, 1);
+	gui.add(params, 'blurRange', 0.25, 1);
 	gui.add(params, 'debug');
 	gui.close();
 }

@@ -13,6 +13,7 @@ class ViewSkybox extends alfrid.View {
 
 	_init() {
 		this.mesh             = alfrid.Geom.skybox(35);
+		this.meshWire 		  = alfrid.Geom.skybox(35, false, GL.LINES);
 	}
 
 
@@ -22,7 +23,7 @@ class ViewSkybox extends alfrid.View {
 		texture.bind(0);
 		this.shader.uniform("uExposure", "uniform1f", params.exposure);
 		this.shader.uniform("uGamma", "uniform1f", params.gamma);
-		GL.draw(this.mesh);
+		GL.draw(params.showWires ? this.meshWire : this.mesh);
 	}
 
 

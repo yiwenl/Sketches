@@ -166,7 +166,7 @@ class SceneApp extends alfrid.Scene {
 
 	render() {
 		//	CAMERA MOVEMENT
-		this.orbitalControl._ry.value += .01;
+		// this.orbitalControl._ry.value += .01;
 
 
 		//	PBR STUFF

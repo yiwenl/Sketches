@@ -10,19 +10,20 @@ const Model = [
 		url:'urlPath1'
 	},
 	{
-		cover:'assets/sketchCoverFlocking.jpg',
-		url:'urlPath2'
-	},
-	{
-		cover:'assets/sketchCoverParticles.jpg',
+		cover:'assets/sketchCoverNefertiti.jpg',
 		url:'urlPath0'
 	},
 	{
-		cover:'assets/sketchCoverReflection.jpg',
+		cover:'assets/sketchCoverFlocking.jpg',
+		url:'urlPath2'
+	},
+	
+	{
+		cover:'assets/sketchCoverRosetta.jpg',
 		url:'urlPath1'
 	},
 	{
-		cover:'assets/sketchCoverFlocking.jpg',
+		cover:'assets/coverSketchNike.jpg',
 		url:'urlPath2'
 	},
 	{

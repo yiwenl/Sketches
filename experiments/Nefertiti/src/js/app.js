@@ -64,7 +64,7 @@ function _init() {
 		if(e.keyCode == 87) {
 			params.showWires = !params.showWires
 		}
-	})
+	});
 }
 
 

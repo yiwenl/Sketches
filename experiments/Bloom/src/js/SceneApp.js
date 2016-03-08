@@ -82,15 +82,14 @@ class SceneApp extends alfrid.Scene {
 			document.body.classList.remove('isLoading');
 		}
 
-		let rotation = 0.02;
+		let rotation = 0.00;
 		this.orbitalControl._ry.value += rotation;
 		this.orbitalControlCube._ry.value += rotation;
 
 		this._fboRender.bind();
 		GL.clear(0, 0, 0, 0);
 
-		GL.setMatrices(this.cameraCubemap);
-		this._vSkybox.render(this._textureRad);
+		
 		GL.setMatrices(this.camera);
 		this._vHead.render(this._textureRad, this._textureIrr, this._textureAO);
 		this._fboRender.unbind();
@@ -121,6 +120,9 @@ class SceneApp extends alfrid.Scene {
 		}
 		
 		// this._bCopy.draw(this._fboPost0.getTexture());
+
+		GL.setMatrices(this.cameraCubemap);
+		this._vSkybox.render(this._textureRad);
 		this._vBloom.render(this._fboRender.getTexture(), this._fboPost0.getTexture());
 
 		let size = 350;

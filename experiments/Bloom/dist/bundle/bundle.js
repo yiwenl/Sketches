@@ -5486,15 +5486,13 @@ var SceneApp = function (_alfrid$Scene) {
 				document.body.classList.remove('isLoading');
 			}
 
-			var rotation = 0.02;
+			var rotation = 0.00;
 			this.orbitalControl._ry.value += rotation;
 			this.orbitalControlCube._ry.value += rotation;
 
 			this._fboRender.bind();
 			GL.clear(0, 0, 0, 0);
 
-			GL.setMatrices(this.cameraCubemap);
-			this._vSkybox.render(this._textureRad);
 			GL.setMatrices(this.camera);
 			this._vHead.render(this._textureRad, this._textureIrr, this._textureAO);
 			this._fboRender.unbind();
@@ -5523,6 +5521,9 @@ var SceneApp = function (_alfrid$Scene) {
 			}
 
 			// this._bCopy.draw(this._fboPost0.getTexture());
+
+			GL.setMatrices(this.cameraCubemap);
+			this._vSkybox.render(this._textureRad);
 			this._vBloom.render(this._fboRender.getTexture(), this._fboPost0.getTexture());
 
 			var size = 350;
@@ -5588,7 +5589,7 @@ var ViewBloom = function (_alfrid$View) {
 	function ViewBloom() {
 		_classCallCheck(this, ViewBloom);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBloom).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// bloom.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureBlur;\nuniform float multiply;\n\nvoid main(void) {\n\tvec4 color     = texture2D(texture, vTextureCoord);\n\tvec4 colorBlur = texture2D(textureBlur, vTextureCoord);\n\tcolor.rgb      += colorBlur.rgb * multiply;\n\tgl_FragColor   = color;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBloom).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "// bloom.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureBlur;\nuniform float multiply;\n\nvoid main(void) {\n\tvec4 color     = texture2D(texture, vTextureCoord);\n\tvec4 colorBlur = texture2D(textureBlur, vTextureCoord);\n\tcolor.rgb      += colorBlur.rgb * multiply;\n\tgl_FragColor   = color;\n}"));
 	}
 
 	_createClass(ViewBloom, [{
@@ -5644,7 +5645,7 @@ var ViewBlur = function (_alfrid$View) {
 	function ViewBlur() {
 		_classCallCheck(this, ViewBlur);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBlur).call(this, "#define GLSLIFY 1\n// blur.vert\n\nprecision highp float;\nattribute vec2 aPosition;\nuniform vec2 direction;\nuniform float range;\n\nvarying vec2 vTextureCoord;\nvarying vec2 v_blurTexCoords[14];\n\nvoid main(void) {\n    gl_Position = vec4(aPosition, 0.0, 1.0);\n    vTextureCoord = aPosition * .5 + .5;\n\n    v_blurTexCoords[ 0] = vTextureCoord + vec2(-0.028, -0.028) * direction * range;\n    v_blurTexCoords[ 1] = vTextureCoord + vec2(-0.024, -0.024) * direction * range;\n    v_blurTexCoords[ 2] = vTextureCoord + vec2(-0.020, -0.020) * direction * range;\n    v_blurTexCoords[ 3] = vTextureCoord + vec2(-0.016, -0.016) * direction * range;\n    v_blurTexCoords[ 4] = vTextureCoord + vec2(-0.012, -0.012) * direction * range;\n    v_blurTexCoords[ 5] = vTextureCoord + vec2(-0.008, -0.008) * direction * range;\n    v_blurTexCoords[ 6] = vTextureCoord + vec2(-0.004, -0.004) * direction * range;\n    v_blurTexCoords[ 7] = vTextureCoord + vec2( 0.004,  0.004) * direction * range;\n    v_blurTexCoords[ 8] = vTextureCoord + vec2( 0.008,  0.008) * direction * range;\n    v_blurTexCoords[ 9] = vTextureCoord + vec2( 0.012,  0.012) * direction * range;\n    v_blurTexCoords[10] = vTextureCoord + vec2( 0.016,  0.016) * direction * range;\n    v_blurTexCoords[11] = vTextureCoord + vec2( 0.020,  0.020) * direction * range;\n    v_blurTexCoords[12] = vTextureCoord + vec2( 0.024,  0.024) * direction * range;\n    v_blurTexCoords[13] = vTextureCoord + vec2( 0.028,  0.028) * direction * range;\n}\n", "#define GLSLIFY 1\n// blur.frag\nprecision mediump float;\n \nuniform sampler2D texture;\n \nvarying vec2 vTextureCoord;\nvarying vec2 v_blurTexCoords[14];\n \nvoid main()\n{\n    gl_FragColor = vec4(0.0);\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 0])*0.0044299121055113265;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 1])*0.00895781211794;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 2])*0.0215963866053;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 3])*0.0443683338718;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 4])*0.0776744219933;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 5])*0.115876621105;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 6])*0.147308056121;\n    gl_FragColor += texture2D(texture, vTextureCoord         )*0.159576912161;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 7])*0.147308056121;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 8])*0.115876621105;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 9])*0.0776744219933;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[10])*0.0443683338718;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[11])*0.0215963866053;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[12])*0.00895781211794;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[13])*0.0044299121055113265;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBlur).call(this, "// blur.vert\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec2 aPosition;\nuniform vec2 direction;\nuniform float range;\n\nvarying vec2 vTextureCoord;\nvarying vec2 v_blurTexCoords[14];\n\nvoid main(void) {\n    gl_Position = vec4(aPosition, 0.0, 1.0);\n    vTextureCoord = aPosition * .5 + .5;\n\n    v_blurTexCoords[ 0] = vTextureCoord + vec2(-0.028, -0.028) * direction * range;\n    v_blurTexCoords[ 1] = vTextureCoord + vec2(-0.024, -0.024) * direction * range;\n    v_blurTexCoords[ 2] = vTextureCoord + vec2(-0.020, -0.020) * direction * range;\n    v_blurTexCoords[ 3] = vTextureCoord + vec2(-0.016, -0.016) * direction * range;\n    v_blurTexCoords[ 4] = vTextureCoord + vec2(-0.012, -0.012) * direction * range;\n    v_blurTexCoords[ 5] = vTextureCoord + vec2(-0.008, -0.008) * direction * range;\n    v_blurTexCoords[ 6] = vTextureCoord + vec2(-0.004, -0.004) * direction * range;\n    v_blurTexCoords[ 7] = vTextureCoord + vec2( 0.004,  0.004) * direction * range;\n    v_blurTexCoords[ 8] = vTextureCoord + vec2( 0.008,  0.008) * direction * range;\n    v_blurTexCoords[ 9] = vTextureCoord + vec2( 0.012,  0.012) * direction * range;\n    v_blurTexCoords[10] = vTextureCoord + vec2( 0.016,  0.016) * direction * range;\n    v_blurTexCoords[11] = vTextureCoord + vec2( 0.020,  0.020) * direction * range;\n    v_blurTexCoords[12] = vTextureCoord + vec2( 0.024,  0.024) * direction * range;\n    v_blurTexCoords[13] = vTextureCoord + vec2( 0.028,  0.028) * direction * range;\n}\n", "// blur.frag\nprecision mediump float;\n#define GLSLIFY 1\n \nuniform sampler2D texture;\n \nvarying vec2 vTextureCoord;\nvarying vec2 v_blurTexCoords[14];\n \nvoid main()\n{\n    gl_FragColor = vec4(0.0);\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 0])*0.0044299121055113265;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 1])*0.00895781211794;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 2])*0.0215963866053;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 3])*0.0443683338718;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 4])*0.0776744219933;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 5])*0.115876621105;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 6])*0.147308056121;\n    gl_FragColor += texture2D(texture, vTextureCoord         )*0.159576912161;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 7])*0.147308056121;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 8])*0.115876621105;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 9])*0.0776744219933;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[10])*0.0443683338718;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[11])*0.0215963866053;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[12])*0.00895781211794;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[13])*0.0044299121055113265;\n}"));
 	}
 
 	_createClass(ViewBlur, [{
@@ -5699,10 +5700,17 @@ var ViewHead = function (_alfrid$View) {
 	function ViewHead() {
 		_classCallCheck(this, ViewHead);
 
-		var fs = "// pbr.frag\n\n#extension GL_EXT_shader_texture_lod : enable\n#define GLSLIFY 1\n\nprecision highp float;\n\nuniform sampler2D \tuAoMap;\nuniform sampler2D \tuParticlesMap;\nuniform samplerCube uRadianceMap;\nuniform samplerCube uIrradianceMap;\n\nuniform vec3\t\tuBaseColor;\nuniform float\t\tuRoughness;\nuniform float\t\tuRoughness4;\nuniform float\t\tuMetallic;\nuniform float\t\tuSpecular;\n\nuniform float\t\tuExposure;\nuniform float\t\tuGamma;\n\nvarying vec3        vNormal;\nvarying vec3        vPosition;\nvarying vec3\t\tvEyePosition;\nvarying vec3\t\tvWsNormal;\nvarying vec3\t\tvWsPosition;\nvarying vec2 \t\tvTextureCoord;\n\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.1415926535897932384626433832795\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nconst float NUM_PARTICLES = {{NUM_PARTICLES}};\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\n// https://www.unrealengine.com/blog/physically-based-shading-on-mobile\nvec3 EnvBRDFApprox( vec3 SpecularColor, float Roughness, float NoV )\n{\n\tconst vec4 c0 = vec4( -1, -0.0275, -0.572, 0.022 );\n\tconst vec4 c1 = vec4( 1, 0.0425, 1.04, -0.04 );\n\tvec4 r = Roughness * c0 + c1;\n\tfloat a004 = min( r.x * r.x, exp2( -9.28 * NoV ) ) * r.x + r.y;\n\tvec2 AB = vec2( -1.04, 1.04 ) * a004 + r.zw;\n\treturn SpecularColor * AB.x + AB.y;\n}\n\n// http://the-witness.net/news/2012/02/seamless-cube-map-filtering/\nvec3 fix_cube_lookup( vec3 v, float cube_size, float lod ) {\n\tfloat M = max(max(abs(v.x), abs(v.y)), abs(v.z));\n\tfloat scale = 1.0 - exp2(lod) / cube_size;\n\tif (abs(v.x) != M) v.x *= scale;\n\tif (abs(v.y) != M) v.y *= scale;\n\tif (abs(v.z) != M) v.z *= scale;\n\treturn v;\n}\n\nvec3 correctGamma(vec3 color, float g) {\n\treturn pow(color, vec3(1.0/g));\n}\n\nconst vec3 COLOR0 = 1.0 - vec3(198.0, 151.0, 75.0)/255.0;\nconst vec3 COLOR1 = vec3(1.0);\n\nvoid main() {\n\t// float mRoughness    = particleLight;\n\t// float mRoughness4   = pow(mRoughness, 4.0);\n\t// float mMetallic     = 1.0 - mRoughness;\n\t// float mSpecular     = 1.0 - mRoughness;\n\t// vec3 mColor         = mix(COLOR0, COLOR1, particleLight);\n\n\tvec3 N \t\t\t\t= normalize( vWsNormal );\n\tvec3 V \t\t\t\t= normalize( vEyePosition );\n\t\n\t// deduce the diffuse and specular color from the baseColor and how metallic the material is\n\tvec3 diffuseColor\t= uBaseColor - uBaseColor * uMetallic;\n\tvec3 specularColor\t= mix( vec3( 0.08 * uSpecular ), uBaseColor, uMetallic );\n\t\n\tvec3 color;\n\t\n\t// sample the pre-filtered cubemap at the corresponding mipmap level\n\tfloat numMips\t\t= 6.0;\n\tfloat mip\t\t\t= numMips - 1.0 + log2(uRoughness);\n\tvec3 lookup\t\t\t= -reflect( V, N );\n\tlookup\t\t\t\t= fix_cube_lookup( lookup, 512.0, mip );\n\tvec3 radiance\t\t= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );\n\tvec3 irradiance\t\t= pow( textureCube( uIrradianceMap, N ).rgb, vec3( 1 ) );\n\t\n\t// get the approximate reflectance\n\tfloat NoV\t\t\t= saturate( dot( N, V ) );\n\tvec3 reflectance\t= EnvBRDFApprox( specularColor, uRoughness4, NoV );\n\t\n\t// combine the specular IBL and the BRDF\n    vec3 diffuse  \t\t= diffuseColor * irradiance;\n    vec3 specular \t\t= radiance * reflectance;\n\tcolor\t\t\t\t= diffuse + specular;\n\t\n\n\tvec3 ao \t\t\t= texture2D(uAoMap, vTextureCoord).rgb;\n\tcolor \t\t\t\t*= ao;\n\n\t// apply the tone-mapping\n\tcolor\t\t\t\t= Uncharted2Tonemap( color * uExposure );\n\t// white balance\n\tcolor\t\t\t\t= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );\n\t\n\t// gamma correction\n\tcolor\t\t\t\t= pow( color, vec3( 1.0 / uGamma ) );\n\n\t// output the fragment color\n    gl_FragColor\t\t= vec4( color, 1.0 );\n\n}";
+		var fs = "// pbr.frag\n\n#extension GL_EXT_shader_texture_lod : enable\n\nprecision highp float;\n#define GLSLIFY 1\n\nuniform sampler2D \tuAoMap;\nuniform sampler2D \tuParticlesMap;\nuniform samplerCube uRadianceMap;\nuniform samplerCube uIrradianceMap;\n\nuniform vec3\t\tuBaseColor;\nuniform float\t\tuRoughness;\nuniform float\t\tuRoughness4;\nuniform float\t\tuMetallic;\nuniform float\t\tuSpecular;\n\nuniform float\t\tuExposure;\nuniform float\t\tuGamma;\n\nvarying vec3        vNormal;\nvarying vec3        vPosition;\nvarying vec3\t\tvEyePosition;\nvarying vec3\t\tvWsNormal;\nvarying vec3\t\tvWsPosition;\nvarying vec2 \t\tvTextureCoord;\n\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.1415926535897932384626433832795\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nconst float NUM_PARTICLES = {{NUM_PARTICLES}};\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\n// https://www.unrealengine.com/blog/physically-based-shading-on-mobile\nvec3 EnvBRDFApprox( vec3 SpecularColor, float Roughness, float NoV )\n{\n\tconst vec4 c0 = vec4( -1, -0.0275, -0.572, 0.022 );\n\tconst vec4 c1 = vec4( 1, 0.0425, 1.04, -0.04 );\n\tvec4 r = Roughness * c0 + c1;\n\tfloat a004 = min( r.x * r.x, exp2( -9.28 * NoV ) ) * r.x + r.y;\n\tvec2 AB = vec2( -1.04, 1.04 ) * a004 + r.zw;\n\treturn SpecularColor * AB.x + AB.y;\n}\n\n// http://the-witness.net/news/2012/02/seamless-cube-map-filtering/\nvec3 fix_cube_lookup( vec3 v, float cube_size, float lod ) {\n\tfloat M = max(max(abs(v.x), abs(v.y)), abs(v.z));\n\tfloat scale = 1.0 - exp2(lod) / cube_size;\n\tif (abs(v.x) != M) v.x *= scale;\n\tif (abs(v.y) != M) v.y *= scale;\n\tif (abs(v.z) != M) v.z *= scale;\n\treturn v;\n}\n\nvec3 correctGamma(vec3 color, float g) {\n\treturn pow(color, vec3(1.0/g));\n}\n\nconst vec3 COLOR0 = 1.0 - vec3(198.0, 151.0, 75.0)/255.0;\nconst vec3 COLOR1 = vec3(1.0);\n\nvoid main() {\n\t// float mRoughness    = particleLight;\n\t// float mRoughness4   = pow(mRoughness, 4.0);\n\t// float mMetallic     = 1.0 - mRoughness;\n\t// float mSpecular     = 1.0 - mRoughness;\n\t// vec3 mColor         = mix(COLOR0, COLOR1, particleLight);\n\n\tvec3 N \t\t\t\t= normalize( vWsNormal );\n\tvec3 V \t\t\t\t= normalize( vEyePosition );\n\t\n\t// deduce the diffuse and specular color from the baseColor and how metallic the material is\n\tvec3 diffuseColor\t= uBaseColor - uBaseColor * uMetallic;\n\tvec3 specularColor\t= mix( vec3( 0.08 * uSpecular ), uBaseColor, uMetallic );\n\t\n\tvec3 color;\n\t\n\t// sample the pre-filtered cubemap at the corresponding mipmap level\n\tfloat numMips\t\t= 6.0;\n\tfloat mip\t\t\t= numMips - 1.0 + log2(uRoughness);\n\tvec3 lookup\t\t\t= -reflect( V, N );\n\tlookup\t\t\t\t= fix_cube_lookup( lookup, 512.0, mip );\n\tvec3 radiance\t\t= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );\n\tvec3 irradiance\t\t= pow( textureCube( uIrradianceMap, N ).rgb, vec3( 1 ) );\n\t\n\t// get the approximate reflectance\n\tfloat NoV\t\t\t= saturate( dot( N, V ) );\n\tvec3 reflectance\t= EnvBRDFApprox( specularColor, uRoughness4, NoV );\n\t\n\t// combine the specular IBL and the BRDF\n    vec3 diffuse  \t\t= diffuseColor * irradiance;\n    vec3 specular \t\t= radiance * reflectance;\n\tcolor\t\t\t\t= diffuse + specular;\n\t\n\n\tvec3 ao \t\t\t= texture2D(uAoMap, vTextureCoord).rgb;\n\tcolor \t\t\t\t*= ao;\n\n\t// apply the tone-mapping\n\tcolor\t\t\t\t= Uncharted2Tonemap( color * uExposure );\n\t// white balance\n\tcolor\t\t\t\t= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );\n\t\n\t// gamma correction\n\tcolor\t\t\t\t= pow( color, vec3( 1.0 / uGamma ) );\n\n\t// output the fragment color\n    gl_FragColor\t\t= vec4( color, 1.0 );\n\n}";
 		fs = fs.replace('{{NUM_PARTICLES}}', params.numParticles.toFixed(1));
 
-		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewHead).call(this, "#define GLSLIFY 1\n// reflection.vert\n\n#define SHADER_NAME REFLECTION_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat3 uNormalMatrix;\nuniform mat3 uModelViewMatrixInverse;\n\nvarying vec2 vTextureCoord;\n\nvarying vec3 vNormal;\nvarying vec3 vPosition;\nvarying vec3 vWsPosition;\nvarying vec3 vEyePosition;\nvarying vec3 vWsNormal;\n\nvoid main(void) {\n\tvec3 position \t\t\t= aVertexPosition * 2.0;\n\tvec4 worldSpacePosition\t= uModelMatrix * vec4(position, 1.0);\n    vec4 viewSpacePosition\t= uViewMatrix * worldSpacePosition;\n\t\n    vNormal\t\t\t\t\t= uNormalMatrix * aNormal;\n    vPosition\t\t\t\t= viewSpacePosition.xyz;\n\tvWsPosition\t\t\t\t= worldSpacePosition.xyz;\n\t\n\tvec4 eyeDirViewSpace\t= viewSpacePosition - vec4( 0, 0, 0, 1 );\n\tvEyePosition\t\t\t= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );\n\tvWsNormal\t\t\t\t= normalize( uModelViewMatrixInverse * vNormal );\n\t\n    gl_Position\t\t\t\t= uProjectionMatrix * viewSpacePosition;\n\n\tvTextureCoord\t\t\t= aTextureCoord;\n}\n", fs));
+		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewHead).call(this, "// reflection.vert\n\n#define SHADER_NAME REFLECTION_VERTEX\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat3 uNormalMatrix;\nuniform mat3 uModelViewMatrixInverse;\n\nvarying vec2 vTextureCoord;\n\nvarying vec3 vNormal;\nvarying vec3 vPosition;\nvarying vec3 vWsPosition;\nvarying vec3 vEyePosition;\nvarying vec3 vWsNormal;\n\nvoid main(void) {\n\tvec3 position \t\t\t= aVertexPosition * 2.3;\n\tposition.y \t\t\t\t-= 2.5;\n\tvec4 worldSpacePosition\t= uModelMatrix * vec4(position, 1.0);\n    vec4 viewSpacePosition\t= uViewMatrix * worldSpacePosition;\n\t\n    vNormal\t\t\t\t\t= uNormalMatrix * aNormal;\n    vPosition\t\t\t\t= viewSpacePosition.xyz;\n\tvWsPosition\t\t\t\t= worldSpacePosition.xyz;\n\t\n\tvec4 eyeDirViewSpace\t= viewSpacePosition - vec4( 0, 0, 0, 1 );\n\tvEyePosition\t\t\t= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );\n\tvWsNormal\t\t\t\t= normalize( uModelViewMatrixInverse * vNormal );\n\t\n    gl_Position\t\t\t\t= uProjectionMatrix * viewSpacePosition;\n\n\tvTextureCoord\t\t\t= aTextureCoord;\n}\n", fs));
+
+		_this.shaderWire = new _alfrid2.default.GLShader(_alfrid2.default.ShaderLibs.generalVert, _alfrid2.default.ShaderLibs.simpleColorFrag);
+		_this.shaderWire.bind();
+		_this.shaderWire.uniform("position", "uniform3fv", [0, -2.5, 0]);
+		_this.shaderWire.uniform("color", "uniform3fv", [1, 1, 1]);
+		_this.shaderWire.uniform("scale", "uniform3fv", [2.3, 2.3, 2.3]);
+		_this.shaderWire.uniform("opacity", "uniform1f", 1);
 
 		_this.isReady = false;
 		return _this;
@@ -5717,6 +5725,11 @@ var ViewHead = function (_alfrid$View) {
 			this._objLoader.load('./assets/004.obj', function (mesh) {
 				return _this2._onObjLoaded(mesh);
 			}, false);
+
+			this._objLoader1 = new _alfrid2.default.ObjLoader();
+			this._objLoader1.load('./assets/005.obj', function (meshWire) {
+				return _this2._onObjWireLoaded(meshWire);
+			}, false, true, GL.LINES);
 		}
 	}, {
 		key: '_onObjLoaded',
@@ -5725,9 +5738,67 @@ var ViewHead = function (_alfrid$View) {
 			this.isReady = true;
 		}
 	}, {
+		key: '_onObjWireLoaded',
+		value: function _onObjWireLoaded(mesh) {
+			// this.meshWire = mesh;
+			var vertices = mesh._vertices;
+			console.log(vertices.length);
+
+			var positions = [];
+			var indices = [];
+			var coords = [];
+			var count = 0;
+
+			for (var i = 0; i < vertices.length; i += 3) {
+				positions.push(vertices[i + 0]);
+				positions.push(vertices[i + 1]);
+
+				coords.push([0, 0]);
+				coords.push([0, 0]);
+
+				indices.push(count * 2 + 0);
+				indices.push(count * 2 + 1);
+
+				count++;
+
+				positions.push(vertices[i + 1]);
+				positions.push(vertices[i + 2]);
+
+				coords.push([0, 0]);
+				coords.push([0, 0]);
+
+				indices.push(count * 2 + 0);
+				indices.push(count * 2 + 1);
+
+				count++;
+
+				positions.push(vertices[i + 2]);
+				positions.push(vertices[i + 0]);
+
+				coords.push([0, 0]);
+				coords.push([0, 0]);
+
+				indices.push(count * 2 + 0);
+				indices.push(count * 2 + 1);
+
+				count++;
+			}
+
+			this.meshWire = new _alfrid2.default.Mesh(GL.LINES);
+			this.meshWire.bufferVertex(positions);
+			this.meshWire.bufferTexCoords(coords);
+			this.meshWire.bufferIndices(indices);
+		}
+	}, {
 		key: 'render',
 		value: function render(textureRad, textureIrr, textureAO) {
 			if (!this.mesh) {
+				return;
+			}
+
+			if (params.showWires) {
+				this.shaderWire.bind();
+				GL.draw(this.meshWire);
 				return;
 			}
 
@@ -5787,13 +5858,14 @@ var ViewSkybox = function (_alfrid$View) {
 	function ViewSkybox() {
 		_classCallCheck(this, ViewSkybox);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSkybox).call(this, "#define GLSLIFY 1\n// basic.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\nvarying vec3 vCameraDir;\n\nvoid main(void) {\n\tgl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvVertex = aVertexPosition;\n}", "#define GLSLIFY 1\n// basic.frag\n\n#define SHADER_NAME BASIC_FRAGMENT\n\nprecision highp float;\n\nuniform samplerCube texture;\nuniform float\t\tuExposure;\nuniform float\t\tuGamma;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\nvoid main(void) {\n\tvec3 color   \t\t= textureCube(texture, vVertex).rgb;\n\n\tcolor\t\t\t\t= Uncharted2Tonemap( color * uExposure );\n\t// white balance\n\tcolor\t\t\t\t= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );\n\t\n\t// gamma correction\n\tcolor\t\t\t\t= pow( color, vec3( 1.0 / uGamma ) );\n\n\tgl_FragColor = vec4(color, 1.0);\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSkybox).call(this, "// basic.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\nvarying vec3 vCameraDir;\n\nvoid main(void) {\n\tgl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvVertex = aVertexPosition;\n}", "// basic.frag\n\n#define SHADER_NAME BASIC_FRAGMENT\n\nprecision highp float;\n#define GLSLIFY 1\n\nuniform samplerCube texture;\nuniform float\t\tuExposure;\nuniform float\t\tuGamma;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\nvoid main(void) {\n\tvec3 color   \t\t= textureCube(texture, vVertex).rgb;\n\n\tcolor\t\t\t\t= Uncharted2Tonemap( color * uExposure );\n\t// white balance\n\tcolor\t\t\t\t= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );\n\t\n\t// gamma correction\n\tcolor\t\t\t\t= pow( color, vec3( 1.0 / uGamma ) );\n\n\tgl_FragColor = vec4(color, 1.0);\n}"));
 	}
 
 	_createClass(ViewSkybox, [{
 		key: '_init',
 		value: function _init() {
 			this.mesh = _alfrid2.default.Geom.skybox(15);
+			this.meshWire = _alfrid2.default.Geom.skybox(15, false, GL.LINES);
 		}
 	}, {
 		key: 'render',
@@ -5803,7 +5875,7 @@ var ViewSkybox = function (_alfrid$View) {
 			this.shader.uniform("uExposure", "uniform1f", params.exposure);
 			this.shader.uniform("uGamma", "uniform1f", params.gamma);
 			textureRad.bind(0);
-			GL.draw(this.mesh);
+			GL.draw(params.showWires ? this.meshWire : this.mesh);
 		}
 	}]);
 
@@ -5842,7 +5914,7 @@ var ViewTreshold = function (_alfrid$View) {
 	function ViewTreshold() {
 		_classCallCheck(this, ViewTreshold);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewTreshold).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// threshold.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float threshold;\n\nvoid main(void) {\n    vec4 color = texture2D(texture, vTextureCoord);\n    float br = length(color.rgb) / length(vec3(1.0));\n\n    if(br < threshold) color.rgb = vec3(0.0);\n\n    gl_FragColor = color;\n    // gl_FragColor = texture2D(texture, vTextureCoord);\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewTreshold).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "// threshold.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float threshold;\n\nvoid main(void) {\n    vec4 color = texture2D(texture, vTextureCoord);\n    float br = length(color.rgb) / length(vec3(1.0));\n\n    if(br < threshold) color.rgb = vec3(0.0);\n\n    gl_FragColor = color;\n    // gl_FragColor = texture2D(texture, vTextureCoord);\n}"));
 	}
 
 	_createClass(ViewTreshold, [{
@@ -5898,15 +5970,17 @@ window.params = {
 	metallic: 1,
 	roughness: 0,
 	specular: 1,
-	offset: .0,
+	offset: .95,
 
 	gamma: 2.2,
-	exposure: 1,
+	exposure: 1.0,
 	threshold: .85,
 	blurRange: .5,
 	numBlur: 1,
-	multiply: 1,
-	debug: false
+	multiply: 1.0,
+	debug: false,
+
+	showWires: false
 
 };
 
@@ -5932,6 +6006,12 @@ function _init() {
 		var loader = document.body.querySelector('.Loading-Bar');
 		loader.style.width = (p * 100).toFixed(2) + '%';
 	}).on('complete', _onImageLoaded).start();
+
+	window.addEventListener('keydown', function (e) {
+		if (e.keyCode == 87) {
+			params.showWires = !params.showWires;
+		}
+	});
 }
 
 function _onImageLoaded(o) {
@@ -5951,7 +6031,7 @@ function _onImageLoaded(o) {
 	var gui = new _datGui2.default.GUI({ width: 300 });
 	gui.add(params, 'offset', 0, 1).listen();
 	gui.add(params, 'threshold', 0.5, 1);
-	gui.add(params, 'blurRange', 0.5, 1);
+	gui.add(params, 'blurRange', 0.25, 1);
 	gui.add(params, 'debug');
 	gui.close();
 }

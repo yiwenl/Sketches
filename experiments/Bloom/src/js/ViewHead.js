@@ -10,6 +10,14 @@ class ViewHead extends alfrid.View {
 		let fs = glslify('../shaders/pbr.frag');
 		fs = fs.replace('{{NUM_PARTICLES}}', params.numParticles.toFixed(1));
 		super(glslify('../shaders/pbr.vert'), fs);
+
+		this.shaderWire = new alfrid.GLShader(alfrid.ShaderLibs.generalVert, alfrid.ShaderLibs.simpleColorFrag);
+		this.shaderWire.bind();
+		this.shaderWire.uniform("position", "uniform3fv", [0, -2.5, 0]);
+		this.shaderWire.uniform("color", "uniform3fv", [1, 1, 1]);
+		this.shaderWire.uniform("scale", "uniform3fv", [2.3, 2.3, 2.3]);
+		this.shaderWire.uniform("opacity", "uniform1f", 1);
+
 		this.isReady = false;
 	}
 
@@ -17,6 +25,9 @@ class ViewHead extends alfrid.View {
 	_init() {
 		this._objLoader 	  = new alfrid.ObjLoader();
 		this._objLoader.load('./assets/004.obj', (mesh)=>this._onObjLoaded(mesh), false);
+
+		this._objLoader1 	  = new alfrid.ObjLoader();
+		this._objLoader1.load('./assets/005.obj', (meshWire)=>this._onObjWireLoaded(meshWire), false, true, GL.LINES);
 	}
 
 	_onObjLoaded(mesh) {
@@ -24,9 +35,66 @@ class ViewHead extends alfrid.View {
 		this.isReady = true;
 	}
 
+	_onObjWireLoaded(mesh) {
+		// this.meshWire = mesh;
+		let vertices = mesh._vertices;
+		console.log(vertices.length);
+
+		let positions = []
+		let indices = [];
+		let coords = [];
+		let count = 0;
+
+		for(let i=0; i<vertices.length; i+=3) {
+			positions.push(vertices[i+0]);
+			positions.push(vertices[i+1]);
+
+			coords.push([0, 0]);
+			coords.push([0, 0]);
+
+			indices.push(count * 2 + 0);
+			indices.push(count * 2 + 1);
+
+			count ++;
+
+			positions.push(vertices[i+1]);
+			positions.push(vertices[i+2]);
+
+			coords.push([0, 0]);
+			coords.push([0, 0]);
+
+			indices.push(count * 2 + 0);
+			indices.push(count * 2 + 1);
+
+			count ++;
+
+			positions.push(vertices[i+2]);
+			positions.push(vertices[i+0]);
+
+			coords.push([0, 0]);
+			coords.push([0, 0]);
+
+			indices.push(count * 2 + 0);
+			indices.push(count * 2 + 1);
+
+			count ++;
+		}
+
+
+		this.meshWire = new alfrid.Mesh(GL.LINES);
+		this.meshWire.bufferVertex(positions);
+		this.meshWire.bufferTexCoords(coords);
+		this.meshWire.bufferIndices(indices);
+	}
 
 	render(textureRad, textureIrr, textureAO) {
 		if(!this.mesh) {
+			return;
+		}
+
+		if(params.showWires) {
+			this.shaderWire.bind();
+			GL.draw(this.meshWire);
 			return;
 		}
 

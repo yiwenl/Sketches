@@ -13,12 +13,13 @@ window.params = {
 	exposure:5,
 	maxRange:15,
 
-	numParticles:512,
+	numParticles:32,
 	particleLightDensity:.35,
 	particleAvoidingForce:.2,
 	particleAvoidingDistance:.3,
 
-	skipCount:1
+	skipCount:1,
+	showWires:false
 };
 
 if(document.body) {
@@ -56,6 +57,13 @@ function _init() {
 		loader.style.width = (p * 100).toFixed(2) + '%';
 	}).on('complete', _onImageLoaded)
 	.start();
+
+	window.addEventListener('keydown', (e)=>{
+		if(e.keyCode == 87) {
+			params.showWires = !params.showWires
+			console.log(params.showWires);
+		}
+	})
 }
 
 

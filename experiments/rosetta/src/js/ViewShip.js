@@ -23,6 +23,9 @@ class ViewShip extends alfrid.View {
 	_init() {
 		let loader = new alfrid.ObjLoader();
 		loader.load('./assets/Rosetta.obj', (o)=>this._onObjLoaded(o), false);
+
+		let loader0 = new alfrid.ObjLoader();
+		loader0.load('./assets/Rosetta.obj', (o)=>this._onObjWireLoaded(o), false, GL.LINES);
 	}
 
 
@@ -32,6 +35,11 @@ class ViewShip extends alfrid.View {
 		}
 
 		this.mesh = o;
+	}
+
+	_onObjWireLoaded(o) {
+		console.log('here' , o);
+		this.meshWire = o;
 	}
 
 
@@ -62,7 +70,7 @@ class ViewShip extends alfrid.View {
 		this.shader.uniform("position", "uniform3fv", [this.x, this.y, this.z]);
 		this.shader.uniform("scale", "uniform3fv", [this.scale, this.scale, this.scale]);
 
-		GL.draw(this.mesh);
+		GL.draw(params.showWires ? this.meshWire : this.mesh);
 	}
 
 
