@@ -1,17 +1,22 @@
 import alfrid from './libs/alfrid.js';
 import SceneApp from './SceneApp';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 import AssetsLoader from 'assets-loader';
-
+const NUM = 2;
 
 window.params = {
-	numParticles:128 * 3,
+	numParticles:128 * NUM,
 	skipCount:2,
 	shadowStrength:.35,
 	shadowThreshold:.55,
-	numSlides:6,
+	numSlides:2 * NUM,
 	gamma:2.2,
-	exposure:5
+	exposure:5,
+
+	threshold:.85,
+	blurRange:.5,
+	numBlur:1,
+	multiply:1
 };
 
 let assets = [
@@ -37,6 +42,8 @@ if(document.body) {
 }
 
 function _init() {
+	document.body.classList.add('isLoading');
+	
 	console.debug('Total Particles :' , params.numParticles * params.numParticles);
 	let loader = new AssetsLoader({
 		assets:assets
@@ -44,8 +51,8 @@ function _init() {
 		console.error(error);
 	}).on('progress', function(p) {
 		console.log('Progress : ', p);
-		// let loader = document.body.querySelector('.Loading-Bar');
-		// loader.style.width = (p * 100).toFixed(2) + '%';
+		let loader = document.body.querySelector('.Loading-Bar');
+		loader.style.width = (p * 100).toFixed(2) + '%';
 	}).on('complete', _onImageLoaded)
 	.start();
 }
@@ -53,6 +60,8 @@ function _init() {
 
 function _onImageLoaded(o) {
 	window.assets = o;
+
+	document.body.classList.remove('isLoading');
 
 	//	CREATE CANVAS
 	let canvas = document.createElement("canvas");
@@ -66,6 +75,6 @@ function _onImageLoaded(o) {
 	let scene = new SceneApp();
 
 
-	let gui = new dat.GUI({width:300});
+	// let gui = new dat.GUI({width:300});
 
 }

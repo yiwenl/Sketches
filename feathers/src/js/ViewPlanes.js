@@ -33,6 +33,9 @@ class ViewPlanes extends alfrid.View {
 		// const MAX_COUNT  = 15000;
 		const num = numParticles / NUM_SLIDES;
 
+
+		console.log(numParticles, NUM_SLIDES, num);
+
 		for(let j=0; j<num; j++) {
 			for(let i=0; i<num; i++) {
 				ux = i/numParticles + .5/numParticles;
@@ -114,6 +117,11 @@ class ViewPlanes extends alfrid.View {
 	render(texture, textureNext, percent, uvIndex, flip, shadowMatrix, textureRad, textureIrr) {
 		// this._flip = this._flip == 0 ? 1 : 0;
 		// let shader = shadowMapTexture === undefined ? this.shader : this.shaderShadow;
+		let NUM_SLIDES   = params.numSlides;
+		let x = (uvIndex % NUM_SLIDES) / NUM_SLIDES;
+		let y = Math.floor(uvIndex / NUM_SLIDES) / NUM_SLIDES;
+
+
 		let shader = this.shader;
 		shader.bind();
 		shader.uniform("texture", "uniform1i", 0);
@@ -123,6 +131,7 @@ class ViewPlanes extends alfrid.View {
 		shader.uniform("percent", "uniform1f", percent);
 		shader.uniform("flip", "uniform1f", flip);
 		shader.uniform("uvIndex", "uniform1f", uvIndex);
+		shader.uniform("uvOffset", "uniform2fv", [x, y]);
 		shader.uniform("numSlides", "uniform1f", params.numSlides);
 		shader.uniform("uShadowMatrix", "uniformMatrix4fv", shadowMatrix);
 

@@ -19,6 +19,7 @@ uniform sampler2D textureNext;
 uniform float percent;
 uniform float flip;
 uniform float uvIndex;
+uniform vec2 uvOffset;
 uniform float numSlides;
 
 varying vec3 vNormal;
@@ -74,13 +75,8 @@ vec3 rotate(vec3 v, mat4 m) {
 }
 
 void main(void) {
-	vec2 uv         = aTextureCoord * .5;
-	
-	uv              *= .5;		
-	float uvSize    = .5/numSlides;
-	float tx        = mod(uvIndex, numSlides) * uvSize;
-	float ty        = floor(uvIndex / numSlides) * uvSize;
-	uv              += vec2(tx, ty);
+	vec2 uv         = aTextureCoord;
+	uv              += uvOffset;
 	vec3 currPos    = texture2D(texture, uv).rgb;
 	vec3 nextPos    = texture2D(textureNext, uv).rgb;
 	vec3 pos        = mix(currPos, nextPos, percent);
@@ -113,7 +109,7 @@ void main(void) {
 	vec4 eyeDirViewSpace	= viewSpacePosition - vec4( 0, 0, 0, 1 );
 	vEyePosition			= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );
 	// vWsNormal				= normalize(mLookAt*aNormal);
-	vWsNormal				= rotate(aNormal, mtxRot);
+	vWsNormal				= normalize(rotate(aNormal, mtxRot));
 
 	// vec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 	// vec4 V          = uProjectionMatrix * mvPosition;

@@ -6,7 +6,9 @@ import ViewSimulation from './ViewSimulation';
 import ViewPlanes from './ViewPlanes';
 import ViewAddVel from './ViewAddVel';
 import ViewSkybox from './ViewSkybox';
-
+import ViewThreshold from './ViewTreshold';
+import ViewBlur from './ViewBlur';
+import ViewBloom from './ViewBloom';
 
 let GL;
 
@@ -18,6 +20,7 @@ class SceneApp extends alfrid.Scene {
 
 		this.camera.setPerspective(Math.PI * .5, GL.aspectRatio, 1, 200);
 		this.orbitalControl._rx.value = .3;
+		this.orbitalControl._ry.value = 8;
 		this._count = 0;
 		this._flip = 0;
 
@@ -76,6 +79,9 @@ class SceneApp extends alfrid.Scene {
 		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboExtra      = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboRender     = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost0      = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost1      = new alfrid.FrameBuffer(GL.width, GL.height);
 
 		let shadowMapSize = 1024;
 		this._fboShadowMap = new alfrid.FrameBuffer(shadowMapSize, shadowMapSize);
@@ -86,13 +92,16 @@ class SceneApp extends alfrid.Scene {
 		console.log('Init Views');
 		this._bAxis      = new alfrid.BatchAxis();
 		this._bDotsPlane = new alfrid.BatchDotsPlane();
-		this._bCopy 	 = new alfrid.BatchCopy();
-
-		this._vRender	 = new ViewRender();
-		this._vPlanes 	 = new ViewPlanes();
-		this._vSim		 = new ViewSimulation();
-		this._vAddVel = new ViewAddVel();
+		this._bCopy      = new alfrid.BatchCopy();
+		
+		this._vRender    = new ViewRender();
+		this._vPlanes    = new ViewPlanes();
+		this._vSim       = new ViewSimulation();
+		this._vAddVel    = new ViewAddVel();
 		this._vSkybox    = new ViewSkybox();
+		this._vThreshold = new ViewThreshold();
+		this._vBlur      = new ViewBlur();
+		this._vBloom     = new ViewBloom();
 
 		//	SAVE INIT POSITIONS
 		this._vSave = new ViewSave();
@@ -149,27 +158,73 @@ class SceneApp extends alfrid.Scene {
 		p = this._count / params.skipCount;
 		this._count ++;
 
-		// this.orbitalControl._ry.value += -.01;
+		this.orbitalControl._ry.value += -.01;
 
 		this._flip = this._flip == 0 ? 1 : 0;
 		let total = params.numSlides * params.numSlides;
 
-		this._vSkybox.render(this._textureRad);
+
+		this._fboRender.bind();
+		GL.clear(0, 0, 0, 0);
+
 		for(let i=0; i<total; i++) {
 			this._vPlanes.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, i, this._flip, this.shadowMatrix, this._textureRad, this._textureIrr);
 		}
 
-		// this._vRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p);
-		
+		this._fboRender.unbind();	
 
 
-		GL.setMatrices(this.cameraOrtho);
 		GL.disable(GL.DEPTH_TEST);
-		let viewSize = 300;
-		GL.viewport(0, 0, viewSize, viewSize);
-		// this._bCopy.draw(this._fboShadowMap.getTexture());
-		// this._bCopy.draw(this._fboCurrent.getTexture());
+
+		this._fboPost0.bind();
+		GL.clear(0, 0, 0, 1);
+		this._vThreshold.render(this._fboRender.getTexture());
+		this._fboPost0.unbind();
+
+
+		for(let i=0; i<params.numBlur; i++) {
+			this._fboPost1.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vBlur.render(this._fboPost0.getTexture(), true);
+			this._fboPost1.unbind();
+
+			this.swap();
+
+			this._fboPost1.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vBlur.render(this._fboPost0.getTexture(), false);
+			this._fboPost1.unbind();
+
+			this.swap();	
+		}
+		
+		// this._bCopy.draw(this._fboPost0.getTexture());
+		this._vSkybox.render(this._textureRad);
+		this._vBloom.render(this._fboRender.getTexture(), this._fboPost0.getTexture());
+
+		let size = 350;
+		GL.viewport(0, 0, size, size / GL.aspectRatio);
+		if(params.debug) {
+			this._bCopy.draw(this._fboPost0.getTexture());	
+		}
+		
 		GL.enable(GL.DEPTH_TEST);
+
+	}
+
+	swap() {
+		let tmp = this._fboPost0;
+		this._fboPost0 = this._fboPost1;
+		this._fboPost1 = tmp;
+	}
+
+	resize() {
+		GL.setSize(window.innerWidth, window.innerHeight);
+		this.camera.setAspectRatio(GL.aspectRatio);
+
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost0 = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost1 = new alfrid.FrameBuffer(GL.width, GL.height);
 	}
 }
 
