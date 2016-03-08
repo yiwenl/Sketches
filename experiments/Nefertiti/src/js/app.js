@@ -17,7 +17,8 @@ window.params = {
 	offset:1,
 
 	gamma:2.2,
-	exposure:5
+	exposure:5,
+	showWires:false
 };
 
 let assets = [
@@ -57,6 +58,13 @@ function _init() {
 		loader.style.width = (p * 100).toFixed(2) + '%';
 	}).on('complete', _onImageLoaded)
 	.start();
+
+
+	window.addEventListener('keydown', (e)=>{
+		if(e.keyCode == 87) {
+			params.showWires = !params.showWires
+		}
+	})
 }
 
 

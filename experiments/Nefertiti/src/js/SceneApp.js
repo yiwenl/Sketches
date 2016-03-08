@@ -106,7 +106,7 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	render() {
-		this.orbitalControl._ry.value += .01;
+		// this.orbitalControl._ry.value += .01;
 		let p = 0;
 
 		if(this._count % params.skipCount === 0) {
