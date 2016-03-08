@@ -1,0 +1,30 @@
+html, body {
+	width:100%;
+	height:100%;
+
+	margin:0;
+	padding:0;
+
+	overflow:hidden;
+	position: static;
+	background: #fff;
+}
+
+html {
+	-webkit-text-size-adjust: none;
+	-moz-text-size-adjust: none;
+	text-size-adjust: none;
+}
+
+h1,h2,h3,h4,text,p {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-webkit-font-smoothing: antialiased;
+}
+
+.Main-Canvas {
+	width:100%;
+	height:100%;
+	top:0px;
+	left:0px;
+	position: absolute;
+}
