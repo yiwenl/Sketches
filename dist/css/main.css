@@ -16,9 +16,29 @@ h1, h2, h3, h4, text, p {
   -webkit-font-smoothing: antialiased;
   -moz-osx-webkit-font-smoothing: antialiased; }
 
-.Main-Canvas {
-  width: 100%;
+.main-Container {
+  max-width: 1000px;
   height: 100%;
-  top: 0px;
-  left: 0px;
-  position: absolute; }
+  overflow-y: auto;
+  margin: 0 auto;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: flex-start;
+  -ms-flex-align: start;
+  align-items: flex-start;
+  -webkit-align-content: flex-start;
+  -ms-flex-line-pack: start;
+  align-content: flex-start;
+  -webkit-justify-content: flex-start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  background: rgba(0, 0, 0, 0.5); }
+
+.exp-container {
+  width: 250px;
+  height: 250px;
+  background: rgba(20, 0, 0, 0.5); }

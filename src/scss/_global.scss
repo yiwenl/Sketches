@@ -21,10 +21,24 @@ h1,h2,h3,h4,text,p {
 	-moz-osx-webkit-font-smoothing: antialiased;
 }
 
-.Main-Canvas {
-	width:100%;
+.main-Container {
+	max-width: 1000px;
 	height:100%;
-	top:0px;
-	left:0px;
-	position: absolute;
+	overflow-y: auto;
+	margin:0 auto;
+
+	display: flex;
+	align-items: flex-start;
+	align-content: flex-start;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+
+
+	background:rgba(0, 0, 0, .5);
+}
+
+.exp-container {
+	width: 250px;
+	height: 250px;
+	background:rgba(20, 0, 0, .5);
 }

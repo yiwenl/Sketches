@@ -11,7 +11,16 @@
 
 	var p = App.prototype;
 
-	p._init = function () {};
+	p._init = function () {
+
+		var numItems = 5;
+		var container = document.body.querySelector('.main-Container');
+		for (var i = 0; i < numItems; i++) {
+			var div = document.createElement("div");
+			div.className = 'exp-container';
+			container.appendChild(div);
+		}
+	};
 
 	new App();
 })();
