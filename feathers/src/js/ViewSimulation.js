@@ -22,11 +22,16 @@ class ViewSimulation extends alfrid.View {
 	}
 
 
-	render(texture) {
+	render(textureVel, texturePos, textureExtra) {
 		this.time += .01;
 		this.shader.bind();
-		this.shader.uniform("texture", "uniform1i", 0);
-		texture.bind(0);
+		this.shader.uniform("textureVel", "uniform1i", 0);
+		this.shader.uniform("texturePos", "uniform1i", 1);
+		this.shader.uniform("textureExtra", "uniform1i", 2);
+		textureVel.bind(0);
+		texturePos.bind(1);
+		textureExtra.bind(2);
+
 		this.shader.uniform("time", "uniform1f", this.time);
 		this.shader.uniform("skipCount", "uniform1f", params.skipCount);
 

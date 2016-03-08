@@ -31,9 +31,10 @@ class ViewPlanes extends alfrid.View {
 		
 		let NUM_SLIDES   = params.numSlides;
 		// const MAX_COUNT  = 15000;
+		const num = numParticles / NUM_SLIDES;
 
-		for(let j=0; j<numParticles/NUM_SLIDES; j++) {
-			for(let i=0; i<numParticles/NUM_SLIDES; i++) {
+		for(let j=0; j<num; j++) {
+			for(let i=0; i<num; i++) {
 				ux = i/numParticles + .5/numParticles;
 				uy = j/numParticles + .5/numParticles;
 				let size       = random(.03, .05);

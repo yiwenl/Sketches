@@ -4,6 +4,7 @@ import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSimulation from './ViewSimulation';
 import ViewPlanes from './ViewPlanes';
+import ViewAddVel from './ViewAddVel';
 import ViewSkybox from './ViewSkybox';
 
 
@@ -69,8 +70,12 @@ class SceneApp extends alfrid.Scene {
 			minFilter:GL.NEAREST,
 			magFilter:GL.NEAREST
 		}
-		this._fboCurrent = new alfrid.FrameBuffer(numParticles*2, numParticles*2, o);
-		this._fboTarget  = new alfrid.FrameBuffer(numParticles*2, numParticles*2, o);
+
+		this._fboCurrentPos = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboExtra      = new alfrid.FrameBuffer(numParticles, numParticles, o);
 
 		let shadowMapSize = 1024;
 		this._fboShadowMap = new alfrid.FrameBuffer(shadowMapSize, shadowMapSize);
@@ -86,36 +91,51 @@ class SceneApp extends alfrid.Scene {
 		this._vRender	 = new ViewRender();
 		this._vPlanes 	 = new ViewPlanes();
 		this._vSim		 = new ViewSimulation();
+		this._vAddVel = new ViewAddVel();
 		this._vSkybox    = new ViewSkybox();
 
 		//	SAVE INIT POSITIONS
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
 
-		this._fboCurrent.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vSave.render();
+		this._fboCurrentPos.bind();
+		this._vSave.render(0);
+		this._fboCurrentPos.unbind();
 
-		this._fboCurrent.unbind();
+		this._fboExtra.bind();
+		this._vSave.render(1);
+		this._fboExtra.unbind();
+
+		this._fboTargetPos.bind();
+		this._bCopy.draw(this._fboCurrentPos.getTexture());
+		this._fboTargetPos.unbind();
+
 		GL.viewport(0, 0, GL.width, GL.height);
 		GL.setMatrices(this.camera);
 	}
 
 
 	updateFbo() {
-		GL.setMatrices(this.cameraOrtho);
+		this._fboTargetVel.bind();
+		GL.clear(0, 0, 0, 1);
+		this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
+		this._fboTargetVel.unbind();
 
-		this._fboTarget.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vSim.render(this._fboCurrent.getTexture());
-		this._fboTarget.unbind();
-		GL.viewport(0, 0, GL.width, GL.height);
-		GL.setMatrices(this.camera);
 
-		//	PING PONG
-		var tmp = this._fboTarget;
-		this._fboTarget = this._fboCurrent;
-		this._fboCurrent = tmp;
+		//	Update position : bind target Position, render addVel with current position / target velocity;
+		this._fboTargetPos.bind();
+		GL.clear(0, 0, 0, 1);
+		this._vAddVel.render(this._fboCurrentPos.getTexture(), this._fboTargetVel.getTexture());
+		this._fboTargetPos.unbind();
+
+		//	SWAPPING : PING PONG
+		let tmpVel          = this._fboCurrentVel;
+		this._fboCurrentVel = this._fboTargetVel;
+		this._fboTargetVel  = tmpVel;
+
+		let tmpPos          = this._fboCurrentPos;
+		this._fboCurrentPos = this._fboTargetPos;
+		this._fboTargetPos  = tmpPos;
 	}
 
 
@@ -136,7 +156,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._vSkybox.render(this._textureRad);
 		for(let i=0; i<total; i++) {
-			this._vPlanes.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, i, this._flip, this.shadowMatrix, this._textureRad, this._textureIrr);
+			this._vPlanes.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, i, this._flip, this.shadowMatrix, this._textureRad, this._textureIrr);
 		}
 
 		// this._vRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p);

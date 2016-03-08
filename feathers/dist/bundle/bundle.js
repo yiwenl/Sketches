@@ -5391,6 +5391,10 @@ var _ViewPlanes = require('./ViewPlanes');
 
 var _ViewPlanes2 = _interopRequireDefault(_ViewPlanes);
 
+var _ViewAddVel = require('./ViewAddVel');
+
+var _ViewAddVel2 = _interopRequireDefault(_ViewAddVel);
+
 var _ViewSkybox = require('./ViewSkybox');
 
 var _ViewSkybox2 = _interopRequireDefault(_ViewSkybox);
@@ -5471,8 +5475,12 @@ var SceneApp = function (_alfrid$Scene) {
 				minFilter: GL.NEAREST,
 				magFilter: GL.NEAREST
 			};
-			this._fboCurrent = new _alfrid2.default.FrameBuffer(numParticles * 2, numParticles * 2, o);
-			this._fboTarget = new _alfrid2.default.FrameBuffer(numParticles * 2, numParticles * 2, o);
+
+			this._fboCurrentPos = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
+			this._fboTargetPos = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
+			this._fboCurrentVel = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
+			this._fboTargetVel = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
+			this._fboExtra = new _alfrid2.default.FrameBuffer(numParticles, numParticles, o);
 
 			var shadowMapSize = 1024;
 			this._fboShadowMap = new _alfrid2.default.FrameBuffer(shadowMapSize, shadowMapSize);
@@ -5488,36 +5496,50 @@ var SceneApp = function (_alfrid$Scene) {
 			this._vRender = new _ViewRender2.default();
 			this._vPlanes = new _ViewPlanes2.default();
 			this._vSim = new _ViewSimulation2.default();
+			this._vAddVel = new _ViewAddVel2.default();
 			this._vSkybox = new _ViewSkybox2.default();
 
 			//	SAVE INIT POSITIONS
 			this._vSave = new _ViewSave2.default();
 			GL.setMatrices(this.cameraOrtho);
 
-			this._fboCurrent.bind();
-			GL.clear(0, 0, 0, 0);
-			this._vSave.render();
+			this._fboCurrentPos.bind();
+			this._vSave.render(0);
+			this._fboCurrentPos.unbind();
 
-			this._fboCurrent.unbind();
+			this._fboExtra.bind();
+			this._vSave.render(1);
+			this._fboExtra.unbind();
+
+			this._fboTargetPos.bind();
+			this._bCopy.draw(this._fboCurrentPos.getTexture());
+			this._fboTargetPos.unbind();
+
 			GL.viewport(0, 0, GL.width, GL.height);
 			GL.setMatrices(this.camera);
 		}
 	}, {
 		key: 'updateFbo',
 		value: function updateFbo() {
-			GL.setMatrices(this.cameraOrtho);
+			this._fboTargetVel.bind();
+			GL.clear(0, 0, 0, 1);
+			this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
+			this._fboTargetVel.unbind();
 
-			this._fboTarget.bind();
-			GL.clear(0, 0, 0, 0);
-			this._vSim.render(this._fboCurrent.getTexture());
-			this._fboTarget.unbind();
-			GL.viewport(0, 0, GL.width, GL.height);
-			GL.setMatrices(this.camera);
+			//	Update position : bind target Position, render addVel with current position / target velocity;
+			this._fboTargetPos.bind();
+			GL.clear(0, 0, 0, 1);
+			this._vAddVel.render(this._fboCurrentPos.getTexture(), this._fboTargetVel.getTexture());
+			this._fboTargetPos.unbind();
 
-			//	PING PONG
-			var tmp = this._fboTarget;
-			this._fboTarget = this._fboCurrent;
-			this._fboCurrent = tmp;
+			//	SWAPPING : PING PONG
+			var tmpVel = this._fboCurrentVel;
+			this._fboCurrentVel = this._fboTargetVel;
+			this._fboTargetVel = tmpVel;
+
+			var tmpPos = this._fboCurrentPos;
+			this._fboCurrentPos = this._fboTargetPos;
+			this._fboTargetPos = tmpPos;
 		}
 	}, {
 		key: 'render',
@@ -5538,7 +5560,7 @@ var SceneApp = function (_alfrid$Scene) {
 
 			this._vSkybox.render(this._textureRad);
 			for (var i = 0; i < total; i++) {
-				this._vPlanes.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, i, this._flip, this.shadowMatrix, this._textureRad, this._textureIrr);
+				this._vPlanes.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, i, this._flip, this.shadowMatrix, this._textureRad, this._textureIrr);
 			}
 
 			// this._vRender.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p);
@@ -5558,7 +5580,65 @@ var SceneApp = function (_alfrid$Scene) {
 
 exports.default = SceneApp;
 
-},{"./ViewPlanes":12,"./ViewRender":13,"./ViewSave":14,"./ViewSimulation":15,"./ViewSkybox":16,"./libs/alfrid.js":18}],12:[function(require,module,exports){
+},{"./ViewAddVel":12,"./ViewPlanes":13,"./ViewRender":14,"./ViewSave":15,"./ViewSimulation":16,"./ViewSkybox":17,"./libs/alfrid.js":19}],12:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _alfrid = require('./libs/alfrid.js');
+
+var _alfrid2 = _interopRequireDefault(_alfrid);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // ViewAddVel.js
+
+var GL = _alfrid2.default.GL;
+
+
+var ViewAddVel = function (_alfrid$View) {
+	_inherits(ViewAddVel, _alfrid$View);
+
+	function ViewAddVel() {
+		_classCallCheck(this, ViewAddVel);
+
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewAddVel).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// addvel.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texturePos;\nuniform sampler2D textureVel;\n\nvoid main(void) {\n\tvec3 pos = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel = texture2D(textureVel, vTextureCoord).rgb;\n\n    gl_FragColor = vec4(pos + vel, 1.0);\n}"));
+	}
+
+	_createClass(ViewAddVel, [{
+		key: '_init',
+		value: function _init() {
+			this.mesh = _alfrid2.default.Geom.bigTriangle();
+		}
+	}, {
+		key: 'render',
+		value: function render(texturePos, textureVel) {
+			this.shader.bind();
+
+			this.shader.uniform("texturePos", "uniform1i", 0);
+			texturePos.bind(0);
+
+			this.shader.uniform("textureVel", "uniform1i", 1);
+			textureVel.bind(1);
+
+			GL.draw(this.mesh);
+		}
+	}]);
+
+	return ViewAddVel;
+}(_alfrid2.default.View);
+
+exports.default = ViewAddVel;
+
+},{"./libs/alfrid.js":19}],13:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5618,9 +5698,10 @@ var ViewPlanes = function (_alfrid$View) {
 
 			var NUM_SLIDES = params.numSlides;
 			// const MAX_COUNT  = 15000;
+			var num = numParticles / NUM_SLIDES;
 
-			for (var j = 0; j < numParticles / NUM_SLIDES; j++) {
-				for (var i = 0; i < numParticles / NUM_SLIDES; i++) {
+			for (var j = 0; j < num; j++) {
+				for (var i = 0; i < num; i++) {
 					ux = i / numParticles + .5 / numParticles;
 					uy = j / numParticles + .5 / numParticles;
 					var size = random(.03, .05);
@@ -5743,7 +5824,7 @@ var ViewPlanes = function (_alfrid$View) {
 
 exports.default = ViewPlanes;
 
-},{"./libs/alfrid.js":18}],13:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5821,7 +5902,7 @@ var ViewRender = function (_alfrid$View) {
 
 exports.default = ViewRender;
 
-},{"./libs/alfrid.js":18}],14:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],15:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5866,27 +5947,25 @@ var ViewSave = function (_alfrid$View) {
 		value: function _init() {
 
 			var positions = [];
+			var extras = [];
 			var coords = [];
 			var indices = [];
 			var count = 0;
 
 			var numParticles = params.numParticles;
 			var totalParticles = numParticles * numParticles;
-			var ux, uy;
+			var ux = undefined,
+			    uy = undefined;
 			var range = 1.5;
 
 			for (var j = 0; j < numParticles; j++) {
 				for (var i = 0; i < numParticles; i++) {
 					positions.push([random(-range, range), random(-range, range), random(-range, range)]);
+					extras.push([Math.random(), Math.random(), Math.random()]);
 
-					ux = i / numParticles - 1.0 + .5 / numParticles;
-					uy = j / numParticles - 1.0 + .5 / numParticles;
+					ux = i / numParticles * 2.0 - 1.0 + .5 / numParticles;
+					uy = j / numParticles * 2.0 - 1.0 + .5 / numParticles;
 					coords.push([ux, uy]);
-					indices.push(count);
-					count++;
-
-					positions.push([Math.random(), Math.random(), Math.random()]);
-					coords.push([ux, uy + 1.0]);
 					indices.push(count);
 					count++;
 				}
@@ -5896,13 +5975,23 @@ var ViewSave = function (_alfrid$View) {
 			this.mesh.bufferVertex(positions);
 			this.mesh.bufferTexCoords(coords);
 			this.mesh.bufferIndices(indices);
+
+			this.meshExtra = new _alfrid2.default.Mesh(GL.POINTS);
+			this.meshExtra.bufferVertex(extras);
+			this.meshExtra.bufferTexCoords(coords);
+			this.meshExtra.bufferIndices(indices);
 		}
 	}, {
 		key: 'render',
 		value: function render() {
+			var state = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 
 			this.shader.bind();
-			GL.draw(this.mesh);
+			if (state == 0) {
+				GL.draw(this.mesh);
+			} else if (state == 1) {
+				GL.draw(this.meshExtra);
+			}
 		}
 	}]);
 
@@ -5911,7 +6000,7 @@ var ViewSave = function (_alfrid$View) {
 
 exports.default = ViewSave;
 
-},{"./libs/alfrid.js":18}],15:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],16:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5942,7 +6031,7 @@ var ViewSimulation = function (_alfrid$View) {
 	function ViewSimulation() {
 		_classCallCheck(this, ViewSimulation);
 
-		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSimulation).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float time;\nuniform float skipCount;\n\nvec3 mod289(vec3 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 mod289(vec4 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 permute(vec4 x) {\treturn mod289(((x*34.0)+1.0)*x);\t}\n\nvec4 taylorInvSqrt(vec4 r) {\treturn 1.79284291400159 - 0.85373472095314 * r;}\n\nfloat snoise(vec3 v) { \n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);\n\n// First corner\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n// Other corners\n  vec3 g = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g;\n  vec3 i1 = min( g.xyz, l.zxy );\n  vec3 i2 = max( g.xyz, l.zxy );\n\n  //   x0 = x0 - 0.0 + 0.0 * C.xxx;\n  //   x1 = x0 - i1  + 1.0 * C.xxx;\n  //   x2 = x0 - i2  + 2.0 * C.xxx;\n  //   x3 = x0 - 1.0 + 3.0 * C.xxx;\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n// Permutations\n  i = mod289(i); \n  vec4 p = permute( permute( permute( \n             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n           + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) \n           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n// Gradients: 7x7 points over a square, mapped onto an octahedron.\n// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D.wyz - D.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;\n  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1.xy,h.z);\n  vec3 p3 = vec3(a1.zw,h.w);\n\n//Normalise gradients\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n// Mix final noise value\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), \n                                dot(p2,x2), dot(p3,x3) ) );\n}\n\nvec3 snoiseVec3( vec3 x ){\n\n  float s  = snoise(vec3( x ));\n  float s1 = snoise(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));\n  float s2 = snoise(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));\n  vec3 c = vec3( s , s1 , s2 );\n  return c;\n\n}\n\nvec3 curlNoise( vec3 p ){\n  \n  const float e = .1;\n  vec3 dx = vec3( e   , 0.0 , 0.0 );\n  vec3 dy = vec3( 0.0 , e   , 0.0 );\n  vec3 dz = vec3( 0.0 , 0.0 , e   );\n\n  vec3 p_x0 = snoiseVec3( p - dx );\n  vec3 p_x1 = snoiseVec3( p + dx );\n  vec3 p_y0 = snoiseVec3( p - dy );\n  vec3 p_y1 = snoiseVec3( p + dy );\n  vec3 p_z0 = snoiseVec3( p - dz );\n  vec3 p_z1 = snoiseVec3( p + dz );\n\n  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;\n  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;\n  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;\n\n  const float divisor = 1.0 / ( 2.0 * e );\n  return normalize( vec3( x , y , z ) * divisor );\n\n}\n\nvoid main(void) {\n\n    if(vTextureCoord.y < .5) {\n    \tif(vTextureCoord.x < .5) {\n        vec2 uvVel   = vTextureCoord + vec2(.5, .0);\n        vec2 uvExtra = vTextureCoord + vec2(.5, .5);\n        vec3 pos     = texture2D(texture, vTextureCoord).rgb;\n        vec3 vel     = texture2D(texture, uvVel).rgb;\n        vec3 extra   = texture2D(texture, uvExtra).rgb;\n    \t\tpos += vel;\n    \t\tgl_FragColor = vec4(pos, 1.0);\n\t\t} else {\n\t\t\t\n      vec2 uvPos      = vTextureCoord - vec2(.5, .0);\n      vec2 uvExtra    = vTextureCoord + vec2(-.5, .5);\n      vec3 pos        = texture2D(texture, uvPos).rgb;\n      vec3 vel        = texture2D(texture, vTextureCoord).rgb;\n      vec3 extra      = texture2D(texture, uvExtra).rgb;\n      float posOffset = 0.15 + extra.r * .05;\n\t\t\tvec3 acc = curlNoise(pos * posOffset + time * .1);\n\t\t\t\n\t\t\tvel += acc * .001 * (skipCount+1.0);\n\n      const float maxRadius = 5.0;\n      float dist = length(pos);\n      if(dist > maxRadius) {\n        float f = (dist - maxRadius) * .01;\n        vel -= normalize(pos) * f;\n      }\n\n\t\t\tconst float decrease = .90;\n\t\t\tvel *= decrease;\n\n\t\t\tgl_FragColor = vec4(vel, 1.0);\n\t\t}\n\t} else {\n\t\tgl_FragColor = texture2D(texture, vTextureCoord);\n\t}\n}"));
+		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSimulation).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform float time;\nuniform float skipCount;\n\nvec3 mod289(vec3 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 mod289(vec4 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 permute(vec4 x) {\treturn mod289(((x*34.0)+1.0)*x);\t}\n\nvec4 taylorInvSqrt(vec4 r) {\treturn 1.79284291400159 - 0.85373472095314 * r;}\n\nfloat snoise(vec3 v) { \n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);\n\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n  vec3 g = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g;\n  vec3 i1 = min( g.xyz, l.zxy );\n  vec3 i2 = max( g.xyz, l.zxy );\n\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n  i = mod289(i); \n  vec4 p = permute( permute( permute( \n             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n           + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) \n           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D.wyz - D.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1.xy,h.z);\n  vec3 p3 = vec3(a1.zw,h.w);\n\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), \n                                dot(p2,x2), dot(p3,x3) ) );\n}\n\nvec3 snoiseVec3( vec3 x ){\n\n  float s  = snoise(vec3( x ));\n  float s1 = snoise(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));\n  float s2 = snoise(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));\n  vec3 c = vec3( s , s1 , s2 );\n  return c;\n\n}\n\nvec3 curlNoise( vec3 p ){\n  \n  const float e = .1;\n  vec3 dx = vec3( e   , 0.0 , 0.0 );\n  vec3 dy = vec3( 0.0 , e   , 0.0 );\n  vec3 dz = vec3( 0.0 , 0.0 , e   );\n\n  vec3 p_x0 = snoiseVec3( p - dx );\n  vec3 p_x1 = snoiseVec3( p + dx );\n  vec3 p_y0 = snoiseVec3( p - dy );\n  vec3 p_y1 = snoiseVec3( p + dy );\n  vec3 p_z0 = snoiseVec3( p - dz );\n  vec3 p_z1 = snoiseVec3( p + dz );\n\n  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;\n  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;\n  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;\n\n  const float divisor = 1.0 / ( 2.0 * e );\n  return normalize( vec3( x , y , z ) * divisor );\n\n}\n\nvoid main(void) {\n  vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;\n  vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;\n  vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;\n  float posOffset = 0.15 + extra.r * .05;\n\tvec3 acc = curlNoise(pos * posOffset + time * .1);\n\t\n\tvel += acc * .001 * (skipCount+1.0);\n\n  const float maxRadius = 5.0;\n  float dist = length(pos);\n  if(dist > maxRadius) {\n    float f = (dist - maxRadius) * .01;\n    vel -= normalize(pos) * f;\n  }\n\n\tconst float decrease = .90;\n\tvel *= decrease;\n\n\tgl_FragColor = vec4(vel, 1.0);\n}"));
 
 		_this.time = Math.random() * 0xFF;
 
@@ -5958,11 +6047,16 @@ var ViewSimulation = function (_alfrid$View) {
 		}
 	}, {
 		key: 'render',
-		value: function render(texture) {
+		value: function render(textureVel, texturePos, textureExtra) {
 			this.time += .01;
 			this.shader.bind();
-			this.shader.uniform("texture", "uniform1i", 0);
-			texture.bind(0);
+			this.shader.uniform("textureVel", "uniform1i", 0);
+			this.shader.uniform("texturePos", "uniform1i", 1);
+			this.shader.uniform("textureExtra", "uniform1i", 2);
+			textureVel.bind(0);
+			texturePos.bind(1);
+			textureExtra.bind(2);
+
 			this.shader.uniform("time", "uniform1f", this.time);
 			this.shader.uniform("skipCount", "uniform1f", params.skipCount);
 
@@ -5975,7 +6069,7 @@ var ViewSimulation = function (_alfrid$View) {
 
 exports.default = ViewSimulation;
 
-},{"./libs/alfrid.js":18}],16:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],17:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -6030,7 +6124,7 @@ var ViewSkybox = function (_alfrid$View) {
 
 exports.default = ViewSkybox;
 
-},{"./libs/alfrid.js":18}],17:[function(require,module,exports){
+},{"./libs/alfrid.js":19}],18:[function(require,module,exports){
 'use strict';
 
 var _alfrid = require('./libs/alfrid.js');
@@ -6101,7 +6195,7 @@ function _onImageLoaded(o) {
 	var gui = new _datGui2.default.GUI({ width: 300 });
 }
 
-},{"./SceneApp":11,"./libs/alfrid.js":18,"assets-loader":4,"dat-gui":7}],18:[function(require,module,exports){
+},{"./SceneApp":11,"./libs/alfrid.js":19,"assets-loader":4,"dat-gui":7}],19:[function(require,module,exports){
 (function (global){
 "use strict";var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol?"symbol":typeof obj;};(function(f){if((typeof exports==="undefined"?"undefined":_typeof(exports))==="object"&&typeof module!=="undefined"){module.exports=f();}else if(typeof define==="function"&&define.amd){define([],f);}else {var g;if(typeof window!=="undefined"){g=window;}else if(typeof global!=="undefined"){g=global;}else if(typeof self!=="undefined"){g=self;}else {g=this;}g.alfrid=f();}})(function(){var define,module,exports;return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f;}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e);},l,l.exports,e,t,n,r);}return n[o].exports;}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++){s(r[o]);}return s;}({1:[function(_dereq_,module,exports){ /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
@@ -8043,6 +8137,6 @@ break;}}this._highTasks=this._highTasks.concat(this._nextTasks);this._nextTasks=
 'use strict';Object.defineProperty(exports,"__esModule",{value:true});var ShaderLibs={simpleColorFrag:"#define GLSLIFY 1\n// simpleColor.frag\n\n#define SHADER_NAME SIMPLE_COLOR\n\nprecision highp float;\n\nuniform vec3 color;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = vec4(color, opacity);\n}",bigTriangleVert:"#define GLSLIFY 1\n// bigTriangle.vert\n\n#define SHADER_NAME BIG_TRIANGLE_VERTEX\n\nprecision highp float;\nattribute vec2 aPosition;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = vec4(aPosition, 0.0, 1.0);\n    vTextureCoord = aPosition * .5 + .5;\n}",generalVert:"#define GLSLIFY 1\n// general.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n}",generalNormalVert:"#define GLSLIFY 1\n// generalWithNormal.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat3 uNormalMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tvTextureCoord = aTextureCoord;\n\tvNormal       = normalize(uNormalMatrix * aNormal);\n}"};exports.default=ShaderLibs;},{}]},{},[11])(11);}); 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[17]);
+},{}]},{},[18]);
 
 //# sourceMappingURL=bundle.js.map
