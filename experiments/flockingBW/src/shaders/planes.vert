@@ -27,7 +27,7 @@ void main(void) {
 	
 	gl_Position     = uProjectionMatrix * mvPosition;
 	
-	vColor          = vec4(1.0, 0.0, 0.0, 1.0);
+	vColor          = vec4(1.0, 1.0, 1.0, 1.0);
 	vPointCoord     = aPointCoord;
 	// vColor          = vec4(vec3(extra.b), 1.0);
 }

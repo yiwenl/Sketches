@@ -9,6 +9,7 @@ uniform mat3 uNormalMatrix;
 
 uniform vec3 axis;
 uniform float angle;
+uniform float showWires;
 
 varying vec2 vTextureCoord;
 varying vec3 vNormalWorldSpace;
@@ -65,4 +66,8 @@ void main(void) {
     vec2 envLightUV             = envMapEquirect(vNormalWorldSpace);
     vec3 envLight               = texture2D(textureLight, envLightUV).rgb;
     gl_FragColor.rgb            += envLight;
+
+    if(showWires > 0.0) {
+      gl_FragColor = vec4(1.0);
+    }
 }

@@ -135,14 +135,23 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl._ry.value += -.01;
 
 
-		this._fboRender.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vPlanes.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), p);
-		this._vFloor.render();
-		this._vDome.render();
-		this._fboRender.unbind();
+		
 
-		this._vPost.render(this._fboRender.getDepthTexture());
+		if(params.showWires) {
+			GL.clear(0, 0, 0, 0);
+			this._vPlanes.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), p);
+			this._vFloor.render();
+			this._vDome.render();
+		} else {
+			this._fboRender.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vPlanes.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), p);
+			this._vFloor.render();
+			this._vDome.render();
+			this._fboRender.unbind();
+
+			this._vPost.render(this._fboRender.getDepthTexture());	
+		}
 	}
 
 

@@ -13,7 +13,9 @@ class ViewCube extends alfrid.View {
 	}
 
 	_init() {
+		console.log(alfrid.Geom.cube);
 		this.mesh = alfrid.Geom.cube(1, 1, 1);
+		this.meshWire = alfrid.Geom.cube(1, 1, 1, false, GL.LINES);
 	}
 
 	render(shadowMatrix, lightPosition, textureDepth) {
@@ -34,7 +36,7 @@ class ViewCube extends alfrid.View {
 		}
 		
 
-		GL.draw(this.mesh);
+		GL.draw(params.showWires ? this.meshWire : this.mesh);
 	}
 }
 

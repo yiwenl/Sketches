@@ -11,7 +11,8 @@ window.params = {
 	focus:.79,
 	minThreshold:.50,
 	maxThreshold:.80,
-	isInvert:false
+	isInvert:false,
+	showWires:false
 };
 
 if(document.body) {
@@ -45,6 +46,10 @@ function _init() {
 	
 
 	window.addEventListener('keydown', (e)=>_onKey(e));		
+	window.addEventListener('click', ()=>{
+		console.log('Show Wire ? ', params.showWires);
+		params.showWires = !params.showWires
+	});		
 
 }
 

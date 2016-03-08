@@ -4,6 +4,7 @@
 
 precision highp float;
 varying vec2 vTextureCoord;
+uniform float showWires;
 // uniform sampler2D texture;
 
 vec4 permute(vec4 x) {  return mod(((x*34.0)+1.0)*x, 289.0);    }
@@ -80,4 +81,8 @@ void main(void) {
 	g = smoothstep(0.28, .3, abs(g-.5));
 
 	gl_FragColor = vec4(g);
+
+    if(showWires > 0.0) {
+        gl_FragColor = vec4(1.0);
+    }
 }

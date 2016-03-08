@@ -5,7 +5,8 @@ var glslify = require("glslify");
 
 window.alfrid = alfrid;
 window.params = {
-	numBalls:10
+	numBalls:10,
+	showWires:false
 };
 
 
@@ -36,6 +37,10 @@ function _init() {
 
 	//	INIT SCENE
 	let scene = new SceneApp();
+
+	window.addEventListener('click', ()=> {
+		params.showWires = !params.showWires;
+	})
 }
 
 

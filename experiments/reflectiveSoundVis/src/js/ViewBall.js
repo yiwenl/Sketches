@@ -13,6 +13,8 @@ class ViewBall extends alfrid.View {
 
 	_init() {
 		this.mesh = alfrid.Geom.sphere(.85, 96, true);
+		console.log(alfrid.Geom.sphere);
+		this.meshWire = alfrid.Geom.sphere(.85, 96, true, false, GL.LINES);
 	}
 
 
@@ -26,7 +28,8 @@ class ViewBall extends alfrid.View {
 		this.shader.uniform("scale", "uniform3fv", [scale, scale, scale]);
 		this.shader.uniform("axis", "uniform3fv", axis);
 		this.shader.uniform("angle", "uniform1f", angle);
-		GL.draw(this.mesh);
+		this.shader.uniform("showWires", "uniform1f", params.wires ? 1.0 : 0.0);
+		GL.draw(params.showWires ? this.meshWire : this.mesh);
 	}
 
 

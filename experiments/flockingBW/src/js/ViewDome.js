@@ -13,6 +13,7 @@ class ViewDome extends alfrid.View {
 
 	_init() {
 		this.mesh = alfrid.Geom.sphere(11, 30, false, true);
+		this.meshWires = alfrid.Geom.sphere(11, 30, false, true, GL.LINES);
 
 		this.shader.bind();
 		this.shader.uniform("color", "uniform3fv", [1, 1, 1]);
@@ -22,7 +23,7 @@ class ViewDome extends alfrid.View {
 
 	render() {
 		this.shader.bind();
-		GL.draw(this.mesh);
+		GL.draw(params.showWires ? this.meshWires : this.mesh);
 	}
 
 

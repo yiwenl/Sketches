@@ -9,7 +9,8 @@ window.params = {
 	numParticles:512,
 	skipCount:5,
 	shadowStrength:.35,
-	shadowThreshold:.55
+	shadowThreshold:.55,
+	showWires:false
 };
 
 if(document.body) {
@@ -36,4 +37,8 @@ function _init() {
 	// let gui = new dat.GUI({width:300});
 	// gui.add(params, 'shadowStrength', 0, 1);
 	// gui.add(params, 'shadowThreshold', 0, 1);
+
+	window.addEventListener('click', ()=> {
+		params.showWires = !params.showWires;
+	})
 }

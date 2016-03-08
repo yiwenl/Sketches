@@ -69,6 +69,11 @@ class ViewFloor extends alfrid.View {
 		this.mesh.bufferTexCoords(coords);
 		this.mesh.bufferIndices(indices);
 
+		this.meshWire = new alfrid.Mesh(GL.LINES);
+		this.meshWire.bufferVertex(positions);
+		this.meshWire.bufferTexCoords(coords);
+		this.meshWire.bufferIndices(indices);
+
 		this.shader.bind();
 		this.shader.uniform("color", "uniform3fv", [1, 1, 1]);
 		this.shader.uniform("opacity", "uniform1f", 1);
@@ -77,7 +82,7 @@ class ViewFloor extends alfrid.View {
 
 	render() {
 		this.shader.bind();
-		GL.draw(this.mesh);
+		GL.draw(params.showWires ? this.meshWire : this.mesh);
 	}
 
 
