@@ -140,7 +140,6 @@ class SceneApp extends alfrid.Scene {
 	_clustering() {
 
 		this._clusterChecker.check(this.pixels)
-
 		if(params.showCenteroid) {
 			for(let i=0; i<this._clusterChecker.clusters.length ; i++ ) {
 				let cluster = this._clusterChecker.clusters[i];
@@ -165,11 +164,14 @@ class SceneApp extends alfrid.Scene {
 	_doRender() {
 		this.updateFbo();
 
-		this.orbitalControl._ry.value += -.003;
+		// this.orbitalControl._ry.value += -.003;
 
 
-		this._bAxis.draw();
-		this._bDotsPlane.draw();
+		if(params.showWires && 0) {
+			this._bAxis.draw();
+			this._bDotsPlane.draw();	
+		}
+		
 		this._vRender.render(this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
 
 		let debugSize = 256/2;

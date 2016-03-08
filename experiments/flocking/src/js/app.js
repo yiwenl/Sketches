@@ -10,7 +10,8 @@ window.params = {
 	shadowThreshold:.55,
 	numSlides:2*2,
 	numClusters:7,
-	showCenteroid:false
+	showCenteroid:true,
+	showWires:false
 };
 
 if(document.body) {
@@ -37,4 +38,10 @@ function _init() {
 	let gui = new dat.GUI({width:300});
 	gui.add(params, 'numClusters', 3, 20).step(1);
 	gui.add(params, 'showCenteroid');
+
+	window.addEventListener('keydown', (e)=>{
+		if(e.keyCode == 87) {
+			params.showWires = !params.showWires
+		}
+	});
 }

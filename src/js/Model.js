@@ -27,28 +27,12 @@ const Model = [
 		url:'urlPath2'
 	},
 	{
-		cover:'assets/sketchCoverParticles.jpg',
+		cover:'assets/coverSketchBloom.jpg',
 		url:'urlPath0'
 	},
 	{
-		cover:'assets/sketchCoverReflection.jpg',
-		url:'urlPath1'
-	},
-	{
-		cover:'assets/sketchCoverFlocking.jpg',
-		url:'urlPath2'
-	},
-	{
-		cover:'assets/sketchCoverParticles.jpg',
+		cover:'assets/coverSketchClustering.jpg',
 		url:'urlPath0'
-	},
-	{
-		cover:'assets/sketchCoverReflection.jpg',
-		url:'urlPath1'
-	},
-	{
-		cover:'assets/sketchCoverFlocking.jpg',
-		url:'urlPath2'
 	}
 ]
 

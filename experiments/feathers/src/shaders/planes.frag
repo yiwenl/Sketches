@@ -25,6 +25,7 @@ uniform float		uSpecular;
 
 uniform float		uExposure;
 uniform float		uGamma;
+uniform float		showWires;
 
 
 #define saturate(x) clamp(x, 0.0, 1.0)
@@ -118,6 +119,7 @@ void main(void) {
 	color				= pow( color, vec3( 1.0 / uGamma ) );
 
 
+	if(showWires > 0.0) color = vec3(1.0);
 
 	// output the fragment color
     gl_FragColor		= vec4( color, 1.0 );

@@ -945,11 +945,11 @@ function isUndefined(arg) {
 },{}],8:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -999,7 +999,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // SceneApp.js
 
-var GL = undefined;
+
+var GL = void 0;
 
 var SceneApp = function (_alfrid$Scene) {
 	_inherits(SceneApp, _alfrid$Scene);
@@ -1173,7 +1174,7 @@ var SceneApp = function (_alfrid$Scene) {
 			this._vThreshold.render(this._fboRender.getTexture());
 			this._fboPost0.unbind();
 
-			for (var i = 0; i < params.numBlur; i++) {
+			for (var _i = 0; _i < params.numBlur; _i++) {
 				this._fboPost1.bind();
 				GL.clear(0, 0, 0, 0);
 				this._vBlur.render(this._fboPost0.getTexture(), true);
@@ -1228,11 +1229,11 @@ exports.default = SceneApp;
 },{"./ViewAddVel":9,"./ViewBloom":10,"./ViewBlur":11,"./ViewPlanes":12,"./ViewRender":13,"./ViewSave":14,"./ViewSimulation":15,"./ViewSkybox":16,"./ViewTreshold":17,"./libs/alfrid.js":19}],9:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -1255,7 +1256,7 @@ var ViewAddVel = function (_alfrid$View) {
 	function ViewAddVel() {
 		_classCallCheck(this, ViewAddVel);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewAddVel).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// addvel.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texturePos;\nuniform sampler2D textureVel;\n\nvoid main(void) {\n\tvec3 pos = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel = texture2D(textureVel, vTextureCoord).rgb;\n\n    gl_FragColor = vec4(pos + vel, 1.0);\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewAddVel).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "// addvel.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nuniform sampler2D texturePos;\nuniform sampler2D textureVel;\n\nvoid main(void) {\n\tvec3 pos = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel = texture2D(textureVel, vTextureCoord).rgb;\n\n    gl_FragColor = vec4(pos + vel, 1.0);\n}"));
 	}
 
 	_createClass(ViewAddVel, [{
@@ -1286,11 +1287,11 @@ exports.default = ViewAddVel;
 },{"./libs/alfrid.js":19}],10:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -1313,7 +1314,7 @@ var ViewBloom = function (_alfrid$View) {
 	function ViewBloom() {
 		_classCallCheck(this, ViewBloom);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBloom).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// bloom.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureBlur;\nuniform float multiply;\n\nvoid main(void) {\n\tvec4 color     = texture2D(texture, vTextureCoord);\n\tvec4 colorBlur = texture2D(textureBlur, vTextureCoord);\n\tcolor.rgb      += colorBlur.rgb * multiply;\n\tgl_FragColor   = color;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBloom).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "// bloom.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureBlur;\nuniform float multiply;\n\nvoid main(void) {\n\tvec4 color     = texture2D(texture, vTextureCoord);\n\tvec4 colorBlur = texture2D(textureBlur, vTextureCoord);\n\tcolor.rgb      += colorBlur.rgb * multiply;\n\tgl_FragColor   = color;\n}"));
 	}
 
 	_createClass(ViewBloom, [{
@@ -1342,11 +1343,11 @@ exports.default = ViewBloom;
 },{"./libs/alfrid.js":19}],11:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -1369,7 +1370,7 @@ var ViewBlur = function (_alfrid$View) {
 	function ViewBlur() {
 		_classCallCheck(this, ViewBlur);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBlur).call(this, "#define GLSLIFY 1\n// blur.vert\n\nprecision highp float;\nattribute vec2 aPosition;\nuniform vec2 direction;\nuniform float range;\n\nvarying vec2 vTextureCoord;\nvarying vec2 v_blurTexCoords[14];\n\nvoid main(void) {\n    gl_Position = vec4(aPosition, 0.0, 1.0);\n    vTextureCoord = aPosition * .5 + .5;\n\n    v_blurTexCoords[ 0] = vTextureCoord + vec2(-0.028, -0.028) * direction * range;\n    v_blurTexCoords[ 1] = vTextureCoord + vec2(-0.024, -0.024) * direction * range;\n    v_blurTexCoords[ 2] = vTextureCoord + vec2(-0.020, -0.020) * direction * range;\n    v_blurTexCoords[ 3] = vTextureCoord + vec2(-0.016, -0.016) * direction * range;\n    v_blurTexCoords[ 4] = vTextureCoord + vec2(-0.012, -0.012) * direction * range;\n    v_blurTexCoords[ 5] = vTextureCoord + vec2(-0.008, -0.008) * direction * range;\n    v_blurTexCoords[ 6] = vTextureCoord + vec2(-0.004, -0.004) * direction * range;\n    v_blurTexCoords[ 7] = vTextureCoord + vec2( 0.004,  0.004) * direction * range;\n    v_blurTexCoords[ 8] = vTextureCoord + vec2( 0.008,  0.008) * direction * range;\n    v_blurTexCoords[ 9] = vTextureCoord + vec2( 0.012,  0.012) * direction * range;\n    v_blurTexCoords[10] = vTextureCoord + vec2( 0.016,  0.016) * direction * range;\n    v_blurTexCoords[11] = vTextureCoord + vec2( 0.020,  0.020) * direction * range;\n    v_blurTexCoords[12] = vTextureCoord + vec2( 0.024,  0.024) * direction * range;\n    v_blurTexCoords[13] = vTextureCoord + vec2( 0.028,  0.028) * direction * range;\n}\n", "#define GLSLIFY 1\n// blur.frag\nprecision mediump float;\n \nuniform sampler2D texture;\n \nvarying vec2 vTextureCoord;\nvarying vec2 v_blurTexCoords[14];\n \nvoid main()\n{\n    gl_FragColor = vec4(0.0);\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 0])*0.0044299121055113265;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 1])*0.00895781211794;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 2])*0.0215963866053;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 3])*0.0443683338718;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 4])*0.0776744219933;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 5])*0.115876621105;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 6])*0.147308056121;\n    gl_FragColor += texture2D(texture, vTextureCoord         )*0.159576912161;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 7])*0.147308056121;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 8])*0.115876621105;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 9])*0.0776744219933;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[10])*0.0443683338718;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[11])*0.0215963866053;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[12])*0.00895781211794;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[13])*0.0044299121055113265;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBlur).call(this, "// blur.vert\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec2 aPosition;\nuniform vec2 direction;\nuniform float range;\n\nvarying vec2 vTextureCoord;\nvarying vec2 v_blurTexCoords[14];\n\nvoid main(void) {\n    gl_Position = vec4(aPosition, 0.0, 1.0);\n    vTextureCoord = aPosition * .5 + .5;\n\n    v_blurTexCoords[ 0] = vTextureCoord + vec2(-0.028, -0.028) * direction * range;\n    v_blurTexCoords[ 1] = vTextureCoord + vec2(-0.024, -0.024) * direction * range;\n    v_blurTexCoords[ 2] = vTextureCoord + vec2(-0.020, -0.020) * direction * range;\n    v_blurTexCoords[ 3] = vTextureCoord + vec2(-0.016, -0.016) * direction * range;\n    v_blurTexCoords[ 4] = vTextureCoord + vec2(-0.012, -0.012) * direction * range;\n    v_blurTexCoords[ 5] = vTextureCoord + vec2(-0.008, -0.008) * direction * range;\n    v_blurTexCoords[ 6] = vTextureCoord + vec2(-0.004, -0.004) * direction * range;\n    v_blurTexCoords[ 7] = vTextureCoord + vec2( 0.004,  0.004) * direction * range;\n    v_blurTexCoords[ 8] = vTextureCoord + vec2( 0.008,  0.008) * direction * range;\n    v_blurTexCoords[ 9] = vTextureCoord + vec2( 0.012,  0.012) * direction * range;\n    v_blurTexCoords[10] = vTextureCoord + vec2( 0.016,  0.016) * direction * range;\n    v_blurTexCoords[11] = vTextureCoord + vec2( 0.020,  0.020) * direction * range;\n    v_blurTexCoords[12] = vTextureCoord + vec2( 0.024,  0.024) * direction * range;\n    v_blurTexCoords[13] = vTextureCoord + vec2( 0.028,  0.028) * direction * range;\n}\n", "// blur.frag\nprecision mediump float;\n#define GLSLIFY 1\n \nuniform sampler2D texture;\n \nvarying vec2 vTextureCoord;\nvarying vec2 v_blurTexCoords[14];\n \nvoid main()\n{\n    gl_FragColor = vec4(0.0);\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 0])*0.0044299121055113265;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 1])*0.00895781211794;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 2])*0.0215963866053;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 3])*0.0443683338718;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 4])*0.0776744219933;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 5])*0.115876621105;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 6])*0.147308056121;\n    gl_FragColor += texture2D(texture, vTextureCoord         )*0.159576912161;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 7])*0.147308056121;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 8])*0.115876621105;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[ 9])*0.0776744219933;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[10])*0.0443683338718;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[11])*0.0215963866053;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[12])*0.00895781211794;\n    gl_FragColor += texture2D(texture, v_blurTexCoords[13])*0.0044299121055113265;\n}"));
 	}
 
 	_createClass(ViewBlur, [{
@@ -1397,11 +1398,11 @@ exports.default = ViewBlur;
 },{"./libs/alfrid.js":19}],12:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -1427,9 +1428,9 @@ var ViewPlanes = function (_alfrid$View) {
 	function ViewPlanes() {
 		_classCallCheck(this, ViewPlanes);
 
-		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPlanes).call(this, "#define GLSLIFY 1\n// planes.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\nattribute vec3 aExtra;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\nuniform mat3 uModelViewMatrixInverse;\nuniform mat3 uNormalMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nuniform float flip;\nuniform float uvIndex;\nuniform vec2 uvOffset;\nuniform float numSlides;\n\nvarying vec3 vNormal;\nvarying vec3 vPosition;\nvarying vec3 vWsPosition;\nvarying vec3 vEyePosition;\nvarying vec3 vWsNormal;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\nvarying vec4 vShadowCoord;\n\nconst float PI = 3.141592657;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nmat3 calcLookAtMatrix(vec3 origin, vec3 target, float roll) {\n\tvec3 rr = vec3(sin(roll), cos(roll), 0.0);\n\tvec3 ww = normalize(target - origin);\n\tvec3 uu = normalize(cross(ww, rr));\n\tvec3 vv = normalize(cross(uu, ww));\n\n\treturn mat3(uu, vv, ww);\n}\n\nvec3 getRotationAxis(vec3 a, vec3 b) {\n\tvec3 axis = normalize(cross(a, b));\n\treturn axis;\n}\n\nfloat angleBetween(vec3 a, vec3 b) {\n\treturn acos(dot(a, b));\n}\n\nmat4 rotationMatrix(vec3 axis, float angle) {\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,\n                0.0,                                0.0,                                0.0,                                1.0);\n}\n\nvec3 rotate(vec3 v, mat4 m) {\n\treturn (m * vec4(v, 1.0)).xyz;\n}\n\nvoid main(void) {\n\tvec2 uv         = aTextureCoord;\n\tuv              += uvOffset;\n\tvec3 currPos    = texture2D(texture, uv).rgb;\n\tvec3 nextPos    = texture2D(textureNext, uv).rgb;\n\tvec3 pos        = mix(currPos, nextPos, percent);\n\n\tvec3 vFront \t= vec3(0.0, 0.0, -1.0);\n\tvec3 vDir \t    = normalize(nextPos - currPos);\n\tvec3 axis \t\t= getRotationAxis(vFront, vDir);\n\tfloat angle \t= angleBetween(vFront, vDir);\n\tmat4 mtxRot \t= rotationMatrix(axis, angle);\n\n\t// mat3 mLookAt \t= calcLookAtMatrix(currPos, nextPos, 1.0);\n\t// pos \t\t\t+= mLookAt * aVertexPosition;\n\tfloat l \t\t= length(aVertexPosition);\n\tvec3 posOffset  = rotate(aVertexPosition, mtxRot);\n\tposOffset \t\t= normalize(posOffset) * l;\n\tpos \t\t\t+= posOffset;\n\t\n\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);\n\t\n\tvec4 worldSpacePosition\t= uModelMatrix * vec4(pos, 1.0);\n\tvec4 viewSpacePosition\t= uViewMatrix * worldSpacePosition;\n\n\tvPosition\t\t\t\t= viewSpacePosition.xyz;\n\tvWsPosition\t\t\t\t= worldSpacePosition.xyz;\n\t\n\tvec4 eyeDirViewSpace\t= viewSpacePosition - vec4( 0, 0, 0, 1 );\n\tvEyePosition\t\t\t= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );\n\t// vWsNormal\t\t\t\t= normalize(mLookAt*aNormal);\n\tvWsNormal\t\t\t\t= normalize(rotate(aNormal, mtxRot));\n\n\t// vec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t// vec4 V          = uProjectionMatrix * mvPosition;\n\t// gl_Position     = V;\n\n\tgl_Position\t\t\t\t= uProjectionMatrix * viewSpacePosition;\n\t\n\t\n\tvNormal         = vWsNormal;\n\tvVertex         = pos;\n\tvExtra          = aExtra;\n}", "// planes.frag\n#extension GL_EXT_shader_texture_lod : enable\n#define GLSLIFY 1\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nuniform samplerCube uRadianceMap;\nuniform samplerCube uIrradianceMap;\n\nvarying vec3 vVertex;\nvarying vec3 vExtra;\n\nvarying vec3        vNormal;\nvarying vec3        vPosition;\nvarying vec3\t\tvEyePosition;\nvarying vec3\t\tvWsNormal;\nvarying vec3\t\tvWsPosition;\nvarying vec2 \t\tvTextureCoord;\n\nuniform vec3\t\tuBaseColor;\nuniform float\t\tuRoughness;\nuniform float\t\tuRoughness4;\nuniform float\t\tuMetallic;\nuniform float\t\tuSpecular;\n\nuniform float\t\tuExposure;\nuniform float\t\tuGamma;\n\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.1415926535897932384626433832795\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\n// https://www.unrealengine.com/blog/physically-based-shading-on-mobile\nvec3 EnvBRDFApprox( vec3 SpecularColor, float Roughness, float NoV )\n{\n\tconst vec4 c0 = vec4( -1, -0.0275, -0.572, 0.022 );\n\tconst vec4 c1 = vec4( 1, 0.0425, 1.04, -0.04 );\n\tvec4 r = Roughness * c0 + c1;\n\tfloat a004 = min( r.x * r.x, exp2( -9.28 * NoV ) ) * r.x + r.y;\n\tvec2 AB = vec2( -1.04, 1.04 ) * a004 + r.zw;\n\treturn SpecularColor * AB.x + AB.y;\n}\n\n// http://the-witness.net/news/2012/02/seamless-cube-map-filtering/\nvec3 fix_cube_lookup( vec3 v, float cube_size, float lod ) {\n\tfloat M = max(max(abs(v.x), abs(v.y)), abs(v.z));\n\tfloat scale = 1.0 - exp2(lod) / cube_size;\n\tif (abs(v.x) != M) v.x *= scale;\n\tif (abs(v.y) != M) v.y *= scale;\n\tif (abs(v.z) != M) v.z *= scale;\n\treturn v;\n}\n\nvec3 correctGamma(vec3 color, float g) {\n\treturn pow(color, vec3(1.0/g));\n}\n\nvoid main(void) {\n\tconst float offset = 0.05;\n\tfloat _roughness  = saturate(vExtra.r*offset);\n\tfloat _roughness4 = pow(_roughness, 4.0);\n\tfloat _specular   = saturate(1.0 - vExtra.r*offset);\n\tfloat _metallic   = saturate(1.0 - vExtra.r*offset);\n\n    vec3 N \t\t\t\t= normalize( vWsNormal );\n\tvec3 V \t\t\t\t= normalize( vEyePosition );\n\t\n\t// deduce the diffuse and specular color from the baseColor and how metallic the material is\n\tvec3 diffuseColor\t= uBaseColor - uBaseColor * _metallic;\n\tvec3 specularColor\t= mix( vec3( 0.08 * _specular ), uBaseColor, _metallic );\n\t\n\tvec3 color;\n\t\n\t// sample the pre-filtered cubemap at the corresponding mipmap level\n\tfloat numMips\t\t= 6.0;\n\tfloat mip\t\t\t= numMips - 1.0 + log2(_roughness);\n\tvec3 lookup\t\t\t= -reflect( V, N );\n\tlookup\t\t\t\t= fix_cube_lookup( lookup, 512.0, mip );\n\tvec3 radiance\t\t= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );\n\tvec3 irradiance\t\t= pow( textureCube( uIrradianceMap, N ).rgb, vec3( 1 ) );\n\t\n\t// get the approximate reflectance\n\tfloat NoV\t\t\t= saturate( dot( N, V ) );\n\tvec3 reflectance\t= EnvBRDFApprox( specularColor, _roughness4, NoV );\n\t\n\t// combine the specular IBL and the BRDF\n    vec3 diffuse  \t\t= diffuseColor * irradiance;\n    vec3 specular \t\t= radiance * reflectance;\n\tcolor\t\t\t\t= diffuse + specular;\n\t\n\n\t// apply the tone-mapping\n\tcolor\t\t\t\t= Uncharted2Tonemap( color * uExposure );\n\t// white balance\n\tcolor\t\t\t\t= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );\n\t\n\t// gamma correction\n\tcolor\t\t\t\t= pow( color, vec3( 1.0 / uGamma ) );\n\n\t// output the fragment color\n    gl_FragColor\t\t= vec4( color, 1.0 );\n}"));
+		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPlanes).call(this, "// planes.vert\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\nattribute vec3 aExtra;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\nuniform mat3 uModelViewMatrixInverse;\nuniform mat3 uNormalMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nuniform float flip;\nuniform float uvIndex;\nuniform vec2 uvOffset;\nuniform float numSlides;\n\nvarying vec3 vNormal;\nvarying vec3 vPosition;\nvarying vec3 vWsPosition;\nvarying vec3 vEyePosition;\nvarying vec3 vWsNormal;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\nvarying vec4 vShadowCoord;\n\nconst float PI = 3.141592657;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nmat3 calcLookAtMatrix(vec3 origin, vec3 target, float roll) {\n\tvec3 rr = vec3(sin(roll), cos(roll), 0.0);\n\tvec3 ww = normalize(target - origin);\n\tvec3 uu = normalize(cross(ww, rr));\n\tvec3 vv = normalize(cross(uu, ww));\n\n\treturn mat3(uu, vv, ww);\n}\n\nvec3 getRotationAxis(vec3 a, vec3 b) {\n\tvec3 axis = normalize(cross(a, b));\n\treturn axis;\n}\n\nfloat angleBetween(vec3 a, vec3 b) {\n\treturn acos(dot(a, b));\n}\n\nmat4 rotationMatrix(vec3 axis, float angle) {\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,\n                0.0,                                0.0,                                0.0,                                1.0);\n}\n\nvec3 rotate(vec3 v, mat4 m) {\n\treturn (m * vec4(v, 1.0)).xyz;\n}\n\nvoid main(void) {\n\tvec2 uv         = aTextureCoord;\n\tuv              += uvOffset;\n\tvec3 currPos    = texture2D(texture, uv).rgb;\n\tvec3 nextPos    = texture2D(textureNext, uv).rgb;\n\tvec3 pos        = mix(currPos, nextPos, percent);\n\n\tvec3 vFront \t= vec3(0.0, 0.0, -1.0);\n\tvec3 vDir \t    = normalize(nextPos - currPos);\n\tvec3 axis \t\t= getRotationAxis(vFront, vDir);\n\tfloat angle \t= angleBetween(vFront, vDir);\n\tmat4 mtxRot \t= rotationMatrix(axis, angle);\n\n\t// mat3 mLookAt \t= calcLookAtMatrix(currPos, nextPos, 1.0);\n\t// pos \t\t\t+= mLookAt * aVertexPosition;\n\tfloat l \t\t= length(aVertexPosition);\n\tvec3 posOffset  = rotate(aVertexPosition, mtxRot);\n\tposOffset \t\t= normalize(posOffset) * l;\n\tpos \t\t\t+= posOffset;\n\t\n\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);\n\t\n\tvec4 worldSpacePosition\t= uModelMatrix * vec4(pos, 1.0);\n\tvec4 viewSpacePosition\t= uViewMatrix * worldSpacePosition;\n\n\tvPosition\t\t\t\t= viewSpacePosition.xyz;\n\tvWsPosition\t\t\t\t= worldSpacePosition.xyz;\n\t\n\tvec4 eyeDirViewSpace\t= viewSpacePosition - vec4( 0, 0, 0, 1 );\n\tvEyePosition\t\t\t= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );\n\t// vWsNormal\t\t\t\t= normalize(mLookAt*aNormal);\n\tvWsNormal\t\t\t\t= normalize(rotate(aNormal, mtxRot));\n\n\t// vec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t// vec4 V          = uProjectionMatrix * mvPosition;\n\t// gl_Position     = V;\n\n\tgl_Position\t\t\t\t= uProjectionMatrix * viewSpacePosition;\n\t\n\t\n\tvNormal         = vWsNormal;\n\tvVertex         = pos;\n\tvExtra          = aExtra;\n}", "// planes.frag\n#extension GL_EXT_shader_texture_lod : enable\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nuniform samplerCube uRadianceMap;\nuniform samplerCube uIrradianceMap;\n\nvarying vec3 vVertex;\nvarying vec3 vExtra;\n\nvarying vec3        vNormal;\nvarying vec3        vPosition;\nvarying vec3\t\tvEyePosition;\nvarying vec3\t\tvWsNormal;\nvarying vec3\t\tvWsPosition;\nvarying vec2 \t\tvTextureCoord;\n\nuniform vec3\t\tuBaseColor;\nuniform float\t\tuRoughness;\nuniform float\t\tuRoughness4;\nuniform float\t\tuMetallic;\nuniform float\t\tuSpecular;\n\nuniform float\t\tuExposure;\nuniform float\t\tuGamma;\nuniform float\t\tshowWires;\n\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.1415926535897932384626433832795\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\n// https://www.unrealengine.com/blog/physically-based-shading-on-mobile\nvec3 EnvBRDFApprox( vec3 SpecularColor, float Roughness, float NoV )\n{\n\tconst vec4 c0 = vec4( -1, -0.0275, -0.572, 0.022 );\n\tconst vec4 c1 = vec4( 1, 0.0425, 1.04, -0.04 );\n\tvec4 r = Roughness * c0 + c1;\n\tfloat a004 = min( r.x * r.x, exp2( -9.28 * NoV ) ) * r.x + r.y;\n\tvec2 AB = vec2( -1.04, 1.04 ) * a004 + r.zw;\n\treturn SpecularColor * AB.x + AB.y;\n}\n\n// http://the-witness.net/news/2012/02/seamless-cube-map-filtering/\nvec3 fix_cube_lookup( vec3 v, float cube_size, float lod ) {\n\tfloat M = max(max(abs(v.x), abs(v.y)), abs(v.z));\n\tfloat scale = 1.0 - exp2(lod) / cube_size;\n\tif (abs(v.x) != M) v.x *= scale;\n\tif (abs(v.y) != M) v.y *= scale;\n\tif (abs(v.z) != M) v.z *= scale;\n\treturn v;\n}\n\nvec3 correctGamma(vec3 color, float g) {\n\treturn pow(color, vec3(1.0/g));\n}\n\nvoid main(void) {\n\tconst float offset = 0.05;\n\tfloat _roughness  = saturate(vExtra.r*offset);\n\tfloat _roughness4 = pow(_roughness, 4.0);\n\tfloat _specular   = saturate(1.0 - vExtra.r*offset);\n\tfloat _metallic   = saturate(1.0 - vExtra.r*offset);\n\n    vec3 N \t\t\t\t= normalize( vWsNormal );\n\tvec3 V \t\t\t\t= normalize( vEyePosition );\n\t\n\t// deduce the diffuse and specular color from the baseColor and how metallic the material is\n\tvec3 diffuseColor\t= uBaseColor - uBaseColor * _metallic;\n\tvec3 specularColor\t= mix( vec3( 0.08 * _specular ), uBaseColor, _metallic );\n\t\n\tvec3 color;\n\t\n\t// sample the pre-filtered cubemap at the corresponding mipmap level\n\tfloat numMips\t\t= 6.0;\n\tfloat mip\t\t\t= numMips - 1.0 + log2(_roughness);\n\tvec3 lookup\t\t\t= -reflect( V, N );\n\tlookup\t\t\t\t= fix_cube_lookup( lookup, 512.0, mip );\n\tvec3 radiance\t\t= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );\n\tvec3 irradiance\t\t= pow( textureCube( uIrradianceMap, N ).rgb, vec3( 1 ) );\n\t\n\t// get the approximate reflectance\n\tfloat NoV\t\t\t= saturate( dot( N, V ) );\n\tvec3 reflectance\t= EnvBRDFApprox( specularColor, _roughness4, NoV );\n\t\n\t// combine the specular IBL and the BRDF\n    vec3 diffuse  \t\t= diffuseColor * irradiance;\n    vec3 specular \t\t= radiance * reflectance;\n\tcolor\t\t\t\t= diffuse + specular;\n\t\n\n\t// apply the tone-mapping\n\tcolor\t\t\t\t= Uncharted2Tonemap( color * uExposure );\n\t// white balance\n\tcolor\t\t\t\t= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );\n\t\n\t// gamma correction\n\tcolor\t\t\t\t= pow( color, vec3( 1.0 / uGamma ) );\n\n\tif(showWires > 0.0) color = vec3(1.0);\n\n\t// output the fragment color\n    gl_FragColor\t\t= vec4( color, 1.0 );\n}"));
 
-		_this.shaderShadow = new _alfrid2.default.GLShader("#define GLSLIFY 1\n// planes.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\nattribute vec3 aExtra;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\nuniform mat3 uModelViewMatrixInverse;\nuniform mat3 uNormalMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nuniform float flip;\nuniform float uvIndex;\nuniform vec2 uvOffset;\nuniform float numSlides;\n\nvarying vec3 vNormal;\nvarying vec3 vPosition;\nvarying vec3 vWsPosition;\nvarying vec3 vEyePosition;\nvarying vec3 vWsNormal;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\nvarying vec4 vShadowCoord;\n\nconst float PI = 3.141592657;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nmat3 calcLookAtMatrix(vec3 origin, vec3 target, float roll) {\n\tvec3 rr = vec3(sin(roll), cos(roll), 0.0);\n\tvec3 ww = normalize(target - origin);\n\tvec3 uu = normalize(cross(ww, rr));\n\tvec3 vv = normalize(cross(uu, ww));\n\n\treturn mat3(uu, vv, ww);\n}\n\nvec3 getRotationAxis(vec3 a, vec3 b) {\n\tvec3 axis = normalize(cross(a, b));\n\treturn axis;\n}\n\nfloat angleBetween(vec3 a, vec3 b) {\n\treturn acos(dot(a, b));\n}\n\nmat4 rotationMatrix(vec3 axis, float angle) {\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,\n                0.0,                                0.0,                                0.0,                                1.0);\n}\n\nvec3 rotate(vec3 v, mat4 m) {\n\treturn (m * vec4(v, 1.0)).xyz;\n}\n\nvoid main(void) {\n\tvec2 uv         = aTextureCoord;\n\tuv              += uvOffset;\n\tvec3 currPos    = texture2D(texture, uv).rgb;\n\tvec3 nextPos    = texture2D(textureNext, uv).rgb;\n\tvec3 pos        = mix(currPos, nextPos, percent);\n\n\tvec3 vFront \t= vec3(0.0, 0.0, -1.0);\n\tvec3 vDir \t    = normalize(nextPos - currPos);\n\tvec3 axis \t\t= getRotationAxis(vFront, vDir);\n\tfloat angle \t= angleBetween(vFront, vDir);\n\tmat4 mtxRot \t= rotationMatrix(axis, angle);\n\n\t// mat3 mLookAt \t= calcLookAtMatrix(currPos, nextPos, 1.0);\n\t// pos \t\t\t+= mLookAt * aVertexPosition;\n\tfloat l \t\t= length(aVertexPosition);\n\tvec3 posOffset  = rotate(aVertexPosition, mtxRot);\n\tposOffset \t\t= normalize(posOffset) * l;\n\tpos \t\t\t+= posOffset;\n\t\n\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);\n\t\n\tvec4 worldSpacePosition\t= uModelMatrix * vec4(pos, 1.0);\n\tvec4 viewSpacePosition\t= uViewMatrix * worldSpacePosition;\n\n\tvPosition\t\t\t\t= viewSpacePosition.xyz;\n\tvWsPosition\t\t\t\t= worldSpacePosition.xyz;\n\t\n\tvec4 eyeDirViewSpace\t= viewSpacePosition - vec4( 0, 0, 0, 1 );\n\tvEyePosition\t\t\t= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );\n\t// vWsNormal\t\t\t\t= normalize(mLookAt*aNormal);\n\tvWsNormal\t\t\t\t= normalize(rotate(aNormal, mtxRot));\n\n\t// vec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t// vec4 V          = uProjectionMatrix * mvPosition;\n\t// gl_Position     = V;\n\n\tgl_Position\t\t\t\t= uProjectionMatrix * viewSpacePosition;\n\t\n\t\n\tvNormal         = vWsNormal;\n\tvVertex         = pos;\n\tvExtra          = aExtra;\n}", "#define GLSLIFY 1\n// shadow.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec4 vShadowCoord;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\n\nuniform vec3 lightPosition;\nuniform sampler2D textureDepth;\nuniform float uShadowStrength;\nuniform float uShadowThreshold;\nuniform mat3 uNormalMatrix;\n\nfloat pcfSoftShadow(sampler2D shadowMap) {\n\tconst float shadowMapSize  = 1024.0;\n\tconst float shadowBias     = .00005;\n\tfloat shadow = 0.0;\n\tfloat texelSizeX =  1.0 / shadowMapSize;\n\tfloat texelSizeY =  1.0 / shadowMapSize;\n\tvec4 shadowCoord\t= vShadowCoord / vShadowCoord.w;\n\n\tbvec4 inFrustumVec = bvec4 ( shadowCoord.x >= 0.0, shadowCoord.x <= 1.0, shadowCoord.y >= 0.0, shadowCoord.y <= 1.0 );\n\tbool inFrustum = all( inFrustumVec );\n\n\tbvec2 frustumTestVec = bvec2( inFrustum, shadowCoord.z <= 1.0 );\n\n\tbool frustumTest = all( frustumTestVec );\n\t\n\n\tif ( frustumTest ) {\n\t\tshadowCoord.z += shadowBias;\n\t\tfloat xPixelOffset = texelSizeX;\n\t\tfloat yPixelOffset = texelSizeY;\n\n\t\tfloat dx0 = - 1.0 * xPixelOffset;\n\t\tfloat dy0 = - 1.0 * yPixelOffset;\n\t\tfloat dx1 = 1.0 * xPixelOffset;\n\t\tfloat dy1 = 1.0 * yPixelOffset;\n\n\t\tmat3 shadowKernel;\n\t\tmat3 depthKernel;\n\n\t\tdepthKernel[ 0 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy0 ) ).r ;\n\t\tdepthKernel[ 0 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, 0.0 ) ).r ;\n\t\tdepthKernel[ 0 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy1 ) ).r ;\n\t\tdepthKernel[ 1 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( 0.0, dy0 ) ).r ;\n\t\tdepthKernel[ 1 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy ).r ;\n\t\tdepthKernel[ 1 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( 0.0, dy1 ) ).r ;\n\t\tdepthKernel[ 2 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, dy0 ) ).r ;\n\t\tdepthKernel[ 2 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, 0.0 ) ).r ;\n\t\tdepthKernel[ 2 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, dy1 ) ).r ;\n\n\t\tvec3 shadowZ = vec3( shadowCoord.z );\n\t\tshadowKernel[ 0 ] = vec3( lessThan( depthKernel[ 0 ], shadowZ ) );\n\t\tshadowKernel[ 0 ] *= vec3( 0.25 );\n\n\t\tshadowKernel[ 1 ] = vec3( lessThan( depthKernel[ 1 ], shadowZ ) );\n\t\tshadowKernel[ 1 ] *= vec3( 0.25 );\n\n\t\tshadowKernel[ 2 ] = vec3( lessThan( depthKernel[ 2 ], shadowZ ) );\n\t\tshadowKernel[ 2 ] *= vec3( 0.25 );\n\n\t\tvec2 fractionalCoord = 1.0 - fract( shadowCoord.xy * shadowMapSize );\n\n\t\tshadowKernel[ 0 ] = mix( shadowKernel[ 1 ], shadowKernel[ 0 ], fractionalCoord.x );\n\t\tshadowKernel[ 1 ] = mix( shadowKernel[ 2 ], shadowKernel[ 1 ], fractionalCoord.x );\n\n\t\tvec4 shadowValues;\n\t\tshadowValues.x = mix( shadowKernel[ 0 ][ 1 ], shadowKernel[ 0 ][ 0 ], fractionalCoord.y );\n\t\tshadowValues.y = mix( shadowKernel[ 0 ][ 2 ], shadowKernel[ 0 ][ 1 ], fractionalCoord.y );\n\t\tshadowValues.z = mix( shadowKernel[ 1 ][ 1 ], shadowKernel[ 1 ][ 0 ], fractionalCoord.y );\n\t\tshadowValues.w = mix( shadowKernel[ 1 ][ 2 ], shadowKernel[ 1 ][ 1 ], fractionalCoord.y );\n\n\t\tshadow = dot( shadowValues, vec4( 1.0 ) ) * uShadowStrength;\n\n\t}\n\n\treturn shadow;\n}\n\nfloat diffuse(vec3 N, vec3 L) {\n\treturn max(dot(N, normalize(L)), .0);\n}\n\nvoid main(void) {\n\tfloat pcf    = pcfSoftShadow(textureDepth);\n\tpcf = 1.0 - smoothstep(0.0, uShadowThreshold, pcf);\n\n\t/*\n\tvec4 color   = vec4(1.0);\n\tcolor.rgb *= pcf;\n\tgl_FragColor = color;\n\t*/\n\n\tvec3 N = uNormalMatrix * normalize(vVertex + vExtra);\n\tfloat _diffuse = diffuse(N, lightPosition);\n\t_diffuse = mix(_diffuse, 1.0, 0.13);\n\n    gl_FragColor = vec4(vec3(_diffuse), 1.0);\n}");
+		_this.shaderShadow = new _alfrid2.default.GLShader("// planes.vert\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\nattribute vec3 aExtra;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\nuniform mat3 uModelViewMatrixInverse;\nuniform mat3 uNormalMatrix;\n\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nuniform float flip;\nuniform float uvIndex;\nuniform vec2 uvOffset;\nuniform float numSlides;\n\nvarying vec3 vNormal;\nvarying vec3 vPosition;\nvarying vec3 vWsPosition;\nvarying vec3 vEyePosition;\nvarying vec3 vWsNormal;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\nvarying vec4 vShadowCoord;\n\nconst float PI = 3.141592657;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nmat3 calcLookAtMatrix(vec3 origin, vec3 target, float roll) {\n\tvec3 rr = vec3(sin(roll), cos(roll), 0.0);\n\tvec3 ww = normalize(target - origin);\n\tvec3 uu = normalize(cross(ww, rr));\n\tvec3 vv = normalize(cross(uu, ww));\n\n\treturn mat3(uu, vv, ww);\n}\n\nvec3 getRotationAxis(vec3 a, vec3 b) {\n\tvec3 axis = normalize(cross(a, b));\n\treturn axis;\n}\n\nfloat angleBetween(vec3 a, vec3 b) {\n\treturn acos(dot(a, b));\n}\n\nmat4 rotationMatrix(vec3 axis, float angle) {\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,\n                0.0,                                0.0,                                0.0,                                1.0);\n}\n\nvec3 rotate(vec3 v, mat4 m) {\n\treturn (m * vec4(v, 1.0)).xyz;\n}\n\nvoid main(void) {\n\tvec2 uv         = aTextureCoord;\n\tuv              += uvOffset;\n\tvec3 currPos    = texture2D(texture, uv).rgb;\n\tvec3 nextPos    = texture2D(textureNext, uv).rgb;\n\tvec3 pos        = mix(currPos, nextPos, percent);\n\n\tvec3 vFront \t= vec3(0.0, 0.0, -1.0);\n\tvec3 vDir \t    = normalize(nextPos - currPos);\n\tvec3 axis \t\t= getRotationAxis(vFront, vDir);\n\tfloat angle \t= angleBetween(vFront, vDir);\n\tmat4 mtxRot \t= rotationMatrix(axis, angle);\n\n\t// mat3 mLookAt \t= calcLookAtMatrix(currPos, nextPos, 1.0);\n\t// pos \t\t\t+= mLookAt * aVertexPosition;\n\tfloat l \t\t= length(aVertexPosition);\n\tvec3 posOffset  = rotate(aVertexPosition, mtxRot);\n\tposOffset \t\t= normalize(posOffset) * l;\n\tpos \t\t\t+= posOffset;\n\t\n\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);\n\t\n\tvec4 worldSpacePosition\t= uModelMatrix * vec4(pos, 1.0);\n\tvec4 viewSpacePosition\t= uViewMatrix * worldSpacePosition;\n\n\tvPosition\t\t\t\t= viewSpacePosition.xyz;\n\tvWsPosition\t\t\t\t= worldSpacePosition.xyz;\n\t\n\tvec4 eyeDirViewSpace\t= viewSpacePosition - vec4( 0, 0, 0, 1 );\n\tvEyePosition\t\t\t= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );\n\t// vWsNormal\t\t\t\t= normalize(mLookAt*aNormal);\n\tvWsNormal\t\t\t\t= normalize(rotate(aNormal, mtxRot));\n\n\t// vec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t// vec4 V          = uProjectionMatrix * mvPosition;\n\t// gl_Position     = V;\n\n\tgl_Position\t\t\t\t= uProjectionMatrix * viewSpacePosition;\n\t\n\t\n\tvNormal         = vWsNormal;\n\tvVertex         = pos;\n\tvExtra          = aExtra;\n}", "// shadow.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec4 vShadowCoord;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\n\nuniform vec3 lightPosition;\nuniform sampler2D textureDepth;\nuniform float uShadowStrength;\nuniform float uShadowThreshold;\nuniform mat3 uNormalMatrix;\n\nfloat pcfSoftShadow(sampler2D shadowMap) {\n\tconst float shadowMapSize  = 1024.0;\n\tconst float shadowBias     = .00005;\n\tfloat shadow = 0.0;\n\tfloat texelSizeX =  1.0 / shadowMapSize;\n\tfloat texelSizeY =  1.0 / shadowMapSize;\n\tvec4 shadowCoord\t= vShadowCoord / vShadowCoord.w;\n\n\tbvec4 inFrustumVec = bvec4 ( shadowCoord.x >= 0.0, shadowCoord.x <= 1.0, shadowCoord.y >= 0.0, shadowCoord.y <= 1.0 );\n\tbool inFrustum = all( inFrustumVec );\n\n\tbvec2 frustumTestVec = bvec2( inFrustum, shadowCoord.z <= 1.0 );\n\n\tbool frustumTest = all( frustumTestVec );\n\t\n\n\tif ( frustumTest ) {\n\t\tshadowCoord.z += shadowBias;\n\t\tfloat xPixelOffset = texelSizeX;\n\t\tfloat yPixelOffset = texelSizeY;\n\n\t\tfloat dx0 = - 1.0 * xPixelOffset;\n\t\tfloat dy0 = - 1.0 * yPixelOffset;\n\t\tfloat dx1 = 1.0 * xPixelOffset;\n\t\tfloat dy1 = 1.0 * yPixelOffset;\n\n\t\tmat3 shadowKernel;\n\t\tmat3 depthKernel;\n\n\t\tdepthKernel[ 0 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy0 ) ).r ;\n\t\tdepthKernel[ 0 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, 0.0 ) ).r ;\n\t\tdepthKernel[ 0 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy1 ) ).r ;\n\t\tdepthKernel[ 1 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( 0.0, dy0 ) ).r ;\n\t\tdepthKernel[ 1 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy ).r ;\n\t\tdepthKernel[ 1 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( 0.0, dy1 ) ).r ;\n\t\tdepthKernel[ 2 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, dy0 ) ).r ;\n\t\tdepthKernel[ 2 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, 0.0 ) ).r ;\n\t\tdepthKernel[ 2 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx1, dy1 ) ).r ;\n\n\t\tvec3 shadowZ = vec3( shadowCoord.z );\n\t\tshadowKernel[ 0 ] = vec3( lessThan( depthKernel[ 0 ], shadowZ ) );\n\t\tshadowKernel[ 0 ] *= vec3( 0.25 );\n\n\t\tshadowKernel[ 1 ] = vec3( lessThan( depthKernel[ 1 ], shadowZ ) );\n\t\tshadowKernel[ 1 ] *= vec3( 0.25 );\n\n\t\tshadowKernel[ 2 ] = vec3( lessThan( depthKernel[ 2 ], shadowZ ) );\n\t\tshadowKernel[ 2 ] *= vec3( 0.25 );\n\n\t\tvec2 fractionalCoord = 1.0 - fract( shadowCoord.xy * shadowMapSize );\n\n\t\tshadowKernel[ 0 ] = mix( shadowKernel[ 1 ], shadowKernel[ 0 ], fractionalCoord.x );\n\t\tshadowKernel[ 1 ] = mix( shadowKernel[ 2 ], shadowKernel[ 1 ], fractionalCoord.x );\n\n\t\tvec4 shadowValues;\n\t\tshadowValues.x = mix( shadowKernel[ 0 ][ 1 ], shadowKernel[ 0 ][ 0 ], fractionalCoord.y );\n\t\tshadowValues.y = mix( shadowKernel[ 0 ][ 2 ], shadowKernel[ 0 ][ 1 ], fractionalCoord.y );\n\t\tshadowValues.z = mix( shadowKernel[ 1 ][ 1 ], shadowKernel[ 1 ][ 0 ], fractionalCoord.y );\n\t\tshadowValues.w = mix( shadowKernel[ 1 ][ 2 ], shadowKernel[ 1 ][ 1 ], fractionalCoord.y );\n\n\t\tshadow = dot( shadowValues, vec4( 1.0 ) ) * uShadowStrength;\n\n\t}\n\n\treturn shadow;\n}\n\nfloat diffuse(vec3 N, vec3 L) {\n\treturn max(dot(N, normalize(L)), .0);\n}\n\nvoid main(void) {\n\tfloat pcf    = pcfSoftShadow(textureDepth);\n\tpcf = 1.0 - smoothstep(0.0, uShadowThreshold, pcf);\n\n\t/*\n\tvec4 color   = vec4(1.0);\n\tcolor.rgb *= pcf;\n\tgl_FragColor = color;\n\t*/\n\n\tvec3 N = uNormalMatrix * normalize(vVertex + vExtra);\n\tfloat _diffuse = diffuse(N, lightPosition);\n\t_diffuse = mix(_diffuse, 1.0, 0.13);\n\n    gl_FragColor = vec4(vec3(_diffuse), 1.0);\n}");
 		_this._flip = 0;
 		_this.gamma = 2.2;
 		_this.exposure = 1;
@@ -1449,8 +1450,8 @@ var ViewPlanes = function (_alfrid$View) {
 			var extras = [];
 			var count = 0;
 			var numParticles = params.numParticles;
-			var ux = undefined,
-			    uy = undefined;
+			var ux = void 0,
+			    uy = void 0;
 
 			var NUM_SLIDES = params.numSlides;
 			// const MAX_COUNT  = 15000;
@@ -1532,12 +1533,20 @@ var ViewPlanes = function (_alfrid$View) {
 			this.mesh.bufferNormal(normals);
 			this.mesh.bufferIndices(indices);
 			this.mesh.bufferData(extras, 'aExtra', 3);
+
+			this.meshWire = new _alfrid2.default.Mesh(GL.LINES);
+			this.meshWire.bufferVertex(positions);
+			this.meshWire.bufferTexCoords(coords);
+			this.meshWire.bufferNormal(normals);
+			this.meshWire.bufferIndices(indices);
+			this.meshWire.bufferData(extras, 'aExtra', 3);
 		}
 	}, {
 		key: 'render',
 		value: function render(texture, textureNext, percent, uvIndex, flip, shadowMatrix, textureRad, textureIrr) {
 			// this._flip = this._flip == 0 ? 1 : 0;
 			// let shader = shadowMapTexture === undefined ? this.shader : this.shaderShadow;
+
 			var NUM_SLIDES = params.numSlides;
 			var x = uvIndex % NUM_SLIDES / NUM_SLIDES;
 			var y = Math.floor(uvIndex / NUM_SLIDES) / NUM_SLIDES;
@@ -1569,6 +1578,7 @@ var ViewPlanes = function (_alfrid$View) {
 
 			this.shader.uniform("uExposure", "uniform1f", params.exposure);
 			this.shader.uniform("uGamma", "uniform1f", params.gamma);
+			this.shader.uniform("showWires", "uniform1f", params.showWires ? 1.0 : 0.0);
 
 			// if(shadowMapTexture) {
 			// 	shader.uniform("textureDepth", "uniform1i", 2);
@@ -1578,7 +1588,7 @@ var ViewPlanes = function (_alfrid$View) {
 			// 	shader.uniform("uShadowThreshold", "uniform1f", params.shadowThreshold);
 			// }
 
-			GL.draw(this.mesh);
+			GL.draw(params.showWires ? this.meshWire : this.mesh);
 		}
 	}]);
 
@@ -1590,11 +1600,11 @@ exports.default = ViewPlanes;
 },{"./libs/alfrid.js":19}],13:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -1610,7 +1620,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
-var GL = undefined;
+var GL = void 0;
 
 var ViewRender = function (_alfrid$View) {
 	_inherits(ViewRender, _alfrid$View);
@@ -1619,7 +1629,7 @@ var ViewRender = function (_alfrid$View) {
 		_classCallCheck(this, ViewRender);
 
 		GL = _alfrid2.default.GL;
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewRender).call(this, "#define GLSLIFY 1\n// render.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nvarying vec4 vColor;\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy * .5;\n\tvec3 currPos = texture2D(texture, uv).rgb;\n\tvec3 nextPos = texture2D(textureNext, uv).rgb;\n\tvec3 pos     = mix(currPos, nextPos, percent);\n\tgl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tgl_PointSize = 1.0;\n\t\n\tfloat d      = length(pos);\n\tfloat a      = smoothstep(3.0, 4.5, d);\n\tvColor       = vec4(1.0, 0.0, 0.0, 1.0-a);\n\n\tif(length(currPos) - length(nextPos) > 1.0) vColor.a = 0.0;\n}", "#define GLSLIFY 1\n// render.frag\n\n// save.frag\n\nprecision highp float;\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewRender).call(this, "// render.vert\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nvarying vec4 vColor;\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy * .5;\n\tvec3 currPos = texture2D(texture, uv).rgb;\n\tvec3 nextPos = texture2D(textureNext, uv).rgb;\n\tvec3 pos     = mix(currPos, nextPos, percent);\n\tgl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tgl_PointSize = 1.0;\n\t\n\tfloat d      = length(pos);\n\tfloat a      = smoothstep(3.0, 4.5, d);\n\tvColor       = vec4(1.0, 0.0, 0.0, 1.0-a);\n\n\tif(length(currPos) - length(nextPos) > 1.0) vColor.a = 0.0;\n}", "// render.frag\n\n// save.frag\n\nprecision highp float;\n#define GLSLIFY 1\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
 	}
 
 	_createClass(ViewRender, [{
@@ -1630,8 +1640,8 @@ var ViewRender = function (_alfrid$View) {
 			var indices = [];
 			var count = 0;
 			var numParticles = params.numParticles;
-			var ux = undefined,
-			    uy = undefined;
+			var ux = void 0,
+			    uy = void 0;
 
 			for (var j = 0; j < numParticles; j++) {
 				for (var i = 0; i < numParticles; i++) {
@@ -1668,11 +1678,11 @@ exports.default = ViewRender;
 },{"./libs/alfrid.js":19}],14:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -1692,7 +1702,7 @@ var random = function random(min, max) {
 	return min + Math.random() * (max - min);
 };
 
-var GL = undefined;
+var GL = void 0;
 
 var ViewSave = function (_alfrid$View) {
 	_inherits(ViewSave, _alfrid$View);
@@ -1702,7 +1712,7 @@ var ViewSave = function (_alfrid$View) {
 
 		GL = _alfrid2.default.GL;
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSave).call(this, "#define GLSLIFY 1\n// save.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vColor;\n\nvoid main(void) {\n\tvColor      = aVertexPosition;\n\tvec3 pos    = vec3(aTextureCoord, 0.0);\n\tgl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\n    gl_PointSize = 1.0;\n}", "#define GLSLIFY 1\n// save.frag\n\nprecision highp float;\n\nvarying vec3 vColor;\n\nvoid main(void) {\n    gl_FragColor = vec4(vColor, 1.0);\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSave).call(this, "// save.vert\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vColor;\n\nvoid main(void) {\n\tvColor      = aVertexPosition;\n\tvec3 pos    = vec3(aTextureCoord, 0.0);\n\tgl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\n    gl_PointSize = 1.0;\n}", "// save.frag\n\nprecision highp float;\n#define GLSLIFY 1\n\nvarying vec3 vColor;\n\nvoid main(void) {\n    gl_FragColor = vec4(vColor, 1.0);\n}"));
 	}
 
 	_createClass(ViewSave, [{
@@ -1717,8 +1727,8 @@ var ViewSave = function (_alfrid$View) {
 
 			var numParticles = params.numParticles;
 			var totalParticles = numParticles * numParticles;
-			var ux = undefined,
-			    uy = undefined;
+			var ux = void 0,
+			    uy = void 0;
 			var range = 1.5;
 
 			for (var j = 0; j < numParticles; j++) {
@@ -1749,6 +1759,7 @@ var ViewSave = function (_alfrid$View) {
 		value: function render() {
 			var state = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 
+
 			this.shader.bind();
 			if (state == 0) {
 				GL.draw(this.mesh);
@@ -1766,11 +1777,11 @@ exports.default = ViewSave;
 },{"./libs/alfrid.js":19}],15:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -1794,7 +1805,7 @@ var ViewSimulation = function (_alfrid$View) {
 	function ViewSimulation() {
 		_classCallCheck(this, ViewSimulation);
 
-		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSimulation).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform float time;\nuniform float skipCount;\n\nvec3 mod289(vec3 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 mod289(vec4 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 permute(vec4 x) {\treturn mod289(((x*34.0)+1.0)*x);\t}\n\nvec4 taylorInvSqrt(vec4 r) {\treturn 1.79284291400159 - 0.85373472095314 * r;}\n\nfloat snoise(vec3 v) { \n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);\n\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n  vec3 g = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g;\n  vec3 i1 = min( g.xyz, l.zxy );\n  vec3 i2 = max( g.xyz, l.zxy );\n\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n  i = mod289(i); \n  vec4 p = permute( permute( permute( \n             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n           + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) \n           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D.wyz - D.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1.xy,h.z);\n  vec3 p3 = vec3(a1.zw,h.w);\n\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), \n                                dot(p2,x2), dot(p3,x3) ) );\n}\n\nvec3 snoiseVec3( vec3 x ){\n\n  float s  = snoise(vec3( x ));\n  float s1 = snoise(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));\n  float s2 = snoise(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));\n  vec3 c = vec3( s , s1 , s2 );\n  return c;\n\n}\n\nvec3 curlNoise( vec3 p ){\n  \n  const float e = .1;\n  vec3 dx = vec3( e   , 0.0 , 0.0 );\n  vec3 dy = vec3( 0.0 , e   , 0.0 );\n  vec3 dz = vec3( 0.0 , 0.0 , e   );\n\n  vec3 p_x0 = snoiseVec3( p - dx );\n  vec3 p_x1 = snoiseVec3( p + dx );\n  vec3 p_y0 = snoiseVec3( p - dy );\n  vec3 p_y1 = snoiseVec3( p + dy );\n  vec3 p_z0 = snoiseVec3( p - dz );\n  vec3 p_z1 = snoiseVec3( p + dz );\n\n  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;\n  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;\n  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;\n\n  const float divisor = 1.0 / ( 2.0 * e );\n  return normalize( vec3( x , y , z ) * divisor );\n\n}\n\nvoid main(void) {\n  vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;\n  vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;\n  vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;\n  float posOffset = 0.15 + extra.r * .05;\n\tvec3 acc = curlNoise(pos * posOffset + time * .1);\n\t\n\tvel += acc * .001 * (skipCount+1.0);\n\n  const float maxRadius = 5.0;\n  float dist = length(pos);\n  if(dist > maxRadius) {\n    float f = (dist - maxRadius) * .01;\n    vel -= normalize(pos) * f;\n  }\n\n\tconst float decrease = .90;\n\tvel *= decrease;\n\n\tgl_FragColor = vec4(vel, 1.0);\n}"));
+		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSimulation).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform float time;\nuniform float skipCount;\n\nvec3 mod289(vec3 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 mod289(vec4 x) {\treturn x - floor(x * (1.0 / 289.0)) * 289.0;\t}\n\nvec4 permute(vec4 x) {\treturn mod289(((x*34.0)+1.0)*x);\t}\n\nvec4 taylorInvSqrt(vec4 r) {\treturn 1.79284291400159 - 0.85373472095314 * r;}\n\nfloat snoise(vec3 v) { \n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);\n\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n  vec3 g = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g;\n  vec3 i1 = min( g.xyz, l.zxy );\n  vec3 i2 = max( g.xyz, l.zxy );\n\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n  i = mod289(i); \n  vec4 p = permute( permute( permute( \n             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n           + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) \n           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D.wyz - D.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1.xy,h.z);\n  vec3 p3 = vec3(a1.zw,h.w);\n\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), \n                                dot(p2,x2), dot(p3,x3) ) );\n}\n\nvec3 snoiseVec3( vec3 x ){\n\n  float s  = snoise(vec3( x ));\n  float s1 = snoise(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));\n  float s2 = snoise(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));\n  vec3 c = vec3( s , s1 , s2 );\n  return c;\n\n}\n\nvec3 curlNoise( vec3 p ){\n  \n  const float e = .1;\n  vec3 dx = vec3( e   , 0.0 , 0.0 );\n  vec3 dy = vec3( 0.0 , e   , 0.0 );\n  vec3 dz = vec3( 0.0 , 0.0 , e   );\n\n  vec3 p_x0 = snoiseVec3( p - dx );\n  vec3 p_x1 = snoiseVec3( p + dx );\n  vec3 p_y0 = snoiseVec3( p - dy );\n  vec3 p_y1 = snoiseVec3( p + dy );\n  vec3 p_z0 = snoiseVec3( p - dz );\n  vec3 p_z1 = snoiseVec3( p + dz );\n\n  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;\n  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;\n  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;\n\n  const float divisor = 1.0 / ( 2.0 * e );\n  return normalize( vec3( x , y , z ) * divisor );\n\n}\n\nvoid main(void) {\n  vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;\n  vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;\n  vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;\n  float posOffset = 0.15 + extra.r * .05;\n\tvec3 acc = curlNoise(pos * posOffset + time * .1);\n\t\n\tvel += acc * .001 * (skipCount+1.0);\n\n  const float maxRadius = 5.0;\n  float dist = length(pos);\n  if(dist > maxRadius) {\n    float f = (dist - maxRadius) * .01;\n    vel -= normalize(pos) * f;\n  }\n\n\tconst float decrease = .90;\n\tvel *= decrease;\n\n\tgl_FragColor = vec4(vel, 1.0);\n}"));
 
 		_this.time = Math.random() * 0xFF;
 
@@ -1835,11 +1846,11 @@ exports.default = ViewSimulation;
 },{"./libs/alfrid.js":19}],16:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -1862,13 +1873,14 @@ var ViewSkybox = function (_alfrid$View) {
 	function ViewSkybox() {
 		_classCallCheck(this, ViewSkybox);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSkybox).call(this, "#define GLSLIFY 1\n// basic.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\nvarying vec3 vCameraDir;\n\nvoid main(void) {\n\tgl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvVertex = aVertexPosition;\n}", "#define GLSLIFY 1\n// basic.frag\n\n#define SHADER_NAME BASIC_FRAGMENT\n\nprecision highp float;\n\nuniform samplerCube texture;\nuniform float\t\tuExposure;\nuniform float\t\tuGamma;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\nvoid main(void) {\n\tvec3 color   \t\t= textureCube(texture, vVertex).rgb;\n\n\tcolor\t\t\t\t= Uncharted2Tonemap( color * uExposure );\n\t// white balance\n\tcolor\t\t\t\t= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );\n\t\n\t// gamma correction\n\tcolor\t\t\t\t= pow( color, vec3( 1.0 / uGamma ) );\n\n\tgl_FragColor = vec4(color, 1.0);\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSkybox).call(this, "// basic.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\nvarying vec3 vCameraDir;\n\nvoid main(void) {\n\tgl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvVertex = aVertexPosition;\n}", "// basic.frag\n\n#define SHADER_NAME BASIC_FRAGMENT\n\nprecision highp float;\n#define GLSLIFY 1\n\nuniform samplerCube texture;\nuniform float\t\tuExposure;\nuniform float\t\tuGamma;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\nvoid main(void) {\n\tvec3 color   \t\t= textureCube(texture, vVertex).rgb;\n\n\tcolor\t\t\t\t= Uncharted2Tonemap( color * uExposure );\n\t// white balance\n\tcolor\t\t\t\t= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );\n\t\n\t// gamma correction\n\tcolor\t\t\t\t= pow( color, vec3( 1.0 / uGamma ) );\n\n\tgl_FragColor = vec4(color, 1.0);\n}"));
 	}
 
 	_createClass(ViewSkybox, [{
 		key: '_init',
 		value: function _init() {
 			this.mesh = _alfrid2.default.Geom.skybox(15);
+			this.meshWire = _alfrid2.default.Geom.skybox(15, false, GL.LINES);
 		}
 	}, {
 		key: 'render',
@@ -1878,7 +1890,7 @@ var ViewSkybox = function (_alfrid$View) {
 			this.shader.uniform("uExposure", "uniform1f", params.exposure);
 			this.shader.uniform("uGamma", "uniform1f", params.gamma);
 			textureRad.bind(0);
-			GL.draw(this.mesh);
+			GL.draw(params.showWires ? this.meshWire : this.mesh);
 		}
 	}]);
 
@@ -1890,11 +1902,11 @@ exports.default = ViewSkybox;
 },{"./libs/alfrid.js":19}],17:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -1917,7 +1929,7 @@ var ViewTreshold = function (_alfrid$View) {
 	function ViewTreshold() {
 		_classCallCheck(this, ViewTreshold);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewTreshold).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// threshold.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float threshold;\n\nvoid main(void) {\n    vec4 color = texture2D(texture, vTextureCoord);\n    float br = length(color.rgb) / length(vec3(1.0));\n\n    if(br < threshold) color.rgb = vec3(0.0);\n\n    gl_FragColor = color;\n    // gl_FragColor = texture2D(texture, vTextureCoord);\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewTreshold).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "// threshold.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float threshold;\n\nvoid main(void) {\n    vec4 color = texture2D(texture, vTextureCoord);\n    float br = length(color.rgb) / length(vec3(1.0));\n\n    if(br < threshold) color.rgb = vec3(0.0);\n\n    gl_FragColor = color;\n    // gl_FragColor = texture2D(texture, vTextureCoord);\n}"));
 	}
 
 	_createClass(ViewTreshold, [{
@@ -1961,6 +1973,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var NUM = 2;
 // import dat from 'dat-gui';
 
+
 window.params = {
 	numParticles: 128 * NUM,
 	skipCount: 2,
@@ -1973,7 +1986,8 @@ window.params = {
 	threshold: .85,
 	blurRange: .5,
 	numBlur: 1,
-	multiply: 1
+	multiply: 1,
+	showWires: false
 };
 
 var assets = [{ id: 'irr_posx', url: 'assets/irr_posx.hdr', type: 'binary' }, { id: 'irr_posy', url: 'assets/irr_posy.hdr', type: 'binary' }, { id: 'irr_posz', url: 'assets/irr_posz.hdr', type: 'binary' }, { id: 'irr_negx', url: 'assets/irr_negx.hdr', type: 'binary' }, { id: 'irr_negy', url: 'assets/irr_negy.hdr', type: 'binary' }, { id: 'irr_negz', url: 'assets/irr_negz.hdr', type: 'binary' }, { id: 'rad_posx', url: 'assets/rad_posx.hdr', type: 'binary' }, { id: 'rad_posy', url: 'assets/rad_posy.hdr', type: 'binary' }, { id: 'rad_posz', url: 'assets/rad_posz.hdr', type: 'binary' }, { id: 'rad_negx', url: 'assets/rad_negx.hdr', type: 'binary' }, { id: 'rad_negy', url: 'assets/rad_negy.hdr', type: 'binary' }, { id: 'rad_negz', url: 'assets/rad_negz.hdr', type: 'binary' }];
@@ -1999,6 +2013,12 @@ function _init() {
 		var loader = document.body.querySelector('.Loading-Bar');
 		loader.style.width = (p * 100).toFixed(2) + '%';
 	}).on('complete', _onImageLoaded).start();
+
+	window.addEventListener('keydown', function (e) {
+		if (e.keyCode == 87) {
+			params.showWires = !params.showWires;
+		}
+	});
 }
 
 function _onImageLoaded(o) {

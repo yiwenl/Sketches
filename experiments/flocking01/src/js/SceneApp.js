@@ -7,7 +7,7 @@ import ViewAddVel from './ViewAddVel';
 import ViewBall from './ViewBall';
 import ViewPlanes from './ViewPlanes';
 import ClusterChecker from './ClusterChecker';
-// import AudioPlayer from './AudioPlayer';
+import AudioPlayer from './AudioPlayer';
 
 let clusterfck = require("clusterfck");
 
@@ -22,8 +22,8 @@ class SceneApp extends alfrid.Scene {
 
 		let size             = params.numParticles;
 		this.pixels          = new Float32Array(4 * size * size);
-		// this._clusterChecker = new ClusterChecker();
-		// this._audioPlayer    = new AudioPlayer();
+		this._clusterChecker = new ClusterChecker();
+		this._audioPlayer    = new AudioPlayer();
 	}
 
 
@@ -139,11 +139,12 @@ class SceneApp extends alfrid.Scene {
 
 	_clustering() {
 
-		// this._clusterChecker.check(this.pixels)
+		this._clusterChecker.check(this.pixels)
 
 		if(params.showCenteroid) {
 			for(let i=0; i<this._clusterChecker.clusters.length ; i++ ) {
-				// let cluster = this._clusterChecker.clusters[i];
+				console.log(i);
+				let cluster = this._clusterChecker.clusters[i];
 				this._vBall.render(cluster.position, .0 + cluster.strength * 2.0, [1, 0, 0]);	
 			}	
 		}

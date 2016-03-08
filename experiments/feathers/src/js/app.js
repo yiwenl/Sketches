@@ -16,7 +16,8 @@ window.params = {
 	threshold:.85,
 	blurRange:.5,
 	numBlur:1,
-	multiply:1
+	multiply:1,
+	showWires:false
 };
 
 let assets = [
@@ -55,6 +56,12 @@ function _init() {
 		loader.style.width = (p * 100).toFixed(2) + '%';
 	}).on('complete', _onImageLoaded)
 	.start();
+
+	window.addEventListener('keydown', (e)=>{
+		if(e.keyCode == 87) {
+			params.showWires = !params.showWires
+		}
+	});
 }
 
 

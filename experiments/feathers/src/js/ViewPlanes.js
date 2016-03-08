@@ -111,12 +111,20 @@ class ViewPlanes extends alfrid.View {
 		this.mesh.bufferNormal(normals);
 		this.mesh.bufferIndices(indices);
 		this.mesh.bufferData(extras, 'aExtra', 3);
+
+		this.meshWire = new alfrid.Mesh(GL.LINES);
+		this.meshWire.bufferVertex(positions);
+		this.meshWire.bufferTexCoords(coords);
+		this.meshWire.bufferNormal(normals);
+		this.meshWire.bufferIndices(indices);
+		this.meshWire.bufferData(extras, 'aExtra', 3);
 	}
 
 
 	render(texture, textureNext, percent, uvIndex, flip, shadowMatrix, textureRad, textureIrr) {
 		// this._flip = this._flip == 0 ? 1 : 0;
 		// let shader = shadowMapTexture === undefined ? this.shader : this.shaderShadow;
+
 		let NUM_SLIDES   = params.numSlides;
 		let x = (uvIndex % NUM_SLIDES) / NUM_SLIDES;
 		let y = Math.floor(uvIndex / NUM_SLIDES) / NUM_SLIDES;
@@ -150,6 +158,7 @@ class ViewPlanes extends alfrid.View {
 
 		this.shader.uniform("uExposure", "uniform1f", params.exposure);
 		this.shader.uniform("uGamma", "uniform1f", params.gamma);
+		this.shader.uniform("showWires", "uniform1f", params.showWires ? 1.0 : 0.0);
 
 		// if(shadowMapTexture) {
 		// 	shader.uniform("textureDepth", "uniform1i", 2);
@@ -160,7 +169,7 @@ class ViewPlanes extends alfrid.View {
 		// }
 		
 
-		GL.draw(this.mesh);
+		GL.draw(params.showWires ? this.meshWire : this.mesh);
 	}
 
 

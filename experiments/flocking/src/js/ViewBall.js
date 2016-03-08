@@ -13,6 +13,7 @@ class ViewBall extends alfrid.View {
 
 	_init() {
 		this.mesh = alfrid.Geom.sphere(.24, 32, true);
+		this.meshWires = alfrid.Geom.sphere(.24, 8, true, false, GL.LINES);
 	}
 
 
@@ -22,7 +23,7 @@ class ViewBall extends alfrid.View {
 		this.shader.uniform("scale", "uniform3fv", [scale, scale, scale]);
 		this.shader.uniform("color", "uniform3fv", color);
 		this.shader.uniform("opacity", "uniform1f", opacity);
-		GL.draw(this.mesh);
+		GL.draw(params.showWires ? this.meshWires : this.mesh);
 	}
 
 

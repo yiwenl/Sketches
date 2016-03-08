@@ -4723,13 +4723,373 @@ dat.utils.common),
 dat.dom.dom,
 dat.utils.common);
 },{}],8:[function(require,module,exports){
-'use strict';
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // Cluster.js
+function EventEmitter() {
+  this._events = this._events || {};
+  this._maxListeners = this._maxListeners || undefined;
+}
+module.exports = EventEmitter;
+
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
+
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._maxListeners = undefined;
+
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+EventEmitter.defaultMaxListeners = 10;
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function(n) {
+  if (!isNumber(n) || n < 0 || isNaN(n))
+    throw TypeError('n must be a positive number');
+  this._maxListeners = n;
+  return this;
+};
+
+EventEmitter.prototype.emit = function(type) {
+  var er, handler, len, args, i, listeners;
+
+  if (!this._events)
+    this._events = {};
+
+  // If there is no 'error' event listener then throw.
+  if (type === 'error') {
+    if (!this._events.error ||
+        (isObject(this._events.error) && !this._events.error.length)) {
+      er = arguments[1];
+      if (er instanceof Error) {
+        throw er; // Unhandled 'error' event
+      }
+      throw TypeError('Uncaught, unspecified "error" event.');
+    }
+  }
+
+  handler = this._events[type];
+
+  if (isUndefined(handler))
+    return false;
+
+  if (isFunction(handler)) {
+    switch (arguments.length) {
+      // fast cases
+      case 1:
+        handler.call(this);
+        break;
+      case 2:
+        handler.call(this, arguments[1]);
+        break;
+      case 3:
+        handler.call(this, arguments[1], arguments[2]);
+        break;
+      // slower
+      default:
+        args = Array.prototype.slice.call(arguments, 1);
+        handler.apply(this, args);
+    }
+  } else if (isObject(handler)) {
+    args = Array.prototype.slice.call(arguments, 1);
+    listeners = handler.slice();
+    len = listeners.length;
+    for (i = 0; i < len; i++)
+      listeners[i].apply(this, args);
+  }
+
+  return true;
+};
+
+EventEmitter.prototype.addListener = function(type, listener) {
+  var m;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events)
+    this._events = {};
+
+  // To avoid recursion in the case that type === "newListener"! Before
+  // adding it to the listeners, first emit "newListener".
+  if (this._events.newListener)
+    this.emit('newListener', type,
+              isFunction(listener.listener) ?
+              listener.listener : listener);
+
+  if (!this._events[type])
+    // Optimize the case of one listener. Don't need the extra array object.
+    this._events[type] = listener;
+  else if (isObject(this._events[type]))
+    // If we've already got an array, just append.
+    this._events[type].push(listener);
+  else
+    // Adding the second element, need to change to array.
+    this._events[type] = [this._events[type], listener];
+
+  // Check for listener leak
+  if (isObject(this._events[type]) && !this._events[type].warned) {
+    if (!isUndefined(this._maxListeners)) {
+      m = this._maxListeners;
+    } else {
+      m = EventEmitter.defaultMaxListeners;
+    }
+
+    if (m && m > 0 && this._events[type].length > m) {
+      this._events[type].warned = true;
+      console.error('(node) warning: possible EventEmitter memory ' +
+                    'leak detected. %d listeners added. ' +
+                    'Use emitter.setMaxListeners() to increase limit.',
+                    this._events[type].length);
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
+    }
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.once = function(type, listener) {
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  var fired = false;
+
+  function g() {
+    this.removeListener(type, g);
+
+    if (!fired) {
+      fired = true;
+      listener.apply(this, arguments);
+    }
+  }
+
+  g.listener = listener;
+  this.on(type, g);
+
+  return this;
+};
+
+// emits a 'removeListener' event iff the listener was removed
+EventEmitter.prototype.removeListener = function(type, listener) {
+  var list, position, length, i;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events || !this._events[type])
+    return this;
+
+  list = this._events[type];
+  length = list.length;
+  position = -1;
+
+  if (list === listener ||
+      (isFunction(list.listener) && list.listener === listener)) {
+    delete this._events[type];
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+
+  } else if (isObject(list)) {
+    for (i = length; i-- > 0;) {
+      if (list[i] === listener ||
+          (list[i].listener && list[i].listener === listener)) {
+        position = i;
+        break;
+      }
+    }
+
+    if (position < 0)
+      return this;
+
+    if (list.length === 1) {
+      list.length = 0;
+      delete this._events[type];
+    } else {
+      list.splice(position, 1);
+    }
+
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.removeAllListeners = function(type) {
+  var key, listeners;
+
+  if (!this._events)
+    return this;
+
+  // not listening for removeListener, no need to emit
+  if (!this._events.removeListener) {
+    if (arguments.length === 0)
+      this._events = {};
+    else if (this._events[type])
+      delete this._events[type];
+    return this;
+  }
+
+  // emit removeListener for all listeners on all events
+  if (arguments.length === 0) {
+    for (key in this._events) {
+      if (key === 'removeListener') continue;
+      this.removeAllListeners(key);
+    }
+    this.removeAllListeners('removeListener');
+    this._events = {};
+    return this;
+  }
+
+  listeners = this._events[type];
+
+  if (isFunction(listeners)) {
+    this.removeListener(type, listeners);
+  } else if (listeners) {
+    // LIFO order
+    while (listeners.length)
+      this.removeListener(type, listeners[listeners.length - 1]);
+  }
+  delete this._events[type];
+
+  return this;
+};
+
+EventEmitter.prototype.listeners = function(type) {
+  var ret;
+  if (!this._events || !this._events[type])
+    ret = [];
+  else if (isFunction(this._events[type]))
+    ret = [this._events[type]];
+  else
+    ret = this._events[type].slice();
+  return ret;
+};
+
+EventEmitter.prototype.listenerCount = function(type) {
+  if (this._events) {
+    var evlistener = this._events[type];
+
+    if (isFunction(evlistener))
+      return 1;
+    else if (evlistener)
+      return evlistener.length;
+  }
+  return 0;
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  return emitter.listenerCount(type);
+};
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+
+},{}],9:[function(require,module,exports){
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// AudioPlayer.js
+
+var sono = require('./libs/sono/sono');
+var NOTES = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
+
+var AudioPlayer = function () {
+	function AudioPlayer() {
+		_classCallCheck(this, AudioPlayer);
+
+		this._isReady = false;
+		this._loadAudios();
+		this._soundIndex = 0;
+		sono.volume = .5;
+	}
+
+	_createClass(AudioPlayer, [{
+		key: '_loadAudios',
+		value: function _loadAudios() {
+
+			this._sounds = [];
+			for (var i = 0; i < NOTES.length; i++) {
+				var path = ['assets/audio/' + NOTES[i] + '_0.ogg', 'assets/audio/' + NOTES[i] + '_0.mp3'];
+
+				var s = sono.createSound({
+					id: 'sound' + i,
+					src: path,
+					loop: false
+				});
+
+				this._sounds.push(s);
+			}
+		}
+	}, {
+		key: 'playNextNote',
+		value: function playNextNote() {
+			this._sounds[this._soundIndex].play();
+
+			var inc = Math.random() > .5 ? 1 : 2;
+			this._soundIndex += inc;
+
+			if (this._soundIndex >= NOTES.length) this._soundIndex = 0;
+		}
+	}]);
+
+	return AudioPlayer;
+}();
+
+exports.default = AudioPlayer;
+
+},{"./libs/sono/sono":49}],10:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // Cluster.js
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -4806,14 +5166,14 @@ var Cluster = function () {
 
 exports.default = Cluster;
 
-},{"./libs/alfrid.js":18}],9:[function(require,module,exports){
+},{"./libs/alfrid.js":20}],11:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Cluster = require('./Cluster');
 
@@ -4830,6 +5190,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // ClusterChecker.js
+
 
 var clusterfck = require("clusterfck");
 
@@ -4878,8 +5239,8 @@ var ClusterChecker = function (_alfrid$EventDispatch) {
 				center[2] /= cluster.length;
 
 				var distances = [];
-				for (var j = 0; j < this._clusters.length; j++) {
-					var c = this._clusters[j];
+				for (var _j = 0; _j < this._clusters.length; _j++) {
+					var c = this._clusters[_j];
 					var d = c.distance(center);
 					distances.push(d);
 				}
@@ -4901,11 +5262,11 @@ var ClusterChecker = function (_alfrid$EventDispatch) {
 
 			if (this._clusters.length === 0) {
 				for (var _i3 = 0; _i3 < newClusters.length; _i3++) {
-					var cluster = newClusters[_i3];
-					var strength = cluster.num / MAX_NUM;
-					var c = new _Cluster2.default(cluster.position, strength);
+					var _cluster = newClusters[_i3];
+					var strength = _cluster.num / MAX_NUM;
+					var _c = new _Cluster2.default(_cluster.position, strength);
 
-					this._clusters.push(c);
+					this._clusters.push(_c);
 				}
 
 				return;
@@ -4917,27 +5278,27 @@ var ClusterChecker = function (_alfrid$EventDispatch) {
 
 			var needToCheck = true;
 			var minDist = 0.0;
-			var ia = undefined,
-			    ib = undefined;
+			var ia = void 0,
+			    ib = void 0;
 			var cnt = 0;
 
 			while (needToCheck) {
 				minDist = -1;
-				for (var j = 0; j < newClusters.length; j++) {
-					var c = newClusters[j];
-					if (!c.picked) {
-						var distances = c.distances;
-						for (var _i4 = 0; _i4 < distances.length; _i4++) {
-							var d = distances[_i4];
+				for (var _j2 = 0; _j2 < newClusters.length; _j2++) {
+					var _c2 = newClusters[_j2];
+					if (!_c2.picked) {
+						var _distances = _c2.distances;
+						for (var _i4 = 0; _i4 < _distances.length; _i4++) {
+							var _d = _distances[_i4];
 							if (minDist < 0) {
-								minDist = d;
-								ia = j;
+								minDist = _d;
+								ia = _j2;
 								ib = _i4;
 							} else {
-								if (d < minDist) {
-									minDist = d;
+								if (_d < minDist) {
+									minDist = _d;
 
-									ia = j;
+									ia = _j2;
 									ib = _i4;
 								}
 							}
@@ -4968,13 +5329,13 @@ var ClusterChecker = function (_alfrid$EventDispatch) {
 			var pickedIndices = [];
 			var tmp = [];
 			for (var _i5 = 0; _i5 < newClusters.length; _i5++) {
-				var cluster = newClusters[_i5];
-				if (cluster.linkedIndex >= 0) {
-					this._clusters[cluster.linkedIndex].update(cluster.position, cluster.num / MAX_NUM);
+				var _cluster2 = newClusters[_i5];
+				if (_cluster2.linkedIndex >= 0) {
+					this._clusters[_cluster2.linkedIndex].update(_cluster2.position, _cluster2.num / MAX_NUM);
 					pickedIndices.push(_i5);
 				} else {
-					var c = new _Cluster2.default(cluster.position, cluster.num / MAX_NUM);
-					tmp.push(c);
+					var _c3 = new _Cluster2.default(_cluster2.position, _cluster2.num / MAX_NUM);
+					tmp.push(_c3);
 				}
 			}
 
@@ -5013,14 +5374,14 @@ var ClusterChecker = function (_alfrid$EventDispatch) {
 
 exports.default = ClusterChecker;
 
-},{"./Cluster":8,"./libs/alfrid.js":18,"clusterfck":1}],10:[function(require,module,exports){
+},{"./Cluster":10,"./libs/alfrid.js":20,"clusterfck":1}],12:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5054,6 +5415,10 @@ var _ClusterChecker = require('./ClusterChecker');
 
 var _ClusterChecker2 = _interopRequireDefault(_ClusterChecker);
 
+var _AudioPlayer = require('./AudioPlayer');
+
+var _AudioPlayer2 = _interopRequireDefault(_AudioPlayer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -5062,11 +5427,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // SceneApp.js
 
-// import AudioPlayer from './AudioPlayer';
 
 var clusterfck = require("clusterfck");
 
-var GL = undefined;
+var GL = void 0;
 
 var SceneApp = function (_alfrid$Scene) {
 	_inherits(SceneApp, _alfrid$Scene);
@@ -5083,8 +5447,8 @@ var SceneApp = function (_alfrid$Scene) {
 
 		var size = params.numParticles;
 		_this.pixels = new Float32Array(4 * size * size);
-		// this._clusterChecker = new ClusterChecker();
-		// this._audioPlayer    = new AudioPlayer();
+		_this._clusterChecker = new _ClusterChecker2.default();
+		_this._audioPlayer = new _AudioPlayer2.default();
 		return _this;
 	}
 
@@ -5201,11 +5565,12 @@ var SceneApp = function (_alfrid$Scene) {
 		key: '_clustering',
 		value: function _clustering() {
 
-			// this._clusterChecker.check(this.pixels)
+			this._clusterChecker.check(this.pixels);
 
 			if (params.showCenteroid) {
 				for (var i = 0; i < this._clusterChecker.clusters.length; i++) {
-					// let cluster = this._clusterChecker.clusters[i];
+					console.log(i);
+					var cluster = this._clusterChecker.clusters[i];
 					this._vBall.render(cluster.position, .0 + cluster.strength * 2.0, [1, 0, 0]);
 				}
 			}
@@ -5250,14 +5615,14 @@ var SceneApp = function (_alfrid$Scene) {
 
 exports.default = SceneApp;
 
-},{"./ClusterChecker":9,"./ViewAddVel":11,"./ViewBall":12,"./ViewPlanes":13,"./ViewRender":14,"./ViewSave":15,"./ViewSimulation":16,"./libs/alfrid.js":18,"clusterfck":1}],11:[function(require,module,exports){
+},{"./AudioPlayer":9,"./ClusterChecker":11,"./ViewAddVel":13,"./ViewBall":14,"./ViewPlanes":15,"./ViewRender":16,"./ViewSave":17,"./ViewSimulation":18,"./libs/alfrid.js":20,"clusterfck":1}],13:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5280,7 +5645,7 @@ var ViewAddVel = function (_alfrid$View) {
 	function ViewAddVel() {
 		_classCallCheck(this, ViewAddVel);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewAddVel).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "#define GLSLIFY 1\n// addvel.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texturePos;\nuniform sampler2D textureVel;\n\nvoid main(void) {\n\tvec3 pos = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel = texture2D(textureVel, vTextureCoord).rgb;\n\n    gl_FragColor = vec4(pos + vel, 1.0);\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewAddVel).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, "// addvel.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nuniform sampler2D texturePos;\nuniform sampler2D textureVel;\n\nvoid main(void) {\n\tvec3 pos = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel = texture2D(textureVel, vTextureCoord).rgb;\n\n    gl_FragColor = vec4(pos + vel, 1.0);\n}"));
 	}
 
 	_createClass(ViewAddVel, [{
@@ -5308,14 +5673,14 @@ var ViewAddVel = function (_alfrid$View) {
 
 exports.default = ViewAddVel;
 
-},{"./libs/alfrid.js":18}],12:[function(require,module,exports){
+},{"./libs/alfrid.js":20}],14:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5338,7 +5703,7 @@ var ViewBall = function (_alfrid$View) {
 	function ViewBall() {
 		_classCallCheck(this, ViewBall);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBall).call(this, _alfrid2.default.ShaderLibs.generalNormalVert, "#define GLSLIFY 1\n// sphere.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nuniform mat3 uNormalMatrix;\n\nfloat diffuse(vec3 N, vec3 L) {\n\treturn max(dot(N, normalize(L)), 0.0);\n}\n\nvec3 diffuse(vec3 N, vec3 L, vec3 C) {\n\treturn diffuse(N, L) * C;\n}\n\nconst float fade = 0.95;\nconst vec3 L0 = vec3(1.0, 1.0, 1.0);\nconst vec3 L1 = vec3(-1.0, -.5, 1.0);\nconst vec3 LC0 = vec3(1.0, 1.0, fade);\nconst vec3 LC1 = vec3(fade, fade, 1.0);\n\nvoid main(void) {\n    vec3 d0 = diffuse(vNormal, L0, LC0) * .5;\n    vec3 d1 = diffuse(vNormal, L1, LC1) * .5;\n\n    vec3 color = .3 + d0 + d1;\n    gl_FragColor = vec4(color * vec3(1.0, .95, .9), 1.0);\n\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewBall).call(this, _alfrid2.default.ShaderLibs.generalNormalVert, "// sphere.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nuniform mat3 uNormalMatrix;\n\nfloat diffuse(vec3 N, vec3 L) {\n\treturn max(dot(N, normalize(L)), 0.0);\n}\n\nvec3 diffuse(vec3 N, vec3 L, vec3 C) {\n\treturn diffuse(N, L) * C;\n}\n\nconst float fade = 0.95;\nconst vec3 L0 = vec3(1.0, 1.0, 1.0);\nconst vec3 L1 = vec3(-1.0, -.5, 1.0);\nconst vec3 LC0 = vec3(1.0, 1.0, fade);\nconst vec3 LC1 = vec3(fade, fade, 1.0);\n\nvoid main(void) {\n    vec3 d0 = diffuse(vNormal, L0, LC0) * .5;\n    vec3 d1 = diffuse(vNormal, L1, LC1) * .5;\n\n    vec3 color = .3 + d0 + d1;\n    gl_FragColor = vec4(color * vec3(1.0, .95, .9), 1.0);\n\n}"));
 	}
 
 	_createClass(ViewBall, [{
@@ -5368,14 +5733,14 @@ var ViewBall = function (_alfrid$View) {
 
 exports.default = ViewBall;
 
-},{"./libs/alfrid.js":18}],13:[function(require,module,exports){
+},{"./libs/alfrid.js":20}],15:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5398,7 +5763,7 @@ var ViewPlanes = function (_alfrid$View) {
 	function ViewPlanes() {
 		_classCallCheck(this, ViewPlanes);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPlanes).call(this, "#define GLSLIFY 1\n// planes.vert\n\n/*\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aFlipPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\nattribute vec3 aExtra;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nuniform float flip;\nuniform float uvIndex;\nuniform float numSlides;\n\nvarying vec3 vNormal;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\nvarying float vDepth;\nvarying vec4 vShadowCoord;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nvoid main(void) {\n\tvec2 uv         = aTextureCoord * .5;\n\t\n\tuv              *= .5;\t\t\n\tfloat uvSize    = .5/numSlides;\n\tfloat tx        = mod(uvIndex, numSlides) * uvSize;\n\tfloat ty        = floor(uvIndex / numSlides) * uvSize;\n\tuv              += vec2(tx, ty);\n\tvec3 currPos    = texture2D(texture, uv).rgb;\n\tvec3 nextPos    = texture2D(textureNext, uv).rgb;\n\tvec3 pos        = mix(currPos, nextPos, percent);\n\n\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);\n\t\n\tvec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tfloat scale     = .04;\n\tmvPosition.xyz  += mix(aVertexPosition, aFlipPosition, flip) * scale;\n\tvec4 V          = uProjectionMatrix * mvPosition;\n\tgl_Position     = V;\n\t\n\t\n\tvNormal         = aNormal;\n\tvVertex         = pos;\n\tvExtra          = aExtra;\n\t\n\tvDepth          = V.z/V.w;\n}\n\n\n*/\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);\n    vTextureCoord = aTextureCoord;\n}", "#define GLSLIFY 1\n// planes.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n\nuniform mat3 uNormalMatrix;\nvarying vec3 vNormal;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\nvarying float vDepth;\n\nfloat diffuse(vec3 N, vec3 L) {\n\treturn max(dot(N, normalize(L)), .0);\n}\n\nconst vec3 LIGHT = vec3(0.0, 1.0, 1.0);\n\nvoid main(void) {\n\tvec3 N = uNormalMatrix * normalize(vVertex + vExtra);\n\tfloat _diffuse = diffuse(N, LIGHT);\n\t_diffuse = mix(_diffuse, 1.0, 0.3);\n\n    gl_FragColor = vec4(vec3(_diffuse), 1.0);\n\n    gl_FragColor = vec4(vec3(vDepth), 1.0);\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewPlanes).call(this, "// planes.vert\n\n/*\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aFlipPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\nattribute vec3 aExtra;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uShadowMatrix;\nuniform sampler2D texture;\nuniform sampler2D textureNext;\nuniform float percent;\nuniform float flip;\nuniform float uvIndex;\nuniform float numSlides;\n\nvarying vec3 vNormal;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\nvarying float vDepth;\nvarying vec4 vShadowCoord;\n\nconst mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.5, 0.0, 0.0,\n\t\t\t\t\t\t\t  0.0, 0.0, 0.5, 0.0,\n\t\t\t\t\t\t\t  0.5, 0.5, 0.5, 1.0 );\n\nvoid main(void) {\n\tvec2 uv         = aTextureCoord * .5;\n\t\n\tuv              *= .5;\t\t\n\tfloat uvSize    = .5/numSlides;\n\tfloat tx        = mod(uvIndex, numSlides) * uvSize;\n\tfloat ty        = floor(uvIndex / numSlides) * uvSize;\n\tuv              += vec2(tx, ty);\n\tvec3 currPos    = texture2D(texture, uv).rgb;\n\tvec3 nextPos    = texture2D(textureNext, uv).rgb;\n\tvec3 pos        = mix(currPos, nextPos, percent);\n\n\n\tvShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);\n\t\n\tvec4 mvPosition = uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tfloat scale     = .04;\n\tmvPosition.xyz  += mix(aVertexPosition, aFlipPosition, flip) * scale;\n\tvec4 V          = uProjectionMatrix * mvPosition;\n\tgl_Position     = V;\n\t\n\t\n\tvNormal         = aNormal;\n\tvVertex         = pos;\n\tvExtra          = aExtra;\n\t\n\tvDepth          = V.z/V.w;\n}\n\n\n*/\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);\n    vTextureCoord = aTextureCoord;\n}", "// planes.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\n\nuniform mat3 uNormalMatrix;\nvarying vec3 vNormal;\nvarying vec3 vVertex;\nvarying vec3 vExtra;\nvarying float vDepth;\n\nfloat diffuse(vec3 N, vec3 L) {\n\treturn max(dot(N, normalize(L)), .0);\n}\n\nconst vec3 LIGHT = vec3(0.0, 1.0, 1.0);\n\nvoid main(void) {\n\tvec3 N = uNormalMatrix * normalize(vVertex + vExtra);\n\tfloat _diffuse = diffuse(N, LIGHT);\n\t_diffuse = mix(_diffuse, 1.0, 0.3);\n\n    gl_FragColor = vec4(vec3(_diffuse), 1.0);\n\n    gl_FragColor = vec4(vec3(vDepth), 1.0);\n}"));
 	}
 
 	_createClass(ViewPlanes, [{
@@ -5452,14 +5817,14 @@ var ViewPlanes = function (_alfrid$View) {
 
 exports.default = ViewPlanes;
 
-},{"./libs/alfrid.js":18}],14:[function(require,module,exports){
+},{"./libs/alfrid.js":20}],16:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5475,7 +5840,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
-var GL = undefined;
+var GL = void 0;
 
 var ViewRender = function (_alfrid$View) {
 	_inherits(ViewRender, _alfrid$View);
@@ -5484,7 +5849,7 @@ var ViewRender = function (_alfrid$View) {
 		_classCallCheck(this, ViewRender);
 
 		GL = _alfrid2.default.GL;
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewRender).call(this, "#define GLSLIFY 1\n// render.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform sampler2D texture;\nuniform sampler2D textureExtra;\nvarying vec4 vColor;\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy;\n\tvec3 pos     = texture2D(texture, uv).rgb;\n\tvec3 extra   = texture2D(textureExtra, uv).rgb;\n\tgl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tgl_PointSize = 1.0 + extra.r * 2.0;\n\t\n\tvColor \t\t= vec4(vec3(extra.b), 1.0);\n}", "#define GLSLIFY 1\n// render.frag\n\n// save.frag\n\nprecision highp float;\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewRender).call(this, "// render.vert\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform sampler2D texture;\nuniform sampler2D textureExtra;\nvarying vec4 vColor;\n\nvoid main(void) {\n\tvec2 uv      = aVertexPosition.xy;\n\tvec3 pos     = texture2D(texture, uv).rgb;\n\tvec3 extra   = texture2D(textureExtra, uv).rgb;\n\tgl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tgl_PointSize = 1.0 + extra.r * 2.0;\n\t\n\tvColor \t\t= vec4(vec3(extra.b), 1.0);\n}", "// render.frag\n\n// save.frag\n\nprecision highp float;\n#define GLSLIFY 1\n\nvarying vec4 vColor;\n\nvoid main(void) {\n\tif(vColor.a <= 0.01) {\n\t\tdiscard;\n\t}\n    gl_FragColor = vColor;\n}"));
 	}
 
 	_createClass(ViewRender, [{
@@ -5495,8 +5860,8 @@ var ViewRender = function (_alfrid$View) {
 			var indices = [];
 			var count = 0;
 			var numParticles = params.numParticles;
-			var ux = undefined,
-			    uy = undefined;
+			var ux = void 0,
+			    uy = void 0;
 
 			for (var j = 0; j < numParticles; j++) {
 				for (var i = 0; i < numParticles; i++) {
@@ -5530,14 +5895,14 @@ var ViewRender = function (_alfrid$View) {
 
 exports.default = ViewRender;
 
-},{"./libs/alfrid.js":18}],15:[function(require,module,exports){
+},{"./libs/alfrid.js":20}],17:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5557,7 +5922,7 @@ var random = function random(min, max) {
 	return min + Math.random() * (max - min);
 };
 
-var GL = undefined;
+var GL = void 0;
 
 var ViewSave = function (_alfrid$View) {
 	_inherits(ViewSave, _alfrid$View);
@@ -5567,7 +5932,7 @@ var ViewSave = function (_alfrid$View) {
 
 		GL = _alfrid2.default.GL;
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSave).call(this, "#define GLSLIFY 1\n// save.vert\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vColor;\n\nvoid main(void) {\n\tvColor      = aVertexPosition;\n\tvec3 pos    = vec3(aTextureCoord, 0.0);\n\tgl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\n    gl_PointSize = 1.0;\n}", "#define GLSLIFY 1\n// save.frag\n\nprecision highp float;\n\nvarying vec3 vColor;\n\nvoid main(void) {\n    gl_FragColor = vec4(vColor, 1.0);\n}"));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSave).call(this, "// save.vert\n\nprecision highp float;\n#define GLSLIFY 1\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vColor;\n\nvoid main(void) {\n\tvColor      = aVertexPosition;\n\tvec3 pos    = vec3(aTextureCoord, 0.0);\n\tgl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\n    gl_PointSize = 1.0;\n}", "// save.frag\n\nprecision highp float;\n#define GLSLIFY 1\n\nvarying vec3 vColor;\n\nvoid main(void) {\n    gl_FragColor = vec4(vColor, 1.0);\n}"));
 	}
 
 	_createClass(ViewSave, [{
@@ -5585,8 +5950,8 @@ var ViewSave = function (_alfrid$View) {
 
 			var numParticles = params.numParticles;
 			var totalParticles = numParticles * numParticles;
-			var ux = undefined,
-			    uy = undefined;
+			var ux = void 0,
+			    uy = void 0;
 			var range = 3.5;
 			var speedScale = .0010;
 
@@ -5625,6 +5990,7 @@ var ViewSave = function (_alfrid$View) {
 		value: function render() {
 			var state = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
 
+
 			this.shader.bind();
 			if (state == 0) {
 				GL.draw(this.mesh);
@@ -5641,14 +6007,14 @@ var ViewSave = function (_alfrid$View) {
 
 exports.default = ViewSave;
 
-},{"./libs/alfrid.js":18}],16:[function(require,module,exports){
+},{"./libs/alfrid.js":20}],18:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _alfrid = require('./libs/alfrid.js');
 
@@ -5672,7 +6038,7 @@ var ViewSimulation = function (_alfrid$View) {
 	function ViewSimulation() {
 		_classCallCheck(this, ViewSimulation);
 
-		var fs = "#define GLSLIFY 1\n// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform sampler2D textureSpeed;\nuniform float time;\n\nconst float NUM = {{NUM_PARTICLES}};\nconst float PI = 3.1415926;\nconst float PI_2 = 3.1415926*2.0;\n\nfloat map(float value, float sx, float sy, float tx, float ty) {\n\tfloat p = (value - sx) / (sy - sx);\n\tp = clamp(p, 0.0, 1.0);\n\treturn tx + (ty - tx) * p;\n}\n\nvoid main(void) {\n\tvec3 pos        = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel        = texture2D(textureVel, vTextureCoord).rgb;\n\tvec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;\n\tvec3 speeds      = texture2D(textureSpeed, vTextureCoord).rgb;\n\n\tvec2 uvParticles;\n\tvec3 posParticle, velParticle;\n\tfloat percent;\n\tvec3 dirToParticle;\n\tfloat f, delta, forceApply;\n\n\tfloat RANGE = .65 * mix(extra.x, 1.0, .5);\n\tfloat forceOffset = mix(extra.y, 1.0, .5);\n\tconst float minThreshold = 0.4;\n\tconst float maxThreshold = 0.7;\n\tconst float decrease = 0.9;\n\n\tconst float repelStrength = 0.03;\n\tconst float attractStrength = 0.0002;\n\tconst float orientStrength = 0.01;\n\n\tfor(float y=0.0; y<NUM; y++) {\n\t\tfor(float x=0.0; x<NUM; x++) {\n\t\t\tif(x <= y) continue;\n\n\t\t\tuvParticles = vec2(x, y)/NUM;\n\t\t\tposParticle = texture2D(texturePos, uvParticles).rgb;\n\t\t\tpercent = distance(pos, posParticle) / RANGE;\n\t\t\tforceApply = 1.0 - step(1.0, percent);\n\t\t\tforceApply *= forceOffset;\n\t\t\tdirToParticle = normalize(posParticle - pos);\n\n\t\t\tif(percent < minThreshold) {\n\t\t\t\tf = (minThreshold/percent - 1.0) * repelStrength;\n\t\t\t\tvel -= f * dirToParticle * forceApply;\n\t\t\t} else if(percent < maxThreshold) {\n\t\t\t\tvelParticle = texture2D(textureVel, uvParticles).rgb;\n\t\t\t\tdelta = map(percent, minThreshold, maxThreshold, 0.0, 1.0);\n\t\t\t\tvec3 avgDir = (vel + velParticle) * .5;\n\t\t\t\tif(length(avgDir) > 0.0) {\n\t\t\t\t\tavgDir = normalize(avgDir);\n\t\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * 0.5 + 0.5 );\n\t\t\t\t\tvel += avgDir * f * orientStrength * forceApply;\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdelta = map(percent, maxThreshold, 1.0, 0.0, 1.0);\n\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * -0.5 + 0.5 );\n\t\t\t\tvel += dirToParticle * f * attractStrength * forceApply;\n\t\t\t}\n\n\t\t}\n\n\t}\n\n\tconst float maxRadius = 2.0;\n\tconst float minRadius = 1.25;\n\tfloat dist = length(pos);\n\tif(dist > maxRadius) {\n\t\tfloat f = (dist - maxRadius) * .005;\n\t\tvel -= normalize(pos) * f * forceOffset;\n\t}\n\n\tif(dist < minRadius) {\n\t\tfloat f = (1.0-dist/minRadius) * 1.0;\n\t\tvel += normalize(pos) * f * forceOffset;\n\t}\n\n\tvec3 velDir = normalize(vel);\n\tfloat speed = length(vel);\n\tif(speed < speeds.x) {\t\t//\tmin speed\n\t\tvel = velDir * speeds.x;\n\t} \n\n\tif(speed > speeds.y) {\t\t//\tmax speed;\n\t\tvel = velDir * speeds.y;\n\t}\n\n\t// vel *= decrease;\n\n\tgl_FragColor = vec4(vel, 1.0);\n}";
+		var fs = "// sim.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nuniform sampler2D textureVel;\nuniform sampler2D texturePos;\nuniform sampler2D textureExtra;\nuniform sampler2D textureSpeed;\nuniform float time;\n\nconst float NUM = {{NUM_PARTICLES}};\nconst float PI = 3.1415926;\nconst float PI_2 = 3.1415926*2.0;\n\nfloat map(float value, float sx, float sy, float tx, float ty) {\n\tfloat p = (value - sx) / (sy - sx);\n\tp = clamp(p, 0.0, 1.0);\n\treturn tx + (ty - tx) * p;\n}\n\nvoid main(void) {\n\tvec3 pos        = texture2D(texturePos, vTextureCoord).rgb;\n\tvec3 vel        = texture2D(textureVel, vTextureCoord).rgb;\n\tvec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;\n\tvec3 speeds      = texture2D(textureSpeed, vTextureCoord).rgb;\n\n\tvec2 uvParticles;\n\tvec3 posParticle, velParticle;\n\tfloat percent;\n\tvec3 dirToParticle;\n\tfloat f, delta, forceApply;\n\n\tfloat RANGE = .65 * mix(extra.x, 1.0, .5);\n\tfloat forceOffset = mix(extra.y, 1.0, .5);\n\tconst float minThreshold = 0.4;\n\tconst float maxThreshold = 0.7;\n\tconst float decrease = 0.9;\n\n\tconst float repelStrength = 0.03;\n\tconst float attractStrength = 0.0002;\n\tconst float orientStrength = 0.01;\n\n\tfor(float y=0.0; y<NUM; y++) {\n\t\tfor(float x=0.0; x<NUM; x++) {\n\t\t\tif(x <= y) continue;\n\n\t\t\tuvParticles = vec2(x, y)/NUM;\n\t\t\tposParticle = texture2D(texturePos, uvParticles).rgb;\n\t\t\tpercent = distance(pos, posParticle) / RANGE;\n\t\t\tforceApply = 1.0 - step(1.0, percent);\n\t\t\tforceApply *= forceOffset;\n\t\t\tdirToParticle = normalize(posParticle - pos);\n\n\t\t\tif(percent < minThreshold) {\n\t\t\t\tf = (minThreshold/percent - 1.0) * repelStrength;\n\t\t\t\tvel -= f * dirToParticle * forceApply;\n\t\t\t} else if(percent < maxThreshold) {\n\t\t\t\tvelParticle = texture2D(textureVel, uvParticles).rgb;\n\t\t\t\tdelta = map(percent, minThreshold, maxThreshold, 0.0, 1.0);\n\t\t\t\tvec3 avgDir = (vel + velParticle) * .5;\n\t\t\t\tif(length(avgDir) > 0.0) {\n\t\t\t\t\tavgDir = normalize(avgDir);\n\t\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * 0.5 + 0.5 );\n\t\t\t\t\tvel += avgDir * f * orientStrength * forceApply;\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdelta = map(percent, maxThreshold, 1.0, 0.0, 1.0);\n\t\t\t\tf = ( 1.0 - cos( delta * PI_2 ) * -0.5 + 0.5 );\n\t\t\t\tvel += dirToParticle * f * attractStrength * forceApply;\n\t\t\t}\n\n\t\t}\n\n\t}\n\n\tconst float maxRadius = 2.0;\n\tconst float minRadius = 1.25;\n\tfloat dist = length(pos);\n\tif(dist > maxRadius) {\n\t\tfloat f = (dist - maxRadius) * .005;\n\t\tvel -= normalize(pos) * f * forceOffset;\n\t}\n\n\tif(dist < minRadius) {\n\t\tfloat f = (1.0-dist/minRadius) * 1.0;\n\t\tvel += normalize(pos) * f * forceOffset;\n\t}\n\n\tvec3 velDir = normalize(vel);\n\tfloat speed = length(vel);\n\tif(speed < speeds.x) {\t\t//\tmin speed\n\t\tvel = velDir * speeds.x;\n\t} \n\n\tif(speed > speeds.y) {\t\t//\tmax speed;\n\t\tvel = velDir * speeds.y;\n\t}\n\n\t// vel *= decrease;\n\n\tgl_FragColor = vec4(vel, 1.0);\n}";
 		fs = fs.replace('{{NUM_PARTICLES}}', params.numParticles.toFixed(1));
 
 		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewSimulation).call(this, _alfrid2.default.ShaderLibs.bigTriangleVert, fs));
@@ -5714,7 +6080,7 @@ var ViewSimulation = function (_alfrid$View) {
 
 exports.default = ViewSimulation;
 
-},{"./libs/alfrid.js":18}],17:[function(require,module,exports){
+},{"./libs/alfrid.js":20}],19:[function(require,module,exports){
 'use strict';
 
 var _alfrid = require('./libs/alfrid.js');
@@ -5768,7 +6134,7 @@ function _init() {
 	gui.add(params, 'showCenteroid');
 }
 
-},{"./SceneApp":10,"./libs/alfrid.js":18,"dat-gui":5}],18:[function(require,module,exports){
+},{"./SceneApp":12,"./libs/alfrid.js":20,"dat-gui":5}],20:[function(require,module,exports){
 (function (global){
 "use strict";var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol?"symbol":typeof obj;};(function(f){if((typeof exports==="undefined"?"undefined":_typeof(exports))==="object"&&typeof module!=="undefined"){module.exports=f();}else if(typeof define==="function"&&define.amd){define([],f);}else {var g;if(typeof window!=="undefined"){g=window;}else if(typeof global!=="undefined"){g=global;}else if(typeof self!=="undefined"){g=self;}else {g=this;}g.alfrid=f();}})(function(){var define,module,exports;return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f;}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e);},l,l.exports,e,t,n,r);}return n[o].exports;}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++){s(r[o]);}return s;}({1:[function(_dereq_,module,exports){ /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
@@ -7706,6 +8072,4177 @@ break;}}this._highTasks=this._highTasks.concat(this._nextTasks);this._nextTasks=
 'use strict';Object.defineProperty(exports,"__esModule",{value:true});var ShaderLibs={simpleColorFrag:"#define GLSLIFY 1\n// simpleColor.frag\n\n#define SHADER_NAME SIMPLE_COLOR\n\nprecision highp float;\n\nuniform vec3 color;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = vec4(color, opacity);\n}",bigTriangleVert:"#define GLSLIFY 1\n// bigTriangle.vert\n\n#define SHADER_NAME BIG_TRIANGLE_VERTEX\n\nprecision highp float;\nattribute vec2 aPosition;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = vec4(aPosition, 0.0, 1.0);\n    vTextureCoord = aPosition * .5 + .5;\n}",generalVert:"#define GLSLIFY 1\n// general.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n}",generalNormalVert:"#define GLSLIFY 1\n// generalWithNormal.vert\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec3 aNormal;\n\nuniform mat4 uModelMatrix;\nuniform mat4 uViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat3 uNormalMatrix;\n\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition * scale;\n\tpos           += position;\n\tgl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);\n\t\n\tvTextureCoord = aTextureCoord;\n\tvNormal       = normalize(uNormalMatrix * aNormal);\n}"};exports.default=ShaderLibs;},{}]},{},[11])(11);}); 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[17]);
+},{}],21:[function(require,module,exports){
+'use strict';
+
+var Analyser = require('./effect/analyser.js'),
+    Distortion = require('./effect/distortion.js'),
+    Echo = require('./effect/echo.js'),
+    FakeContext = require('./effect/fake-context.js'),
+    Filter = require('./effect/filter.js'),
+    Flanger = require('./effect/flanger.js'),
+    Panner = require('./effect/panner.js'),
+    Phaser = require('./effect/phaser.js'),
+    Recorder = require('./effect/recorder.js'),
+    Reverb = require('./effect/reverb.js');
+
+function Effect(context) {
+    context = context || new FakeContext();
+
+    var api,
+        destination,
+        nodeList = [],
+        panning = new Panner(context),
+        sourceNode;
+
+    var has = function has(node) {
+        if (!node) {
+            return false;
+        }
+        return nodeList.indexOf(node) > -1;
+    };
+
+    var add = function add(node) {
+        if (!node) {
+            return;
+        }
+        if (has(node)) {
+            return node;
+        }
+        nodeList.push(node);
+        updateConnections();
+        return node;
+    };
+
+    var remove = function remove(node) {
+        if (!node) {
+            return;
+        }
+        if (!has(node)) {
+            return node;
+        }
+        var l = nodeList.length;
+        for (var i = 0; i < l; i++) {
+            if (node === nodeList[i]) {
+                nodeList.splice(i, 1);
+                break;
+            }
+        }
+        var output = node._output || node;
+        output.disconnect();
+        updateConnections();
+        return node;
+    };
+
+    var toggle = function toggle(node, force) {
+        force = !!force;
+        var hasNode = has(node);
+        if (arguments.length > 1 && hasNode === force) {
+            return api;
+        }
+        if (hasNode) {
+            remove(node);
+        } else {
+            add(node);
+        }
+        return api;
+    };
+
+    var removeAll = function removeAll() {
+        while (nodeList.length) {
+            nodeList.pop().disconnect();
+        }
+        updateConnections();
+        return api;
+    };
+
+    var destroy = function destroy() {
+        removeAll();
+        context = null;
+        destination = null;
+        nodeList = [];
+        if (sourceNode) {
+            sourceNode.disconnect();
+        }
+        sourceNode = null;
+    };
+
+    var connect = function connect(a, b) {
+        //console.log('> connect', (a.name || a.constructor.name), 'to', (b.name || b.constructor.name));
+
+        var output = a._output || a;
+        //console.log('> disconnect output: ', (a.name || a.constructor.name));
+        output.disconnect();
+        //console.log('> connect output: ', (a.name || a.constructor.name), 'to input:', (b.name || b.constructor.name));
+        output.connect(b);
+    };
+
+    var connectToDestination = function connectToDestination(node) {
+        var l = nodeList.length,
+            lastNode = l ? nodeList[l - 1] : sourceNode;
+
+        if (lastNode) {
+            connect(lastNode, node);
+        }
+
+        destination = node;
+    };
+
+    var updateConnections = function updateConnections() {
+        if (!sourceNode) {
+            return;
+        }
+
+        //console.log('updateConnections:', nodeList.length);
+
+        var node, prev;
+
+        for (var i = 0; i < nodeList.length; i++) {
+            node = nodeList[i];
+            //console.log(i, node);
+            prev = i === 0 ? sourceNode : nodeList[i - 1];
+            connect(prev, node);
+        }
+
+        if (destination) {
+            connectToDestination(destination);
+        }
+    };
+
+    /*
+     * Effects
+     */
+
+    var analyser = function analyser(config) {
+        return add(new Analyser(context, config));
+    };
+
+    // lowers the volume of the loudest parts of the signal and raises the volume of the softest parts
+    var compressor = function compressor(config) {
+        config = config || {};
+
+        var node = context.createDynamicsCompressor();
+
+        node.update = function (config) {
+            // min decibels to start compressing at from -100 to 0
+            node.threshold.value = config.threshold !== undefined ? config.threshold : -24;
+            // decibel value to start curve to compressed value from 0 to 40
+            node.knee.value = config.knee !== undefined ? config.knee : 30;
+            // amount of change per decibel from 1 to 20
+            node.ratio.value = config.ratio !== undefined ? config.ratio : 12;
+            // gain reduction currently applied by compressor from -20 to 0
+            node.reduction.value = config.reduction !== undefined ? config.reduction : -10;
+            // seconds to reduce gain by 10db from 0 to 1 - how quickly signal adapted when volume increased
+            node.attack.value = config.attack !== undefined ? config.attack : 0.0003;
+            // seconds to increase gain by 10db from 0 to 1 - how quickly signal adapted when volume redcuced
+            node.release.value = config.release !== undefined ? config.release : 0.25;
+        };
+
+        node.update(config);
+
+        return add(node);
+    };
+
+    var convolver = function convolver(impulseResponse) {
+        // impulseResponse is an audio file buffer
+        var node = context.createConvolver();
+        node.buffer = impulseResponse;
+        return add(node);
+    };
+
+    var delay = function delay(time) {
+        var node = context.createDelay();
+        if (time !== undefined) {
+            node.delayTime.value = time;
+        }
+        return add(node);
+    };
+
+    var echo = function echo(config) {
+        return add(new Echo(context, config));
+    };
+
+    var distortion = function distortion(amount) {
+        // Float32Array defining curve (values are interpolated)
+        //node.curve
+        // up-sample before applying curve for better resolution result 'none', '2x' or '4x'
+        //node.oversample = '2x';
+        return add(new Distortion(context, amount));
+    };
+
+    var filter = function filter(type, frequency, q, gain) {
+        return add(new Filter(context, type, frequency, q, gain));
+    };
+
+    var lowpass = function lowpass(frequency, peak) {
+        return filter('lowpass', frequency, peak);
+    };
+
+    var highpass = function highpass(frequency, peak) {
+        return filter('highpass', frequency, peak);
+    };
+
+    var bandpass = function bandpass(frequency, width) {
+        return filter('bandpass', frequency, width);
+    };
+
+    var lowshelf = function lowshelf(frequency, gain) {
+        return filter('lowshelf', frequency, 0, gain);
+    };
+
+    var highshelf = function highshelf(frequency, gain) {
+        return filter('highshelf', frequency, 0, gain);
+    };
+
+    var peaking = function peaking(frequency, width, gain) {
+        return filter('peaking', frequency, width, gain);
+    };
+
+    var notch = function notch(frequency, width, gain) {
+        return filter('notch', frequency, width, gain);
+    };
+
+    var allpass = function allpass(frequency, sharpness) {
+        return filter('allpass', frequency, sharpness);
+    };
+
+    var flanger = function flanger(config) {
+        return add(new Flanger(context, config));
+    };
+
+    var gain = function gain(value) {
+        var node = context.createGain();
+        if (value !== undefined) {
+            node.gain.value = value;
+        }
+        return node;
+    };
+
+    var panner = function panner() {
+        return add(new Panner(context));
+    };
+
+    var phaser = function phaser(config) {
+        return add(new Phaser(context, config));
+    };
+
+    var recorder = function recorder(passThrough) {
+        return add(new Recorder(context, passThrough));
+    };
+
+    var reverb = function reverb(seconds, decay, reverse) {
+        return add(new Reverb(context, seconds, decay, reverse));
+    };
+
+    var script = function script(config) {
+        config = config || {};
+        // bufferSize 256 - 16384 (pow 2)
+        var bufferSize = config.bufferSize || 1024;
+        var inputChannels = config.inputChannels === undefined ? 0 : inputChannels;
+        var outputChannels = config.outputChannels === undefined ? 1 : outputChannels;
+
+        var node = context.createScriptProcessor(bufferSize, inputChannels, outputChannels);
+
+        var thisArg = config.thisArg || config.context || node;
+        var callback = config.callback || function () {};
+
+        // available props:
+        /*
+        event.inputBuffer
+        event.outputBuffer
+        event.playbackTime
+        */
+        // Example: generate noise
+        /*
+        var output = event.outputBuffer.getChannelData(0);
+        var l = output.length;
+        for (var i = 0; i < l; i++) {
+            output[i] = Math.random();
+        }
+        */
+        node.onaudioprocess = callback.bind(thisArg);
+
+        return add(node);
+    };
+
+    var setSource = function setSource(node) {
+        sourceNode = node;
+        updateConnections();
+        return node;
+    };
+
+    var setDestination = function setDestination(node) {
+        connectToDestination(node);
+        return node;
+    };
+
+    //
+
+    api = {
+        context: context,
+        nodeList: nodeList,
+        panning: panning,
+
+        has: has,
+        add: add,
+        remove: remove,
+        toggle: toggle,
+        removeAll: removeAll,
+        destroy: destroy,
+        setSource: setSource,
+        setDestination: setDestination,
+
+        analyser: analyser,
+        compressor: compressor,
+        convolver: convolver,
+        delay: delay,
+        echo: echo,
+        distortion: distortion,
+        filter: filter,
+        lowpass: lowpass,
+        highpass: highpass,
+        bandpass: bandpass,
+        lowshelf: lowshelf,
+        highshelf: highshelf,
+        peaking: peaking,
+        notch: notch,
+        allpass: allpass,
+        flanger: flanger,
+        gain: gain,
+        panner: panner,
+        phaser: phaser,
+        recorder: recorder,
+        reverb: reverb,
+        script: script
+    };
+
+    return Object.freeze(api);
+}
+
+module.exports = Effect;
+
+},{"./effect/analyser.js":22,"./effect/distortion.js":23,"./effect/echo.js":24,"./effect/fake-context.js":25,"./effect/filter.js":26,"./effect/flanger.js":27,"./effect/panner.js":28,"./effect/phaser.js":29,"./effect/recorder.js":30,"./effect/reverb.js":31}],22:[function(require,module,exports){
+'use strict';
+
+function Analyser(context, config) {
+    config = config || {};
+
+    var fftSize = config.fftSize || 512,
+        freqFloat = !!config.float,
+        waveFloat = !!config.float,
+        waveform,
+        frequencies,
+        node = context.createAnalyser();
+
+    node.fftSize = fftSize; // frequencyBinCount will be half this value
+    node.smoothingTimeConstant = config.smoothing || config.smoothingTimeConstant || node.smoothingTimeConstant;
+    node.minDecibels = config.minDecibels || node.minDecibels;
+    node.maxDecibels = config.maxDecibels || node.maxDecibels;
+
+    var needsUpdate = function needsUpdate(arr, float) {
+        if (!arr) {
+            return true;
+        }
+        if (node.fftSize !== fftSize) {
+            return true;
+        }
+        if (float && arr instanceof Uint8Array) {
+            return true;
+        }
+        return !float && arr instanceof Float32Array;
+    };
+
+    var createArray = function createArray(float, length) {
+        return float ? new Float32Array(length) : new Uint8Array(length);
+    };
+
+    node.getWaveform = function (float) {
+        if (!arguments.length) {
+            float = waveFloat;
+        }
+
+        if (needsUpdate(waveform, float)) {
+            fftSize = node.fftSize;
+            waveFloat = float;
+            waveform = createArray(float, fftSize);
+        }
+
+        if (float) {
+            this.getFloatTimeDomainData(waveform);
+        } else {
+            this.getByteTimeDomainData(waveform);
+        }
+
+        return waveform;
+    };
+
+    node.getFrequencies = function (float) {
+        if (!arguments.length) {
+            float = freqFloat;
+        }
+
+        if (needsUpdate(frequencies, float)) {
+            fftSize = node.fftSize;
+            freqFloat = float;
+            frequencies = createArray(float, node.frequencyBinCount);
+        }
+
+        if (float) {
+            this.getFloatFrequencyData(frequencies);
+        } else {
+            this.getByteFrequencyData(frequencies);
+        }
+
+        return frequencies;
+    };
+
+    node.update = function () {
+        node.getWaveform();
+        node.getFrequencies();
+    };
+
+    Object.defineProperties(node, {
+        smoothing: {
+            get: function get() {
+                return node.smoothingTimeConstant;
+            },
+            set: function set(value) {
+                node.smoothingTimeConstant = value;
+            }
+        }
+    });
+
+    return node;
+}
+
+module.exports = Analyser;
+
+},{}],23:[function(require,module,exports){
+'use strict';
+
+var validify = require('../utils/validify.js').number;
+var n = 22050;
+
+function Distortion(context, amount) {
+
+    amount = validify(amount, 1);
+
+    var node = context.createWaveShaper();
+    var curve = new Float32Array(n);
+
+    // create waveShaper distortion curve from 0 to 1
+    node.update = function (value) {
+        amount = value;
+        if (amount <= 0) {
+            amount = 0;
+            this.curve = null;
+            return;
+        }
+        var k = value * 100,
+
+        // n = 22050,
+        // curve = new Float32Array(n),
+        deg = Math.PI / 180,
+            x;
+
+        for (var i = 0; i < n; i++) {
+            x = i * 2 / n - 1;
+            curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
+        }
+
+        this.curve = curve;
+    };
+
+    Object.defineProperties(node, {
+        amount: {
+            get: function get() {
+                return amount;
+            },
+            set: function set(value) {
+                this.update(value);
+            }
+        }
+    });
+
+    if (amount !== undefined) {
+        node.update(amount);
+    }
+
+    return node;
+}
+
+module.exports = Distortion;
+
+},{"../utils/validify.js":46}],24:[function(require,module,exports){
+'use strict';
+
+var validify = require('../utils/validify.js').number;
+
+function Echo(context, config) {
+    config = config || {};
+
+    var input = context.createGain();
+    var delay = context.createDelay();
+    var gain = context.createGain();
+    var output = context.createGain();
+
+    delay.delayTime.value = validify(config.delayTime, 0.5);
+    gain.gain.value = validify(config.feedback, 0.5);
+
+    input.connect(delay);
+    input.connect(output);
+    delay.connect(gain);
+    gain.connect(delay);
+    gain.connect(output);
+
+    var node = input;
+    node.name = 'Echo';
+    node._output = output;
+
+    Object.defineProperties(node, {
+        delay: {
+            get: function get() {
+                return delay.delayTime.value;
+            },
+            set: function set(value) {
+                delay.delayTime.value = value;
+            }
+        },
+        feedback: {
+            get: function get() {
+                return gain.gain.value;
+            },
+            set: function set(value) {
+                gain.gain.value = value;
+            }
+        }
+    });
+
+    return node;
+}
+
+module.exports = Echo;
+
+},{"../utils/validify.js":46}],25:[function(require,module,exports){
+'use strict';
+
+function FakeContext() {
+
+    var startTime = Date.now();
+
+    var fn = function fn() {};
+
+    var param = function param() {
+        return {
+            value: 1,
+            defaultValue: 1,
+            linearRampToValueAtTime: fn,
+            setValueAtTime: fn,
+            exponentialRampToValueAtTime: fn,
+            setTargetAtTime: fn,
+            setValueCurveAtTime: fn,
+            cancelScheduledValues: fn
+        };
+    };
+
+    var fakeNode = function fakeNode() {
+        return {
+            connect: fn,
+            disconnect: fn,
+            // analyser
+            frequencyBinCount: 0,
+            smoothingTimeConstant: 0,
+            fftSize: 0,
+            minDecibels: 0,
+            maxDecibels: 0,
+            getByteTimeDomainData: fn,
+            getByteFrequencyData: fn,
+            getFloatTimeDomainData: fn,
+            getFloatFrequencyData: fn,
+            // gain
+            gain: param(),
+            // panner
+            panningModel: 0,
+            setPosition: fn,
+            setOrientation: fn,
+            setVelocity: fn,
+            distanceModel: 0,
+            refDistance: 0,
+            maxDistance: 0,
+            rolloffFactor: 0,
+            coneInnerAngle: 360,
+            coneOuterAngle: 360,
+            coneOuterGain: 0,
+            // filter:
+            type: 0,
+            frequency: param(),
+            Q: param(),
+            detune: param(),
+            // delay
+            delayTime: param(),
+            // convolver
+            buffer: 0,
+            // compressor
+            threshold: param(),
+            knee: param(),
+            ratio: param(),
+            attack: param(),
+            release: param(),
+            reduction: param(),
+            // distortion
+            oversample: 0,
+            curve: 0,
+            // buffer
+            sampleRate: 1,
+            length: 0,
+            duration: 0,
+            numberOfChannels: 0,
+            getChannelData: function getChannelData() {
+                return [];
+            },
+            copyFromChannel: fn,
+            copyToChannel: fn,
+            // listener
+            dopplerFactor: 0,
+            speedOfSound: 0,
+            // osc
+            start: fn
+        };
+    };
+
+    // ie9
+    if (!window.Uint8Array) {
+        window.Uint8Array = window.Float32Array = Array;
+    }
+
+    return {
+        createAnalyser: fakeNode,
+        createBuffer: fakeNode,
+        createBiquadFilter: fakeNode,
+        createChannelMerger: fakeNode,
+        createChannelSplitter: fakeNode,
+        createDynamicsCompressor: fakeNode,
+        createConvolver: fakeNode,
+        createDelay: fakeNode,
+        createGain: fakeNode,
+        createOscillator: fakeNode,
+        createPanner: fakeNode,
+        createScriptProcessor: fakeNode,
+        createWaveShaper: fakeNode,
+        listener: fakeNode(),
+        get currentTime() {
+            return (Date.now() - startTime) / 1000;
+        }
+    };
+}
+
+module.exports = FakeContext;
+
+},{}],26:[function(require,module,exports){
+'use strict';
+
+// https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode
+// For lowpass and highpass Q indicates how peaked the frequency is around the cutoff.
+// The greater the value is, the greater is the peak
+
+function Filter(context, type, frequency, q, gain) {
+    // Frequency between 40Hz and half of the sampling rate
+    var minFrequency = 40;
+    var maxFrequency = context.sampleRate / 2;
+
+    var node = context.createBiquadFilter();
+    node.type = type;
+
+    var getFrequency = function getFrequency(value) {
+        // Logarithm (base 2) to compute how many octaves fall in the range.
+        var numberOfOctaves = Math.log(maxFrequency / minFrequency) / Math.LN2;
+        // Compute a multiplier from 0 to 1 based on an exponential scale.
+        var multiplier = Math.pow(2, numberOfOctaves * (value - 1.0));
+        // Get back to the frequency value between min and max.
+        return maxFrequency * multiplier;
+    };
+
+    node.set = function (frequency, q, gain) {
+        if (frequency !== undefined) {
+            node.frequency.value = frequency;
+        }
+        if (q !== undefined) {
+            node.Q.value = q;
+        }
+        if (gain !== undefined) {
+            node.gain.value = gain;
+        }
+        return node;
+    };
+
+    // set filter frequency based on value from 0 to 1
+    node.setByPercent = function (percent, q, gain) {
+        return node.set(getFrequency(percent), q, gain);
+    };
+
+    return node.set(frequency, q, gain);
+}
+
+module.exports = Filter;
+
+},{}],27:[function(require,module,exports){
+'use strict';
+
+var validify = require('../utils/validify.js').number;
+
+function MonoFlanger(context, config) {
+    var input = context.createGain();
+    var delay = context.createDelay();
+    var feedback = context.createGain();
+    var lfo = context.createOscillator();
+    var gain = context.createGain();
+    var output = context.createGain();
+
+    delay.delayTime.value = validify(config.delay, 0.005); // 5-25ms delay (0.005 > 0.025)
+    feedback.gain.value = validify(config.feedback, 0.5); // 0 > 1
+
+    lfo.type = 'sine';
+    lfo.frequency.value = validify(config.gain, 0.002); // 0.05 > 5
+    gain.gain.value = validify(config.frequency, 0.25); // 0.0005 > 0.005
+
+    input.connect(output);
+    input.connect(delay);
+    delay.connect(output);
+    delay.connect(feedback);
+    feedback.connect(input);
+
+    lfo.connect(gain);
+    gain.connect(delay.delayTime);
+    lfo.start(0);
+
+    var node = input;
+    node.name = 'Flanger';
+    node._output = output;
+
+    Object.defineProperties(node, {
+        delay: {
+            get: function get() {
+                return delay.delayTime.value;
+            },
+            set: function set(value) {
+                delay.delayTime.value = value;
+            }
+        },
+        lfoFrequency: {
+            get: function get() {
+                return lfo.frequency.value;
+            },
+            set: function set(value) {
+                lfo.frequency.value = value;
+            }
+        },
+        lfoGain: {
+            get: function get() {
+                return gain.gain.value;
+            },
+            set: function set(value) {
+                gain.gain.value = value;
+            }
+        },
+        feedback: {
+            get: function get() {
+                return feedback.gain.value;
+            },
+            set: function set(value) {
+                feedback.gain.value = value;
+            }
+        }
+    });
+
+    return node;
+}
+
+function StereoFlanger(context, config) {
+    var input = context.createGain();
+    var splitter = context.createChannelSplitter(2);
+    var merger = context.createChannelMerger(2);
+    var feedbackL = context.createGain();
+    var feedbackR = context.createGain();
+    var lfo = context.createOscillator();
+    var lfoGainL = context.createGain();
+    var lfoGainR = context.createGain();
+    var delayL = context.createDelay();
+    var delayR = context.createDelay();
+    var output = context.createGain();
+
+    feedbackL.gain.value = feedbackR.gain.value = validify(config.feedback, 0.5);
+    delayL.delayTime.value = delayR.delayTime.value = validify(config.delay, 0.003);
+
+    lfo.type = 'sine';
+    lfo.frequency.value = validify(config.frequency, 0.5);
+    lfoGainL.gain.value = validify(config.gain, 0.005);
+    lfoGainR.gain.value = 0 - lfoGainL.gain.value;
+
+    input.connect(splitter);
+
+    splitter.connect(delayL, 0);
+    splitter.connect(delayR, 1);
+
+    delayL.connect(feedbackL);
+    delayR.connect(feedbackR);
+
+    feedbackL.connect(delayR);
+    feedbackR.connect(delayL);
+
+    delayL.connect(merger, 0, 0);
+    delayR.connect(merger, 0, 1);
+
+    merger.connect(output);
+    input.connect(output);
+
+    lfo.connect(lfoGainL);
+    lfo.connect(lfoGainR);
+    lfoGainL.connect(delayL.delayTime);
+    lfoGainR.connect(delayR.delayTime);
+    lfo.start(0);
+
+    var node = input;
+    node.name = 'StereoFlanger';
+    node._output = output;
+
+    Object.defineProperties(node, {
+        delay: {
+            get: function get() {
+                return delayL.delayTime.value;
+            },
+            set: function set(value) {
+                delayL.delayTime.value = delayR.delayTime.value = value;
+            }
+        },
+        lfoFrequency: {
+            get: function get() {
+                return lfo.frequency.value;
+            },
+            set: function set(value) {
+                lfo.frequency.value = value;
+            }
+        },
+        lfoGain: {
+            get: function get() {
+                return lfoGainL.gain.value;
+            },
+            set: function set(value) {
+                lfoGainL.gain.value = lfoGainR.gain.value = value;
+            }
+        },
+        feedback: {
+            get: function get() {
+                return feedbackL.gain.value;
+            },
+            set: function set(value) {
+                feedbackL.gain.value = feedbackR.gain.value = value;
+            }
+        }
+    });
+
+    return node;
+}
+
+function Flanger(context, config) {
+    config = config || {};
+    return config.stereo ? new StereoFlanger(context, config) : new MonoFlanger(context, config);
+}
+
+module.exports = Flanger;
+
+},{"../utils/validify.js":46}],28:[function(require,module,exports){
+'use strict';
+
+var validify = require('../utils/validify.js').number;
+
+function Panner(context) {
+    var node = context.createPanner();
+
+    // Default for stereo is 'HRTF' can also be 'equalpower'
+    node.panningModel = Panner.defaults.panningModel;
+
+    // Distance model and attributes
+    // Can be 'linear' 'inverse' 'exponential'
+    node.distanceModel = Panner.defaults.distanceModel;
+    node.refDistance = Panner.defaults.refDistance;
+    node.maxDistance = Panner.defaults.maxDistance;
+    node.rolloffFactor = Panner.defaults.rolloffFactor;
+    node.coneInnerAngle = Panner.defaults.coneInnerAngle;
+    node.coneOuterAngle = Panner.defaults.coneOuterAngle;
+    node.coneOuterGain = Panner.defaults.coneOuterGain;
+    // set to defaults (needed in Firefox)
+    node.setPosition(0, 0, 1);
+    node.setOrientation(0, 0, 0);
+
+    // simple vec3 object pool
+    var vecPool = {
+        pool: [],
+        get: function get(x, y, z) {
+            var v = this.pool.length ? this.pool.pop() : { x: 0, y: 0, z: 0 };
+            // check if a vector has been passed in
+            if (x !== undefined && isNaN(x) && 'x' in x && 'y' in x && 'z' in x) {
+                v.x = validify(x.x);
+                v.y = validify(x.y);
+                v.z = validify(x.z);
+            } else {
+                v.x = validify(x);
+                v.y = validify(y);
+                v.z = validify(z);
+            }
+            return v;
+        },
+        dispose: function dispose(instance) {
+            this.pool.push(instance);
+        }
+    };
+
+    var globalUp = vecPool.get(0, 1, 0),
+        angle45 = Math.PI / 4,
+        angle90 = Math.PI / 2;
+
+    // set the orientation of the source (where the audio is coming from)
+    var setOrientation = function setOrientation(node, fw) {
+        // calculate up vec ( up = (forward cross (0, 1, 0)) cross forward )
+        var up = vecPool.get(fw.x, fw.y, fw.z);
+        cross(up, globalUp);
+        cross(up, fw);
+        normalize(up);
+        normalize(fw);
+        // set the audio context's listener position to match the camera position
+        node.setOrientation(fw.x, fw.y, fw.z, up.x, up.y, up.z);
+        // return the vecs to the pool
+        vecPool.dispose(fw);
+        vecPool.dispose(up);
+    };
+
+    var setPosition = function setPosition(nodeOrListener, vec) {
+        nodeOrListener.setPosition(vec.x, vec.y, vec.z);
+        vecPool.dispose(vec);
+    };
+
+    // cross product of 2 vectors
+    var cross = function cross(a, b) {
+        var ax = a.x,
+            ay = a.y,
+            az = a.z;
+        var bx = b.x,
+            by = b.y,
+            bz = b.z;
+        a.x = ay * bz - az * by;
+        a.y = az * bx - ax * bz;
+        a.z = ax * by - ay * bx;
+    };
+
+    // normalise to unit vector
+    var normalize = function normalize(vec3) {
+        if (vec3.x === 0 && vec3.y === 0 && vec3.z === 0) {
+            return vec3;
+        }
+        var length = Math.sqrt(vec3.x * vec3.x + vec3.y * vec3.y + vec3.z * vec3.z);
+        var invScalar = 1 / length;
+        vec3.x *= invScalar;
+        vec3.y *= invScalar;
+        vec3.z *= invScalar;
+        return vec3;
+    };
+
+    node.set = function (x, y, z) {
+        var v = vecPool.get(x, y, z);
+
+        if (arguments.length === 1 && v.x) {
+            // pan left to right with value from -1 to 1
+            x = v.x;
+
+            if (x > 1) {
+                x = 1;
+            }
+            if (x < -1) {
+                x = -1;
+            }
+
+            // creates a nice curve with z
+            x = x * angle45;
+            z = x + angle90;
+
+            if (z > angle90) {
+                z = Math.PI - z;
+            }
+
+            v.x = Math.sin(x);
+            v.z = Math.sin(z);
+        }
+        setPosition(node, v);
+    };
+
+    // set the position the audio is coming from)
+    node.setSourcePosition = function (x, y, z) {
+        setPosition(node, vecPool.get(x, y, z));
+    };
+
+    // set the direction the audio is coming from)
+    node.setSourceOrientation = function (x, y, z) {
+        setOrientation(node, vecPool.get(x, y, z));
+    };
+
+    // set the position of who or what is hearing the audio (could be camera or some character)
+    node.setListenerPosition = function (x, y, z) {
+        setPosition(context.listener, vecPool.get(x, y, z));
+    };
+
+    // set the position of who or what is hearing the audio (could be camera or some character)
+    node.setListenerOrientation = function (x, y, z) {
+        setOrientation(context.listener, vecPool.get(x, y, z));
+    };
+
+    node.getDefaults = function () {
+        return Panner.defaults;
+    };
+
+    node.setDefaults = function (defaults) {
+        Object.keys(defaults).forEach(function (key) {
+            Panner.defaults[key] = defaults[key];
+        });
+    };
+
+    return node;
+}
+
+Panner.defaults = {
+    panningModel: 'HRTF',
+    distanceModel: 'linear',
+    refDistance: 1,
+    maxDistance: 1000,
+    rolloffFactor: 1,
+    coneInnerAngle: 360,
+    coneOuterAngle: 0,
+    coneOuterGain: 0
+};
+
+module.exports = Panner;
+
+},{"../utils/validify.js":46}],29:[function(require,module,exports){
+'use strict';
+
+var validify = require('../utils/validify.js').number;
+
+function Phaser(context, config) {
+    config = config || {};
+    var stages = validify(config.stages, 8),
+        filters = [],
+        filter;
+
+    var input = context.createGain();
+    var feedback = context.createGain();
+    var lfo = context.createOscillator();
+    var lfoGain = context.createGain();
+    var output = context.createGain();
+
+    feedback.gain.value = validify(config.feedback, 0.5);
+
+    lfo.type = 'sine';
+    lfo.frequency.value = validify(config.frequency, 0.5);
+    lfoGain.gain.value = validify(config.gain, 300);
+
+    for (var i = 0; i < stages; i++) {
+        filter = context.createBiquadFilter();
+        filter.type = 'allpass';
+        filter.frequency.value = 1000 * i;
+        //filter.Q.value = 10;
+        if (i > 0) {
+            filters[i - 1].connect(filter);
+        }
+        lfoGain.connect(filter.frequency);
+
+        filters.push(filter);
+    }
+
+    var first = filters[0];
+    var last = filters[filters.length - 1];
+
+    input.connect(first);
+    input.connect(output);
+    last.connect(output);
+    last.connect(feedback);
+    feedback.connect(first);
+    lfo.connect(lfoGain);
+    lfo.start(0);
+
+    var node = input;
+    node.name = 'Phaser';
+    node._output = output;
+
+    Object.defineProperties(node, {
+        lfoFrequency: {
+            get: function get() {
+                return lfo.frequency.value;
+            },
+            set: function set(value) {
+                lfo.frequency.value = value;
+            }
+        },
+        lfoGain: {
+            get: function get() {
+                return lfoGain.gain.value;
+            },
+            set: function set(value) {
+                lfoGain.gain.value = value;
+            }
+        },
+        feedback: {
+            get: function get() {
+                return feedback.gain.value;
+            },
+            set: function set(value) {
+                feedback.gain.value = value;
+            }
+        }
+    });
+
+    return node;
+}
+
+module.exports = Phaser;
+
+},{"../utils/validify.js":46}],30:[function(require,module,exports){
+'use strict';
+
+function Recorder(context, passThrough) {
+    var bufferLength = 4096,
+        buffersL = [],
+        buffersR = [],
+        startedAt = 0,
+        stoppedAt = 0;
+
+    var input = context.createGain();
+    var output = context.createGain();
+    var script;
+
+    var node = input;
+    node.name = 'Recorder';
+    node._output = output;
+
+    node.isRecording = false;
+
+    var getBuffer = function getBuffer() {
+        if (!buffersL.length) {
+            return context.createBuffer(2, bufferLength, context.sampleRate);
+        }
+        var recordingLength = buffersL.length * bufferLength;
+        var buffer = context.createBuffer(2, recordingLength, context.sampleRate);
+        buffer.getChannelData(0).set(mergeBuffers(buffersL, recordingLength));
+        buffer.getChannelData(1).set(mergeBuffers(buffersR, recordingLength));
+        return buffer;
+    };
+
+    var mergeBuffers = function mergeBuffers(buffers, length) {
+        var buffer = new Float32Array(length);
+        var offset = 0;
+        for (var i = 0; i < buffers.length; i++) {
+            buffer.set(buffers[i], offset);
+            offset += buffers[i].length;
+        }
+        return buffer;
+    };
+
+    var createScriptProcessor = function createScriptProcessor() {
+        destroyScriptProcessor();
+
+        script = context.createScriptProcessor(bufferLength, 2, 2);
+        input.connect(script);
+        script.connect(context.destination);
+        script.connect(output);
+
+        script.onaudioprocess = function (event) {
+            var inputL = event.inputBuffer.getChannelData(0),
+                inputR = event.inputBuffer.getChannelData(1);
+
+            if (passThrough) {
+                var outputL = event.outputBuffer.getChannelData(0),
+                    outputR = event.outputBuffer.getChannelData(1);
+                outputL.set(inputL);
+                outputR.set(inputR);
+            }
+
+            if (node.isRecording) {
+                buffersL.push(new Float32Array(inputL));
+                buffersR.push(new Float32Array(inputR));
+            }
+        };
+    };
+
+    var destroyScriptProcessor = function destroyScriptProcessor() {
+        if (script) {
+            script.onaudioprocess = null;
+            input.disconnect();
+            script.disconnect();
+        }
+    };
+
+    node.start = function () {
+        createScriptProcessor();
+        buffersL.length = 0;
+        buffersR.length = 0;
+        startedAt = context.currentTime;
+        stoppedAt = 0;
+        this.isRecording = true;
+    };
+
+    node.stop = function () {
+        stoppedAt = context.currentTime;
+        this.isRecording = false;
+        destroyScriptProcessor();
+        return getBuffer();
+    };
+
+    node.getDuration = function () {
+        if (!this.isRecording) {
+            return stoppedAt - startedAt;
+        }
+        return context.currentTime - startedAt;
+    };
+
+    return node;
+}
+
+module.exports = Recorder;
+
+},{}],31:[function(require,module,exports){
+'use strict';
+
+var validify = require('../utils/validify.js').number;
+
+function Reverb(context, config) {
+    config = config || {};
+
+    var time = validify(config.time, 1),
+        decay = validify(config.decay, 5),
+        reverse = !!config.reverse,
+        rate = context.sampleRate,
+        length,
+        impulseResponse;
+
+    var input = context.createGain();
+    var reverb = context.createConvolver();
+    var output = context.createGain();
+
+    input.connect(reverb);
+    input.connect(output);
+    reverb.connect(output);
+
+    var node = input;
+    node.name = 'Reverb';
+    node._output = output;
+
+    node.update = function (opt) {
+        if (opt.time !== undefined) {
+            time = opt.time;
+            length = Math.floor(rate * time);
+            impulseResponse = length ? context.createBuffer(2, length, rate) : null;
+        }
+        if (opt.decay !== undefined) {
+            decay = opt.decay;
+        }
+        if (opt.reverse !== undefined) {
+            reverse = opt.reverse;
+        }
+
+        if (!impulseResponse) {
+            reverb.buffer = null;
+            return;
+        }
+
+        var left = impulseResponse.getChannelData(0),
+            right = impulseResponse.getChannelData(1),
+            n,
+            e;
+
+        for (var i = 0; i < length; i++) {
+            n = reverse ? length - i : i;
+            e = Math.pow(1 - n / length, decay);
+            left[i] = (Math.random() * 2 - 1) * e;
+            right[i] = (Math.random() * 2 - 1) * e;
+        }
+
+        reverb.buffer = impulseResponse;
+    };
+
+    node.update({
+        time: time,
+        decay: decay,
+        reverse: reverse
+    });
+
+    Object.defineProperties(node, {
+        time: {
+            get: function get() {
+                return time;
+            },
+            set: function set(value) {
+                console.log.call(console, '1 set time:', value);
+                if (value === time) {
+                    return;
+                }
+                this.update({ time: value });
+            }
+        },
+        decay: {
+            get: function get() {
+                return decay;
+            },
+            set: function set(value) {
+                if (value === decay) {
+                    return;
+                }
+                this.update({ decay: value });
+            }
+        },
+        reverse: {
+            get: function get() {
+                return reverse;
+            },
+            set: function set(value) {
+                if (value === reverse) {
+                    return;
+                }
+                this.update({ reverse: !!value });
+            }
+        }
+    });
+
+    return node;
+}
+
+module.exports = Reverb;
+
+},{"../utils/validify.js":46}],32:[function(require,module,exports){
+'use strict';
+
+var Effect = require('./effect.js');
+
+function Group(context, destination) {
+    var sounds = [],
+        effect = new Effect(context),
+        gain = effect.gain(),
+        preMuteVolume = 1,
+        group;
+
+    if (context) {
+        effect.setSource(gain);
+        effect.setDestination(destination || context.destination);
+    }
+
+    /*
+     * Add / remove
+     */
+
+    var add = function add(sound) {
+        sound.gain.disconnect();
+        sound.gain.connect(gain);
+
+        sounds.push(sound);
+
+        sound.once('destroy', remove);
+
+        return group;
+    };
+
+    var find = function find(soundOrId, callback) {
+        var found;
+
+        if (!soundOrId && soundOrId !== 0) {
+            return found;
+        }
+
+        sounds.some(function (sound) {
+            if (sound === soundOrId || sound.id === soundOrId) {
+                found = sound;
+                return true;
+            }
+        });
+
+        if (found && callback) {
+            callback(found);
+        }
+
+        return found;
+    };
+
+    var remove = function remove(soundOrId) {
+        find(soundOrId, function (sound) {
+            sounds.splice(sounds.indexOf(sound), 1);
+        });
+        return group;
+    };
+
+    /*
+     * Controls
+     */
+
+    var play = function play(delay, offset) {
+        sounds.forEach(function (sound) {
+            sound.play(delay, offset);
+        });
+        return group;
+    };
+
+    var pause = function pause() {
+        sounds.forEach(function (sound) {
+            if (sound.playing) {
+                sound.pause();
+            }
+        });
+        return group;
+    };
+
+    var resume = function resume() {
+        sounds.forEach(function (sound) {
+            if (sound.paused) {
+                sound.play();
+            }
+        });
+        return group;
+    };
+
+    var stop = function stop() {
+        sounds.forEach(function (sound) {
+            sound.stop();
+        });
+        return group;
+    };
+
+    var seek = function seek(percent) {
+        sounds.forEach(function (sound) {
+            sound.seek(percent);
+        });
+        return group;
+    };
+
+    var mute = function mute() {
+        preMuteVolume = group.volume;
+        group.volume = 0;
+        return group;
+    };
+
+    var unMute = function unMute() {
+        group.volume = preMuteVolume || 1;
+        return group;
+    };
+
+    var setVolume = function setVolume(value) {
+        group.volume = value;
+        return group;
+    };
+
+    var fade = function fade(volume, duration) {
+        if (context) {
+            var param = gain.gain;
+            var time = context.currentTime;
+
+            param.cancelScheduledValues(time);
+            param.setValueAtTime(param.value, time);
+            // param.setValueAtTime(volume, time + duration);
+            param.linearRampToValueAtTime(volume, time + duration);
+            // param.setTargetAtTime(volume, time, duration);
+            // param.exponentialRampToValueAtTime(Math.max(volume, 0.0001), time + duration);
+        } else {
+                sounds.forEach(function (sound) {
+                    sound.fade(volume, duration);
+                });
+            }
+
+        return group;
+    };
+
+    /*
+     * Destroy
+     */
+
+    var destroy = function destroy() {
+        while (sounds.length) {
+            sounds.pop().destroy();
+        }
+    };
+
+    /*
+     * Api
+     */
+
+    group = {
+        add: add,
+        find: find,
+        remove: remove,
+        play: play,
+        pause: pause,
+        resume: resume,
+        stop: stop,
+        seek: seek,
+        setVolume: setVolume,
+        mute: mute,
+        unMute: unMute,
+        fade: fade,
+        destroy: destroy
+    };
+
+    /*
+     * Getters & Setters
+     */
+
+    Object.defineProperties(group, {
+        effect: {
+            value: effect
+        },
+        gain: {
+            value: gain
+        },
+        sounds: {
+            value: sounds
+        },
+        volume: {
+            get: function get() {
+                return gain.gain.value;
+            },
+            set: function set(value) {
+                if (isNaN(value)) {
+                    return;
+                }
+
+                if (context) {
+                    gain.gain.cancelScheduledValues(context.currentTime);
+                    gain.gain.value = value;
+                    gain.gain.setValueAtTime(value, context.currentTime);
+                } else {
+                    gain.gain.value = value;
+                }
+                sounds.forEach(function (sound) {
+                    if (!sound.context) {
+                        sound.groupVolume = value;
+                    }
+                });
+            }
+        }
+    });
+
+    return group;
+}
+
+module.exports = Group;
+
+},{"./effect.js":21}],33:[function(require,module,exports){
+'use strict';
+
+var BufferSource = require('./source/buffer-source.js'),
+    Effect = require('./effect.js'),
+    Emitter = require('./utils/emitter.js'),
+    file = require('./utils/file.js'),
+    Loader = require('./utils/loader.js'),
+    MediaSource = require('./source/media-source.js'),
+    MicrophoneSource = require('./source/microphone-source.js'),
+    OscillatorSource = require('./source/oscillator-source.js'),
+    ScriptSource = require('./source/script-source.js'),
+    waveform = require('./utils/waveform.js')();
+
+function Sound(context, destination) {
+    var id,
+        data,
+        effect = new Effect(context),
+        gain = effect.gain(),
+        isTouchLocked = false,
+        loader,
+        loop = false,
+        playbackRate = 1,
+        playWhenReady,
+        source,
+        sound;
+
+    if (context) {
+        effect.setDestination(gain);
+        gain.connect(destination || context.destination);
+    }
+
+    /*
+     * Load
+     */
+
+    var load = function load(config) {
+        var src = file.getSupportedFile(config.src || config.url || config);
+
+        if (source && data && data.tagName) {
+            source.load(src);
+        } else {
+            loader = loader || new Loader(src);
+            loader.audioContext = !!config.asMediaElement ? null : context;
+            loader.isTouchLocked = isTouchLocked;
+            loader.once('loaded', function (file) {
+                createSource(file);
+                sound.emit('loaded', sound);
+            });
+        }
+        return sound;
+    };
+
+    /*
+     * Controls
+     */
+
+    var play = function play(delay, offset) {
+        if (!source || isTouchLocked) {
+            playWhenReady = function playWhenReady() {
+                if (source) {
+                    play(delay, offset);
+                }
+            };
+            return sound;
+        }
+        playWhenReady = null;
+        effect.setSource(source.sourceNode);
+
+        // update volume needed for no webaudio
+        if (!context) {
+            sound.volume = gain.gain.value;
+        }
+
+        source.play(delay, offset);
+
+        if (source.hasOwnProperty('loop')) {
+            source.loop = loop;
+        }
+
+        sound.emit('play', sound);
+
+        return sound;
+    };
+
+    var pause = function pause() {
+        source && source.pause();
+        sound.emit('pause', sound);
+        return sound;
+    };
+
+    var stop = function stop(delay) {
+        source && source.stop(delay || 0);
+        sound.emit('stop', sound);
+        return sound;
+    };
+
+    var seek = function seek(percent) {
+        if (source) {
+            source.stop();
+            play(0, source.duration * percent);
+        }
+        return sound;
+    };
+
+    var fade = function fade(volume, duration) {
+        if (!source) {
+            return sound;
+        }
+
+        var param = gain.gain;
+
+        if (context) {
+            var time = context.currentTime;
+            param.cancelScheduledValues(time);
+            param.setValueAtTime(param.value, time);
+            param.linearRampToValueAtTime(volume, time + duration);
+        } else if (typeof source.fade === 'function') {
+            source.fade(volume, duration);
+            param.value = volume;
+        }
+
+        return sound;
+    };
+
+    /*
+     * Destroy
+     */
+
+    var destroy = function destroy() {
+        source && source.destroy();
+        effect && effect.destroy();
+        gain && gain.disconnect();
+        loader && loader.destroy();
+        sound.off('loaded');
+        sound.off('ended');
+        gain = null;
+        context = null;
+        data = null;
+        playWhenReady = null;
+        source = null;
+        effect = null;
+        loader = null;
+        sound.emit('destroy', sound);
+        sound.off('destroy');
+    };
+
+    /*
+     * Create source
+     */
+
+    var createSource = function createSource(value) {
+        data = value;
+
+        if (file.isAudioBuffer(data)) {
+            source = new BufferSource(data, context, function () {
+                sound.emit('ended', sound);
+            });
+        } else if (file.isMediaElement(data)) {
+            source = new MediaSource(data, context, function () {
+                sound.emit('ended', sound);
+            });
+        } else if (file.isMediaStream(data)) {
+            source = new MicrophoneSource(data, context);
+        } else if (file.isOscillatorType(data && data.type || data)) {
+            source = new OscillatorSource(data.type || data, context);
+        } else if (file.isScriptConfig(data)) {
+            source = new ScriptSource(data, context);
+        } else {
+            throw new Error('Cannot detect data type: ' + data);
+        }
+
+        effect.setSource(source.sourceNode);
+
+        sound.emit('ready', sound);
+
+        if (playWhenReady) {
+            playWhenReady();
+        }
+    };
+
+    sound = Object.create(Emitter.prototype, {
+        _events: {
+            value: {}
+        },
+        constructor: {
+            value: Sound
+        },
+        play: {
+            value: play
+        },
+        pause: {
+            value: pause
+        },
+        load: {
+            value: load
+        },
+        seek: {
+            value: seek
+        },
+        stop: {
+            value: stop
+        },
+        fade: {
+            value: fade
+        },
+        destroy: {
+            value: destroy
+        },
+        context: {
+            value: context
+        },
+        currentTime: {
+            get: function get() {
+                return source ? source.currentTime : 0;
+            },
+            set: function set(value) {
+                // var silent = sound.playing;
+                source && source.stop();
+                // play(0, value, silent);
+                play(0, value);
+            }
+        },
+        data: {
+            get: function get() {
+                return data;
+            },
+            set: function set(value) {
+                if (!value) {
+                    return;
+                }
+                createSource(value);
+            }
+        },
+        duration: {
+            get: function get() {
+                return source ? source.duration : 0;
+            }
+        },
+        effect: {
+            value: effect
+        },
+        ended: {
+            get: function get() {
+                return !!source && source.ended;
+            }
+        },
+        frequency: {
+            get: function get() {
+                return source ? source.frequency : 0;
+            },
+            set: function set(value) {
+                if (source && source.hasOwnProperty('frequency')) {
+                    source.frequency = value;
+                }
+            }
+        },
+        gain: {
+            value: gain
+        },
+        id: {
+            get: function get() {
+                return id;
+            },
+            set: function set(value) {
+                id = value;
+            }
+        },
+        isTouchLocked: {
+            set: function set(value) {
+                isTouchLocked = value;
+                if (loader) {
+                    loader.isTouchLocked = value;
+                }
+                if (!value && playWhenReady) {
+                    playWhenReady();
+                }
+            }
+        },
+        loader: {
+            get: function get() {
+                return loader;
+            }
+        },
+        loop: {
+            get: function get() {
+                return loop;
+            },
+            set: function set(value) {
+                loop = !!value;
+
+                if (source && source.hasOwnProperty('loop') && source.loop !== loop) {
+                    source.loop = loop;
+                }
+            }
+        },
+        paused: {
+            get: function get() {
+                return !!source && source.paused;
+            }
+        },
+        playing: {
+            get: function get() {
+                return !!source && source.playing;
+            }
+        },
+        playbackRate: {
+            get: function get() {
+                return playbackRate;
+            },
+            set: function set(value) {
+                playbackRate = value;
+                if (source) {
+                    source.playbackRate = playbackRate;
+                }
+            }
+        },
+        progress: {
+            get: function get() {
+                return source ? source.progress : 0;
+            }
+        },
+        volume: {
+            get: function get() {
+                if (context) {
+                    return gain.gain.value;
+                }
+                if (source && source.hasOwnProperty('volume')) {
+                    return source.volume;
+                }
+                return 1;
+            },
+            set: function set(value) {
+                if (isNaN(value)) {
+                    return;
+                }
+
+                var param = gain.gain;
+
+                if (context) {
+                    var time = context.currentTime;
+                    param.cancelScheduledValues(time);
+                    param.value = value;
+                    param.setValueAtTime(value, time);
+                } else {
+                    param.value = value;
+
+                    if (source && source.hasOwnProperty('volume')) {
+                        source.volume = value;
+                    }
+                }
+            }
+        },
+        // for media element source
+        groupVolume: {
+            get: function get() {
+                return source.groupVolume;
+            },
+            set: function set(value) {
+                if (source && source.hasOwnProperty('groupVolume')) {
+                    source.groupVolume = value;
+                }
+            }
+        },
+        waveform: {
+            value: function value(length) {
+                if (!data) {
+                    sound.once('ready', function () {
+                        waveform(data, length);
+                    });
+                }
+                return waveform(data, length);
+            }
+        },
+        userData: {
+            value: {}
+        }
+    });
+
+    return Object.freeze(sound);
+}
+
+module.exports = Sound;
+
+},{"./effect.js":21,"./source/buffer-source.js":34,"./source/media-source.js":35,"./source/microphone-source.js":36,"./source/oscillator-source.js":37,"./source/script-source.js":38,"./utils/emitter.js":40,"./utils/file.js":41,"./utils/loader.js":42,"./utils/waveform.js":47}],34:[function(require,module,exports){
+'use strict';
+
+function BufferSource(buffer, context, onEnded) {
+    var ended = false,
+        endedCallback = onEnded,
+        loop = false,
+        paused = false,
+        pausedAt = 0,
+        playbackRate = 1,
+        playing = false,
+        sourceNode = null,
+        startedAt = 0,
+        api = {};
+
+    var createSourceNode = function createSourceNode() {
+        if (!sourceNode && context) {
+            sourceNode = context.createBufferSource();
+            sourceNode.buffer = buffer;
+        }
+        return sourceNode;
+    };
+
+    /*
+     * Controls
+     */
+
+    var play = function play(delay, offset) {
+        if (playing) {
+            return;
+        }
+
+        delay = delay ? context.currentTime + delay : 0;
+        offset = offset || 0;
+        if (offset) {
+            pausedAt = 0;
+        }
+        if (pausedAt) {
+            offset = pausedAt;
+        }
+        while (offset > api.duration) {
+            offset = offset % api.duration;
+        }
+
+        createSourceNode();
+        sourceNode.onended = endedHandler;
+        sourceNode.start(delay, offset);
+
+        sourceNode.loop = loop;
+        sourceNode.playbackRate.value = playbackRate;
+
+        startedAt = context.currentTime - offset;
+        ended = false;
+        paused = false;
+        pausedAt = 0;
+        playing = true;
+    };
+
+    var pause = function pause() {
+        var elapsed = context.currentTime - startedAt;
+        stop();
+        pausedAt = elapsed;
+        playing = false;
+        paused = true;
+    };
+
+    var stop = function stop() {
+        if (sourceNode) {
+            sourceNode.onended = null;
+            try {
+                sourceNode.disconnect();
+                sourceNode.stop(0);
+            } catch (e) {}
+            sourceNode = null;
+        }
+
+        paused = false;
+        pausedAt = 0;
+        playing = false;
+        startedAt = 0;
+    };
+
+    /*
+     * Ended handler
+     */
+
+    var endedHandler = function endedHandler() {
+        stop();
+        ended = true;
+        if (typeof endedCallback === 'function') {
+            endedCallback(api);
+        }
+    };
+
+    /*
+     * Destroy
+     */
+
+    var destroy = function destroy() {
+        stop();
+        buffer = null;
+        context = null;
+        endedCallback = null;
+        sourceNode = null;
+    };
+
+    /*
+     * Getters & Setters
+     */
+
+    Object.defineProperties(api, {
+        play: {
+            value: play
+        },
+        pause: {
+            value: pause
+        },
+        stop: {
+            value: stop
+        },
+        destroy: {
+            value: destroy
+        },
+        currentTime: {
+            get: function get() {
+                if (pausedAt) {
+                    return pausedAt;
+                }
+                if (startedAt) {
+                    var time = context.currentTime - startedAt;
+                    if (time > api.duration) {
+                        time = time % api.duration;
+                    }
+                    return time;
+                }
+                return 0;
+            }
+        },
+        duration: {
+            get: function get() {
+                return buffer ? buffer.duration : 0;
+            }
+        },
+        ended: {
+            get: function get() {
+                return ended;
+            }
+        },
+        loop: {
+            get: function get() {
+                return loop;
+            },
+            set: function set(value) {
+                loop = !!value;
+                if (sourceNode) {
+                    sourceNode.loop = loop;
+                }
+            }
+        },
+        paused: {
+            get: function get() {
+                return paused;
+            }
+        },
+        playbackRate: {
+            get: function get() {
+                return playbackRate;
+            },
+            set: function set(value) {
+                playbackRate = value;
+                if (sourceNode) {
+                    sourceNode.playbackRate.value = playbackRate;
+                }
+            }
+        },
+        playing: {
+            get: function get() {
+                return playing;
+            }
+        },
+        progress: {
+            get: function get() {
+                return api.duration ? api.currentTime / api.duration : 0;
+            }
+        },
+        sourceNode: {
+            get: function get() {
+                return createSourceNode();
+            }
+        }
+    });
+
+    return Object.freeze(api);
+}
+
+module.exports = BufferSource;
+
+},{}],35:[function(require,module,exports){
+'use strict';
+
+function MediaSource(el, context, onEnded) {
+    var ended = false,
+        endedCallback = onEnded,
+        delayTimeout,
+        fadeTimeout,
+        loop = false,
+        paused = false,
+        playbackRate = 1,
+        playing = false,
+        sourceNode = null,
+        groupVolume = 1,
+        volume = 1,
+        api = {};
+
+    var createSourceNode = function createSourceNode() {
+        if (!sourceNode && context) {
+            sourceNode = context.createMediaElementSource(el);
+        }
+        return sourceNode;
+    };
+
+    /*
+     * Load
+     */
+
+    var load = function load(url) {
+        el.src = url;
+        el.load();
+        ended = false;
+        paused = false;
+        playing = false;
+    };
+
+    /*
+     * Controls
+     */
+
+    var play = function play(delay, offset) {
+        clearTimeout(delayTimeout);
+
+        el.volume = volume * groupVolume;
+        el.playbackRate = playbackRate;
+
+        if (offset) {
+            el.currentTime = offset;
+        }
+
+        if (delay) {
+            delayTimeout = setTimeout(play, delay);
+        } else {
+            // el.load();
+            el.play();
+        }
+
+        ended = false;
+        paused = false;
+        playing = true;
+
+        el.removeEventListener('ended', endedHandler);
+        el.addEventListener('ended', endedHandler, false);
+
+        if (el.readyState < 4) {
+            el.removeEventListener('canplaythrough', readyHandler);
+            el.addEventListener('canplaythrough', readyHandler, false);
+            el.load();
+            el.play();
+        }
+    };
+
+    var readyHandler = function readyHandler() {
+        el.removeEventListener('canplaythrough', readyHandler);
+        if (playing) {
+            el.play();
+        }
+    };
+
+    var pause = function pause() {
+        clearTimeout(delayTimeout);
+
+        if (!el) {
+            return;
+        }
+
+        el.pause();
+        playing = false;
+        paused = true;
+    };
+
+    var stop = function stop() {
+        clearTimeout(delayTimeout);
+
+        if (!el) {
+            return;
+        }
+
+        el.pause();
+
+        try {
+            el.currentTime = 0;
+            // fixes bug where server doesn't support seek:
+            if (el.currentTime > 0) {
+                el.load();
+            }
+        } catch (e) {}
+
+        playing = false;
+        paused = false;
+    };
+
+    /*
+     * Fade for no webaudio
+     */
+
+    var fade = function fade(toVolume, duration) {
+        if (context) {
+            return api;
+        }
+
+        function ramp(value, step) {
+            fadeTimeout = setTimeout(function () {
+                api.volume = api.volume + (value - api.volume) * 0.2;
+                if (Math.abs(api.volume - value) > 0.05) {
+                    return ramp(value, step);
+                }
+                api.volume = value;
+            }, step * 1000);
+        }
+
+        window.clearTimeout(fadeTimeout);
+        ramp(toVolume, duration / 10);
+
+        return api;
+    };
+
+    /*
+     * Ended handler
+     */
+
+    var endedHandler = function endedHandler() {
+        ended = true;
+        paused = false;
+        playing = false;
+
+        if (loop) {
+            el.currentTime = 0;
+            // fixes bug where server doesn't support seek:
+            if (el.currentTime > 0) {
+                el.load();
+            }
+            play();
+        } else if (typeof endedCallback === 'function') {
+            endedCallback(api);
+        }
+    };
+
+    /*
+     * Destroy
+     */
+
+    var destroy = function destroy() {
+        el.removeEventListener('ended', endedHandler);
+        el.removeEventListener('canplaythrough', readyHandler);
+        stop();
+        el = null;
+        context = null;
+        endedCallback = null;
+        sourceNode = null;
+    };
+
+    /*
+     * Getters & Setters
+     */
+
+    Object.defineProperties(api, {
+        play: {
+            value: play
+        },
+        pause: {
+            value: pause
+        },
+        stop: {
+            value: stop
+        },
+        load: {
+            value: load
+        },
+        fade: {
+            value: fade
+        },
+        destroy: {
+            value: destroy
+        },
+        currentTime: {
+            get: function get() {
+                return el ? el.currentTime : 0;
+            }
+        },
+        duration: {
+            get: function get() {
+                return el ? el.duration : 0;
+            }
+        },
+        ended: {
+            get: function get() {
+                return ended;
+            }
+        },
+        loop: {
+            get: function get() {
+                return loop;
+            },
+            set: function set(value) {
+                loop = !!value;
+            }
+        },
+        paused: {
+            get: function get() {
+                return paused;
+            }
+        },
+        playbackRate: {
+            get: function get() {
+                return playbackRate;
+            },
+            set: function set(value) {
+                playbackRate = value;
+                if (el) {
+                    el.playbackRate = playbackRate;
+                }
+            }
+        },
+        playing: {
+            get: function get() {
+                return playing;
+            }
+        },
+        progress: {
+            get: function get() {
+                return el && el.duration ? el.currentTime / el.duration : 0;
+            }
+        },
+        sourceNode: {
+            get: function get() {
+                return createSourceNode();
+            }
+        },
+        volume: {
+            get: function get() {
+                return volume;
+            },
+            set: function set(value) {
+                window.clearTimeout(fadeTimeout);
+                volume = value;
+                if (el) {
+                    el.volume = volume * groupVolume;
+                }
+            }
+        },
+        groupVolume: {
+            get: function get() {
+                return groupVolume;
+            },
+            set: function set(value) {
+                groupVolume = value;
+                if (el) {
+                    el.volume = volume * groupVolume;
+                }
+            }
+        }
+    });
+
+    return Object.freeze(api);
+}
+
+module.exports = MediaSource;
+
+},{}],36:[function(require,module,exports){
+'use strict';
+
+function MicrophoneSource(stream, context) {
+    var ended = false,
+        paused = false,
+        pausedAt = 0,
+        playing = false,
+        sourceNode = null,
+        // MicrophoneSourceNode
+    startedAt = 0;
+
+    var createSourceNode = function createSourceNode() {
+        if (!sourceNode && context) {
+            sourceNode = context.createMediaStreamSource(stream);
+            // HACK: stops moz garbage collection killing the stream
+            // see https://support.mozilla.org/en-US/questions/984179
+            if (navigator.mozGetUserMedia) {
+                window.mozHack = sourceNode;
+            }
+        }
+        return sourceNode;
+    };
+
+    /*
+     * Controls
+     */
+
+    var play = function play(delay) {
+        delay = delay ? context.currentTime + delay : 0;
+
+        createSourceNode();
+        sourceNode.start(delay);
+
+        startedAt = context.currentTime - pausedAt;
+        ended = false;
+        playing = true;
+        paused = false;
+        pausedAt = 0;
+    };
+
+    var pause = function pause() {
+        var elapsed = context.currentTime - startedAt;
+        stop();
+        pausedAt = elapsed;
+        playing = false;
+        paused = true;
+    };
+
+    var stop = function stop() {
+        if (sourceNode) {
+            try {
+                sourceNode.stop(0);
+            } catch (e) {}
+            sourceNode = null;
+        }
+        ended = true;
+        paused = false;
+        pausedAt = 0;
+        playing = false;
+        startedAt = 0;
+    };
+
+    /*
+     * Destroy
+     */
+
+    var destroy = function destroy() {
+        stop();
+        context = null;
+        sourceNode = null;
+        stream = null;
+        window.mozHack = null;
+    };
+
+    /*
+     * Api
+     */
+
+    var api = {
+        play: play,
+        pause: pause,
+        stop: stop,
+        destroy: destroy,
+
+        duration: 0,
+        progress: 0
+    };
+
+    /*
+     * Getters & Setters
+     */
+
+    Object.defineProperties(api, {
+        currentTime: {
+            get: function get() {
+                if (pausedAt) {
+                    return pausedAt;
+                }
+                if (startedAt) {
+                    return context.currentTime - startedAt;
+                }
+                return 0;
+            }
+        },
+        ended: {
+            get: function get() {
+                return ended;
+            }
+        },
+        paused: {
+            get: function get() {
+                return paused;
+            }
+        },
+        playing: {
+            get: function get() {
+                return playing;
+            }
+        },
+        sourceNode: {
+            get: function get() {
+                return createSourceNode();
+            }
+        }
+    });
+
+    return Object.freeze(api);
+}
+
+module.exports = MicrophoneSource;
+
+},{}],37:[function(require,module,exports){
+'use strict';
+
+function OscillatorSource(type, context) {
+    var ended = false,
+        paused = false,
+        pausedAt = 0,
+        playing = false,
+        sourceNode = null,
+        // OscillatorSourceNode
+    startedAt = 0,
+        frequency = 200,
+        api;
+
+    var createSourceNode = function createSourceNode() {
+        if (!sourceNode && context) {
+            sourceNode = context.createOscillator();
+            sourceNode.type = type;
+            sourceNode.frequency.value = frequency;
+        }
+        return sourceNode;
+    };
+
+    /*
+     * Controls
+     */
+
+    var play = function play(delay) {
+        delay = delay || 0;
+        if (delay) {
+            delay = context.currentTime + delay;
+        }
+
+        createSourceNode();
+        sourceNode.start(delay);
+
+        if (pausedAt) {
+            startedAt = context.currentTime - pausedAt;
+        } else {
+            startedAt = context.currentTime;
+        }
+
+        ended = false;
+        playing = true;
+        paused = false;
+        pausedAt = 0;
+    };
+
+    var pause = function pause() {
+        var elapsed = context.currentTime - startedAt;
+        this.stop();
+        pausedAt = elapsed;
+        playing = false;
+        paused = true;
+    };
+
+    var stop = function stop() {
+        if (sourceNode) {
+            try {
+                sourceNode.stop(0);
+            } catch (e) {}
+            sourceNode = null;
+        }
+        ended = true;
+        paused = false;
+        pausedAt = 0;
+        playing = false;
+        startedAt = 0;
+    };
+
+    /*
+     * Destroy
+     */
+
+    var destroy = function destroy() {
+        this.stop();
+        context = null;
+        sourceNode = null;
+    };
+
+    /*
+     * Api
+     */
+
+    api = {
+        play: play,
+        pause: pause,
+        stop: stop,
+        destroy: destroy
+    };
+
+    /*
+     * Getters & Setters
+     */
+
+    Object.defineProperties(api, {
+        currentTime: {
+            get: function get() {
+                if (pausedAt) {
+                    return pausedAt;
+                }
+                if (startedAt) {
+                    return context.currentTime - startedAt;
+                }
+                return 0;
+            }
+        },
+        duration: {
+            value: 0
+        },
+        ended: {
+            get: function get() {
+                return ended;
+            }
+        },
+        frequency: {
+            get: function get() {
+                return frequency;
+            },
+            set: function set(value) {
+                frequency = value;
+                if (sourceNode) {
+                    sourceNode.frequency.value = value;
+                }
+            }
+        },
+        paused: {
+            get: function get() {
+                return paused;
+            }
+        },
+        playing: {
+            get: function get() {
+                return playing;
+            }
+        },
+        progress: {
+            value: 0
+        },
+        sourceNode: {
+            get: function get() {
+                return createSourceNode();
+            }
+        }
+    });
+
+    return Object.freeze(api);
+}
+
+module.exports = OscillatorSource;
+
+},{}],38:[function(require,module,exports){
+'use strict';
+
+function ScriptSource(data, context) {
+    var bufferSize = data.bufferSize || 1024,
+        channels = data.channels || 1,
+        ended = false,
+        onProcess = data.callback.bind(data.thisArg || this),
+        paused = false,
+        pausedAt = 0,
+        playing = false,
+        sourceNode = null,
+        // ScriptSourceNode
+    startedAt = 0,
+        api;
+
+    var createSourceNode = function createSourceNode() {
+        if (!sourceNode && context) {
+            sourceNode = context.createScriptProcessor(bufferSize, 0, channels);
+        }
+        return sourceNode;
+    };
+
+    /*
+     * Controls
+     */
+
+    var play = function play(delay) {
+        delay = delay ? context.currentTime + delay : 0;
+
+        createSourceNode();
+        sourceNode.onaudioprocess = onProcess;
+
+        startedAt = context.currentTime - pausedAt;
+        ended = false;
+        paused = false;
+        pausedAt = 0;
+        playing = true;
+    };
+
+    var pause = function pause() {
+        var elapsed = context.currentTime - startedAt;
+        this.stop();
+        pausedAt = elapsed;
+        playing = false;
+        paused = true;
+    };
+
+    var stop = function stop() {
+        if (sourceNode) {
+            sourceNode.onaudioprocess = onPaused;
+        }
+        ended = true;
+        paused = false;
+        pausedAt = 0;
+        playing = false;
+        startedAt = 0;
+    };
+
+    var onPaused = function onPaused(event) {
+        var buffer = event.outputBuffer;
+        for (var i = 0; i < buffer.numberOfChannels; i++) {
+            var channel = buffer.getChannelData(i);
+            for (var j = 0; j < channel.length; j++) {
+                channel[j] = 0;
+            }
+        }
+    };
+
+    /*
+     * Destroy
+     */
+
+    var destroy = function destroy() {
+        this.stop();
+        context = null;
+        onProcess = null;
+        sourceNode = null;
+    };
+
+    /*
+     * Api
+     */
+
+    api = {
+        play: play,
+        pause: pause,
+        stop: stop,
+        destroy: destroy,
+
+        duration: 0,
+        progress: 0
+    };
+
+    /*
+     * Getters & Setters
+     */
+
+    Object.defineProperties(api, {
+        currentTime: {
+            get: function get() {
+                if (pausedAt) {
+                    return pausedAt;
+                }
+                if (startedAt) {
+                    return context.currentTime - startedAt;
+                }
+                return 0;
+            }
+        },
+        ended: {
+            get: function get() {
+                return ended;
+            }
+        },
+        paused: {
+            get: function get() {
+                return paused;
+            }
+        },
+        playing: {
+            get: function get() {
+                return playing;
+            }
+        },
+        sourceNode: {
+            get: function get() {
+                return createSourceNode();
+            }
+        }
+    });
+
+    return Object.freeze(api);
+}
+
+module.exports = ScriptSource;
+
+},{}],39:[function(require,module,exports){
+'use strict';
+
+var browser = {};
+
+browser.handlePageVisibility = function (onHidden, onShown) {
+    var hidden, visibilityChange;
+
+    if (typeof document.hidden !== 'undefined') {
+        hidden = 'hidden';
+        visibilityChange = 'visibilitychange';
+    } else if (typeof document.mozHidden !== 'undefined') {
+        hidden = 'mozHidden';
+        visibilityChange = 'mozvisibilitychange';
+    } else if (typeof document.msHidden !== 'undefined') {
+        hidden = 'msHidden';
+        visibilityChange = 'msvisibilitychange';
+    } else if (typeof document.webkitHidden !== 'undefined') {
+        hidden = 'webkitHidden';
+        visibilityChange = 'webkitvisibilitychange';
+    }
+
+    function onChange() {
+        if (document[hidden]) {
+            onHidden();
+        } else {
+            onShown();
+        }
+    }
+
+    if (visibilityChange !== undefined) {
+        document.addEventListener(visibilityChange, onChange, false);
+    }
+};
+
+browser.handleTouchLock = function (context, onUnlock) {
+    var ua = navigator.userAgent,
+        locked = !!ua.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|SymbianOS/i);
+
+    var unlock = function unlock() {
+        document.body.removeEventListener('touchstart', unlock);
+
+        if (context) {
+            var buffer = context.createBuffer(1, 1, 22050);
+            var source = context.createBufferSource();
+            source.buffer = buffer;
+            source.connect(context.destination);
+            source.start(0);
+            source.disconnect();
+        }
+
+        onUnlock();
+    };
+
+    if (locked) {
+        document.body.addEventListener('touchstart', unlock, false);
+    }
+    return locked;
+};
+
+module.exports = browser;
+
+},{}],40:[function(require,module,exports){
+'use strict';
+
+var EventEmitter = require('events').EventEmitter;
+
+function Emitter() {
+    EventEmitter.call(this);
+    this.setMaxListeners(20);
+}
+
+Emitter.prototype = Object.create(EventEmitter.prototype);
+Emitter.prototype.constructor = Emitter;
+
+Emitter.prototype.off = function (type, listener) {
+    if (listener) {
+        return this.removeListener(type, listener);
+    }
+    if (type) {
+        return this.removeAllListeners(type);
+    }
+    return this.removeAllListeners();
+};
+
+module.exports = Emitter;
+
+},{"events":8}],41:[function(require,module,exports){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var File = {
+    extensions: [],
+    canPlay: {}
+};
+
+/*
+ * Initial tests
+ */
+
+var tests = [{ ext: 'ogg', type: 'audio/ogg; codecs="vorbis"' }, { ext: 'mp3', type: 'audio/mpeg;' }, { ext: 'opus', type: 'audio/ogg; codecs="opus"' }, { ext: 'wav', type: 'audio/wav; codecs="1"' }, { ext: 'm4a', type: 'audio/x-m4a;' }, { ext: 'm4a', type: 'audio/aac;' }];
+
+var el = document.createElement('audio');
+if (el) {
+    tests.forEach(function (test) {
+        var canPlayType = !!el.canPlayType(test.type);
+        if (canPlayType && File.extensions.indexOf(test.ext) === -1) {
+            File.extensions.push(test.ext);
+        }
+        File.canPlay[test.ext] = canPlayType;
+    });
+    el = null;
+}
+
+/*
+ * find a supported file
+ */
+
+File.getFileExtension = function (url) {
+    // from DataURL
+    if (url.slice(0, 5) === 'data:') {
+        var match = url.match(/data:audio\/(ogg|mp3|opus|wav|m4a)/i);
+        if (match && match.length > 1) {
+            return match[1].toLowerCase();
+        }
+    }
+    // from Standard URL
+    url = url.split('?')[0];
+    url = url.slice(url.lastIndexOf('/') + 1);
+
+    var a = url.split('.');
+    if (a.length === 1 || a[0] === '' && a.length === 2) {
+        return '';
+    }
+    return a.pop().toLowerCase();
+};
+
+File.getSupportedFile = function (fileNames) {
+    var name;
+
+    if (Array.isArray(fileNames)) {
+        // if array get the first one that works
+        fileNames.some(function (item) {
+            name = item;
+            var ext = this.getFileExtension(item);
+            return this.extensions.indexOf(ext) > -1;
+        }, this);
+    } else if ((typeof fileNames === 'undefined' ? 'undefined' : _typeof(fileNames)) === 'object') {
+        // if not array and is object
+        Object.keys(fileNames).some(function (key) {
+            name = fileNames[key];
+            var ext = this.getFileExtension(name);
+            return this.extensions.indexOf(ext) > -1;
+        }, this);
+    }
+    // if string just return
+    return name || fileNames;
+};
+
+/*
+ * infer file types
+ */
+
+File.isAudioBuffer = function (data) {
+    return !!(data && window.AudioBuffer && data instanceof window.AudioBuffer);
+};
+
+File.isMediaElement = function (data) {
+    return !!(data && window.HTMLMediaElement && data instanceof window.HTMLMediaElement);
+};
+
+File.isMediaStream = function (data) {
+    return !!(data && typeof data.getAudioTracks === 'function' && data.getAudioTracks().length && window.MediaStreamTrack && data.getAudioTracks()[0] instanceof window.MediaStreamTrack);
+};
+
+File.isOscillatorType = function (data) {
+    return !!(data && typeof data === 'string' && (data === 'sine' || data === 'square' || data === 'sawtooth' || data === 'triangle'));
+};
+
+File.isScriptConfig = function (data) {
+    return !!(data && (typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object' && data.bufferSize && data.channels && data.callback);
+};
+
+File.isURL = function (data) {
+    return !!(data && typeof data === 'string' && (data.indexOf('.') > -1 || data.slice(0, 5) === 'data:'));
+};
+
+File.containsURL = function (config) {
+    if (!config || this.isMediaElement(config)) {
+        return false;
+    }
+    // string, array or object with src property that is string or array
+    var src = config.src || config.url || config;
+    return this.isURL(src) || Array.isArray(src) && this.isURL(src[0]);
+};
+
+module.exports = File;
+
+},{}],42:[function(require,module,exports){
+'use strict';
+
+var Emitter = require('./emitter.js');
+
+function Loader(url) {
+    var emitter = new Emitter(),
+        progress = 0,
+        audioContext,
+        isTouchLocked,
+        request,
+        timeout,
+        data,
+        ERROR_STATE = ['', 'ABORTED', 'NETWORK', 'DECODE', 'SRC_NOT_SUPPORTED'];
+
+    var start = function start() {
+        if (audioContext) {
+            loadArrayBuffer();
+        } else {
+            loadAudioElement();
+        }
+    };
+
+    var dispatchComplete = function dispatchComplete(buffer) {
+        emitter.emit('progress', 1);
+        emitter.emit('loaded', buffer);
+        emitter.emit('complete', buffer);
+
+        removeListeners();
+    };
+
+    // audio buffer
+
+    var loadArrayBuffer = function loadArrayBuffer() {
+        request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.responseType = 'arraybuffer';
+        request.addEventListener('progress', progressHandler);
+        request.addEventListener('load', loadHandler);
+        request.addEventListener('error', errorHandler);
+        request.send();
+    };
+
+    var progressHandler = function progressHandler(event) {
+        if (event.lengthComputable) {
+            progress = event.loaded / event.total;
+            emitter.emit('progress', progress);
+        }
+    };
+
+    var loadHandler = function loadHandler() {
+        audioContext.decodeAudioData(request.response, function (buffer) {
+            data = buffer;
+            request = null;
+            progress = 1;
+            dispatchComplete(buffer);
+        }, errorHandler);
+    };
+
+    // audio element
+
+    var loadAudioElement = function loadAudioElement() {
+        if (!data || !data.tagName) {
+            data = document.createElement('audio');
+        }
+
+        if (!isTouchLocked) {
+            // timeout because sometimes canplaythrough doesn't fire
+            window.clearTimeout(timeout);
+            timeout = window.setTimeout(readyHandler, 2000);
+            data.addEventListener('canplaythrough', readyHandler, false);
+        }
+
+        data.addEventListener('error', errorHandler, false);
+        data.preload = 'auto';
+        data.src = url;
+        data.load();
+
+        if (isTouchLocked) {
+            dispatchComplete(data);
+        }
+    };
+
+    var readyHandler = function readyHandler() {
+        window.clearTimeout(timeout);
+        if (!data) {
+            return;
+        }
+        progress = 1;
+        dispatchComplete(data);
+    };
+
+    // error
+
+    var errorHandler = function errorHandler(event) {
+        window.clearTimeout(timeout);
+
+        var message = event;
+
+        if (data && data.error) {
+            message = 'Media Error: ' + ERROR_STATE[data.error.code] + ' ' + url;
+        }
+
+        if (request) {
+            message = 'XHR Error: ' + request.status + ' ' + request.statusText + ' ' + url;
+        }
+
+        emitter.emit('error', message);
+
+        removeListeners();
+    };
+
+    // clean up
+
+    var removeListeners = function removeListeners() {
+        emitter.off('error');
+        emitter.off('progress');
+        emitter.off('complete');
+        emitter.off('loaded');
+
+        if (data && typeof data.removeEventListener === 'function') {
+            data.removeEventListener('canplaythrough', readyHandler);
+            data.removeEventListener('error', errorHandler);
+        }
+
+        if (request) {
+            request.removeEventListener('progress', progressHandler);
+            request.removeEventListener('load', loadHandler);
+            request.removeEventListener('error', errorHandler);
+        }
+    };
+
+    var cancel = function cancel() {
+        removeListeners();
+
+        if (request && request.readyState !== 4) {
+            request.abort();
+        }
+        request = null;
+
+        window.clearTimeout(timeout);
+    };
+
+    var destroy = function destroy() {
+        cancel();
+        request = null;
+        data = null;
+        audioContext = null;
+    };
+
+    // reload
+
+    var load = function load(newUrl) {
+        url = newUrl;
+        start();
+    };
+
+    var api = {
+        on: emitter.on.bind(emitter),
+        once: emitter.once.bind(emitter),
+        off: emitter.off.bind(emitter),
+        load: load,
+        start: start,
+        cancel: cancel,
+        destroy: destroy
+    };
+
+    Object.defineProperties(api, {
+        data: {
+            get: function get() {
+                return data;
+            }
+        },
+        progress: {
+            get: function get() {
+                return progress;
+            }
+        },
+        audioContext: {
+            set: function set(value) {
+                audioContext = value;
+            }
+        },
+        isTouchLocked: {
+            set: function set(value) {
+                isTouchLocked = value;
+            }
+        }
+    });
+
+    return Object.freeze(api);
+}
+
+Loader.Group = function () {
+    var emitter = new Emitter(),
+        queue = [],
+        numLoaded = 0,
+        numTotal = 0,
+        loader;
+
+    var add = function add(loader) {
+        queue.push(loader);
+        numTotal++;
+        return loader;
+    };
+
+    var start = function start() {
+        numTotal = queue.length;
+        next();
+    };
+
+    var next = function next() {
+        if (queue.length === 0) {
+            loader = null;
+            emitter.emit('complete');
+            return;
+        }
+
+        loader = queue.pop();
+        loader.on('progress', progressHandler);
+        loader.once('loaded', completeHandler);
+        loader.once('error', errorHandler);
+        loader.start();
+    };
+
+    var progressHandler = function progressHandler(progress) {
+        var loaded = numLoaded + progress;
+        emitter.emit('progress', loaded / numTotal);
+    };
+
+    var completeHandler = function completeHandler() {
+        numLoaded++;
+        removeListeners();
+        emitter.emit('progress', numLoaded / numTotal);
+        next();
+    };
+
+    var errorHandler = function errorHandler(e) {
+        console.error.call(console, e);
+        removeListeners();
+        emitter.emit('error', e);
+        next();
+    };
+
+    var removeListeners = function removeListeners() {
+        loader.off('progress', progressHandler);
+        loader.off('loaded', completeHandler);
+        loader.off('error', errorHandler);
+    };
+
+    return Object.freeze({
+        on: emitter.on.bind(emitter),
+        once: emitter.once.bind(emitter),
+        off: emitter.off.bind(emitter),
+        add: add,
+        start: start
+    });
+};
+
+module.exports = Loader;
+
+},{"./emitter.js":40}],43:[function(require,module,exports){
+'use strict';
+
+function Microphone(connected, denied, error) {
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+    error = error || function () {};
+
+    var isSupported = !!navigator.getUserMedia,
+        stream = null,
+        api = {};
+
+    var connect = function connect() {
+        if (!isSupported) {
+            return;
+        }
+
+        navigator.getUserMedia({ audio: true }, function (micStream) {
+            stream = micStream;
+            connected(stream);
+        }, function (e) {
+            if (denied && e.name === 'PermissionDeniedError' || e === 'PERMISSION_DENIED') {
+                // console.log('Permission denied. Reset by clicking the camera icon with the red cross in the address bar');
+                denied();
+            } else {
+                error(e.message || e);
+            }
+        });
+        return api;
+    };
+
+    var disconnect = function disconnect() {
+        if (stream) {
+            stream.stop();
+            stream = null;
+        }
+        return api;
+    };
+
+    Object.defineProperties(api, {
+        connect: {
+            value: connect
+        },
+        disconnect: {
+            value: disconnect
+        },
+        isSupported: {
+            value: isSupported
+        },
+        stream: {
+            get: function get() {
+                return stream;
+            }
+        }
+    });
+
+    return Object.freeze(api);
+}
+
+module.exports = Microphone;
+
+},{}],44:[function(require,module,exports){
+'use strict';
+
+var Group = require('../group.js');
+
+function SoundGroup(context, destination) {
+    var group = new Group(context, destination),
+        sounds = group.sounds,
+        playbackRate = 1,
+        loop = false,
+        src;
+
+    var getSource = function getSource() {
+        if (!sounds.length) {
+            return;
+        }
+
+        src = sounds.slice(0).sort(function (a, b) {
+            return b.duration - a.duration;
+        })[0];
+    };
+
+    var add = group.add;
+    group.add = function (sound) {
+        add(sound);
+        getSource();
+        return group;
+    };
+
+    var remove = group.rmeove;
+    group.remove = function (soundOrId) {
+        remove(soundOrId);
+        getSource();
+        return group;
+    };
+
+    Object.defineProperties(group, {
+        currentTime: {
+            get: function get() {
+                return src ? src.currentTime : 0;
+            },
+            set: function set(value) {
+                this.stop();
+                this.play(0, value);
+            }
+        },
+        duration: {
+            get: function get() {
+                return src ? src.duration : 0;
+            }
+        },
+        // ended: {
+        //     get: function() {
+        //         return src ? src.ended : false;
+        //     }
+        // },
+        loop: {
+            get: function get() {
+                return loop;
+            },
+            set: function set(value) {
+                loop = !!value;
+                sounds.forEach(function (sound) {
+                    sound.loop = loop;
+                });
+            }
+        },
+        paused: {
+            get: function get() {
+                // return src ? src.paused : false;
+                return !!src && src.paused;
+            }
+        },
+        progress: {
+            get: function get() {
+                return src ? src.progress : 0;
+            }
+        },
+        playbackRate: {
+            get: function get() {
+                return playbackRate;
+            },
+            set: function set(value) {
+                playbackRate = value;
+                sounds.forEach(function (sound) {
+                    sound.playbackRate = playbackRate;
+                });
+            }
+        },
+        playing: {
+            get: function get() {
+                // return src ? src.playing : false;
+                return !!src && src.playing;
+            }
+        }
+    });
+
+    return group;
+}
+
+module.exports = SoundGroup;
+
+},{"../group.js":32}],45:[function(require,module,exports){
+'use strict';
+
+var Microphone = require('./microphone.js');
+var waveformer = require('./waveformer.js');
+
+/*
+ * audio audioContext
+ */
+var audioContext;
+
+var setContext = function setContext(value) {
+    audioContext = value;
+};
+
+/*
+ * clone audio buffer
+ */
+
+var cloneBuffer = function cloneBuffer(buffer) {
+    if (!audioContext) {
+        return buffer;
+    }
+
+    var numChannels = buffer.numberOfChannels,
+        cloned = audioContext.createBuffer(numChannels, buffer.length, buffer.sampleRate);
+    for (var i = 0; i < numChannels; i++) {
+        cloned.getChannelData(i).set(buffer.getChannelData(i));
+    }
+    return cloned;
+};
+
+/*
+ * reverse audio buffer
+ */
+
+var reverseBuffer = function reverseBuffer(buffer) {
+    var numChannels = buffer.numberOfChannels;
+    for (var i = 0; i < numChannels; i++) {
+        Array.prototype.reverse.call(buffer.getChannelData(i));
+    }
+    return buffer;
+};
+
+/*
+ * ramp audio param
+ */
+
+var ramp = function ramp(param, fromValue, toValue, duration, linear) {
+    if (!audioContext) {
+        return;
+    }
+
+    param.setValueAtTime(fromValue, audioContext.currentTime);
+
+    if (linear) {
+        param.linearRampToValueAtTime(toValue, audioContext.currentTime + duration);
+    } else {
+        param.exponentialRampToValueAtTime(toValue, audioContext.currentTime + duration);
+    }
+};
+
+/*
+ * get frequency from min to max by passing 0 to 1
+ */
+
+var getFrequency = function getFrequency(value) {
+    if (!audioContext) {
+        return 0;
+    }
+    // get frequency by passing number from 0 to 1
+    // Clamp the frequency between the minimum value (40 Hz) and half of the
+    // sampling rate.
+    var minValue = 40;
+    var maxValue = audioContext.sampleRate / 2;
+    // Logarithm (base 2) to compute how many octaves fall in the range.
+    var numberOfOctaves = Math.log(maxValue / minValue) / Math.LN2;
+    // Compute a multiplier from 0 to 1 based on an exponential scale.
+    var multiplier = Math.pow(2, numberOfOctaves * (value - 1.0));
+    // Get back to the frequency value between min and max.
+    return maxValue * multiplier;
+};
+
+/*
+ * microphone util
+ */
+
+var microphone = function microphone(connected, denied, error) {
+    return new Microphone(connected, denied, error);
+};
+
+/*
+ * Format seconds as timecode string
+ */
+
+var timeCode = function timeCode(seconds, delim) {
+    if (delim === undefined) {
+        delim = ':';
+    }
+    var h = Math.floor(seconds / 3600);
+    var m = Math.floor(seconds % 3600 / 60);
+    var s = Math.floor(seconds % 3600 % 60);
+    var hr = h === 0 ? '' : h < 10 ? '0' + h + delim : h + delim;
+    var mn = (m < 10 ? '0' + m : m) + delim;
+    var sc = s < 10 ? '0' + s : s;
+    return hr + mn + sc;
+};
+
+module.exports = Object.freeze({
+    setContext: setContext,
+    cloneBuffer: cloneBuffer,
+    reverseBuffer: reverseBuffer,
+    ramp: ramp,
+    getFrequency: getFrequency,
+    microphone: microphone,
+    timeCode: timeCode,
+    waveformer: waveformer
+});
+
+},{"./microphone.js":43,"./waveformer.js":48}],46:[function(require,module,exports){
+'use strict';
+
+module.exports = Object.freeze({
+  number: function number(value, defaultValue) {
+    if (arguments.length < 2) {
+      defaultValue = 0;
+    }
+    if (typeof value !== 'number' || isNaN(value)) {
+      return defaultValue;
+    }
+    return value;
+  }
+});
+
+},{}],47:[function(require,module,exports){
+'use strict';
+
+function waveform() {
+
+    var buffer, wave;
+
+    return function (audioBuffer, length) {
+        if (!window.Float32Array || !window.AudioBuffer) {
+            return [];
+        }
+
+        var sameBuffer = buffer === audioBuffer;
+        var sameLength = wave && wave.length === length;
+        if (sameBuffer && sameLength) {
+            return wave;
+        }
+
+        //console.time('waveData');
+        if (!wave || wave.length !== length) {
+            wave = new Float32Array(length);
+        }
+
+        if (!audioBuffer) {
+            return wave;
+        }
+
+        // cache for repeated calls
+        buffer = audioBuffer;
+
+        var chunk = Math.floor(buffer.length / length),
+            resolution = 5,
+            // 10
+        incr = Math.max(Math.floor(chunk / resolution), 1),
+            greatest = 0;
+
+        for (var i = 0; i < buffer.numberOfChannels; i++) {
+            // check each channel
+            var channel = buffer.getChannelData(i);
+            for (var j = 0; j < length; j++) {
+                // get highest value within the chunk
+                for (var k = j * chunk, l = k + chunk; k < l; k += incr) {
+                    // select highest value from channels
+                    var a = channel[k];
+                    if (a < 0) {
+                        a = -a;
+                    }
+                    if (a > wave[j]) {
+                        wave[j] = a;
+                    }
+                    // update highest overall for scaling
+                    if (a > greatest) {
+                        greatest = a;
+                    }
+                }
+            }
+        }
+        // scale up
+        var scale = 1 / greatest;
+        for (i = 0; i < wave.length; i++) {
+            wave[i] *= scale;
+        }
+        //console.timeEnd('waveData');
+
+        return wave;
+    };
+}
+
+module.exports = waveform;
+
+},{}],48:[function(require,module,exports){
+'use strict';
+
+var halfPI = Math.PI / 2;
+var twoPI = Math.PI * 2;
+
+module.exports = function waveformer(config) {
+
+  var style = config.style || 'fill',
+      // 'fill' or 'line'
+  shape = config.shape || 'linear',
+      // 'circular' or 'linear'
+  color = config.color || 0,
+      bgColor = config.bgColor,
+      lineWidth = config.lineWidth || 1,
+      percent = config.percent || 1,
+      originX = config.x || 0,
+      originY = config.y || 0,
+      transform = config.transform,
+      canvas = config.canvas,
+      width = config.width || canvas && canvas.width,
+      height = config.height || canvas && canvas.height,
+      ctx,
+      currentColor,
+      waveform,
+      length,
+      i,
+      value,
+      x,
+      y,
+      radius,
+      innerRadius,
+      centerX,
+      centerY;
+
+  if (!canvas && !config.context) {
+    canvas = document.createElement('canvas');
+    width = width || canvas.width;
+    height = height || canvas.height;
+    canvas.width = height;
+    canvas.height = height;
+  }
+
+  if (shape === 'circular') {
+    radius = config.radius || Math.min(height / 2, width / 2), innerRadius = config.innerRadius || radius / 2;
+    centerX = originX + width / 2;
+    centerY = originY + height / 2;
+  }
+
+  ctx = config.context || canvas.getContext('2d');
+
+  var clear = function clear() {
+    if (bgColor) {
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(originX, originY, width, height);
+    } else {
+      ctx.clearRect(originX, originY, width, height);
+    }
+
+    ctx.lineWidth = lineWidth;
+
+    currentColor = null;
+
+    if (typeof color !== 'function') {
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+    }
+  };
+
+  var updateColor = function updateColor(position, length, value) {
+    if (typeof color === 'function') {
+      var newColor = color(position, length, value);
+      if (newColor !== currentColor) {
+        currentColor = newColor;
+        ctx.stroke();
+        ctx.strokeStyle = currentColor;
+        ctx.beginPath();
+      }
+    }
+  };
+
+  var getValue = function getValue(value, position, length) {
+    if (typeof transform === 'function') {
+      return transform(value, position, length);
+    }
+    return value;
+  };
+
+  var getWaveform = function getWaveform(value, length) {
+    if (value && typeof value.waveform === 'function') {
+      return value.waveform(length);
+    }
+    if (value) {
+      return value;
+    }
+    if (config.waveform) {
+      return config.waveform;
+    }
+    if (config.sound) {
+      return config.sound.waveform(length);
+    }
+    return null;
+  };
+
+  var update = function update(wave) {
+
+    clear();
+
+    if (shape === 'circular') {
+
+      waveform = getWaveform(wave, 360);
+      length = Math.floor(waveform.length * percent);
+
+      var step = twoPI / length,
+          angle,
+          magnitude,
+          sine,
+          cosine;
+
+      for (i = 0; i < length; i++) {
+        value = getValue(waveform[i], i, length);
+        updateColor(i, length, value);
+
+        angle = i * step - halfPI;
+        cosine = Math.cos(angle);
+        sine = Math.sin(angle);
+
+        if (style === 'fill') {
+          x = centerX + innerRadius * cosine;
+          y = centerY + innerRadius * sine;
+          ctx.moveTo(x, y);
+        }
+
+        magnitude = innerRadius + (radius - innerRadius) * value;
+        x = centerX + magnitude * cosine;
+        y = centerY + magnitude * sine;
+
+        if (style === 'line' && i === 0) {
+          ctx.moveTo(x, y);
+        }
+
+        ctx.lineTo(x, y);
+      }
+
+      if (style === 'line') {
+        ctx.closePath();
+      }
+    } else {
+
+      waveform = getWaveform(wave, width);
+      length = Math.min(waveform.length, width - lineWidth / 2);
+      length = Math.floor(length * percent);
+
+      for (i = 0; i < length; i++) {
+        value = getValue(waveform[i], i, length);
+        updateColor(i, length, value);
+
+        if (style === 'line' && i > 0) {
+          ctx.lineTo(x, y);
+        }
+
+        x = originX + i;
+        y = originY + height - Math.round(height * value);
+        y = Math.floor(Math.min(y, originY + height - lineWidth / 2));
+
+        if (style === 'fill') {
+          ctx.moveTo(x, y);
+          ctx.lineTo(x, originY + height);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+    }
+    ctx.stroke();
+  };
+
+  update.canvas = canvas;
+
+  if (config.waveform || config.sound) {
+    update();
+  }
+
+  return update;
+};
+
+},{}],49:[function(require,module,exports){
+'use strict';
+
+var browser = require('./lib/utils/browser.js'),
+    file = require('./lib/utils/file.js'),
+    Group = require('./lib/group.js'),
+    Loader = require('./lib/utils/loader.js'),
+    Sound = require('./lib/sound.js'),
+    SoundGroup = require('./lib/utils/sound-group.js'),
+    utils = require('./lib/utils/utils.js');
+
+function Sono() {
+    var VERSION = '0.0.9',
+        Ctx = window.AudioContext || window.webkitAudioContext,
+        context = Ctx ? new Ctx() : null,
+        destination = context ? context.destination : null,
+        group = new Group(context, destination),
+        api;
+
+    utils.setContext(context);
+
+    /*
+     * Create Sound
+     *
+     * Accepted values for param config:
+     * Object config e.g. { id:'foo', url:['foo.ogg', 'foo.mp3'] }
+     * Array (of files e.g. ['foo.ogg', 'foo.mp3'])
+     * ArrayBuffer
+     * HTMLMediaElement
+     * Filename string (e.g. 'foo.ogg')
+     * Oscillator type string (i.e. 'sine', 'square', 'sawtooth', 'triangle')
+     * ScriptProcessor config object (e.g. { bufferSize: 1024, channels: 1, callback: fn })
+     */
+
+    var createSound = function createSound(config) {
+        // try to load if config contains URLs
+        if (file.containsURL(config)) {
+            return load(config);
+        }
+
+        var sound = add(config);
+        sound.data = config.data || config;
+
+        return sound;
+    };
+
+    /*
+     * Destroy
+     */
+
+    var destroySound = function destroySound(soundOrId) {
+        group.find(soundOrId, function (sound) {
+            sound.destroy();
+        });
+        return api;
+    };
+
+    var destroyAll = function destroyAll() {
+        group.destroy();
+        return api;
+    };
+
+    /*
+     * Get Sound by id
+     */
+
+    var getSound = function getSound(id) {
+        return group.find(id);
+    };
+
+    /*
+     * Create group
+     */
+
+    var createGroup = function createGroup(sounds) {
+        var soundGroup = new SoundGroup(context, group.gain);
+        if (sounds) {
+            sounds.forEach(function (sound) {
+                soundGroup.add(sound);
+            });
+        }
+        return soundGroup;
+    };
+
+    /*
+     * Loading
+     */
+
+    var load = function load(config) {
+        var src = config.src || config.url || config,
+            sound,
+            loader;
+
+        if (file.containsURL(src)) {
+            sound = queue(config);
+            loader = sound.loader;
+        } else if (Array.isArray(src) && file.containsURL(src[0].src || src[0].url)) {
+            sound = [];
+            loader = new Loader.Group();
+            src.forEach(function (file) {
+                sound.push(queue(file, loader));
+            });
+        } else {
+            var errorMessage = 'sono.load: No audio file URLs found in config.';
+            if (config.onError) {
+                config.onError('[ERROR] ' + errorMessage);
+            } else {
+                throw new Error(errorMessage);
+            }
+            return null;
+        }
+        if (config.onProgress) {
+            loader.on('progress', function (progress) {
+                config.onProgress(progress);
+            });
+        }
+        if (config.onComplete) {
+            loader.once('complete', function () {
+                loader.off('progress');
+                config.onComplete(sound);
+            });
+        }
+        loader.once('error', function (err) {
+            loader.off('error');
+            if (config.onError) {
+                config.onError(err);
+            } else {
+                console.error.call(console, '[ERROR] sono.load: ' + err);
+            }
+        });
+        loader.start();
+
+        return sound;
+    };
+
+    var queue = function queue(config, loaderGroup) {
+        var sound = add(config).load(config);
+
+        if (loaderGroup) {
+            loaderGroup.add(sound.loader);
+        }
+        return sound;
+    };
+
+    var add = function add(config) {
+        var soundContext = config && config.webAudio === false ? null : context;
+        var sound = new Sound(soundContext, group.gain);
+        sound.isTouchLocked = isTouchLocked;
+        if (config) {
+            sound.id = config.id || '';
+            sound.loop = !!config.loop;
+            sound.volume = config.volume;
+        }
+        group.add(sound);
+        return sound;
+    };
+
+    /*
+     * Controls
+     */
+
+    var mute = function mute() {
+        group.mute();
+        return api;
+    };
+
+    var unMute = function unMute() {
+        group.unMute();
+        return api;
+    };
+
+    var fade = function fade(volume, duration) {
+        group.fade(volume, duration);
+        return api;
+    };
+
+    var pauseAll = function pauseAll() {
+        group.pause();
+        return api;
+    };
+
+    var resumeAll = function resumeAll() {
+        group.resume();
+        return api;
+    };
+
+    var stopAll = function stopAll() {
+        group.stop();
+        return api;
+    };
+
+    var play = function play(id, delay, offset) {
+        group.find(id, function (sound) {
+            sound.play(delay, offset);
+        });
+        return api;
+    };
+
+    var pause = function pause(id) {
+        group.find(id, function (sound) {
+            sound.pause();
+        });
+        return api;
+    };
+
+    var stop = function stop(id) {
+        group.find(id, function (sound) {
+            sound.stop();
+        });
+        return api;
+    };
+
+    /*
+     * Mobile touch lock
+     */
+
+    var isTouchLocked = browser.handleTouchLock(context, function () {
+        isTouchLocked = false;
+        group.sounds.forEach(function (sound) {
+            sound.isTouchLocked = false;
+        });
+    });
+
+    /*
+     * Page visibility events
+     */
+
+    (function () {
+        var pageHiddenPaused = [];
+
+        // pause currently playing sounds and store refs
+        function onHidden() {
+            group.sounds.forEach(function (sound) {
+                if (sound.playing) {
+                    sound.pause();
+                    pageHiddenPaused.push(sound);
+                }
+            });
+        }
+
+        // play sounds that got paused when page was hidden
+        function onShown() {
+            while (pageHiddenPaused.length) {
+                pageHiddenPaused.pop().play();
+            }
+        }
+
+        browser.handlePageVisibility(onHidden, onShown);
+    })();
+
+    /*
+     * Log version & device support info
+     */
+
+    var log = function log() {
+        var title = 'sono ' + VERSION,
+            info = 'Supported:' + api.isSupported + ' WebAudioAPI:' + api.hasWebAudio + ' TouchLocked:' + isTouchLocked + ' Extensions:' + file.extensions;
+
+        if (navigator.userAgent.indexOf('Chrome') > -1) {
+            var args = ['%c ♫ ' + title + ' ♫ %c ' + info + ' ', 'color: #FFFFFF; background: #379F7A', 'color: #1F1C0D; background: #E0FBAC'];
+            console.log.apply(console, args);
+        } else if (window.console && window.console.log.call) {
+            console.log.call(console, title + ' ' + info);
+        }
+    };
+
+    api = {
+        createSound: createSound,
+        destroySound: destroySound,
+        destroyAll: destroyAll,
+        getSound: getSound,
+        createGroup: createGroup,
+        load: load,
+        mute: mute,
+        unMute: unMute,
+        fade: fade,
+        pauseAll: pauseAll,
+        resumeAll: resumeAll,
+        stopAll: stopAll,
+        play: play,
+        pause: pause,
+        stop: stop,
+        log: log,
+
+        canPlay: file.canPlay,
+        context: context,
+        effect: group.effect,
+        extensions: file.extensions,
+        hasWebAudio: !!context,
+        isSupported: file.extensions.length > 0,
+        gain: group.gain,
+        utils: utils,
+        VERSION: VERSION
+    };
+
+    /*
+     * Getters & Setters
+     */
+
+    Object.defineProperties(api, {
+        isTouchLocked: {
+            get: function get() {
+                return isTouchLocked;
+            }
+        },
+        sounds: {
+            get: function get() {
+                return group.sounds.slice(0);
+            }
+        },
+        volume: {
+            get: function get() {
+                return group.volume;
+            },
+            set: function set(value) {
+                group.volume = value;
+            }
+        }
+    });
+
+    return Object.freeze(api);
+}
+
+module.exports = new Sono();
+
+},{"./lib/group.js":32,"./lib/sound.js":33,"./lib/utils/browser.js":39,"./lib/utils/file.js":41,"./lib/utils/loader.js":42,"./lib/utils/sound-group.js":44,"./lib/utils/utils.js":45}]},{},[19]);
 
 //# sourceMappingURL=bundle.js.map
