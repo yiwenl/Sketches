@@ -8,13 +8,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var Model = [{
 	cover: 'assets/sketchCoverParticles.jpg',
-	url: 'urlPath'
+	url: 'urlPath0'
 }, {
 	cover: 'assets/sketchCoverReflection.jpg',
-	url: 'urlPath'
+	url: 'urlPath1'
 }, {
 	cover: 'assets/sketchCoverFlocking.jpg',
-	url: 'urlPath'
+	url: 'urlPath2'
 }];
 
 exports.default = Model;
@@ -38,7 +38,7 @@ function _init() {
 	var numItems = _Model2.default.length;
 	var container = document.body.querySelector('.main-Container');
 
-	for (var i = 0; i < numItems; i++) {
+	var _loop = function _loop(i) {
 		var div = document.createElement("div");
 		div.className = 'exp-container';
 		container.appendChild(div);
@@ -48,7 +48,20 @@ function _init() {
 		div.appendChild(divImg);
 		divImg.style.background = 'url(' + _Model2.default[i].cover + ')';
 		divImg.style.backgroundSize = 'cover';
+
+		var url = _Model2.default[i].url;
+		div.addEventListener('click', function (e) {
+			return _onClicked(url);
+		});
+	};
+
+	for (var i = 0; i < numItems; i++) {
+		_loop(i);
 	}
+}
+
+function _onClicked(url) {
+	console.log('Clicked : ', url);
 }
 
 },{"./Model":1}]},{},[2]);

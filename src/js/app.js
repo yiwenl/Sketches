@@ -25,6 +25,14 @@ function _init() {
 		div.appendChild(divImg);
 		divImg.style.background = 'url(' + Model[i].cover + ')';
 		divImg.style.backgroundSize = 'cover';
+
+		let url = Model[i].url;
+		div.addEventListener('click', ( e ) => _onClicked(url));
 	}
+}
+
+
+function _onClicked(url) {
+	console.log('Clicked : ', url);
 }
 
