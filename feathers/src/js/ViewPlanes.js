@@ -34,8 +34,8 @@ class ViewPlanes extends alfrid.View {
 
 		for(let j=0; j<numParticles/NUM_SLIDES; j++) {
 			for(let i=0; i<numParticles/NUM_SLIDES; i++) {
-				ux = i/numParticles;
-				uy = j/numParticles;
+				ux = i/numParticles + .5/numParticles;
+				uy = j/numParticles + .5/numParticles;
 				let size       = random(.03, .05);
 				let ratio 	   = random(3, 5);
 				let r = [random(-1, 1), random(-1, 1), random(-1, 1)];
@@ -138,8 +138,8 @@ class ViewPlanes extends alfrid.View {
 		this.shader.uniform("uMetallic", "uniform1f", this.metallic);
 		this.shader.uniform("uSpecular", "uniform1f", this.specular);
 
-		this.shader.uniform("uExposure", "uniform1f", this.exposure);
-		this.shader.uniform("uGamma", "uniform1f", this.gamma);
+		this.shader.uniform("uExposure", "uniform1f", params.exposure);
+		this.shader.uniform("uGamma", "uniform1f", params.gamma);
 
 		// if(shadowMapTexture) {
 		// 	shader.uniform("textureDepth", "uniform1i", 2);

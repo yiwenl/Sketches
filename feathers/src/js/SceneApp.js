@@ -134,7 +134,7 @@ class SceneApp extends alfrid.Scene {
 		this._flip = this._flip == 0 ? 1 : 0;
 		let total = params.numSlides * params.numSlides;
 
-		this._vSkybox.render(this._textureIrr);
+		this._vSkybox.render(this._textureRad);
 		for(let i=0; i<total; i++) {
 			this._vPlanes.render(this._fboTarget.getTexture(), this._fboCurrent.getTexture(), p, i, this._flip, this.shadowMatrix, this._textureRad, this._textureIrr);
 		}

@@ -11,7 +11,7 @@ window.params = {
 	shadowThreshold:.55,
 	numSlides:6,
 	gamma:2.2,
-	exposure:1
+	exposure:5
 };
 
 let assets = [

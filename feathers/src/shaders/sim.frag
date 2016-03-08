@@ -142,7 +142,7 @@ void main(void) {
       vec3 pos        = texture2D(texture, uvPos).rgb;
       vec3 vel        = texture2D(texture, vTextureCoord).rgb;
       vec3 extra      = texture2D(texture, uvExtra).rgb;
-      float posOffset = 0.15 + extra.r * .02;
+      float posOffset = 0.15 + extra.r * .05;
 			vec3 acc = curlNoise(pos * posOffset + time * .1);
 			
 			vel += acc * .001 * (skipCount+1.0);
