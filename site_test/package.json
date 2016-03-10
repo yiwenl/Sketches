@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "live": "budo 01/index.js:bundle.js --dir 01 --verbose --live -- -t babelify"
+    "live": "budo 01/index.js:bundle.js --dir 01 --verbose --live -- -t babelify",
+    "start": "budo 01/index.js:bundle.js --dir 01 --verbose --live -- -t babelify"
   },
   "dependencies": {
     "bole": "^2.0.0",
