@@ -13,7 +13,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Experiment from './pages/Experiment';
 
-console.log('Static pages testing 4');
+console.log('Static pages testing 5');
 //	CONSTRUCT MODELS
 
 const experimentsReducer = (state=ExpModel, action) => {

@@ -89,7 +89,7 @@ var _pagesExperiment = require('./pages/Experiment');
 
 var _pagesExperiment2 = _interopRequireDefault(_pagesExperiment);
 
-console.log('Static pages testing 4');
+console.log('Static pages testing 5');
 //	CONSTRUCT MODELS
 
 var experimentsReducer = function experimentsReducer(state, action) {
@@ -152,7 +152,7 @@ var About = function About(props) {
 		{
 			className: 'About-Container',
 			onClick: function () {
-				props.dispatch((0, _reactRouterRedux.push)('/Sketches'));
+				props.dispatch((0, _reactRouterRedux.push)('/Sketches/'));
 			} },
 		'About container'
 	);
