@@ -13,7 +13,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Experiment from './pages/Experiment';
 
-console.log('Static pages testing');
+console.log('Static pages testing 1');
 //	CONSTRUCT MODELS
 
 const experimentsReducer = (state=ExpModel, action) => {
@@ -35,10 +35,10 @@ const history = syncHistoryWithStore(browserHistory, store);
 render(
 	<Provider store={store}>
 		<Router history={browserHistory}>
-			<Route path="/Sketches/" component={App}>
+			<Route path="/Sketches" component={App}>
 				<IndexRoute component={Home} />
 				<Route path="exps/:exp" component={Experiment} />
-				<Route path="about" component={About} />
+				<Route path="/about" component={About} />
 			</Route>
 		</Router>
 	</Provider>
