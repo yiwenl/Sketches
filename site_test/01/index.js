@@ -13,14 +13,14 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Experiment from './pages/Experiment';
 
-console.log('New hash testing');
+console.log('Static pages testing');
 //	CONSTRUCT MODELS
 
 const experimentsReducer = (state=ExpModel, action) => {
 	return state;
 }
 
-const middleware = routerMiddleware(hashHistory)
+const middleware = routerMiddleware(browserHistory)
 
 //	MAKE SOME REDUCERS
 let reducer = combineReducers({
@@ -29,13 +29,13 @@ let reducer = combineReducers({
 })
 
 const store = createStore(reducer, applyMiddleware(middleware));
-const history = syncHistoryWithStore(hashHistory, store);
+const history = syncHistoryWithStore(browserHistory, store);
 
 
 render(
 	<Provider store={store}>
-		<Router history={hashHistory}>
-			<Route path="/" component={App}>
+		<Router history={browserHistory}>
+			<Route path="/Sketches/" component={App}>
 				<IndexRoute component={Home} />
 				<Route path="exps/:exp" component={Experiment} />
 				<Route path="about" component={About} />

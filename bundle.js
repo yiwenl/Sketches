@@ -55,15 +55,15 @@ module.exports = exports['default'];
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
 var _redux = require('redux');
 
 var _reactRouter = require('react-router');
 
 var _reactRouterRedux = require('react-router-redux');
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = require('react-dom');
 
@@ -89,7 +89,7 @@ var _pagesExperiment = require('./pages/Experiment');
 
 var _pagesExperiment2 = _interopRequireDefault(_pagesExperiment);
 
-console.log('New hash testing');
+console.log('Static pages testing');
 //	CONSTRUCT MODELS
 
 var experimentsReducer = function experimentsReducer(state, action) {
@@ -98,13 +98,7 @@ var experimentsReducer = function experimentsReducer(state, action) {
 	return state;
 };
 
-var reducers = function reducers(state, action) {
-	if (state === undefined) state = _ExpModel2['default'];
-
-	return state;
-};
-
-var middleware = (0, _reactRouterRedux.routerMiddleware)(_reactRouter.hashHistory);
+var middleware = (0, _reactRouterRedux.routerMiddleware)(_reactRouter.browserHistory);
 
 //	MAKE SOME REDUCERS
 var reducer = (0, _redux.combineReducers)({
@@ -113,18 +107,17 @@ var reducer = (0, _redux.combineReducers)({
 });
 
 var store = (0, _redux.createStore)(reducer, (0, _redux.applyMiddleware)(middleware));
-// const storeRouting = createStore(reducer);
-var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.hashHistory, store);
+var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHistory, store);
 
 (0, _reactDom.render)(_react2['default'].createElement(
 	_reactRedux.Provider,
 	{ store: store },
 	_react2['default'].createElement(
 		_reactRouter.Router,
-		{ history: _reactRouter.hashHistory },
+		{ history: _reactRouter.browserHistory },
 		_react2['default'].createElement(
 			_reactRouter.Route,
-			{ path: '/', component: _pagesApp2['default'] },
+			{ path: '/Sketches/', component: _pagesApp2['default'] },
 			_react2['default'].createElement(_reactRouter.IndexRoute, { component: _pagesHome2['default'] }),
 			_react2['default'].createElement(_reactRouter.Route, { path: 'exps/:exp', component: _pagesExperiment2['default'] }),
 			_react2['default'].createElement(_reactRouter.Route, { path: 'about', component: _pagesAbout2['default'] })
@@ -154,15 +147,11 @@ var _reactRedux = require('react-redux');
 var _reactRouterRedux = require('react-router-redux');
 
 var About = function About(props) {
-	console.log('Props :', props);
 	return _react2['default'].createElement(
 		'div',
 		{
 			className: 'About-Container',
 			onClick: function () {
-				console.log('Clicked !!', _reactRouterRedux.push);
-
-				// props.history.push('/');
 				props.dispatch((0, _reactRouterRedux.push)(''));
 			} },
 		'About container'
