@@ -152,7 +152,7 @@ var About = function About(props) {
 		{
 			className: 'About-Container',
 			onClick: function () {
-				props.dispatch((0, _reactRouterRedux.push)({ BASE_URL: BASE_URL }));
+				props.dispatch((0, _reactRouterRedux.push)('/'));
 			} },
 		'About container'
 	);
