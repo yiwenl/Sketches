@@ -1,30 +1,13 @@
 // App.js
 
-import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
-import { Link } from 'react-router';
-import ExperimentList from './ExperimentList';
+import React from 'react';
 
-class App extends Component {
-	constructor(props) {
-		super(props)
-	}
-
-	render() {
-		return (
-			<div className="App">
-				<Link to="/Sketches/about">ABOUT</Link>
-				<ExperimentList 
-					experiments = {this.props.experiments}
-				/>
-			</div>
-
-		);
-	}
-} 
-
-function mapStateToProps(state, ownProps) {
-	return {experiments:state.experiments};
+const App = (props) => {
+	console.log('props : ', props);
+	return (
+		<div>{props.children}</div>
+	)
 }
 
-export default connect(mapStateToProps)(App);
+
+export default App;

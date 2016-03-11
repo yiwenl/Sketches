@@ -14,7 +14,7 @@ const About = (props) => {
 				console.log('Clicked !!', push);
 
 				// props.history.push('/');
-				props.dispatch(push('/Sketches/'))
+				props.dispatch(push(''))
 			}
 		}>About container</div>
 	);
