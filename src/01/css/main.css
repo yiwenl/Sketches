@@ -35,18 +35,25 @@
 
 
 .About-Link {
-	color:black;
+	color:rgb(150, 150, 150);
 	font-family: Verdana, Arial;
 	letter-spacing: 1.5px;
 	font-size:12px;
+
+	transition: color .5s ease-out;
+}
+
+.About-Link:hover {
+	color:black;
 }
 
 .About-Desc {
 	color:black;
 	font-family: Verdana, Arial;
 	font-size:12px;
-	line-height: 18px;
+	line-height: 24px;
 	margin-bottom:24px;
+	letter-spacing: 1px;
 }
 
 .About-RightPanel {

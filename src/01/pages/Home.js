@@ -17,6 +17,7 @@ class Home extends Component {
 				<ExperimentList 
 					experiments = {this.props.experiments}
 				/>
+				{this.props.children}
 			</div>
 
 		);
