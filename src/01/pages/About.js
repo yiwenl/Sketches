@@ -10,7 +10,7 @@ const About = (props) => {
 		<div
 			className='About-Container' 
 			onClick={ ()=>{
-				props.dispatch(push('/Sketches/'))
+				props.dispatch(push({BASE_URL}))
 			}
 		}>About container</div>
 	);

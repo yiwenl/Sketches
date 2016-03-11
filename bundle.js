@@ -89,7 +89,7 @@ var _pagesExperiment = require('./pages/Experiment');
 
 var _pagesExperiment2 = _interopRequireDefault(_pagesExperiment);
 
-console.log('Static pages testing 6');
+console.log('Static pages testing ', Math.floor(Math.random() * 100));
 //	CONSTRUCT MODELS
 
 var experimentsReducer = function experimentsReducer(state, action) {
@@ -98,7 +98,7 @@ var experimentsReducer = function experimentsReducer(state, action) {
 	return state;
 };
 
-var middleware = (0, _reactRouterRedux.routerMiddleware)(_reactRouter.browserHistory);
+var middleware = (0, _reactRouterRedux.routerMiddleware)(_reactRouter.hashHistory);
 
 //	MAKE SOME REDUCERS
 var reducer = (0, _redux.combineReducers)({
@@ -107,20 +107,20 @@ var reducer = (0, _redux.combineReducers)({
 });
 
 var store = (0, _redux.createStore)(reducer, (0, _redux.applyMiddleware)(middleware));
-var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHistory, store);
+var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.hashHistory, store);
 
 (0, _reactDom.render)(_react2['default'].createElement(
 	_reactRedux.Provider,
 	{ store: store },
 	_react2['default'].createElement(
 		_reactRouter.Router,
-		{ history: _reactRouter.browserHistory },
+		{ history: _reactRouter.hashHistory },
 		_react2['default'].createElement(
 			_reactRouter.Route,
-			{ path: '/Sketches/', component: _pagesApp2['default'] },
+			{ path: '/', component: _pagesApp2['default'] },
 			_react2['default'].createElement(_reactRouter.IndexRoute, { component: _pagesHome2['default'] }),
-			_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/exps/:exp', component: _pagesExperiment2['default'] }),
-			_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/about', component: _pagesAbout2['default'] })
+			_react2['default'].createElement(_reactRouter.Route, { path: '/exps/:exp', component: _pagesExperiment2['default'] }),
+			_react2['default'].createElement(_reactRouter.Route, { path: '/about', component: _pagesAbout2['default'] })
 		)
 	)
 ), document.querySelector('#root'));
@@ -152,7 +152,7 @@ var About = function About(props) {
 		{
 			className: 'About-Container',
 			onClick: function () {
-				props.dispatch((0, _reactRouterRedux.push)('/Sketches/'));
+				props.dispatch((0, _reactRouterRedux.push)({ BASE_URL: BASE_URL }));
 			} },
 		'About container'
 	);
