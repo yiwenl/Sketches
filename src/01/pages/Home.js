@@ -13,7 +13,7 @@ class Home extends Component {
 	render() {
 		return (
 			<div className="App">
-				<Link to="about">ABOUT</Link>
+				<Link to="/Sketches/about">ABOUT</Link>
 				<ExperimentList 
 					experiments = {this.props.experiments}
 				/>

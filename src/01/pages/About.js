@@ -19,7 +19,7 @@ const About = (props) => {
 				className="About-Background"
 				onClick={ ()=>{
 					console.log('Click');
-					props.dispatch(push('/'));
+					props.dispatch(push('/Sketches/'));
 				}}
 			/>
 		</div>

@@ -89,7 +89,7 @@ var _pagesExperiment = require('./pages/Experiment');
 
 var _pagesExperiment2 = _interopRequireDefault(_pagesExperiment);
 
-console.log('Static pages testing ', Math.floor(Math.random() * 100));
+console.log('Folder Static pages testing ', Math.floor(Math.random() * 100));
 //	CONSTRUCT MODELS
 
 var experimentsReducer = function experimentsReducer(state, action) {
@@ -98,7 +98,7 @@ var experimentsReducer = function experimentsReducer(state, action) {
 	return state;
 };
 
-var middleware = (0, _reactRouterRedux.routerMiddleware)(_reactRouter.hashHistory);
+var middleware = (0, _reactRouterRedux.routerMiddleware)(_reactRouter.browserHistory);
 
 //	MAKE SOME REDUCERS
 var reducer = (0, _redux.combineReducers)({
@@ -107,20 +107,21 @@ var reducer = (0, _redux.combineReducers)({
 });
 
 var store = (0, _redux.createStore)(reducer, (0, _redux.applyMiddleware)(middleware));
-var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.hashHistory, store);
+var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHistory, store);
 
 (0, _reactDom.render)(_react2['default'].createElement(
 	_reactRedux.Provider,
 	{ store: store },
 	_react2['default'].createElement(
 		_reactRouter.Router,
-		{ history: _reactRouter.hashHistory },
+		{ history: _reactRouter.browserHistory },
 		_react2['default'].createElement(
 			_reactRouter.Route,
-			{ path: '/', component: _pagesApp2['default'] },
+			{ path: '/Sketches/', component: _pagesApp2['default'] },
 			_react2['default'].createElement(_reactRouter.IndexRoute, { component: _pagesHome2['default'] }),
 			_react2['default'].createElement(_reactRouter.Route, { path: '/exps/:exp', component: _pagesExperiment2['default'] }),
-			_react2['default'].createElement(_reactRouter.Route, { path: '/about', component: _pagesAbout2['default'] })
+			_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/about', component: _pagesAbout2['default'] }),
+			_react2['default'].createElement(_reactRouter.Redirect, { from: 'about', to: '/Sketches/about' })
 		)
 	)
 ), document.querySelector('#root'));
@@ -149,12 +150,45 @@ var _reactRouterRedux = require('react-router-redux');
 var About = function About(props) {
 	return _react2['default'].createElement(
 		'div',
-		{
-			className: 'About-Container',
+		{ className: 'About-Container' },
+		_react2['default'].createElement(
+			'div',
+			{ className: 'About-RightPanel' },
+			_react2['default'].createElement(
+				'div',
+				{ className: 'About-TextWrapper' },
+				_react2['default'].createElement(
+					'p',
+					{ className: 'About-Desc' },
+					'A place for my sketches, most of them are not optimised so it take a bit of time to load, please be patient. Also some of them aren\'t working in Firefox because Firefox doesn\'t support textureCubeLod'
+				),
+				_react2['default'].createElement(
+					'a',
+					{ href: 'http://blog.bongiovi.tw', target: '_blank' },
+					_react2['default'].createElement(
+						'p',
+						{ className: 'About-Link' },
+						'blog.bongiovi.tw'
+					)
+				),
+				_react2['default'].createElement(
+					'a',
+					{ href: 'https://twitter.com/yiwen_lin', target: '_blank' },
+					_react2['default'].createElement(
+						'p',
+						{ className: 'About-Link' },
+						'@yiwen_lin'
+					)
+				)
+			)
+		),
+		_react2['default'].createElement('div', {
+			className: 'About-Background',
 			onClick: function () {
-				props.dispatch((0, _reactRouterRedux.push)('/'));
-			} },
-		'About container'
+				console.log('Click');
+				props.dispatch((0, _reactRouterRedux.push)('/Sketches/'));
+			}
+		})
 	);
 };
 
@@ -181,7 +215,7 @@ var _react = require('react');
 var _react2 = _interopRequireDefault(_react);
 
 var App = function App(props) {
-	console.log('props : ', props);
+	console.log('APP props : ', props);
 	return _react2['default'].createElement(
 		'div',
 		null,
@@ -317,12 +351,13 @@ var Home = (function (_Component) {
 				{ className: 'App' },
 				_react2['default'].createElement(
 					_reactRouter.Link,
-					{ to: 'about' },
+					{ to: '/Sketches/about' },
 					'ABOUT'
 				),
 				_react2['default'].createElement(_ExperimentList2['default'], {
 					experiments: this.props.experiments
-				})
+				}),
+				this.props.children
 			);
 		}
 	}]);
