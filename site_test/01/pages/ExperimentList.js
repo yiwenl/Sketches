@@ -13,13 +13,17 @@ const ExperimentList = ({
 			{
 				experiments.map( (exp) => {
 					let dest = '/exps/'+exp.id.toString();
+					let divStyle = {
+						color: 'white',
+						backgroundImage: 'url(' + exp.cover + ')',
+						backgroundSize:'cover'
+					};
 					return (
 						<Link 
 							to={dest} 
 							key={exp.id} 
-							className="Experiment-Item">
-							{exp.cover}
-						</Link>
+							className="Experiment-Item"
+							style={divStyle} />
 					);
 				})
 			}
