@@ -295,7 +295,7 @@ var ExperimentList = function ExperimentList(_ref) {
 		'div',
 		{ className: 'Experiment-List' },
 		experiments.map(function (exp) {
-			var dest = '/exps/' + exp.id.toString();
+			var dest = '/Sketches/exps/' + exp.id.toString();
 			var divStyle = {
 				color: 'white',
 				backgroundImage: 'url(' + exp.cover + ')',
