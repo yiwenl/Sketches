@@ -15,7 +15,7 @@ const Experiment = (props) => {
 }
 
 function mapStateToProps(state, ownProps) {
-	return {experiments:state};
+	return {experiments:state.experiments};
 }
 
 export default connect(mapStateToProps)(Experiment);

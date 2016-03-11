@@ -6,8 +6,6 @@ import { Link } from 'react-router';
 const ExperimentList = ({
 	experiments
 }) => {
-
-	console.log('Experiments : ', experiments);
 	return (
 		<div className="Experiment-List">
 			{

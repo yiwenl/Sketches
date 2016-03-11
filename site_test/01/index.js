@@ -1,7 +1,7 @@
 //	IMPORTS
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { Router, Route, hashHistory, browserHistory } from 'react-router';
-import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
+import { syncHistoryWithStore, routerReducer, routerMiddleware } from 'react-router-redux'
 
 
 import React from 'react';
@@ -16,25 +16,30 @@ import Experiment from './pages/Experiment';
 
 //	CONSTRUCT MODELS
 
-const reducers = (state=ExpModel, action) => {
-	switch (action.type) {
-		default :
-			return state;
-	}
+const experimentsReducer = (state=ExpModel, action) => {
+	return state;
 }
 
-//	MAKE SOME REDUCERS
-// const reducer = combineReducers({
-//   ...reducers,
-//   routing: routerReducer
-// })
+const reducers = (state=ExpModel, action) => {
+	return state;
+}
 
-const store = createStore(reducers);
-// const history = syncHistoryWithStore(browserHistory, store);
+const middleware = routerMiddleware(browserHistory)
+
+//	MAKE SOME REDUCERS
+let reducer = combineReducers({
+  experiments: experimentsReducer,
+  routing: routerReducer
+})
+
+const store = createStore(reducer, applyMiddleware(middleware));
+// const storeRouting = createStore(reducer);
+const history = syncHistoryWithStore(browserHistory, store);
+
 
 render(
 	<Provider store={store}>
-		<Router history={hashHistory}>
+		<Router history={browserHistory}>
 			<Route path="/" component={App} />
 				<Route path="/exps/:exp" component={Experiment} />
 			<Route path="/about" component={About} />

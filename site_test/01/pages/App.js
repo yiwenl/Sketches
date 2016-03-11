@@ -24,8 +24,7 @@ class App extends Component {
 } 
 
 function mapStateToProps(state, ownProps) {
-	console.log("STATE:", state);
-	return {experiments:state};
+	return {experiments:state.experiments};
 }
 
 export default connect(mapStateToProps)(App);
