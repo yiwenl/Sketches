@@ -10,7 +10,7 @@ const ExperimentList = ({
 		<div className="Experiment-List">
 			{
 				experiments.map( (exp) => {
-					let dest = 'exps/'+exp.id.toString();
+					let dest = '/Sketches/exps/'+exp.id.toString();
 					let divStyle = {
 						color: 'white',
 						backgroundImage: 'url(' + exp.cover + ')',

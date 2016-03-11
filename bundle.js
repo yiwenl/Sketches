@@ -119,7 +119,7 @@ var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHi
 			_reactRouter.Route,
 			{ path: '/Sketches/', component: _pagesApp2['default'] },
 			_react2['default'].createElement(_reactRouter.IndexRoute, { component: _pagesHome2['default'] }),
-			_react2['default'].createElement(_reactRouter.Route, { path: '/exps/:exp', component: _pagesExperiment2['default'] }),
+			_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/exps/:exp', component: _pagesExperiment2['default'] }),
 			_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/about', component: _pagesAbout2['default'] }),
 			_react2['default'].createElement(_reactRouter.Redirect, { from: 'about', to: '/Sketches/about' })
 		)
@@ -285,7 +285,7 @@ var ExperimentList = function ExperimentList(_ref) {
 		'div',
 		{ className: 'Experiment-List' },
 		experiments.map(function (exp) {
-			var dest = 'exps/' + exp.id.toString();
+			var dest = '/Sketches/exps/' + exp.id.toString();
 			var divStyle = {
 				color: 'white',
 				backgroundImage: 'url(' + exp.cover + ')',

@@ -36,7 +36,7 @@ render(
 		<Router history={browserHistory}>
 			<Route path='/Sketches/' component={App}>
 				<IndexRoute component={Home} />
-				<Route path="/exps/:exp" component={Experiment} />
+				<Route path="/Sketches/exps/:exp" component={Experiment} />
 				<Route path="/Sketches/about" component={About} />
 
 				<Redirect from="about" to="/Sketches/about" />
