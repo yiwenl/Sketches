@@ -89,7 +89,7 @@ var _pagesExperiment = require('./pages/Experiment');
 
 var _pagesExperiment2 = _interopRequireDefault(_pagesExperiment);
 
-console.log('Static pages testing 3');
+console.log('Static pages testing 4');
 //	CONSTRUCT MODELS
 
 var experimentsReducer = function experimentsReducer(state, action) {
@@ -117,10 +117,10 @@ var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHi
 		{ history: _reactRouter.browserHistory },
 		_react2['default'].createElement(
 			_reactRouter.Route,
-			{ path: '/Sketches', component: _pagesApp2['default'] },
+			{ path: '/Sketches/', component: _pagesApp2['default'] },
 			_react2['default'].createElement(_reactRouter.IndexRoute, { component: _pagesHome2['default'] }),
-			_react2['default'].createElement(_reactRouter.Route, { path: '/exps/:exp', component: _pagesExperiment2['default'] }),
-			_react2['default'].createElement(_reactRouter.Route, { path: '/about', component: _pagesAbout2['default'] })
+			_react2['default'].createElement(_reactRouter.Route, { path: 'exps/:exp', component: _pagesExperiment2['default'] }),
+			_react2['default'].createElement(_reactRouter.Route, { path: 'about', component: _pagesAbout2['default'] })
 		)
 	)
 ), document.querySelector('#root'));
