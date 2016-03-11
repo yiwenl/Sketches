@@ -117,9 +117,9 @@ var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHi
 	_react2['default'].createElement(
 		_reactRouter.Router,
 		{ history: _reactRouter.browserHistory },
-		_react2['default'].createElement(_reactRouter.Route, { path: '/', component: _pagesApp2['default'] }),
-		_react2['default'].createElement(_reactRouter.Route, { path: '/exps/:exp', component: _pagesExperiment2['default'] }),
-		_react2['default'].createElement(_reactRouter.Route, { path: '/about', component: _pagesAbout2['default'] })
+		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches', component: _pagesApp2['default'] }),
+		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/exps/:exp', component: _pagesExperiment2['default'] }),
+		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/about', component: _pagesAbout2['default'] })
 	)
 ), document.querySelector('#root'));
 

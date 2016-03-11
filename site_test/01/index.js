@@ -40,9 +40,9 @@ const history = syncHistoryWithStore(browserHistory, store);
 render(
 	<Provider store={store}>
 		<Router history={browserHistory}>
-			<Route path="/" component={App} />
-				<Route path="/exps/:exp" component={Experiment} />
-			<Route path="/about" component={About} />
+			<Route path="/Sketches" component={App} />
+				<Route path="/Sketches/exps/:exp" component={Experiment} />
+			<Route path="/Sketches/about" component={About} />
 		</Router>
 	</Provider>
 	,document.querySelector('#root')
