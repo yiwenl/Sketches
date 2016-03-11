@@ -1,6 +1,8 @@
 //	IMPORTS
-import { createStore } from 'redux';
-import { Router, Route, hashHistory } from 'react-router';
+import { createStore, combineReducers } from 'redux';
+import { Router, Route, hashHistory, browserHistory } from 'react-router';
+import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
+
 
 import React from 'react';
 import { render } from 'react-dom';
@@ -22,8 +24,13 @@ const reducers = (state=ExpModel, action) => {
 }
 
 //	MAKE SOME REDUCERS
+// const reducer = combineReducers({
+//   ...reducers,
+//   routing: routerReducer
+// })
 
 const store = createStore(reducers);
+// const history = syncHistoryWithStore(browserHistory, store);
 
 render(
 	<Provider store={store}>

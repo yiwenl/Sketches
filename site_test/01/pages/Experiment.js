@@ -8,7 +8,9 @@ const Experiment = (props) => {
 	let url = props.experiments[index].url;
 	console.log('URL : ', url);
 	return (
-		<div>Experiment container</div>
+		// <div>Experiment container</div>
+		// <iframe src="http://yiwenl.github.io/Sketches/experiments/selfshadingParticles/dist/index.html"/>
+		<iframe src={url} className="Experiment-Content" />
 	);
 }
 
