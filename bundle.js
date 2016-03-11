@@ -85,6 +85,7 @@ var _pagesExperiment = require('./pages/Experiment');
 
 var _pagesExperiment2 = _interopRequireDefault(_pagesExperiment);
 
+console.log('New Path testing');
 //	CONSTRUCT MODELS
 
 var experimentsReducer = function experimentsReducer(state, action) {
@@ -117,7 +118,7 @@ var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHi
 	_react2['default'].createElement(
 		_reactRouter.Router,
 		{ history: _reactRouter.browserHistory },
-		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches', component: _pagesApp2['default'] }),
+		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/', component: _pagesApp2['default'] }),
 		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/exps/:exp', component: _pagesExperiment2['default'] }),
 		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/about', component: _pagesAbout2['default'] })
 	)
@@ -154,7 +155,7 @@ var About = function About(props) {
 				console.log('Clicked !!', _reactRouterRedux.push);
 
 				// props.history.push('/');
-				props.dispatch((0, _reactRouterRedux.push)('/'));
+				props.dispatch((0, _reactRouterRedux.push)('/Sketches/'));
 			} },
 		'About container'
 	);
@@ -215,7 +216,7 @@ var App = (function (_Component) {
 				{ className: 'App' },
 				_react2['default'].createElement(
 					_reactRouter.Link,
-					{ to: '/about' },
+					{ to: '/Sketches/about' },
 					'ABOUT'
 				),
 				_react2['default'].createElement(_ExperimentList2['default'], {
