@@ -14,7 +14,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Experiment from './pages/Experiment';
 
-console.log('New Path testing');
+console.log('New Index testing');
 //	CONSTRUCT MODELS
 
 const experimentsReducer = (state=ExpModel, action) => {

@@ -89,7 +89,7 @@ var _pagesExperiment = require('./pages/Experiment');
 
 var _pagesExperiment2 = _interopRequireDefault(_pagesExperiment);
 
-console.log('New Path testing');
+console.log('New Index testing');
 //	CONSTRUCT MODELS
 
 var experimentsReducer = function experimentsReducer(state, action) {
