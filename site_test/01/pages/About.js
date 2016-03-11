@@ -10,7 +10,7 @@ const About = (props) => {
 		<div
 			className='About-Container' 
 			onClick={ ()=>{
-				props.dispatch(push(''))
+				props.dispatch(push('/'))
 			}
 		}>About container</div>
 	);

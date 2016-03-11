@@ -37,7 +37,7 @@ render(
 		<Router history={browserHistory}>
 			<Route path="/Sketches" component={App}>
 				<IndexRoute component={Home} />
-				<Route path="exps/:exp" component={Experiment} />
+				<Route path="/exps/:exp" component={Experiment} />
 				<Route path="/about" component={About} />
 			</Route>
 		</Router>
