@@ -6,8 +6,7 @@
   "scripts": {
     "live": "budo 01/index.js:bundle.js --dir 01 --verbose --live -- -t babelify",
     "start": "budo 01/index.js:bundle.js --dir 01 --verbose --live -- -t babelify",
-    "build": "browserify 01/index.js -o bundle.js -t [ babelify --presets [ es2015 ] ]",
-    "test": "browserify 01/index.js -o bundle.js -t babelify"
+    "build": "browserify 01/index.js -o bundle.js -t babelify"
   },
   "dependencies": {
     "bole": "^2.0.0",
