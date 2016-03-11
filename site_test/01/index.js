@@ -24,7 +24,7 @@ const reducers = (state=ExpModel, action) => {
 	return state;
 }
 
-const middleware = routerMiddleware(browserHistory)
+const middleware = routerMiddleware(hashHistory)
 
 //	MAKE SOME REDUCERS
 let reducer = combineReducers({
@@ -34,12 +34,12 @@ let reducer = combineReducers({
 
 const store = createStore(reducer, applyMiddleware(middleware));
 // const storeRouting = createStore(reducer);
-const history = syncHistoryWithStore(browserHistory, store);
+const history = syncHistoryWithStore(hashHistory, store);
 
 
 render(
 	<Provider store={store}>
-		<Router history={browserHistory}>
+		<Router history={hashHistory}>
 			<Route path="/Sketches/" component={App} />
 				<Route path="/Sketches/exps/:exp" component={Experiment} />
 			<Route path="/Sketches/about" component={About} />

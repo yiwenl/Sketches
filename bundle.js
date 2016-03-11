@@ -100,7 +100,7 @@ var reducers = function reducers(state, action) {
 	return state;
 };
 
-var middleware = (0, _reactRouterRedux.routerMiddleware)(_reactRouter.browserHistory);
+var middleware = (0, _reactRouterRedux.routerMiddleware)(_reactRouter.hashHistory);
 
 //	MAKE SOME REDUCERS
 var reducer = (0, _redux.combineReducers)({
@@ -110,14 +110,14 @@ var reducer = (0, _redux.combineReducers)({
 
 var store = (0, _redux.createStore)(reducer, (0, _redux.applyMiddleware)(middleware));
 // const storeRouting = createStore(reducer);
-var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHistory, store);
+var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.hashHistory, store);
 
 (0, _reactDom.render)(_react2['default'].createElement(
 	_reactRedux.Provider,
 	{ store: store },
 	_react2['default'].createElement(
 		_reactRouter.Router,
-		{ history: _reactRouter.browserHistory },
+		{ history: _reactRouter.hashHistory },
 		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/', component: _pagesApp2['default'] }),
 		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/exps/:exp', component: _pagesExperiment2['default'] }),
 		_react2['default'].createElement(_reactRouter.Route, { path: '/Sketches/about', component: _pagesAbout2['default'] })
