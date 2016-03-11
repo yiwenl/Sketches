@@ -39,7 +39,7 @@ class App extends Component {
 
 	render() {
 		return (
-			<div>
+			<div className="App">
 				<Link to="/about">ABOUT</Link>
 				<ExperimentList 
 					experiments = {this.props.experiments}

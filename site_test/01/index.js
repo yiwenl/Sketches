@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import ExpModel from './ExpModel';
 
 import App from './pages/App';
-import Description from './pages/Description';
+import About from './pages/About';
 import Experiment from './pages/Experiment';
 
 
@@ -30,7 +30,7 @@ render(
 		<Router history={hashHistory}>
 			<Route path="/" component={App} />
 				<Route path="/exps/:exp" component={Experiment} />
-			<Route path="/about" component={Description} />
+			<Route path="/about" component={About} />
 		</Router>
 	</Provider>
 	,document.querySelector('#root')

@@ -9,11 +9,18 @@ const ExperimentList = ({
 
 	console.log('Experiments : ', experiments);
 	return (
-		<div>
+		<div className="Experiment-List">
 			{
 				experiments.map( (exp) => {
 					let dest = '/exps/'+exp.id.toString();
-					return <Link to={dest} key={exp.id}>{exp.cover}</Link>;
+					return (
+						<Link 
+							to={dest} 
+							key={exp.id} 
+							className="Experiment-Item">
+							{exp.cover}
+						</Link>
+					);
 				})
 			}
 		</div>
