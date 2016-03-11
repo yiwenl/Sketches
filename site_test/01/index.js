@@ -14,7 +14,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Experiment from './pages/Experiment';
 
-console.log('New Index testing');
+console.log('New hash testing');
 //	CONSTRUCT MODELS
 
 const experimentsReducer = (state=ExpModel, action) => {
@@ -25,7 +25,7 @@ const reducers = (state=ExpModel, action) => {
 	return state;
 }
 
-const middleware = routerMiddleware(browserHistory)
+const middleware = routerMiddleware(hashHistory)
 
 //	MAKE SOME REDUCERS
 let reducer = combineReducers({
@@ -35,13 +35,13 @@ let reducer = combineReducers({
 
 const store = createStore(reducer, applyMiddleware(middleware));
 // const storeRouting = createStore(reducer);
-const history = syncHistoryWithStore(browserHistory, store);
+const history = syncHistoryWithStore(hashHistory, store);
 
 
 render(
 	<Provider store={store}>
-		<Router history={browserHistory}>
-			<Route path="/Sketches/" component={App}>
+		<Router history={hashHistory}>
+			<Route path="/" component={App}>
 				<IndexRoute component={Home} />
 				<Route path="exps/:exp" component={Experiment} />
 				<Route path="about" component={About} />
