@@ -38,7 +38,7 @@ function _init() {
 	// gui.add(params, 'shadowStrength', 0, 1);
 	// gui.add(params, 'shadowThreshold', 0, 1);
 
-	window.addEventListener('click', ()=> {
-		params.showWires = !params.showWires;
-	})
+	// window.addEventListener('click', ()=> {
+	// 	params.showWires = !params.showWires;
+	// })
 }

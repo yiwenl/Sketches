@@ -86,7 +86,7 @@ class SceneApp extends alfrid.Scene {
 	render() {
 
 		let frequencies = this._beatDetector.frequencies;
-		if(frequencies == undefined) return;
+		// if(frequencies == undefined) return;
 
 		this.orbitalControl._ry.value -= this._rotationY.value;
 		// this.orbitalControl._rx.value = Math.sin(this._rotationX.value) * .7;

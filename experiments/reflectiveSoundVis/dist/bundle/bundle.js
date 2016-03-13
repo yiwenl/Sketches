@@ -343,7 +343,7 @@ var SceneApp = function (_alfrid$Scene) {
 		value: function render() {
 
 			var frequencies = this._beatDetector.frequencies;
-			if (frequencies == undefined) return;
+			// if(frequencies == undefined) return;
 
 			this.orbitalControl._ry.value -= this._rotationY.value;
 			// this.orbitalControl._rx.value = Math.sin(this._rotationX.value) * .7;
@@ -811,9 +811,9 @@ function _init() {
 	//	INIT SCENE
 	var scene = new _SceneApp2.default();
 
-	window.addEventListener('click', function () {
-		params.showWires = !params.showWires;
-	});
+	// window.addEventListener('click', ()=> {
+	// 	params.showWires = !params.showWires;
+	// })
 }
 
 function _loop() {

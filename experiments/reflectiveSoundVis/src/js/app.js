@@ -38,9 +38,9 @@ function _init() {
 	//	INIT SCENE
 	let scene = new SceneApp();
 
-	window.addEventListener('click', ()=> {
-		params.showWires = !params.showWires;
-	})
+	// window.addEventListener('click', ()=> {
+	// 	params.showWires = !params.showWires;
+	// })
 }
 
 
