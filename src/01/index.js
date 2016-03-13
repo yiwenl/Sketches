@@ -24,7 +24,7 @@ const experimentsReducer = (state=ExpModel, action) => {
 const middleware = routerMiddleware(browserHistory)
 
 
-//*/
+/*/
 window.baseUrl = '/';
 /*/
 window.baseUrl = "/Sketches/";
