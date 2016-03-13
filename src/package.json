@@ -45,6 +45,7 @@
     "canvas-loop": "^1.0.4",
     "ndjson": "^1.4.1",
     "react": "^0.14.7",
+    "react-addons-css-transition-group": "^0.14.7",
     "react-dom": "^0.14.7",
     "react-redux": "^4.4.0",
     "react-router": "^2.0.1",

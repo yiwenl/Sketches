@@ -1,0 +1,42 @@
+#root,
+.App {
+	position: absolute;
+	width: 100%;
+	height:100%;
+
+	left:0;
+	top:0;
+}
+
+.App-LinkToAbout {
+	position: fixed;
+	padding:25px;
+}
+
+
+.App-LinkToAbout svg {
+	width:20px;
+	height:20px;
+	fill:#000;
+}
+
+
+/*	TRANSITIONS	*/
+
+.example-enter {
+  opacity: 0.01;
+  transition: opacity .25s ease-out;
+}
+
+.example-enter.example-enter-active {
+  opacity: 1;
+}
+
+.example-leave {
+  opacity: 1;
+  transition: opacity .25s ease-out;
+}
+
+.example-leave.example-leave-active {
+  opacity: 0;
+}

@@ -1,118 +1,138 @@
-/*main.css*/
+/*main.scss*/
 #root,
 .App {
-	position: absolute;
-	width: 100%;
-	height:100%;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0; }
 
-	left:0;
-	top:0;
-}
+.App-LinkToAbout {
+  position: fixed;
+  padding: 25px; }
 
+.App-LinkToAbout svg {
+  width: 20px;
+  height: 20px;
+  fill: #000; }
+
+/*	TRANSITIONS	*/
+.example-enter {
+  opacity: 0.01;
+  transition: opacity .25s ease-out; }
+
+.example-enter.example-enter-active {
+  opacity: 1; }
+
+.example-leave {
+  opacity: 1;
+  transition: opacity .25s ease-out; }
+
+.example-leave.example-leave-active {
+  opacity: 0; }
+
+/*_about.scss*/
 .About-Background,
 .About-Container {
-	position: absolute;
-	width: 100%;
-	height:100%;
-
-	left:0;
-	top:0;
-	background: black;
-	color:white;
-}
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background: black;
+  color: white; }
 
 .About-Background {
-	width: 50%;
-	z-index: 0;
-}
+  width: 50%;
+  z-index: 0; }
 
 .About-Container a {
-	text-decoration: none;
-}
+  text-decoration: none; }
 
-.About-TextWrapper {
-}
+.About-CloseButton {
+  position: absolute;
+  padding: 20px;
+  cursor: pointer;
+  z-index: 9999; }
 
+.About-CloseButton svg {
+  width: 30px;
+  height: 30px;
+  fill: #ffffff; }
 
 .About-Link {
-	color:rgb(150, 150, 150);
-	font-family: Verdana, Arial;
-	letter-spacing: 1.5px;
-	font-size:12px;
-
-	transition: color .5s ease-out;
-}
+  color: #969696;
+  font-family: Verdana, Arial;
+  letter-spacing: 1.5px;
+  font-size: 12px;
+  transition: color .5s ease-out; }
 
 .About-Link:hover {
-	color:black;
-}
+  color: black; }
 
 .About-Desc {
-	color:black;
-	font-family: Verdana, Arial;
-	font-size:12px;
-	line-height: 24px;
-	margin-bottom:24px;
-	letter-spacing: 1px;
-}
+  color: black;
+  font-family: Verdana, Arial;
+  font-size: 12px;
+  line-height: 24px;
+  margin-bottom: 24px;
+  letter-spacing: 1px; }
 
 .About-RightPanel {
-	width:50%;
-	height:100%;
-	float:right;
-	background:white;
+  width: 50%;
+  height: 100%;
+  float: right;
+  background: white;
+  padding: 20px;
+  box-sizing: border-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: flex-end;
+  -ms-flex-align: end;
+  align-items: flex-end; }
 
-	padding:20px;
-	box-sizing: border-box;
-
-    display: flex;
-    align-items: flex-end;
-}
-
+/*_experiment.scss*/
 .Experiment-List {
-	max-width: 1215px;
-	margin:0 auto;
-
-	display: flex;
-	align-items: center;
-	justify-content: flex-start;
-	align-content: flex-start;
-	flex-wrap: wrap;
-	padding-top:50px;
-}
+  max-width: 1215px;
+  margin: 0 auto;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-justify-content: flex-start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  -webkit-align-content: flex-start;
+  -ms-flex-line-pack: start;
+  align-content: flex-start;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  padding-top: 50px; }
 
 @media (max-width: 1215px) {
-	.Experiment-List {
-		max-width: 900px;
-	}
-}
-
+  .Experiment-List {
+    max-width: 900px; } }
 @media (max-width: 915px) {
-	.Experiment-List {
-		max-width: 600px;
-	}
-}
-
+  .Experiment-List {
+    max-width: 600px; } }
 @media (max-width: 615px) {
-	.Experiment-List {
-		max-width: 300px;
-	}
-}
-
+  .Experiment-List {
+    max-width: 300px; } }
 .Experiment-Item {
-	width:280px;
-	height:280px;
-	box-sizing: border-box;
-	margin:10px;
-}
+  width: 280px;
+  height: 280px;
+  box-sizing: border-box;
+  margin: 10px; }
 
 .Experiment-Content {
-	position: absolute;
-	z-index: 999;
-	width: 100%;
-	height: 100%;
-	border:0;
-
-	top:0;
-	left:0;
-}
+  position: absolute;
+  z-index: 999;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  top: 0;
+  left: 0; }

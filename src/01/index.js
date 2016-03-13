@@ -7,6 +7,7 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 
 
+
 import ExpModel from './ExpModel';
 import App from './pages/App';
 import Home from './pages/Home';
@@ -22,6 +23,13 @@ const experimentsReducer = (state=ExpModel, action) => {
 
 const middleware = routerMiddleware(browserHistory)
 
+
+//*/
+window.baseUrl = '/';
+/*/
+window.baseUrl = "/Sketches/";
+//*/
+
 //	MAKE SOME REDUCERS
 let reducer = combineReducers({
   experiments: experimentsReducer,
@@ -34,12 +42,9 @@ const history = syncHistoryWithStore(browserHistory, store);
 render(
 	<Provider store={store}>
 		<Router history={browserHistory}>
-			<Route path='/Sketches/' component={App}>
-				<IndexRoute component={Home} />
-				<Route path="/Sketches/exps/:exp" component={Experiment} />
-				<Route path="/Sketches/about" component={About} />
-
-				<Redirect from="about" to="/Sketches/about" />
+			<Route path={baseUrl} component={App}>
+				<Route path={baseUrl + 'exps/:exp'} component={Experiment} />
+				<Route path={baseUrl + '/about'} component={About} />
 			</Route>
 		</Router>
 	</Provider>

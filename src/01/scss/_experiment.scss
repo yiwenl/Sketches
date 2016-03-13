@@ -1,0 +1,51 @@
+/*_experiment.scss*/
+
+
+
+.Experiment-List {
+	max-width: 1215px;
+	margin:0 auto;
+
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	align-content: flex-start;
+	flex-wrap: wrap;
+	padding-top:50px;
+}
+
+@media (max-width: 1215px) {
+	.Experiment-List {
+		max-width: 900px;
+	}
+}
+
+@media (max-width: 915px) {
+	.Experiment-List {
+		max-width: 600px;
+	}
+}
+
+@media (max-width: 615px) {
+	.Experiment-List {
+		max-width: 300px;
+	}
+}
+
+.Experiment-Item {
+	width:280px;
+	height:280px;
+	box-sizing: border-box;
+	margin:10px;
+}
+
+.Experiment-Content {
+	position: absolute;
+	z-index: 999;
+	width: 100%;
+	height: 100%;
+	border:0;
+
+	top:0;
+	left:0;
+}
