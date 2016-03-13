@@ -1,6 +1,6 @@
 // Description.js	
 
-import React from 'react';
+import React, { Component } from 'react';
 
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux'
@@ -10,8 +10,10 @@ const About = (props) => {
 		props.dispatch(push(baseUrl));
 	};
 
+	console.log('rendr');
+
 	return (
-		<div className='About-Container' >
+		<div className='About-Page' >
 			<div 
 				onClick={returnToHome}
 				className="About-CloseButton">

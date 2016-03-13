@@ -24,19 +24,21 @@
 /*	TRANSITIONS	*/
 
 .example-enter {
-  opacity: 0.01;
-  transition: opacity .25s ease-out;
+  /*opacity: 0.01;*/
+  /*transition: opacity .25s ease-out;*/
+	transform: translate(100%, 0);
+	transition: transform .5s ease-out;
 }
 
 .example-enter.example-enter-active {
-  opacity: 1;
+	transform: translate(0, 0);
 }
 
 .example-leave {
-  opacity: 1;
-  transition: opacity .25s ease-out;
+	transform: translate(0, 0);
+	transition: transform .25s ease-in;
 }
 
 .example-leave.example-leave-active {
-  opacity: 0;
+	transform: translate(100%, 0);
 }

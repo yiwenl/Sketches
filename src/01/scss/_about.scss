@@ -1,6 +1,6 @@
-/*_about.scss*/
+
 .About-Background,
-.About-Container {
+.About-Page {
 	position: absolute;
 	width: 100%;
 	height:100%;
@@ -9,32 +9,33 @@
 	top:0;
 	background: black;
 	color:white;
+
+	a {
+		text-decoration: none;
+	}
 }
 
+.About-Page {
+
+}
 
 .About-Background {
 	width: 50%;
 	z-index: 0;
 }
 
-.About-Container a {
-	text-decoration: none;
-}
-
-.About-TextWrapper {
-}
 
 .About-CloseButton {
 	position: absolute;
 	padding:20px;
 	cursor: pointer;
 	z-index:9999;
-}
 
-.About-CloseButton svg {
-	width: 30px;
-	height: 30px;
-	fill: #ffffff; 
+	svg {
+		width: 30px;
+		height: 30px;
+		fill: #ffffff; 
+	}
 }
 
 
@@ -45,11 +46,12 @@
 	font-size:12px;
 
 	transition: color .5s ease-out;
+
+	&:hover {
+		color:black;
+	}
 }
 
-.About-Link:hover {
-	color:black;
-}
 
 .About-Desc {
 	color:black;
@@ -60,10 +62,21 @@
 	letter-spacing: 1px;
 }
 
+
+@keyframes slideIn {
+    from {
+    	margin-left:100%;
+    }
+    to {
+    	margin-left:50%;
+    }
+}
+
+
 .About-RightPanel {
 	width:50%;
 	height:100%;
-	float:right;
+	margin-left:100%;
 	background:white;
 
 	padding:20px;
@@ -71,4 +84,9 @@
 
     display: flex;
     align-items: flex-end;
+    transition:margin-left .25s ease-out .25s;
+
+    .isOpened & {
+    	margin-left: 50%;
+    }
 }

@@ -18,22 +18,31 @@
 
 /*	TRANSITIONS	*/
 .example-enter {
-  opacity: 0.01;
-  transition: opacity .25s ease-out; }
+  /*opacity: 0.01;*/
+  /*transition: opacity .25s ease-out;*/
+  -webkit-transform: translate(100%, 0);
+  transform: translate(100%, 0);
+  transition: -webkit-transform .5s ease-out;
+  transition: transform .5s ease-out;
+  transition: transform .5s ease-out, -webkit-transform .5s ease-out; }
 
 .example-enter.example-enter-active {
-  opacity: 1; }
+  -webkit-transform: translate(0, 0);
+  transform: translate(0, 0); }
 
 .example-leave {
-  opacity: 1;
-  transition: opacity .25s ease-out; }
+  -webkit-transform: translate(0, 0);
+  transform: translate(0, 0);
+  transition: -webkit-transform .25s ease-in;
+  transition: transform .25s ease-in;
+  transition: transform .25s ease-in, -webkit-transform .25s ease-in; }
 
 .example-leave.example-leave-active {
-  opacity: 0; }
+  -webkit-transform: translate(100%, 0);
+  transform: translate(100%, 0); }
 
-/*_about.scss*/
 .About-Background,
-.About-Container {
+.About-Page {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -41,24 +50,23 @@
   top: 0;
   background: black;
   color: white; }
+  .About-Background a,
+  .About-Page a {
+    text-decoration: none; }
 
 .About-Background {
   width: 50%;
   z-index: 0; }
-
-.About-Container a {
-  text-decoration: none; }
 
 .About-CloseButton {
   position: absolute;
   padding: 20px;
   cursor: pointer;
   z-index: 9999; }
-
-.About-CloseButton svg {
-  width: 30px;
-  height: 30px;
-  fill: #ffffff; }
+  .About-CloseButton svg {
+    width: 30px;
+    height: 30px;
+    fill: #ffffff; }
 
 .About-Link {
   color: #969696;
@@ -66,9 +74,8 @@
   letter-spacing: 1.5px;
   font-size: 12px;
   transition: color .5s ease-out; }
-
-.About-Link:hover {
-  color: black; }
+  .About-Link:hover {
+    color: black; }
 
 .About-Desc {
   color: black;
@@ -78,10 +85,21 @@
   margin-bottom: 24px;
   letter-spacing: 1px; }
 
+@-webkit-keyframes slideIn {
+  from {
+    margin-left: 100%; }
+  to {
+    margin-left: 50%; } }
+
+@keyframes slideIn {
+  from {
+    margin-left: 100%; }
+  to {
+    margin-left: 50%; } }
 .About-RightPanel {
   width: 50%;
   height: 100%;
-  float: right;
+  margin-left: 100%;
   background: white;
   padding: 20px;
   box-sizing: border-box;
@@ -90,7 +108,10 @@
   display: flex;
   -webkit-align-items: flex-end;
   -ms-flex-align: end;
-  align-items: flex-end; }
+  align-items: flex-end;
+  transition: margin-left .25s ease-out .25s; }
+  .isOpened .About-RightPanel {
+    margin-left: 50%; }
 
 /*_experiment.scss*/
 .Experiment-List {
