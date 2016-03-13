@@ -30,6 +30,11 @@ window.baseUrl = '/';
 window.baseUrl = "/Sketches/";
 //*/
 
+console.log('Location : ', window.location.href);
+if(window.location.href.indexOf('localhost') > -1) {
+	window.baseUrl = '/';
+}
+
 //	MAKE SOME REDUCERS
 let reducer = combineReducers({
   experiments: experimentsReducer,
