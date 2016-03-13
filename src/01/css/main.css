@@ -9,12 +9,15 @@
 
 .App-LinkToAbout {
   position: fixed;
-  padding: 25px; }
+  padding: 25px;
+  color: black;
+  font-family: Arial Black;
+  text-decoration: none; }
 
 .App-LinkToAbout svg {
   width: 20px;
   height: 20px;
-  fill: #000; }
+  fill: #666; }
 
 /*	TRANSITIONS	*/
 .fadeIn-enter {
@@ -103,8 +106,8 @@
   cursor: pointer;
   z-index: 9999; }
   .About-CloseButton svg {
-    width: 30px;
-    height: 30px;
+    width: 20px;
+    height: 20px;
     fill: #ffffff; }
 
 .About-Link {
