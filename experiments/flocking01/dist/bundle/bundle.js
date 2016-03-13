@@ -6104,7 +6104,7 @@ window.params = {
 	shadowThreshold: .55,
 	numSlides: 2 * 2,
 	numClusters: 7,
-	showCenteroid: false
+	showCenteroid: true
 };
 
 if (document.body) {

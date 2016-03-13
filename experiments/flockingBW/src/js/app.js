@@ -46,10 +46,10 @@ function _init() {
 	
 
 	window.addEventListener('keydown', (e)=>_onKey(e));		
-	window.addEventListener('click', ()=>{
-		console.log('Show Wire ? ', params.showWires);
-		params.showWires = !params.showWires
-	});		
+	// window.addEventListener('click', ()=>{
+	// 	console.log('Show Wire ? ', params.showWires);
+	// 	params.showWires = !params.showWires
+	// });		
 
 }
 

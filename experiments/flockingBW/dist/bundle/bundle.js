@@ -1155,10 +1155,10 @@ function _init() {
 	window.addEventListener('keydown', function (e) {
 		return _onKey(e);
 	});
-	window.addEventListener('click', function () {
-		console.log('Show Wire ? ', params.showWires);
-		params.showWires = !params.showWires;
-	});
+	// window.addEventListener('click', ()=>{
+	// 	console.log('Show Wire ? ', params.showWires);
+	// 	params.showWires = !params.showWires
+	// });		
 }
 
 function _onKey(e) {
