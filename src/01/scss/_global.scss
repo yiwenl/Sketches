@@ -23,22 +23,66 @@
 
 /*	TRANSITIONS	*/
 
-.example-enter {
-  /*opacity: 0.01;*/
-  /*transition: opacity .25s ease-out;*/
-	transform: translate(100%, 0);
-	transition: transform .5s ease-out;
+.fadeIn-enter {
+	/*transform: translate(100%, 0);*/
+	opacity: 0;
+	transition: opacity .5s ease-out;
 }
 
-.example-enter.example-enter-active {
+.fadeIn-enter.fadeIn-enter-active {
+	/*transform: translate(0, 0);*/
+	opacity: 1;
+}
+
+.fadeIn-leave {
+	/*transform: translate(0, 0);*/
+	opacity: 1;
+	transition: opacity .25s ease-in;
+}
+
+.fadeIn-leave.fadeIn-leave-active {
+	/*transform: translate(100%, 0);*/
+	opacity: 0;
+}
+
+
+
+.slideIn-appear,
+.slideIn-enter {
+	transform: translate(100%, 0);
+	transition: transform 0.25s ease-out;
+}
+
+.slideIn-appear.slideIn-appear-active,
+.slideIn-enter.slideIn-enter-active {
 	transform: translate(0, 0);
 }
 
-.example-leave {
+.slideIn-leave {
 	transform: translate(0, 0);
 	transition: transform .25s ease-in;
 }
 
-.example-leave.example-leave-active {
+.slideIn-leave.slideIn-leave-active {
+	transform: translate(100%, 0);
+}
+
+
+
+.slideInDelay-appear {
+	transform: translate(100%, 0);
+	transition: transform 0.4s ease-out 0.1s;
+}
+
+.slideInDelay-appear.slideInDelay-appear-active {
+	transform: translate(0, 0);
+}
+
+.slideInDelay-leave {
+	transform: translate(0, 0);
+	transition: transform .25s ease-in;
+}
+
+.slideInDelay-leave.slideInDelay-leave-active {
 	transform: translate(100%, 0);
 }
