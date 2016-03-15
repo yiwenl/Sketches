@@ -83,7 +83,7 @@ class SceneApp extends alfrid.Scene {
 			document.body.classList.remove('isLoading');
 		}
 
-		let rotation = 0.00;
+		let rotation = 0.01;
 		this.orbitalControl._ry.value += rotation;
 		this.orbitalControlCube._ry.value += rotation;
 

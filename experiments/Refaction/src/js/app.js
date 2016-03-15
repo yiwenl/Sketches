@@ -31,6 +31,7 @@ window.params = {
 
 let assets = [
 	{id:'aomap', url:'assets/aomap.jpg'},
+	{id:'objModel', url:'assets/statue.obj', type:'binary'},
 	{id:'irr_posx', url:'assets/irr_posx.hdr', type:'binary'},
 	{id:'irr_posy', url:'assets/irr_posy.hdr', type:'binary'},
 	{id:'irr_posz', url:'assets/irr_posz.hdr', type:'binary'},

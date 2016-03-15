@@ -46,6 +46,12 @@ const ExpModel = [
 		url:'http://yiwenl.github.io/Sketches/experiments/flocking01/dist/index.html',
 		id:7,
 		opened:false
+	},
+	{
+		cover:'assets/coverSketchRefraction.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/Refaction/dist/index.html',
+		id:8,
+		opened:false
 	}
 ]
 
