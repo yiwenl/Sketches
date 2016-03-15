@@ -44,6 +44,11 @@ var ExpModel = [{
 	url: 'http://yiwenl.github.io/Sketches/experiments/flocking01/dist/index.html',
 	id: 7,
 	opened: false
+}, {
+	cover: 'assets/coverSketchRefraction.jpg',
+	url: 'http://yiwenl.github.io/Sketches/experiments/Refaction/dist/index.html',
+	id: 8,
+	opened: false
 }];
 
 exports['default'] = ExpModel;
@@ -374,14 +379,33 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactRedux = require('react-redux');
 
+var _reactRouterRedux = require('react-router-redux');
+
 var Experiment = function Experiment(props) {
 	var index = parseInt(props.params.exp);
 	var url = props.experiments[index].url;
-	console.log('URL : ', url);
+	console.log('URL : ', url, props);
 	return(
 		// <div>Experiment container</div>
 		// <iframe src="http://yiwenl.github.io/Sketches/experiments/selfshadingParticles/dist/index.html"/>
-		_react2['default'].createElement('iframe', { src: url, className: 'Experiment-Content' })
+		_react2['default'].createElement(
+			'div',
+			null,
+			_react2['default'].createElement(
+				'div',
+				{
+					onClick: function () {
+						props.dispatch((0, _reactRouterRedux.push)(baseUrl));
+					},
+					className: 'Experiment-CloseButton' },
+				_react2['default'].createElement(
+					'svg',
+					{ width: '512px', height: '512px', viewBox: '0 0 512 512' },
+					_react2['default'].createElement('path', { d: 'M437.5,386.6L306.9,256l130.6-130.6c14.1-14.1,14.1-36.8,0-50.9c-14.1-14.1-36.8-14.1-50.9,0L256,205.1L125.4,74.5 c-14.1-14.1-36.8-14.1-50.9,0c-14.1,14.1-14.1,36.8,0,50.9L205.1,256L74.5,386.6c-14.1,14.1-14.1,36.8,0,50.9 c14.1,14.1,36.8,14.1,50.9,0L256,306.9l130.6,130.6c14.1,14.1,36.8,14.1,50.9,0C451.5,423.4,451.5,400.6,437.5,386.6z' })
+				)
+			),
+			_react2['default'].createElement('iframe', { src: url, className: 'Experiment-Content' })
+		)
 	);
 };
 
@@ -392,7 +416,7 @@ function mapStateToProps(state, ownProps) {
 exports['default'] = (0, _reactRedux.connect)(mapStateToProps)(Experiment);
 module.exports = exports['default'];
 
-},{"react":242,"react-redux":63}],6:[function(require,module,exports){
+},{"react":242,"react-redux":63,"react-router-redux":71}],6:[function(require,module,exports){
 // ExperimentList.js
 
 'use strict';

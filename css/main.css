@@ -188,3 +188,14 @@
   border: 0;
   top: 0;
   left: 0; }
+
+.Experiment-CloseButton {
+  position: absolute;
+  padding: 20px;
+  cursor: pointer;
+  z-index: 9999;
+  top: 0px; }
+  .Experiment-CloseButton svg {
+    width: 20px;
+    height: 20px;
+    fill: #ffffff; }

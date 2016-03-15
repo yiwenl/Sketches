@@ -1,7 +1,7 @@
 import alfrid from './libs/alfrid.js';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 
 var glslify = require("glslify");
 
@@ -91,14 +91,14 @@ function _onImageLoaded(o) {
 	//	INIT SCENE
 	let scene = new SceneApp();
 
-	let gui = new dat.GUI({width:300});
-	gui.add(params, 'refractionRate', 1, 3);
-	gui.add(params, 'roughness', 0, 1);
-	gui.add(params, 'metallic', 0, 1);
-	gui.add(params, 'specular', 0, 1);
-	gui.add(params, 'threshold', 0., 1);
-	gui.add(params, 'blurRange', 0.125, 1);
-	gui.add(params, 'debug');
-	gui.close();
+	// let gui = new dat.GUI({width:300});
+	// gui.add(params, 'refractionRate', 1, 3);
+	// gui.add(params, 'roughness', 0, 1);
+	// gui.add(params, 'metallic', 0, 1);
+	// gui.add(params, 'specular', 0, 1);
+	// gui.add(params, 'threshold', 0., 1);
+	// gui.add(params, 'blurRange', 0.125, 1);
+	// gui.add(params, 'debug');
+	// gui.close();
 }
 
