@@ -5,6 +5,8 @@ import ViewSkybox 		from './ViewSkybox';
 import ViewThreshold 	from './ViewTreshold';
 import ViewBlur 		from './ViewBlur';
 import ViewBloom 		from './ViewBloom';
+import ViewNoise 		from './ViewNoise';
+import ViewNormal 		from './ViewNormal';
 
 var glslify = require("glslify");
 
@@ -60,6 +62,10 @@ class SceneApp extends alfrid.Scene {
 		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 		this._fboPost0 = new alfrid.FrameBuffer(GL.width, GL.height);
 		this._fboPost1 = new alfrid.FrameBuffer(GL.width, GL.height);
+
+		const fboSize = 1024;
+		this._fboNoise = new alfrid.FrameBuffer(fboSize, fboSize);
+		this._fboNormal = new alfrid.FrameBuffer(fboSize, fboSize);
 	}
 	
 
@@ -70,6 +76,20 @@ class SceneApp extends alfrid.Scene {
 		this._vThreshold = new ViewThreshold();
 		this._vBlur 	 = new ViewBlur();
 		this._vBloom 	 = new ViewBloom();
+		this._vNoise 	 = new ViewNoise();
+		this._vNormal 	 = new ViewNormal();
+
+
+		GL.setMatrices(this.camera);
+		this._fboNoise.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vNoise.render();
+		this._fboNoise.unbind();
+
+		this._fboNormal.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vNormal.render(this._fboNoise.getTexture());
+		this._fboNormal.unbind();
 	}
 
 
@@ -125,12 +145,11 @@ class SceneApp extends alfrid.Scene {
 		this._vSkybox.render(this._textureRad);
 		this._vBloom.render(this._fboRender.getTexture(), this._fboPost0.getTexture());
 
-		let size = 350;
-		GL.viewport(0, 0, size, size / GL.aspectRatio);
-		if(params.debug) {
-			this._bCopy.draw(this._fboPost0.getTexture());	
-		}
-		
+		let size = 250;
+		GL.viewport(0, 0, size, size);
+		this._bCopy.draw(this._fboNoise.getTexture());	
+		GL.viewport(size, 0, size, size);
+		this._bCopy.draw(this._fboNormal.getTexture());	
 		GL.enable(GL.DEPTH_TEST);
 	}
 
