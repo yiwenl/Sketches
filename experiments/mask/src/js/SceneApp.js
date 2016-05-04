@@ -11,7 +11,7 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 
 		this.orbitalControl.radius.value = 5;
-		this.orbitalControl.radius.limit(2, 15);
+		this.orbitalControl.radius.limit(2, 15 );
 		window.addEventListener('keydown', (e)=>this._onKey(e));
 	}
 

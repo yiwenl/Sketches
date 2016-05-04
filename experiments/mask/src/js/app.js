@@ -9,7 +9,7 @@ const GL = alfrid.GL;
 window.params = {
 	gamma:2.2,
 	exposure:2,
-	numDrops:20
+	numDrops:5
 };
 
 const assets = [

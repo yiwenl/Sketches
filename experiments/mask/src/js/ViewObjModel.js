@@ -15,8 +15,9 @@ class ViewObjModel extends alfrid.View {
 		this.roughness = .92;
 		this.specular = 0;
 		this.metallic = 0;
-		this.baseColor = [10, 25, 44];
+		this.baseColor = [5, 15, 34];
 		this.normalScale = .5;
+		this._needUpdate = true;
 
 		this.identityMatrix = mat4.create();
 		this.drops = [];
@@ -53,6 +54,7 @@ class ViewObjModel extends alfrid.View {
 
 		this.drops.push(dropMatrix);
 		if(this.drops.length > params.numDrops) this.drops.shift();
+		this._needUpdate = true;
 	}
 
 
@@ -65,35 +67,13 @@ class ViewObjModel extends alfrid.View {
 		gui.add(this, 'normalScale', 0, 1);
 		gui.addColor(this, 'baseColor');
 		*/
-	}
-
-
-	render(textureRad, textureIrr, textureAO) {
-		if(!this.mesh) {
-			return;
-		}
-
-		let dropMatrices = [];
-
-		for(let i=0; i<params.numDrops; i++) {
-			let mtx = this.drops[i] || this.identityMatrix;
-			for(let j=0; j<mtx.length; j++) {
-				dropMatrices.push(mtx[j]);
-			}
-		}
 
 		this.shader.bind();
-
 		this.shader.uniform("uAoMap", "uniform1i", 0);
 		this.shader.uniform("uGoldMap", "uniform1i", 1);
 		this.shader.uniform("uDropMap", "uniform1i", 2);
 		this.shader.uniform("uRadianceMap", "uniform1i", 3);
 		this.shader.uniform("uIrradianceMap", "uniform1i", 4);
-		textureAO.bind(0);
-		this._textureGold.bind(1);
-		this._textureDrop.bind(2);
-		textureRad.bind(3);
-		textureIrr.bind(4);
 
 		let color = [this.baseColor[0]/255, this.baseColor[1]/255, this.baseColor[2]/255];
 		this.shader.uniform("uBaseColor", "uniform3fv", color);
@@ -104,9 +84,38 @@ class ViewObjModel extends alfrid.View {
 		this.shader.uniform("uExposure", "uniform1f", params.exposure);
 		this.shader.uniform("uGamma", "uniform1f", params.gamma);
 		this.shader.uniform("uNormalScale", "uniform1f", this.normalScale);
+	}
 
-		this.shader.uniform("uDropMatrices", "uniformMatrix4fv", dropMatrices);
-		this.shader.uniform("numPaints", "float", this.drops.length);
+
+	render(textureRad, textureIrr, textureAO) {
+		if(!this.mesh) {
+			return;
+		}
+
+		
+		this.shader.bind();
+		textureAO.bind(0);
+		this._textureGold.bind(1);
+		this._textureDrop.bind(2);
+		textureRad.bind(3);
+		textureIrr.bind(4);
+
+		
+		if(this._needUpdate) {
+			let dropMatrices = [];
+
+			for(let i=0; i<params.numDrops; i++) {
+				let mtx = this.drops[i] || this.identityMatrix;
+				for(let j=0; j<mtx.length; j++) {
+					dropMatrices.push(mtx[j]);
+				}
+			}
+
+			this.shader.uniform("uDropMatrices", "uniformMatrix4fv", dropMatrices);
+			this.shader.uniform("numPaints", "float", this.drops.length);
+			this._needUpdate = false;
+		}
+		
 
 		GL.draw(this.mesh);
 	}
