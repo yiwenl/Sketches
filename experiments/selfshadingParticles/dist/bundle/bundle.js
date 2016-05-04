@@ -242,7 +242,6 @@ var ViewCube = function (_alfrid$View) {
 	_createClass(ViewCube, [{
 		key: '_init',
 		value: function _init() {
-			console.log(_alfrid2.default.Geom.cube);
 			this.mesh = _alfrid2.default.Geom.cube(1, 1, 1);
 			this.meshWire = _alfrid2.default.Geom.cube(1, 1, 1, false, GL.LINES);
 		}
@@ -686,6 +685,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // import dat from 'dat-gui';
 
 window.alfrid = _alfrid2.default;
+var hasStarted = false;
 
 window.params = {
 	numParticles: 512,
@@ -698,12 +698,17 @@ window.params = {
 if (document.body) {
 	_init();
 } else {
-	window.addEventListener('load', function () {
+	window.addEventListener('DOMContentLoaded', function () {
 		return _init();
 	});
 }
 
 function _init() {
+	console.log('init');
+	if (hasStarted) {
+		return;
+	}
+	hasStarted = true;
 	console.debug('Total Particles :', params.numParticles * params.numParticles);
 
 	//	CREATE CANVAS

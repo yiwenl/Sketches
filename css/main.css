@@ -1,4 +1,7 @@
 /*main.scss*/
+body.not-home {
+  overflow: hidden; }
+
 #root,
 .App {
   position: absolute;
@@ -86,7 +89,7 @@
 
 .About-Background,
 .About-Page {
-  position: absolute;
+  position: fixed;
   width: 100%;
   height: 100%;
   left: 0;
@@ -181,7 +184,7 @@
   margin: 10px; }
 
 .Experiment-Content {
-  position: absolute;
+  position: fixed;
   z-index: 999;
   width: 100%;
   height: 100%;
@@ -190,7 +193,7 @@
   left: 0; }
 
 .Experiment-CloseButton {
-  position: absolute;
+  position: fixed;
   padding: 20px;
   cursor: pointer;
   z-index: 9999;

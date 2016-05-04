@@ -3,7 +3,7 @@ import SceneApp from './SceneApp';
 // import dat from 'dat-gui';
 
 window.alfrid = alfrid;
-
+let hasStarted = false;
 
 window.params = {
 	numParticles:512,
@@ -16,10 +16,15 @@ window.params = {
 if(document.body) {
 	_init();
 } else {
-	window.addEventListener('load', ()=>_init());
+	window.addEventListener('DOMContentLoaded', ()=>_init());
 }
 
 function _init() {
+	console.log('init');
+	if(hasStarted) {
+		return;
+	}
+	hasStarted = true;
 	console.debug('Total Particles :' , params.numParticles * params.numParticles);
 
 	//	CREATE CANVAS

@@ -13,7 +13,6 @@ class ViewCube extends alfrid.View {
 	}
 
 	_init() {
-		console.log(alfrid.Geom.cube);
 		this.mesh = alfrid.Geom.cube(1, 1, 1);
 		this.meshWire = alfrid.Geom.cube(1, 1, 1, false, GL.LINES);
 	}

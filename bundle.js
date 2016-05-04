@@ -183,6 +183,16 @@ var About = (function (_Component) {
 	}
 
 	_createClass(About, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			document.body.classList.add('not-home');
+		}
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			document.body.classList.remove('not-home');
+		}
+	}, {
 		key: 'render',
 		value: function render() {
 			var props = this.props;
@@ -371,7 +381,15 @@ Object.defineProperty(exports, '__esModule', {
 	value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var _react = require('react');
 
@@ -381,33 +399,80 @@ var _reactRedux = require('react-redux');
 
 var _reactRouterRedux = require('react-router-redux');
 
-var Experiment = function Experiment(props) {
-	var index = parseInt(props.params.exp);
-	var url = props.experiments[index].url;
-	console.log('URL : ', url, props);
-	return(
-		// <div>Experiment container</div>
-		// <iframe src="http://yiwenl.github.io/Sketches/experiments/selfshadingParticles/dist/index.html"/>
-		_react2['default'].createElement(
-			'div',
-			null,
-			_react2['default'].createElement(
+var Experiment = (function (_Component) {
+	_inherits(Experiment, _Component);
+
+	function Experiment(props) {
+		_classCallCheck(this, Experiment);
+
+		_get(Object.getPrototypeOf(Experiment.prototype), 'constructor', this).call(this, props);
+	}
+
+	/*
+ const Experiment = (props) => {
+ 	let index = parseInt(props.params.exp);
+ 	let url = props.experiments[index].url;
+ 	console.log('URL : ', url, props);
+ 	return (
+ 		<div>
+ 			<div 
+ 				onClick={()=> {
+ 					props.dispatch(push(baseUrl));
+ 				}}
+ 				className="Experiment-CloseButton">
+ 				<svg width="512px" height="512px" viewBox="0 0 512 512">
+ 				<path d="M437.5,386.6L306.9,256l130.6-130.6c14.1-14.1,14.1-36.8,0-50.9c-14.1-14.1-36.8-14.1-50.9,0L256,205.1L125.4,74.5
+ 					c-14.1-14.1-36.8-14.1-50.9,0c-14.1,14.1-14.1,36.8,0,50.9L205.1,256L74.5,386.6c-14.1,14.1-14.1,36.8,0,50.9
+ 					c14.1,14.1,36.8,14.1,50.9,0L256,306.9l130.6,130.6c14.1,14.1,36.8,14.1,50.9,0C451.5,423.4,451.5,400.6,437.5,386.6z"/>
+ 				</svg>
+ 			</div>
+ 			<iframe src={url} className="Experiment-Content" />
+ 		</div>
+ 		
+ 	);
+ }*/
+
+	_createClass(Experiment, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			document.body.classList.add('not-home');
+		}
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			document.body.classList.remove('not-home');
+		}
+	}, {
+		key: 'render',
+		value: function render() {
+			var _this = this;
+
+			var index = parseInt(this.props.params.exp);
+			var url = this.props.experiments[index].url;
+			console.log('URL : ', url, this.props);
+			return _react2['default'].createElement(
 				'div',
-				{
-					onClick: function () {
-						props.dispatch((0, _reactRouterRedux.push)(baseUrl));
-					},
-					className: 'Experiment-CloseButton' },
+				null,
 				_react2['default'].createElement(
-					'svg',
-					{ width: '512px', height: '512px', viewBox: '0 0 512 512' },
-					_react2['default'].createElement('path', { d: 'M437.5,386.6L306.9,256l130.6-130.6c14.1-14.1,14.1-36.8,0-50.9c-14.1-14.1-36.8-14.1-50.9,0L256,205.1L125.4,74.5 c-14.1-14.1-36.8-14.1-50.9,0c-14.1,14.1-14.1,36.8,0,50.9L205.1,256L74.5,386.6c-14.1,14.1-14.1,36.8,0,50.9 c14.1,14.1,36.8,14.1,50.9,0L256,306.9l130.6,130.6c14.1,14.1,36.8,14.1,50.9,0C451.5,423.4,451.5,400.6,437.5,386.6z' })
-				)
-			),
-			_react2['default'].createElement('iframe', { src: url, className: 'Experiment-Content' })
-		)
-	);
-};
+					'div',
+					{
+						onClick: function () {
+							_this.props.dispatch((0, _reactRouterRedux.push)(baseUrl));
+						},
+						className: 'Experiment-CloseButton' },
+					_react2['default'].createElement(
+						'svg',
+						{ width: '512px', height: '512px', viewBox: '0 0 512 512' },
+						_react2['default'].createElement('path', { d: 'M437.5,386.6L306.9,256l130.6-130.6c14.1-14.1,14.1-36.8,0-50.9c-14.1-14.1-36.8-14.1-50.9,0L256,205.1L125.4,74.5 c-14.1-14.1-36.8-14.1-50.9,0c-14.1,14.1-14.1,36.8,0,50.9L205.1,256L74.5,386.6c-14.1,14.1-14.1,36.8,0,50.9 c14.1,14.1,36.8,14.1,50.9,0L256,306.9l130.6,130.6c14.1,14.1,36.8,14.1,50.9,0C451.5,423.4,451.5,400.6,437.5,386.6z' })
+					)
+				),
+				_react2['default'].createElement('iframe', { src: url, className: 'Experiment-Content' })
+			);
+		}
+	}]);
+
+	return Experiment;
+})(_react.Component);
 
 function mapStateToProps(state, ownProps) {
 	return { experiments: state.experiments };
