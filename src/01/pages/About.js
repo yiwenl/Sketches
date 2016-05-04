@@ -11,6 +11,14 @@ class About extends Component {
 		super(props);
 	}
 
+	componentDidMount() {
+		document.body.classList.add('not-home');
+	}
+
+
+	componentWillUnmount() {
+		document.body.classList.remove('not-home');
+	}
 
 	render() {
 		let props = this.props;
