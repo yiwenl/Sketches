@@ -111,20 +111,12 @@ void main() {
 	vec3 baseColor 		= texture2D( uColorMap, vTextureCoord).rgb;
 
 	float br = 1.0;
-	float specular = 0.0;
+	
 	if(vDistToWave < waveLength) {
 		float tmp = 1.0 - vDistToWave / waveLength;
 		tmp = easing(tmp);
 		br += tmp * 15.0;
-		specular = tmp;
 	}
-	
-	vec3 color 			= getPbr(N, V, baseColor, uRoughness, specular * 1.5, uSpecular);
-
-	vec3 ao 			= texture2D(uAoMap, vTextureCoord).rgb;
-	color 				*= ao;
-
-		
 
 	float opacity = 1.0;
 	if(vDistToStart < waveFront) {
@@ -135,6 +127,17 @@ void main() {
 			opacity = tmp;
 		}	
 	}
+
+	float specular = (1.0 - opacity) * .5;
+	
+	vec3 color 			= getPbr(N, V, baseColor+1.0 - opacity, uRoughness, 1.0-opacity, 1.0-opacity);
+
+	vec3 ao 			= texture2D(uAoMap, vTextureCoord).rgb;
+	color 				*= ao;
+
+		
+
+	
 
 
 	color *= br;
