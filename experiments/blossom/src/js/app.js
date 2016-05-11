@@ -15,6 +15,7 @@ const assets = [
 	{id:'aomap', url:'assets/aomap.jpg'},
 	{id:'aoTerrain', url:'assets/aoTerrain.jpg'},
 	{id:'aoTree', url:'assets/aoTree.jpg'},
+	{id:'bg', url:'assets/bg.jpg'},
 	{id:'irr_posx', url:'assets/irr_posx.hdr', type:'binary'},
 	{id:'irr_posx', url:'assets/irr_posx.hdr', type:'binary'},
 	{id:'irr_posy', url:'assets/irr_posy.hdr', type:'binary'},

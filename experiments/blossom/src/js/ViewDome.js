@@ -133,11 +133,13 @@ class ViewDome extends alfrid.View {
 	}
 
 
-	render() {
+	render(texture) {
 		this.shader.bind();
 		this.shader.uniform("waveFront", "float", this.waveFront.value);
 		this.shader.uniform("waveLength", "float", this.waveLength);
 		this.shader.uniform("startPosition", "vec3", this.startPosition);
+		this.shader.uniform("texture", "uniform1i", 0);
+		texture.bind(0);
 		GL.draw(this.mesh);
 	}
 

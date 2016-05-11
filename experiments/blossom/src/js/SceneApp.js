@@ -53,6 +53,7 @@ class SceneApp extends alfrid.Scene {
 		this._textureAO = new alfrid.GLTexture(getAsset('aomap'));
 		this._textureAOTerrain = new alfrid.GLTexture(getAsset('aoTerrain'));
 		this._textureAOTree = new alfrid.GLTexture(getAsset('aoTree'));
+		this._textureBg = new alfrid.GLTexture(getAsset('bg'));
 	}
 
 
@@ -75,9 +76,9 @@ class SceneApp extends alfrid.Scene {
 		this._bAxis.draw();
 		this._bDots.draw();
 
-		this._vDome.render();
-		// this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain);
-		// this._vTree.render(this._textureRad, this._textureIrr, this._textureAOTree);
+		this._vDome.render(this._textureBg);
+		this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain);
+		this._vTree.render(this._textureRad, this._textureIrr, this._textureAOTree);
 	}
 
 
