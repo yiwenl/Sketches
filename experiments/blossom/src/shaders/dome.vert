@@ -105,6 +105,10 @@ vec3 rotate(vec3 v, vec3 axis, float angle) {
 	return (m * vec4(v, 1.0)).xyz;
 }
 
+float exponentialOut(float t) {
+    return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);
+}
+
 void main(void) {
 
 	vec3 relativePos = aVertexPosition - aCenter;
@@ -119,7 +123,7 @@ void main(void) {
 	float distToWaveFront = distance(distToStartPoint, waveFront);
 	float angle = 0.0;
 	if(distToWaveFront < waveLength) {
-		angle = (1.0 - distToWaveFront/waveLength) * PI;
+		angle = (1.0 - exponentialOut(distToWaveFront/waveLength)) * PI;
 	}
 
 

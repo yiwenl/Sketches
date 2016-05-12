@@ -7,8 +7,13 @@ import dat from 'dat-gui';
 const GL = alfrid.GL;
 
 window.params = {
+	numParticles:256,
+	skipCount:10,
 	gamma:2.2,
-	exposure:5
+	exposure:5,
+	offset:1.0,
+	maxRadius: 1.5,
+	domeRadius:5.5
 };
 
 const assets = [
@@ -16,20 +21,10 @@ const assets = [
 	{id:'aoTree', url:'assets/aoTree.jpg'},
 	{id:'bg1', url:'assets/bg1.jpg'},
 	{id:'bg2', url:'assets/bg2.jpg'},
-	{id:'irr_posx', url:'assets/irr_posx.hdr', type:'binary'},
-	{id:'irr_posx', url:'assets/irr_posx.hdr', type:'binary'},
-	{id:'irr_posy', url:'assets/irr_posy.hdr', type:'binary'},
-	{id:'irr_posz', url:'assets/irr_posz.hdr', type:'binary'},
-	{id:'irr_negx', url:'assets/irr_negx.hdr', type:'binary'},
-	{id:'irr_negy', url:'assets/irr_negy.hdr', type:'binary'},
-	{id:'irr_negz', url:'assets/irr_negz.hdr', type:'binary'},
-
-	{id:'rad_posx', url:'assets/rad_posx.hdr', type:'binary'},
-	{id:'rad_posy', url:'assets/rad_posy.hdr', type:'binary'},
-	{id:'rad_posz', url:'assets/rad_posz.hdr', type:'binary'},
-	{id:'rad_negx', url:'assets/rad_negx.hdr', type:'binary'},
-	{id:'rad_negy', url:'assets/rad_negy.hdr', type:'binary'},
-	{id:'rad_negz', url:'assets/rad_negz.hdr', type:'binary'}
+	{id:'winter', url:'assets/winter.jpg'},
+	{id:'spring', url:'assets/spring.jpg'},
+	{id:'summer', url:'assets/summer.jpg'},
+	{id:'fall', url:'assets/fall.jpg'}
 ];
 
 if(document.body) {
@@ -87,8 +82,4 @@ function _init3D() {
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
-
-	
-	gui.add(params, 'gamma', 1, 5);
-	gui.add(params, 'exposure', 1, 25);
 }

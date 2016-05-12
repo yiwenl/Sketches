@@ -4,30 +4,18 @@ import alfrid from 'alfrid';
 let GL = alfrid.GL;
 const vs = require('../shaders/dome.vert');
 const fs = require('../shaders/dome.frag');
-const radius = 2.75;
-var random = function(min, max) { return min + Math.random() * (max - min);	}
+
 
 class ViewDome extends alfrid.View {
 	
 	constructor() {
 		super(vs, fs);
 		this.time = Math.random();
-		this.waveFront = new alfrid.EaseNumber(-1, 0.005);
-		this.waveLength = .45;
-		this.startPosition = [0, radius, -1];
+		this.waveFront = new alfrid.EaseNumber(params.domeRadius * 2.0 + 3, 0.0075);
+		this.waveLength = 1.;
+		this.startPosition = [0, params.domeRadius, -1];
 
-		gui.add(this.waveFront, 'value', -1, 6);
-
-		window.addEventListener('keydown', (e) => {
-			if(e.keyCode === 32) {
-
-				let s = vec3.fromValues(random(-1, 1), .5, random(-1, 1));
-				vec3.normalize(s, s);
-				vec3.scale(s, s, radius);
-
-				this.open(s);
-			}
-		})
+		// gui.add(this.waveFront, 'value', -1, params.domeRadius * 2.0 + 3).listen();
 	}
 
 
@@ -47,8 +35,8 @@ class ViewDome extends alfrid.View {
 			let ry = i/num * Math.PI * 2.0;
 			let rx = j/num * Math.PI - Math.PI/2;
 
-			pos[1] = Math.sin(rx) * radius;
-			let r = Math.cos(rx) * radius;
+			pos[1] = Math.sin(rx) * params.domeRadius;
+			let r = Math.cos(rx) * params.domeRadius;
 			pos[0] = Math.cos(ry) * r;
 			pos[2] = Math.sin(ry) * r;
 
@@ -130,17 +118,23 @@ class ViewDome extends alfrid.View {
 		this.mesh.bufferData(centers, 'aCenter', 3);
 	}
 
-
-	open(startPosition=[1, radius, 0]) {
+	open(startPosition=[1, params.domeRadius, 0]) {
 		console.log('Open');
 		this.time = Math.random();
 		this.startPosition = startPosition;
 		this.waveFront.setTo(-1);
-		this.waveFront.value = radius * 2.0 + 3;
+		this.waveFront.value = params.domeRadius * 2.0 + 3;
 	}
 
 
 	render(textureCurr, textureNext) {
+
+		let p = this.waveFront.value / params.domeRadius / 2.0;
+		if(p < 0) p = 0;
+		if(p > 1) p = 1;
+
+		params.offset = p;
+
 		this.shader.bind();
 		this.shader.uniform("time", "float", this.time);
 		this.shader.uniform("waveFront", "float", this.waveFront.value);

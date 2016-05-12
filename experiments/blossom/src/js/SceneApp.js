@@ -4,26 +4,39 @@ import alfrid , { Scene } from 'alfrid';
 import ViewTerrain from './ViewTerrain';
 import ViewTree from './ViewTree';
 import ViewDome from './ViewDome';
+import ViewAddVel from './ViewAddVel';
+import ViewSave from './ViewSave';
+import ViewRender from './ViewRender';
+import ViewSim from './ViewSim';
 
 const GL = alfrid.GL;
 const RAD = Math.PI/180;
+var random = function(min, max) { return min + Math.random() * (max - min);	}
 
 class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
-		this.camera.setPerspective(70 * RAD, GL.aspectRatio, .1, 10);
+		this.camera.setPerspective(70 * RAD, GL.aspectRatio, .1, 100);
 		let v = vec3.fromValues(-3, .37, -2);
 		this.orbitalControl.radius.setTo(2);
-		this.orbitalControl.radius.value = 0.452;
+		this.orbitalControl.radius.value = 4.52;
 
-		// this.orbitalControl.center[1] = 0.65;
-		// this.orbitalControl.positionOffset[1] = 0.25;
-		// this.orbitalControl.rx.value = .1;
+		this.orbitalControl.center[1] = 1.35;
+		this.orbitalControl.positionOffset[1] = 0.25;
+		this.orbitalControl.rx.value = .1;
+		this.orbitalControl.rx.limit(.1, .15);
+
+		this._seasonIndex = 3;
+		this._count = 0;
+
+		window.addEventListener('keydown', (e)=>this._onKey(e));
+		window.addEventListener('mousedown', (e) => {
+			this.orbitalControl.ry.easing = 0.1;
+		})
 	}
 
 	_initTextures() {
-		console.log('init textures');
 		function getAsset(id) {
 			for(var i=0; i<assets.length; i++) {
 				if(id === assets[i].id) {
@@ -32,28 +45,27 @@ class SceneApp extends alfrid.Scene {
 			}
 		}
 
-		let irr_posx = alfrid.HDRLoader.parse(getAsset('irr_posx'))
-		let irr_negx = alfrid.HDRLoader.parse(getAsset('irr_negx'))
-		let irr_posy = alfrid.HDRLoader.parse(getAsset('irr_posy'))
-		let irr_negy = alfrid.HDRLoader.parse(getAsset('irr_negy'))
-		let irr_posz = alfrid.HDRLoader.parse(getAsset('irr_posz'))
-		let irr_negz = alfrid.HDRLoader.parse(getAsset('irr_negz'))
-
-		this._textureIrr = new alfrid.GLCubeTexture([irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz]);
-
-		let rad_posx = alfrid.HDRLoader.parse(getAsset('rad_posx'))
-		let rad_negx = alfrid.HDRLoader.parse(getAsset('rad_negx'))
-		let rad_posy = alfrid.HDRLoader.parse(getAsset('rad_posy'))
-		let rad_negy = alfrid.HDRLoader.parse(getAsset('rad_negy'))
-		let rad_posz = alfrid.HDRLoader.parse(getAsset('rad_posz'))
-		let rad_negz = alfrid.HDRLoader.parse(getAsset('rad_negz'))
-
-		this._textureRad = new alfrid.GLCubeTexture([rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz]);
-
 		this._textureAOTerrain = new alfrid.GLTexture(getAsset('aoTerrain'));
 		this._textureAOTree = new alfrid.GLTexture(getAsset('aoTree'));
 		this._textureBg1 = new alfrid.GLTexture(getAsset('bg1'));
 		this._textureBg2 = new alfrid.GLTexture(getAsset('bg2'));
+
+		let tWinter = new alfrid.GLTexture(getAsset('winter'));
+		let tSpring = new alfrid.GLTexture(getAsset('spring'));
+		let tSummer = new alfrid.GLTexture(getAsset('summer'));
+		let tFall = new alfrid.GLTexture(getAsset('fall'));
+
+		this._textureSeasons = [tWinter, tSpring, tSummer, tFall];
+
+		//	particles
+		const numParticles = params.numParticles;
+		const o = { minFilter:GL.NEAREST, magFilter:GL.NEAREST };
+
+		this._fboCurrentPos = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
 	}
 
 
@@ -67,18 +79,100 @@ class SceneApp extends alfrid.Scene {
 		this._vTerrain = new ViewTerrain();
 		this._vTree = new ViewTree();
 		this._vDome = new ViewDome();
+
+		this._vAddVel = new ViewAddVel();
+		this._vRender = new ViewRender();
+		this._vSim 	  = new ViewSim();
+
+		this._vSave = new ViewSave();
+		GL.setMatrices(this.cameraOrtho);
+
+		this._fboCurrentPos.bind();
+		this._vSave.render(0);
+		this._fboCurrentPos.unbind();
+
+		this._fboExtra.bind();
+		this._vSave.render(1);
+		this._fboExtra.unbind();
+
+		this._fboTargetPos.bind();
+		this._bCopy.draw(this._fboCurrentPos.getTexture());
+		this._fboTargetPos.unbind();
+
+		GL.setMatrices(this.camera);
+	}
+
+	_onKey(e) {
+		console.log(e.keyCode);
+		if(e.keyCode === 32) {
+			this._seasonIndex ++;
+			if(this._seasonIndex >=4) this._seasonIndex = 0;
+			let s = vec3.fromValues(random(-1, 1), 1, random(-1, 1));
+			vec3.normalize(s, s);
+			vec3.scale(s, s, params.domeRadius);
+
+			this._vDome.open(s);
+			this.orbitalControl.ry.easing = 0.0075;
+			this.orbitalControl.ry.value += Math.PI;
+		}
 	}
 
 
-	render() {
-		GL.clear(0, 0, 0, 0);
-		this._bSkybox.draw(this._textureRad);
-		this._bAxis.draw();
-		this._bDots.draw();
+	updateFbo() {
+		//	Update Velocity : bind target Velocity, render simulation with current velocity / current position
+		this._fboTargetVel.bind();
+		GL.clear(0, 0, 0, 1);
+		this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture() );
+		this._fboTargetVel.unbind();
 
-		this._vDome.render(this._textureBg1, this._textureBg2);
-		// this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain);
-		// this._vTree.render(this._textureRad, this._textureIrr, this._textureAOTree);
+
+		//	Update position : bind target Position, render addVel with current position / target velocity;
+		this._fboTargetPos.bind();
+		GL.clear(0, 0, 0, 1);
+		this._vAddVel.render(this._fboCurrentPos.getTexture(), this._fboTargetVel.getTexture());
+		this._fboTargetPos.unbind();
+
+		//	SWAPPING : PING PONG
+		let tmpVel          = this._fboCurrentVel;
+		this._fboCurrentVel = this._fboTargetVel;
+		this._fboTargetVel  = tmpVel;
+
+		let tmpPos          = this._fboCurrentPos;
+		this._fboCurrentPos = this._fboTargetPos;
+		this._fboTargetPos  = tmpPos;
+
+	}
+
+	render() {
+		this._count ++;
+		if(this._count % params.skipCount == 0) {
+			this._count = 0;
+			this.updateFbo();
+		}
+
+		let p = this._count/params.skipCount;
+
+		GL.clear(0, 0, 0, 0);
+
+		this._vDome.render(this.currentSeasonTexture, this.nextSeasonTexture);
+		this._vTerrain.render(this.currentSeasonTexture, this.nextSeasonTexture, this._textureAOTerrain);
+		this._vTree.render(this.currentSeasonTexture, this.nextSeasonTexture, this._textureAOTree);
+
+		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
+	}
+
+
+	get currentSeasonTexture() {
+		return this._textureSeasons[this._seasonIndex];
+	}
+
+
+	get nextSeasonTexture() {
+		let index = this._seasonIndex + 1;
+		if(index>=4) {
+			index = 0;
+		}
+		return this._textureSeasons[index];
 	}
 
 

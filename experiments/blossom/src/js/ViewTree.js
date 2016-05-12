@@ -3,7 +3,7 @@
 import alfrid from 'alfrid';
 let GL = alfrid.GL;
 const vs = require('../shaders/pbr.vert');
-const fs = require('../shaders/pbr.frag');
+const fs = require('../shaders/envLight.frag');
 
 class ViewTree extends alfrid.View {
 	
@@ -12,7 +12,7 @@ class ViewTree extends alfrid.View {
 		this.roughness = .9;
 		this.specular = 0;
 		this.metallic = 0;
-		this.baseColor = [1, 1, 1];
+		this.baseColor = [50/255, 25/255, 25/255];
 		this.position = [0, 0, 0];
 		this.scale = [1, 1, 1];
 	}
@@ -31,26 +31,28 @@ class ViewTree extends alfrid.View {
 	}
 
 
-	render(textureRad, textureIrr, textureAO) {
+	render(texture, textureNext, textureAO) {
 		if(!this.mesh) {
 			return;
 		}
+
 		this.shader.bind();
 
 		this.shader.uniform("uAoMap", "uniform1i", 0);
-		this.shader.uniform("uRadianceMap", "uniform1i", 1);
-		this.shader.uniform("uIrradianceMap", "uniform1i", 2);
+		this.shader.uniform("texture", "uniform1i", 1);
+		this.shader.uniform("textureNext", "uniform1i", 2);
 		textureAO.bind(0);
-		textureRad.bind(1);
-		textureIrr.bind(2);
+		texture.bind(1);
+		textureNext.bind(2);
 
 		this.shader.uniform("uBaseColor", "uniform3fv", this.baseColor);
-		this.shader.uniform("uRoughness", "uniform1f", this.roughness);
-		this.shader.uniform("uMetallic", "uniform1f", this.metallic);
-		this.shader.uniform("uSpecular", "uniform1f", this.specular);
+		// this.shader.uniform("uRoughness", "uniform1f", this.roughness);
+		// this.shader.uniform("uMetallic", "uniform1f", this.metallic);
+		// this.shader.uniform("uSpecular", "uniform1f", this.specular);
 
 		this.shader.uniform("uPosition", "vec3", this.position);
 		this.shader.uniform("uScale", "vec3", this.scale);
+		this.shader.uniform("offset", "float", params.offset);
 
 		this.shader.uniform("uExposure", "uniform1f", params.exposure);
 		this.shader.uniform("uGamma", "uniform1f", params.gamma);

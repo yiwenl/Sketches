@@ -114,6 +114,6 @@ void main() {
 	color				= pow( color, vec3( 1.0 / uGamma ) );
 
 	// output the fragment color
-    gl_FragColor		= vec4( color, 1.0 );
+    gl_FragColor		= vec4( ao*1.5, 1.0 );
 
 }
