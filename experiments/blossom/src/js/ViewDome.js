@@ -5,21 +5,27 @@ let GL = alfrid.GL;
 const vs = require('../shaders/dome.vert');
 const fs = require('../shaders/dome.frag');
 const radius = 2.75;
+var random = function(min, max) { return min + Math.random() * (max - min);	}
 
 class ViewDome extends alfrid.View {
 	
 	constructor() {
 		super(vs, fs);
-
-		this.waveFront = new alfrid.EaseNumber(-1, 0.01);
-		this.waveLength = 1;
+		this.time = Math.random();
+		this.waveFront = new alfrid.EaseNumber(-1, 0.005);
+		this.waveLength = .45;
 		this.startPosition = [0, radius, -1];
 
 		gui.add(this.waveFront, 'value', -1, 6);
 
 		window.addEventListener('keydown', (e) => {
 			if(e.keyCode === 32) {
-				this.open();
+
+				let s = vec3.fromValues(random(-1, 1), .5, random(-1, 1));
+				vec3.normalize(s, s);
+				vec3.scale(s, s, radius);
+
+				this.open(s);
 			}
 		})
 	}
@@ -32,7 +38,7 @@ class ViewDome extends alfrid.View {
 		let normals = [];
 		let centers = [];
 		let count = 0;
-		const num = 50;
+		const num = 60;
 		const uvGap = 1/num;
 
 
@@ -127,19 +133,23 @@ class ViewDome extends alfrid.View {
 
 	open(startPosition=[1, radius, 0]) {
 		console.log('Open');
+		this.time = Math.random();
 		this.startPosition = startPosition;
 		this.waveFront.setTo(-1);
-		this.waveFront.value = radius * 2.0 + 2;
+		this.waveFront.value = radius * 2.0 + 3;
 	}
 
 
-	render(texture) {
+	render(textureCurr, textureNext) {
 		this.shader.bind();
+		this.shader.uniform("time", "float", this.time);
 		this.shader.uniform("waveFront", "float", this.waveFront.value);
 		this.shader.uniform("waveLength", "float", this.waveLength);
 		this.shader.uniform("startPosition", "vec3", this.startPosition);
-		this.shader.uniform("texture", "uniform1i", 0);
-		texture.bind(0);
+		this.shader.uniform("textureCurr", "uniform1i", 0);
+		textureCurr.bind(0);
+		this.shader.uniform("textureNext", "uniform1i", 1);
+		textureNext.bind(1);
 		GL.draw(this.mesh);
 	}
 

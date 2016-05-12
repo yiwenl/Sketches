@@ -14,12 +14,12 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 		this.camera.setPerspective(70 * RAD, GL.aspectRatio, .1, 10);
 		let v = vec3.fromValues(-3, .37, -2);
-		console.log(vec3.length(v));
 		this.orbitalControl.radius.setTo(2);
-		this.orbitalControl.radius.value = 4.52;
-		this.orbitalControl.center[1] = 0.65;
-		this.orbitalControl.positionOffset[1] = 0.25;
-		this.orbitalControl.rx.value = .1;
+		this.orbitalControl.radius.value = 0.452;
+
+		// this.orbitalControl.center[1] = 0.65;
+		// this.orbitalControl.positionOffset[1] = 0.25;
+		// this.orbitalControl.rx.value = .1;
 	}
 
 	_initTextures() {
@@ -53,7 +53,8 @@ class SceneApp extends alfrid.Scene {
 		this._textureAO = new alfrid.GLTexture(getAsset('aomap'));
 		this._textureAOTerrain = new alfrid.GLTexture(getAsset('aoTerrain'));
 		this._textureAOTree = new alfrid.GLTexture(getAsset('aoTree'));
-		this._textureBg = new alfrid.GLTexture(getAsset('bg'));
+		this._textureBg1 = new alfrid.GLTexture(getAsset('bg1'));
+		this._textureBg2 = new alfrid.GLTexture(getAsset('bg2'));
 	}
 
 
@@ -76,9 +77,9 @@ class SceneApp extends alfrid.Scene {
 		this._bAxis.draw();
 		this._bDots.draw();
 
-		this._vDome.render(this._textureBg);
-		this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain);
-		this._vTree.render(this._textureRad, this._textureIrr, this._textureAOTree);
+		this._vDome.render(this._textureBg1, this._textureBg2);
+		// this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain);
+		// this._vTree.render(this._textureRad, this._textureIrr, this._textureAOTree);
 	}
 
 
