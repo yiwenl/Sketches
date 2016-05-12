@@ -4,6 +4,7 @@ import alfrid , { Scene } from 'alfrid';
 import ViewObjModel from './ViewObjModel';
 import ViewBox from './ViewBox';
 import ViewMap from './ViewMap';
+import ViewReflection from './ViewReflection';
 
 const GL = alfrid.GL;
 
@@ -66,6 +67,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._vBox = new ViewBox();
 		this._vMap = new ViewMap();
+		this._vReflection = new ViewReflection();
 	}
 
 
@@ -89,10 +91,11 @@ class SceneApp extends alfrid.Scene {
 
 		// const size = 200;
 		// GL.viewport(0, 0, size, size/GL.aspectRatio);
-		GL.disable(GL.DEPTH_TEST);
-		this._bCopy.draw(this._fboReflection.getTexture());
-		GL.enable(GL.DEPTH_TEST);
+		// GL.disable(GL.DEPTH_TEST);
+		// this._bCopy.draw(this._fboReflection.getTexture());
+		// GL.enable(GL.DEPTH_TEST);
 		this._vBox.render(this._textureRad, this._textureIrr, this._textureWhite);
+		this._vReflection.render(this._fboReflection.getTexture());
 	}
 
 
