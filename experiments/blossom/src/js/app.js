@@ -12,7 +12,6 @@ window.params = {
 };
 
 const assets = [
-	{id:'aomap', url:'assets/aomap.jpg'},
 	{id:'aoTerrain', url:'assets/aoTerrain.jpg'},
 	{id:'aoTree', url:'assets/aoTree.jpg'},
 	{id:'bg1', url:'assets/bg1.jpg'},

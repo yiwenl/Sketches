@@ -50,7 +50,6 @@ class SceneApp extends alfrid.Scene {
 
 		this._textureRad = new alfrid.GLCubeTexture([rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz]);
 
-		this._textureAO = new alfrid.GLTexture(getAsset('aomap'));
 		this._textureAOTerrain = new alfrid.GLTexture(getAsset('aoTerrain'));
 		this._textureAOTree = new alfrid.GLTexture(getAsset('aoTree'));
 		this._textureBg1 = new alfrid.GLTexture(getAsset('bg1'));
