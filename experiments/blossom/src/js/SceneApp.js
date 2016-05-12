@@ -17,7 +17,7 @@ class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
-		this.camera.setPerspective(70 * RAD, GL.aspectRatio, .1, 100);
+		this.camera.setPerspective(70 * RAD, GL.aspectRatio, .1, 30);
 		let v = vec3.fromValues(-3, .37, -2);
 		this.orbitalControl.radius.setTo(2);
 		this.orbitalControl.radius.value = 4.52;

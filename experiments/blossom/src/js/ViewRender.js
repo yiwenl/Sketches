@@ -10,6 +10,10 @@ class ViewRender extends alfrid.View {
 	constructor() {
 		super(vsRender, fsRender);
 		this.time = Math.random() * 0xFFF;
+		this.mid = .93;
+		this.range = 0.05;
+		gui.add(this, 'mid', 0.9, 1);
+		gui.add(this, 'range', 0.01, 0.1);
 	}
 
 
@@ -53,6 +57,8 @@ class ViewRender extends alfrid.View {
 
 		this.shader.uniform("percent", "float", p);
 		this.shader.uniform("time", "float", this.time);
+		this.shader.uniform("mid", "float", this.mid);
+		this.shader.uniform("range", "float", this.range);
 		GL.draw(this.mesh);
 	}
 

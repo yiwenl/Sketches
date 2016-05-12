@@ -11,6 +11,8 @@ uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
 uniform float percent;
 uniform float time;
+uniform float mid;
+uniform float range;
 varying vec4 vColor;
 
 void main(void) {
@@ -28,9 +30,12 @@ void main(void) {
 	float g 	 = sin(extra.r + time * mix(extra.b, 1.0, .5));
 	g 			 = smoothstep(0.0, 1.0, g);
 	g 			 = mix(g, 1.0, .5);
-	vColor       = vec4(1.0);
+	
 
 	float d      = V.z/V.w;
 
-	gl_PointSize = d * 3.0;
+	d = 1.0-smoothstep(mid-range, mid+range, d);
+
+	gl_PointSize = d * 10.0;
+	vColor       = vec4(vec3(mix(d, 1.0, .7)), 1.0);
 }
