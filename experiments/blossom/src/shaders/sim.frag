@@ -7,6 +7,7 @@ varying vec2 vTextureCoord;
 uniform sampler2D textureVel;
 uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
+uniform sampler2D textureLife;
 uniform float time;
 uniform float maxRadius;
 
@@ -113,19 +114,24 @@ vec3 curlNoise( vec3 p ){
 
 }
 
+const float FORCE_MULTIPLIER = 1.0;
+
 void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
+	vec3 life       = texture2D(textureLife, vTextureCoord).rgb;
 	float posOffset = (0.5 + extra.r * 0.2) * .25 * 3.0;
 	vec3 acc        = curlNoise(pos * posOffset + time * .3);
 	acc.y = acc.y *.5 + .5;
-	
-	vel += acc * .01;
 
-	float dist = length(pos);
+	float lifeOffset = smoothstep(0.5, 1.0, life.r);
+	
+	vel += acc * .01 * lifeOffset * FORCE_MULTIPLIER;
+
+	float dist = length(pos+vec3(0.0, -0.65, 0.0));
 	if(dist > maxRadius) {
-		float f = (dist - maxRadius) * .005;
+		float f = (dist - maxRadius) * .005 * FORCE_MULTIPLIER;
 		vel -= normalize(pos) * f;
 	}
 

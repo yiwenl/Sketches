@@ -18,7 +18,7 @@ class ViewAddVel extends alfrid.View {
 	}
 
 
-	render(texturePos, textureVel) {
+	render(texturePos, textureVel, textureLife, textureInit) {
 		this.shader.bind();
 
 		this.shader.uniform("texturePos", "uniform1i", 0);
@@ -26,6 +26,12 @@ class ViewAddVel extends alfrid.View {
 
 		this.shader.uniform("textureVel", "uniform1i", 1);
 		textureVel.bind(1);
+
+		this.shader.uniform("textureLife", "uniform1i", 2);
+		textureLife.bind(2);
+
+		this.shader.uniform("textureInit", "uniform1i", 3);
+		textureInit.bind(3);
 
 		GL.draw(this.mesh);
 	}

@@ -25,9 +25,25 @@ class ViewTree extends alfrid.View {
 
 	_onObjLoaded(mesh) {
 		this.mesh = mesh;
+		const minY = 0.65;
+
+		this._vertices = [];
+		for(let i=0; i<this.mesh.vertices.length; i++) {
+			let v = this.mesh.vertices[i];
+			if(v[1] > minY) {
+				this._vertices.push(v);
+			}
+		}
+
+		console.log(this._vertices.length, this.mesh.vertices.length);
 		// gui.add(this, 'roughness', 0, 1);
 		// gui.add(this, 'specular', 0, 1);
 		// gui.add(this, 'metallic', 0, 1);
+	}
+
+
+	get vertices() {
+		return this._vertices;
 	}
 
 

@@ -1,6 +1,6 @@
 // SceneApp.js
 
-import alfrid , { Scene } from 'alfrid';
+import alfrid , { Scene, GL } from 'alfrid';
 import ViewTerrain from './ViewTerrain';
 import ViewTree from './ViewTree';
 import ViewDome from './ViewDome';
@@ -8,8 +8,8 @@ import ViewAddVel from './ViewAddVel';
 import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
+import ViewAddLife from './ViewAddLife';
 
-const GL = alfrid.GL;
 const RAD = Math.PI/180;
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 
@@ -29,6 +29,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._seasonIndex = 3;
 		this._count = 0;
+		this._hasCreateParticles = false;
 
 		window.addEventListener('keydown', (e)=>this._onKey(e));
 		window.addEventListener('mousedown', (e) => {
@@ -63,6 +64,9 @@ class SceneApp extends alfrid.Scene {
 
 		this._fboCurrentPos = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboInitPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboCurrentLife = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetLife  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
@@ -81,10 +85,15 @@ class SceneApp extends alfrid.Scene {
 		this._vDome = new ViewDome();
 
 		this._vAddVel = new ViewAddVel();
+		this._vAddLife = new ViewAddLife();
 		this._vRender = new ViewRender();
 		this._vSim 	  = new ViewSim();
+	}
 
-		this._vSave = new ViewSave();
+
+	_initParticles() {
+		console.debug('init particles');
+		this._vSave = new ViewSave(this._vTree.vertices);
 		GL.setMatrices(this.cameraOrtho);
 
 		this._fboCurrentPos.bind();
@@ -95,12 +104,23 @@ class SceneApp extends alfrid.Scene {
 		this._vSave.render(1);
 		this._fboExtra.unbind();
 
+		this._fboCurrentLife.bind();
+		this._vSave.render(2);
+		this._fboCurrentLife.unbind();
+
+
 		this._fboTargetPos.bind();
 		this._bCopy.draw(this._fboCurrentPos.getTexture());
 		this._fboTargetPos.unbind();
 
+		this._fboInitPos.bind();
+		this._bCopy.draw(this._fboCurrentPos.getTexture());
+		this._fboInitPos.unbind();
+
 		GL.setMatrices(this.camera);
+		this._hasCreateParticles = true;
 	}
+
 
 	_onKey(e) {
 		console.log(e.keyCode);
@@ -122,15 +142,20 @@ class SceneApp extends alfrid.Scene {
 		//	Update Velocity : bind target Velocity, render simulation with current velocity / current position
 		this._fboTargetVel.bind();
 		GL.clear(0, 0, 0, 1);
-		this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture() );
+		this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), this._fboCurrentLife.getTexture() );
 		this._fboTargetVel.unbind();
-
 
 		//	Update position : bind target Position, render addVel with current position / target velocity;
 		this._fboTargetPos.bind();
 		GL.clear(0, 0, 0, 1);
-		this._vAddVel.render(this._fboCurrentPos.getTexture(), this._fboTargetVel.getTexture());
+		this._vAddVel.render(this._fboCurrentPos.getTexture(), this._fboTargetVel.getTexture(), this._fboCurrentLife.getTexture(), this._fboInitPos.getTexture());
 		this._fboTargetPos.unbind();
+
+		//	Update life
+		this._fboTargetLife.bind();
+		GL.clear(0, 0, 0, 1);
+		this._vAddLife.render(this._fboCurrentLife.getTexture());
+		this._fboTargetLife.unbind();
 
 		//	SWAPPING : PING PONG
 		let tmpVel          = this._fboCurrentVel;
@@ -141,6 +166,10 @@ class SceneApp extends alfrid.Scene {
 		this._fboCurrentPos = this._fboTargetPos;
 		this._fboTargetPos  = tmpPos;
 
+		let tmpLife          = this._fboCurrentLife;
+		this._fboCurrentLife = this._fboTargetLife;
+		this._fboTargetLife  = tmpLife;
+
 	}
 
 	render() {
@@ -148,6 +177,10 @@ class SceneApp extends alfrid.Scene {
 		if(this._count % params.skipCount == 0) {
 			this._count = 0;
 			this.updateFbo();
+		}
+
+		if(!this._hasCreateParticles && this._vTree.mesh) {
+			this._initParticles();
 		}
 
 		let p = this._count/params.skipCount;
@@ -159,6 +192,11 @@ class SceneApp extends alfrid.Scene {
 		this._vTree.render(this.currentSeasonTexture, this.nextSeasonTexture, this._textureAOTree);
 
 		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
+
+		GL.viewport(0, 0, 200, 200);
+		GL.disable(GL.DEPTH_TEST);
+		this._bCopy.draw(this._fboCurrentLife.getTexture());
+		GL.enable(GL.DEPTH_TEST);
 	}
 
 

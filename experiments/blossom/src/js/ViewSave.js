@@ -9,32 +9,48 @@ const random = function(min, max) { return min + Math.random() * (max - min);	}
 
 class ViewSave extends alfrid.View {
 	
-	constructor() {
+	constructor(mVertices) {
 		super(vsSave, fsSave);
+		this._vertices = mVertices;
+		this._initMesh();
 	}
 
 
-	_init() {
+	_initMesh() {
+		const vertices = this._vertices;
+		const RANGE = .025;
+
 		let positions = [];
 		let coords = [];
 		let indices = []; 
 		let extras = [];
+		let lifes = [];
 		let count = 0;
 
 		let numParticles = params.numParticles;
 		let totalParticles = numParticles * numParticles;
-		console.debug('Total Particles : ', totalParticles);
 		let ux, uy;
-		let range = .25;
+
+		function getRandomPos() {
+			let idx = Math.floor(Math.random() * vertices.length);
+			let v = vertices[idx];
+			v[0] += random(-RANGE, RANGE);
+			v[1] += random(-RANGE, RANGE);
+			v[2] += random(-RANGE, RANGE);
+
+			return v;
+		}
+
 
 		for(let j=0; j<numParticles; j++) {
 			for(let i=0; i<numParticles; i++) {
-				positions.push([random(-range, range), random(-range, range)+1, random(-range, range)]);
+				positions.push(getRandomPos());
 
 				ux = i/numParticles*2.0-1.0+.5/numParticles;
 				uy = j/numParticles*2.0-1.0+.5/numParticles;
 
 				extras.push([Math.random(), Math.random(), Math.random()]);
+				lifes.push([Math.random() * .5, random(0.005, 0.01), Math.random()]);
 				coords.push([ux, uy]);
 				indices.push(count);
 				count ++;
@@ -52,6 +68,11 @@ class ViewSave extends alfrid.View {
 		this.meshExtra.bufferVertex(extras);
 		this.meshExtra.bufferTexCoords(coords);
 		this.meshExtra.bufferIndices(indices);
+
+		this.meshLife = new alfrid.Mesh(GL.POINTS);
+		this.meshLife.bufferVertex(lifes);
+		this.meshLife.bufferTexCoords(coords);
+		this.meshLife.bufferIndices(indices);
 	}
 
 
@@ -61,8 +82,9 @@ class ViewSave extends alfrid.View {
 			GL.draw(this.mesh);	
 		} else if(state === 1) {
 			GL.draw(this.meshExtra);	
+		} else if(state === 2) {
+			GL.draw(this.meshLife);
 		}
-		
 	}
 
 
