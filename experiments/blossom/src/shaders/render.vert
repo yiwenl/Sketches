@@ -9,6 +9,7 @@ uniform mat4 uProjectionMatrix;
 uniform sampler2D textureCurr;
 uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
+uniform sampler2D textureLife;
 uniform float percent;
 uniform float time;
 uniform float mid;
@@ -21,21 +22,23 @@ void main(void) {
 	vec3 posNext = texture2D(textureNext, uv).rgb;
 	vec3 pos     = mix(posCurr, posNext, percent);
 	vec3 extra   = texture2D(textureExtra, uv).rgb;
+	float life   = texture2D(textureLife, uv).r;
 	vec4 V  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 	gl_Position = V;
 	
-	
-	
-
-	float g 	 = sin(extra.r + time * mix(extra.b, 1.0, .5));
-	g 			 = smoothstep(0.0, 1.0, g);
-	g 			 = mix(g, 1.0, .5);
-	
-
 	float d      = V.z/V.w;
 
 	d = 1.0-smoothstep(mid-range, mid+range, d);
 
-	gl_PointSize = d * 10.0;
-	vColor       = vec4(vec3(mix(d, 1.0, .7)), 1.0);
+	gl_PointSize = d * 10.0 * (1.0 + extra.r * 1.0);
+	
+	float opacity;
+	if(life > .5) {
+		opacity = 1.0-smoothstep(0.95, 1.0, life);
+	} else {
+		opacity = smoothstep(0.1, 0.2, life);
+	}
+
+
+	vColor       = vec4(vec3(mix(d, 1.0, .7)), opacity);
 }

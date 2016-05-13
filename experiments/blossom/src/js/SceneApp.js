@@ -191,12 +191,12 @@ class SceneApp extends alfrid.Scene {
 		this._vTerrain.render(this.currentSeasonTexture, this.nextSeasonTexture, this._textureAOTerrain);
 		this._vTree.render(this.currentSeasonTexture, this.nextSeasonTexture, this._textureAOTree);
 
-		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
+		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture());
 
-		GL.viewport(0, 0, 200, 200);
-		GL.disable(GL.DEPTH_TEST);
-		this._bCopy.draw(this._fboCurrentLife.getTexture());
-		GL.enable(GL.DEPTH_TEST);
+		// GL.viewport(0, 0, 200, 200);
+		// GL.disable(GL.DEPTH_TEST);
+		// this._bCopy.draw(this._fboCurrentLife.getTexture());
+		// GL.enable(GL.DEPTH_TEST);
 	}
 
 
