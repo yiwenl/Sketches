@@ -33,6 +33,8 @@ class ViewAddVel extends alfrid.View {
 		this.shader.uniform("textureInit", "uniform1i", 3);
 		textureInit.bind(3);
 
+		this.shader.uniform("flyThreshold", "float", params.flyThreshold);
+
 		GL.draw(this.mesh);
 	}
 

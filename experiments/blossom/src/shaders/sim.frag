@@ -10,6 +10,7 @@ uniform sampler2D textureExtra;
 uniform sampler2D textureLife;
 uniform float time;
 uniform float maxRadius;
+uniform float flyThreshold;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -122,10 +123,10 @@ void main(void) {
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
 	vec3 life       = texture2D(textureLife, vTextureCoord).rgb;
 	float posOffset = (0.5 + extra.r * 0.2) * .25 * 3.0;
-	vec3 acc        = curlNoise(pos * posOffset + time * .3);
+	vec3 acc        = curlNoise(pos * posOffset + time * .5);
 	acc.y = acc.y *.5 + .5;
 
-	float lifeOffset = smoothstep(0.5, 1.0, life.r);
+	float lifeOffset = smoothstep(flyThreshold, 1.0, life.r);
 	
 	vel += acc * .01 * lifeOffset * FORCE_MULTIPLIER;
 

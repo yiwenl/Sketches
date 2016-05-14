@@ -26,6 +26,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.positionOffset[1] = 0.25;
 		this.orbitalControl.rx.value = .1;
 		this.orbitalControl.rx.limit(.1, .15);
+		this.orbitalControl.lockZoom(true);
 
 		this._seasonIndex = 3;
 		this._count = 0;
@@ -187,11 +188,18 @@ class SceneApp extends alfrid.Scene {
 
 		GL.clear(0, 0, 0, 0);
 
-		this._vDome.render(this.currentSeasonTexture, this.nextSeasonTexture);
-		this._vTerrain.render(this.currentSeasonTexture, this.nextSeasonTexture, this._textureAOTerrain);
-		this._vTree.render(this.currentSeasonTexture, this.nextSeasonTexture, this._textureAOTree);
+		if(params.renderEnvironment) {
+			this._vDome.render(this.currentSeasonTexture, this.nextSeasonTexture);
+			this._vTerrain.render(this.currentSeasonTexture, this.nextSeasonTexture, this._textureAOTerrain);
+			this._vTree.render(this.currentSeasonTexture, this.nextSeasonTexture, this._textureAOTree);	
+		}
 
-		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture());
+		if(params.renderParticles) {
+			this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture());	
+		}
+		
+
+		
 
 		// GL.viewport(0, 0, 200, 200);
 		// GL.disable(GL.DEPTH_TEST);

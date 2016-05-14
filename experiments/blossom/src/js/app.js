@@ -12,8 +12,11 @@ window.params = {
 	gamma:2.2,
 	exposure:5,
 	offset:1.0,
-	maxRadius: 1.5,
-	domeRadius:5.5
+	maxRadius:1.5,
+	domeRadius:5.5,
+	flyThreshold:0.75,
+	renderEnvironment:true,
+	renderParticles:true,
 };
 
 const assets = [
@@ -24,7 +27,7 @@ const assets = [
 	{id:'winter', url:'assets/winter.jpg'},
 	{id:'spring', url:'assets/spring.jpg'},
 	{id:'summer', url:'assets/summer.jpg'},
-	{id:'fall', url:'assets/fall.jpg'}
+	{id:'fall', url:'assets/fall.jpg'},
 ];
 
 if(document.body) {
@@ -79,6 +82,9 @@ function _init3D() {
 
 	//	INIT DAT-GUI
 	window.gui = new dat.GUI({width:300});
+	gui.add(params, 'flyThreshold', 0, 1);
+	gui.add(params, 'renderParticles');
+	gui.add(params, 'renderEnvironment');
 
 	//	CREATE SCENE
 	let scene = new SceneApp();

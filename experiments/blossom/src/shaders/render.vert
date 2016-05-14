@@ -30,7 +30,7 @@ void main(void) {
 
 	d = 1.0-smoothstep(mid-range, mid+range, d);
 
-	gl_PointSize = d * 10.0 * (1.0 + extra.r * 1.0);
+	
 	
 	float opacity;
 	if(life > .5) {
@@ -39,6 +39,9 @@ void main(void) {
 		opacity = smoothstep(0.1, 0.2, life);
 	}
 
-
-	vColor       = vec4(vec3(mix(d, 1.0, .7)), opacity);
+	// if(life > .5) {
+		d *= opacity;
+	// }
+	gl_PointSize = d * 10.0 * (1.0 + extra.r * 1.0);
+	vColor       = vec4(vec3(mix(d, 1.0, .9)), opacity);
 }

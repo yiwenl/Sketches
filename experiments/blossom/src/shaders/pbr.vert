@@ -1,6 +1,6 @@
 // reflection.vert
 
-#define SHADER_NAME REFLECTION_VERTEX
+#define SHADER_NAME PBR_VERTEX
 
 precision highp float;
 attribute vec3 aVertexPosition;
