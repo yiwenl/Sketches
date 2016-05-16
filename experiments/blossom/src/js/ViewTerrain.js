@@ -44,7 +44,7 @@ class ViewTerrain extends alfrid.View {
 		this.shader.uniform("uGamma", "uniform1f", params.gamma);
 
 
-		this.noiseScale = 2.0;
+		this.noiseScale = 5.0;
 		// gui.add(this, 'noiseScale', 0, 10);
 		this.shader.uniform("noiseScale", "float", this.noiseScale);
 	}

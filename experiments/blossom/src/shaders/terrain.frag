@@ -41,7 +41,7 @@ float diffuse(vec3 N, vec3 L) {
 void main(void) {
 	vec3 baseColor = texture2D(uAoMap, vTextureCoord).rgb * 1.0 * uBaseColor;
 
-	vec3 noise = texture2D(textureNoise, vTextureCoord * 5.0).rgb * 2.0 - 1.0;
+	vec3 noise = texture2D(textureNoise, vTextureCoord * 10.0).rgb * 2.0 - 1.0;
 	vec3 N = normalize(vWsNormal + noise * noiseScale);
 
 	vec2 uv = envMapEquirect(N);
@@ -51,7 +51,7 @@ void main(void) {
 	vec3 color = mix(colorNow, colorNext, offset);
 	float d = diffuse(uNormalMatrix * vWsNormal, light);
 	baseColor *= d;
-	baseColor += color * .5;
+	baseColor += color * .75;
 
     gl_FragColor = vec4(baseColor, 1.0);
 }
