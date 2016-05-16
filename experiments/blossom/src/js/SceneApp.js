@@ -10,6 +10,7 @@ import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 import ViewAddLife from './ViewAddLife';
 import ViewShadow from './ViewShadow';
+import SubsceneSnow from './SubsceneSnow';
 
 const RAD = Math.PI/180;
 var random = function(min, max) { return min + Math.random() * (max - min);	}
@@ -101,6 +102,8 @@ class SceneApp extends alfrid.Scene {
 		this._vRender = new ViewRender();
 		this._vSim 	  = new ViewSim();
 		this._vShadow = new ViewShadow();
+
+		this._snow = new SubsceneSnow(this, this._bCopy);
 	}
 
 
@@ -149,6 +152,9 @@ class SceneApp extends alfrid.Scene {
 			this._vDome.open(s);
 			this.orbitalControl.ry.easing = 0.0075;
 			this.orbitalControl.ry.value += Math.PI;
+
+			let opacity = (this._seasonIndex == 3) ? 0.0 : 1.0;
+			params.particleOpacity.value = opacity;
 		}
 	}
 
@@ -188,6 +194,7 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	render() {
+		
 		params.time += 0.01;
 		this._count ++;
 		if(this._count % params.skipCount == 0) {
@@ -197,6 +204,8 @@ class SceneApp extends alfrid.Scene {
 
 		if(!this._hasCreateParticles && this._vTree.mesh) {
 			this._initParticles();
+
+			document.body.classList.remove('isLoading');
 		}
 
 		let p = this._count/params.skipCount;
@@ -219,6 +228,8 @@ class SceneApp extends alfrid.Scene {
 			GL.setMatrices(this.camera);
 			this._vShadow.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture(), this._fboShadowMap.getDepthTexture(), this.shadowMatrix, this.currentColor, this.nextColor, this.startDirection);
 		}
+
+		this._snow.render();
 
 		/*/
 		GL.disable(GL.DEPTH_TEST);

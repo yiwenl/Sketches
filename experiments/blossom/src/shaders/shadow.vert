@@ -59,7 +59,7 @@ void main(void) {
 	gl_PointSize = d * 5.0 * (.5 + extra.r * 1.5) + 1.0;
 
 
-	float distToStart = distance(pos, startPoint + extra.b);
+	float distToStart = distance(pos, startPoint) + pow(extra.b, 2.0);
 	float distToWaveFront = distance(distToStart, waveFront);
 	float mixOffset = 0.0;
 

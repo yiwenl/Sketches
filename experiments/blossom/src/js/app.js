@@ -2,12 +2,13 @@ import '../scss/global.scss';
 import alfrid , { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 
 const GL = alfrid.GL;
 
 window.params = {
 	numParticles:256,
+	numSnow:256/4,
 	skipCount:10,
 	gamma:2.2,
 	exposure:5,
@@ -18,6 +19,7 @@ window.params = {
 	renderEnvironment:true,
 	renderParticles:true,
 	particleColor:[255, 255, 255],
+	particleOpacity:new alfrid.TweenNumber(0, 'expIn'),
 	time:Math.random() * 999
 };
 
@@ -75,7 +77,7 @@ function _onImageLoaded(o) {
 
 	//	ASSETS
 	console.log('Image Loaded : ', o);
-	document.body.classList.remove('isLoading');
+	// document.body.classList.remove('isLoading');
 	window.assets = o;	
 
 	_init3D();
@@ -92,11 +94,11 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({width:300});
-	gui.add(params, 'flyThreshold', 0, 1);
-	gui.add(params, 'renderParticles');
-	gui.add(params, 'renderEnvironment');
-	gui.addColor(params, 'particleColor');
+	// window.gui = new dat.GUI({width:300});
+	// gui.add(params, 'flyThreshold', 0, 1);
+	// gui.add(params, 'renderParticles');
+	// gui.add(params, 'renderEnvironment');
+	// gui.addColor(params, 'particleColor');
 
 	//	CREATE SCENE
 	let scene = new SceneApp();

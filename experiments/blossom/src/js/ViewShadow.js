@@ -49,13 +49,7 @@ class ViewRender extends alfrid.View {
 
 		this.shadowThreshold = 0.55;
 		this.shadowStrength = 0.25;
-		this.particleAlpha = 1.0;
 		this.waveLength = .5;
-
-		// gui.add(this, 'shadowThreshold', 0, 1);
-		// gui.add(this, 'shadowStrength', 0, 1);
-		gui.add(this, 'particleAlpha', 0, 1);
-
 
 		this.shader.uniform("uShadowThreshold", "float", this.shadowThreshold);
 		this.shader.uniform("uShadowStrength", "float", this.shadowStrength);
@@ -78,7 +72,7 @@ class ViewRender extends alfrid.View {
 		// this.shader.uniform("uBaseColor", "vec3", color);
 		this.shader.uniform("color0", "vec3", color0);
 		this.shader.uniform("color1", "vec3", color1);
-		this.shader.uniform("particleAlpha", "float", this.particleAlpha);
+		this.shader.uniform("particleAlpha", "float", params.particleOpacity.value);
 		this.shader.uniform("startPoint", "vec3", startPoint);
 		this.shader.uniform("waveFront", "float", -.5 + params.offset * 3);
 		this.shader.uniform("waveLength", "float", 0.5);
