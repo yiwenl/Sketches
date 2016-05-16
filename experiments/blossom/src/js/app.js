@@ -28,6 +28,7 @@ const assets = [
 	{id:'spring', url:'assets/spring.jpg'},
 	{id:'summer', url:'assets/summer.jpg'},
 	{id:'fall', url:'assets/fall.jpg'},
+	{id:'noise', url:'assets/noise.jpg'},
 ];
 
 if(document.body) {

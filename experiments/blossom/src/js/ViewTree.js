@@ -39,6 +39,20 @@ class ViewTree extends alfrid.View {
 		// gui.add(this, 'roughness', 0, 1);
 		// gui.add(this, 'specular', 0, 1);
 		// gui.add(this, 'metallic', 0, 1);
+
+		this.shader.bind();
+
+		this.shader.uniform("uAoMap", "uniform1i", 0);
+		this.shader.uniform("texture", "uniform1i", 1);
+		this.shader.uniform("textureNext", "uniform1i", 2);
+		this.shader.uniform("uBaseColor", "uniform3fv", this.baseColor);
+
+		this.shader.uniform("uPosition", "vec3", this.position);
+		this.shader.uniform("uScale", "vec3", this.scale);
+		this.shader.uniform("offset", "float", params.offset);
+
+		this.shader.uniform("uExposure", "uniform1f", params.exposure);
+		this.shader.uniform("uGamma", "uniform1f", params.gamma);
 	}
 
 
@@ -53,25 +67,13 @@ class ViewTree extends alfrid.View {
 		}
 
 		this.shader.bind();
-
-		this.shader.uniform("uAoMap", "uniform1i", 0);
-		this.shader.uniform("texture", "uniform1i", 1);
-		this.shader.uniform("textureNext", "uniform1i", 2);
 		textureAO.bind(0);
 		texture.bind(1);
 		textureNext.bind(2);
-
-		this.shader.uniform("uBaseColor", "uniform3fv", this.baseColor);
+		
 		// this.shader.uniform("uRoughness", "uniform1f", this.roughness);
 		// this.shader.uniform("uMetallic", "uniform1f", this.metallic);
 		// this.shader.uniform("uSpecular", "uniform1f", this.specular);
-
-		this.shader.uniform("uPosition", "vec3", this.position);
-		this.shader.uniform("uScale", "vec3", this.scale);
-		this.shader.uniform("offset", "float", params.offset);
-
-		this.shader.uniform("uExposure", "uniform1f", params.exposure);
-		this.shader.uniform("uGamma", "uniform1f", params.gamma);
 
 		GL.draw(this.mesh);
 	}

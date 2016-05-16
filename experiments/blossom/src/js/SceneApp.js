@@ -12,6 +12,13 @@ import ViewAddLife from './ViewAddLife';
 
 const RAD = Math.PI/180;
 var random = function(min, max) { return min + Math.random() * (max - min);	}
+window.getAsset = function(id) {
+	for(var i=0; i<assets.length; i++) {
+		if(id === assets[i].id) {
+			return assets[i].file;
+		}
+	}
+}
 
 class SceneApp extends alfrid.Scene {
 	constructor() {
@@ -39,13 +46,7 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	_initTextures() {
-		function getAsset(id) {
-			for(var i=0; i<assets.length; i++) {
-				if(id === assets[i].id) {
-					return assets[i].file;
-				}
-			}
-		}
+		
 
 		this._textureAOTerrain = new alfrid.GLTexture(getAsset('aoTerrain'));
 		this._textureAOTree = new alfrid.GLTexture(getAsset('aoTree'));

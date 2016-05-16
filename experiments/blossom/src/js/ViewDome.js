@@ -13,7 +13,7 @@ class ViewDome extends alfrid.View {
 		this.time = Math.random();
 		this.waveFront = new alfrid.EaseNumber(params.domeRadius * 2.0 + 3, 0.0075);
 		this.waveLength = 1.;
-		this.startPosition = [0, params.domeRadius, -1];
+		
 
 		// gui.add(this.waveFront, 'value', -1, params.domeRadius * 2.0 + 3).listen();
 	}
@@ -116,6 +116,14 @@ class ViewDome extends alfrid.View {
 		this.mesh.bufferIndices(indices);
 		this.mesh.bufferNormal(normals);
 		this.mesh.bufferData(centers, 'aCenter', 3);
+
+		
+		this.startPosition = [0, params.domeRadius, -1];
+
+		this.shader.bind();
+		this.shader.uniform("startPosition", "vec3", this.startPosition);
+		this.shader.uniform("textureCurr", "uniform1i", 0);
+		this.shader.uniform("textureNext", "uniform1i", 1);
 	}
 
 	open(startPosition=[1, params.domeRadius, 0]) {
@@ -124,6 +132,8 @@ class ViewDome extends alfrid.View {
 		this.startPosition = startPosition;
 		this.waveFront.setTo(-1);
 		this.waveFront.value = params.domeRadius * 2.0 + 3;
+		this.shader.bind();
+		this.shader.uniform("startPosition", "vec3", this.startPosition);
 	}
 
 
@@ -139,10 +149,7 @@ class ViewDome extends alfrid.View {
 		this.shader.uniform("time", "float", this.time);
 		this.shader.uniform("waveFront", "float", this.waveFront.value);
 		this.shader.uniform("waveLength", "float", this.waveLength);
-		this.shader.uniform("startPosition", "vec3", this.startPosition);
-		this.shader.uniform("textureCurr", "uniform1i", 0);
 		textureCurr.bind(0);
-		this.shader.uniform("textureNext", "uniform1i", 1);
 		textureNext.bind(1);
 		GL.draw(this.mesh);
 	}

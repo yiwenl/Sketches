@@ -10,10 +10,9 @@ class ViewRender extends alfrid.View {
 	constructor() {
 		super(vsRender, fsRender);
 		this.time = Math.random() * 0xFFF;
-		this.mid = .93;
-		this.range = 0.05;
-		gui.add(this, 'mid', 0.9, 1);
-		gui.add(this, 'range', 0.01, 0.1);
+		
+		// gui.add(this, 'mid', 0.9, 1);
+		// gui.add(this, 'range', 0.01, 0.1);
 	}
 
 
@@ -39,29 +38,33 @@ class ViewRender extends alfrid.View {
 		this.mesh = new alfrid.Mesh(GL.POINTS);
 		this.mesh.bufferVertex(positions);
 		this.mesh.bufferIndices(indices);
+
+		this.mid = .93;
+		this.range = 0.05;
+
+		this.shader.bind();
+		this.shader.uniform("textureCurr", "uniform1i", 0);
+		this.shader.uniform("textureNext", "uniform1i", 1);
+		this.shader.uniform("textureExtra", "uniform1i", 2);
+		this.shader.uniform("textureLife", "uniform1i", 3);
+
+		this.shader.uniform("mid", "float", this.mid);
+		this.shader.uniform("range", "float", this.range);
 	}
 
 
 	render(textureCurr, textureNext, p, textureExtra, textureLife) {
 		this.time += 0.1;
+
 		this.shader.bind();
-
-		this.shader.uniform("textureCurr", "uniform1i", 0);
 		textureCurr.bind(0);
-
-		this.shader.uniform("textureNext", "uniform1i", 1);
 		textureNext.bind(1);
-
-		this.shader.uniform("textureExtra", "uniform1i", 2);
 		textureExtra.bind(2);
-
-		this.shader.uniform("textureLife", "uniform1i", 3);
 		textureLife.bind(3);
 
 		this.shader.uniform("percent", "float", p);
 		this.shader.uniform("time", "float", this.time);
-		this.shader.uniform("mid", "float", this.mid);
-		this.shader.uniform("range", "float", this.range);
+		
 		GL.draw(this.mesh);
 	}
 
