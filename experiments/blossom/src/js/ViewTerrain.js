@@ -65,6 +65,7 @@ class ViewTerrain extends alfrid.View {
 		// this.shader.uniform("uSpecular", "uniform1f", this.specular);
 		
 		this.shader.uniform("offset", "float", params.offset);
+		this.shader.uniform("colorOffset", "float", 1.0 - params.particleOpacity.value);
 		
 
 		GL.draw(this.mesh);

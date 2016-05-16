@@ -10,6 +10,7 @@ uniform float 		offset;
 uniform vec3 		uBaseColor;
 uniform mat3 		uNormalMatrix;
 uniform float 		noiseScale;
+uniform float 		colorOffset;
 
 varying vec3 vNormal;
 varying vec3 vPosition;
@@ -51,6 +52,7 @@ void main(void) {
 	vec3 color = mix(colorNow, colorNext, offset);
 	float d = diffuse(uNormalMatrix * vWsNormal, light);
 	baseColor *= d;
+	baseColor += (colorOffset * .5);
 	baseColor += color * .75;
 
     gl_FragColor = vec4(baseColor, 1.0);
