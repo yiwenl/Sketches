@@ -9,6 +9,7 @@ import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 import ViewAddLife from './ViewAddLife';
+import ViewShadow from './ViewShadow';
 
 const RAD = Math.PI/180;
 var random = function(min, max) { return min + Math.random() * (max - min);	}
@@ -39,6 +40,15 @@ class SceneApp extends alfrid.Scene {
 		this._count = 0;
 		this._hasCreateParticles = false;
 
+		//	SHADOW
+		this.lightPosition = [.5, 5, 1.5];
+		this.shadowMatrix  = mat4.create();
+		
+		this.cameraLight   = new alfrid.CameraPerspective();
+		this.cameraLight.setPerspective(90*RAD, 1.0, .5, 30);
+		this.cameraLight.lookAt(this.lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+		mat4.multiply(this.shadowMatrix, this.cameraLight.projection, this.cameraLight.viewMatrix);
+
 		window.addEventListener('keydown', (e)=>this._onKey(e));
 		window.addEventListener('mousedown', (e) => {
 			this.orbitalControl.ry.easing = 0.1;
@@ -46,8 +56,6 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	_initTextures() {
-		
-
 		this._textureAOTerrain = new alfrid.GLTexture(getAsset('aoTerrain'));
 		this._textureAOTree = new alfrid.GLTexture(getAsset('aoTree'));
 		this._textureBg1 = new alfrid.GLTexture(getAsset('bg1'));
@@ -72,6 +80,7 @@ class SceneApp extends alfrid.Scene {
 		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboShadowMap = new alfrid.FrameBuffer(1024, 1024);
 	}
 
 
@@ -90,6 +99,7 @@ class SceneApp extends alfrid.Scene {
 		this._vAddLife = new ViewAddLife();
 		this._vRender = new ViewRender();
 		this._vSim 	  = new ViewSim();
+		this._vShadow = new ViewShadow();
 	}
 
 
@@ -175,6 +185,7 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	render() {
+		params.time += 0.01;
 		this._count ++;
 		if(this._count % params.skipCount == 0) {
 			this._count = 0;
@@ -196,16 +207,43 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		if(params.renderParticles) {
+			this._fboShadowMap.bind();
+			GL.clear(0, 0, 0, 0);
+			GL.setMatrices(this.cameraLight);
 			this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture());	
+			this._fboShadowMap.unbind();
+
+			GL.setMatrices(this.camera);
+			// this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture());	
+			this._vShadow.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture(), this._fboShadowMap.getDepthTexture(), this.shadowMatrix, this.color);
 		}
-		
 
-		
+		/*/
+		GL.disable(GL.DEPTH_TEST);
+		const size = 500/2;
+		GL.viewport(0, 0, size, size);
+		this._bCopy.draw(this._fboShadowMap.getDepthTexture());
+		GL.enable(GL.DEPTH_TEST);
+		//*/
+	}
 
-		// GL.viewport(0, 0, 200, 200);
-		// GL.disable(GL.DEPTH_TEST);
-		// this._bCopy.draw(this._fboCurrentLife.getTexture());
-		// GL.enable(GL.DEPTH_TEST);
+
+	get color() {
+		function mix(a, b, p) { return a * (1.0 - p) + b * p; }
+
+		let index = this._seasonIndex + 1;
+		if(index>=4) {
+			index = 0;
+		}
+
+		let current = colors[this._seasonIndex];
+		let next = colors[index];
+
+		return [
+			mix(current[0], next[0], params.offset),
+			mix(current[1], next[1], params.offset),
+			mix(current[2], next[2], params.offset)
+		]
 	}
 
 

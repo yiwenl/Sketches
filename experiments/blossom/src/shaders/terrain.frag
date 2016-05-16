@@ -9,6 +9,7 @@ uniform sampler2D 	uAoMap;
 uniform float 		offset;
 uniform vec3 		uBaseColor;
 uniform mat3 		uNormalMatrix;
+uniform float 		noiseScale;
 
 varying vec3 vNormal;
 varying vec3 vPosition;
@@ -41,7 +42,7 @@ void main(void) {
 	vec3 baseColor = texture2D(uAoMap, vTextureCoord).rgb * 1.0 * uBaseColor;
 
 	vec3 noise = texture2D(textureNoise, vTextureCoord * 5.0).rgb * 2.0 - 1.0;
-	vec3 N = normalize(vWsNormal + noise * 5.0);
+	vec3 N = normalize(vWsNormal + noise * noiseScale);
 
 	vec2 uv = envMapEquirect(N);
 	vec3 colorNow = texture2D(texture, uv).rgb;

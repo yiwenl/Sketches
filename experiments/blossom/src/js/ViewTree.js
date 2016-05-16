@@ -49,7 +49,7 @@ class ViewTree extends alfrid.View {
 
 		this.shader.uniform("uPosition", "vec3", this.position);
 		this.shader.uniform("uScale", "vec3", this.scale);
-		this.shader.uniform("offset", "float", params.offset);
+		
 
 		this.shader.uniform("uExposure", "uniform1f", params.exposure);
 		this.shader.uniform("uGamma", "uniform1f", params.gamma);
@@ -70,7 +70,8 @@ class ViewTree extends alfrid.View {
 		textureAO.bind(0);
 		texture.bind(1);
 		textureNext.bind(2);
-		
+			
+		this.shader.uniform("offset", "float", params.offset);
 		// this.shader.uniform("uRoughness", "uniform1f", this.roughness);
 		// this.shader.uniform("uMetallic", "uniform1f", this.metallic);
 		// this.shader.uniform("uSpecular", "uniform1f", this.specular);

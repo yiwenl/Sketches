@@ -17,7 +17,17 @@ window.params = {
 	flyThreshold:0.75,
 	renderEnvironment:true,
 	renderParticles:true,
+	particleColor:[255, 255, 255],
+	time:Math.random()
 };
+
+
+window.colors = [
+	[255/255, 255/255, 255/255],
+	[255/255, 160/255, 160/255],
+	[180/255, 255/255, 114/255],
+	[255/255, 45/255, 0/255]
+]
 
 const assets = [
 	{id:'aoTerrain', url:'assets/aoTerrain.jpg'},
@@ -86,6 +96,7 @@ function _init3D() {
 	gui.add(params, 'flyThreshold', 0, 1);
 	gui.add(params, 'renderParticles');
 	gui.add(params, 'renderEnvironment');
+	gui.addColor(params, 'particleColor');
 
 	//	CREATE SCENE
 	let scene = new SceneApp();

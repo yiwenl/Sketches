@@ -6,6 +6,8 @@ attribute vec3 aVertexPosition;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
+uniform mat4 uShadowMatrix;
+
 uniform sampler2D textureCurr;
 uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
@@ -17,6 +19,12 @@ uniform float range;
 
 varying vec4 vColor;
 varying vec3 vExtra;
+varying vec4 vShadowCoord;
+
+const mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,
+							  0.0, 0.5, 0.0, 0.0,
+							  0.0, 0.0, 0.5, 0.0,
+							  0.5, 0.5, 0.5, 1.0 );
 
 void main(void) {
 	vec2 uv      = aVertexPosition.xy;
@@ -42,9 +50,11 @@ void main(void) {
 	}
 
 	d *= opacity;
-	// gl_PointSize = d * 2.0 * (.5 + extra.r * 1.5);
-	gl_PointSize = 1.5;
+	gl_PointSize = d * 5.0 * (.5 + extra.r * 1.5) + 1.0;
+	// gl_PointSize = 2.0;
 
 	vColor       = vec4(vec3(mix(d, 1.0, .8)), opacity);
 	vExtra 		 = extra;
+
+	vShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);;
 }

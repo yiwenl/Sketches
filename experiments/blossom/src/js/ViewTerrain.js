@@ -42,6 +42,11 @@ class ViewTerrain extends alfrid.View {
 
 		this.shader.uniform("uExposure", "uniform1f", params.exposure);
 		this.shader.uniform("uGamma", "uniform1f", params.gamma);
+
+
+		this.noiseScale = 2.0;
+		// gui.add(this, 'noiseScale', 0, 10);
+		this.shader.uniform("noiseScale", "float", this.noiseScale);
 	}
 
 
@@ -60,6 +65,7 @@ class ViewTerrain extends alfrid.View {
 		// this.shader.uniform("uSpecular", "uniform1f", this.specular);
 		
 		this.shader.uniform("offset", "float", params.offset);
+		
 
 		GL.draw(this.mesh);
 	}
