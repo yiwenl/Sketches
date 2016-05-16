@@ -14,7 +14,9 @@ uniform float percent;
 uniform float time;
 uniform float mid;
 uniform float range;
+
 varying vec4 vColor;
+varying vec3 vExtra;
 
 void main(void) {
 	vec2 uv      = aVertexPosition.xy;
@@ -39,9 +41,9 @@ void main(void) {
 		opacity = smoothstep(0.1, 0.2, life);
 	}
 
-	// if(life > .5) {
-		d *= opacity;
-	// }
-	gl_PointSize = d * 10.0 * (1.0 + extra.r * 1.0);
-	vColor       = vec4(vec3(mix(d, 1.0, .9)), opacity);
+	d *= opacity;
+	gl_PointSize = d * 10.0 * (.5 + extra.r * 1.5);
+
+	vColor       = vec4(vec3(mix(d, 1.0, .6)), opacity);
+	vExtra 		 = extra;
 }

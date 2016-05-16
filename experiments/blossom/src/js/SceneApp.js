@@ -20,7 +20,7 @@ class SceneApp extends alfrid.Scene {
 		this.camera.setPerspective(70 * RAD, GL.aspectRatio, .1, 30);
 		let v = vec3.fromValues(-3, .37, -2);
 		this.orbitalControl.radius.setTo(2);
-		this.orbitalControl.radius.value = 4.52;
+		this.orbitalControl.radius.value = 4.02;
 
 		this.orbitalControl.center[1] = 1.35;
 		this.orbitalControl.positionOffset[1] = 0.25;
