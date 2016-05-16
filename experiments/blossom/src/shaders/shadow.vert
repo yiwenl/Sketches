@@ -16,6 +16,12 @@ uniform float percent;
 uniform float time;
 uniform float mid;
 uniform float range;
+uniform float particleAlpha;
+uniform float waveFront;
+uniform float waveLength;
+uniform vec3 startPoint;
+uniform vec3 color0;
+uniform vec3 color1;
 
 varying vec4 vColor;
 varying vec3 vExtra;
@@ -51,9 +57,23 @@ void main(void) {
 
 	d *= opacity;
 	gl_PointSize = d * 5.0 * (.5 + extra.r * 1.5) + 1.0;
-	// gl_PointSize = 2.0;
 
-	vColor       = vec4(vec3(mix(d, 1.0, .8)), opacity);
+
+	float distToStart = distance(pos, startPoint + extra.b);
+	float distToWaveFront = distance(distToStart, waveFront);
+	float mixOffset = 0.0;
+
+	if(distToWaveFront < waveLength) {
+		mixOffset = smoothstep(0.0, 1.0, 1.0 - distToWaveFront / waveLength);
+	}
+	if(distToWaveFront < waveFront) {
+		mixOffset = 1.0;
+	}
+
+	vec3 colorOffset = mix(color0, color1, mixOffset);
+	colorOffset = mix(colorOffset, extra, .3);
+
+	vColor       = vec4(vec3(mix(d, 1.0, .8)) * colorOffset, opacity * particleAlpha);
 	vExtra 		 = extra;
 
 	vShadowCoord    = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);;

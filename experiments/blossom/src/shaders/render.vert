@@ -43,7 +43,7 @@ void main(void) {
 
 	d *= opacity;
 	// gl_PointSize = d * 2.0 * (.5 + extra.r * 1.5);
-	gl_PointSize = 1.5;
+	gl_PointSize = 1.0;
 
 	vColor       = vec4(vec3(mix(d, 1.0, .8)), opacity);
 	vExtra 		 = extra;

@@ -6,9 +6,6 @@ varying vec4 vColor;
 varying vec3 vExtra;
 varying vec4 vShadowCoord;
 
-// const float uShadowThreshold = 0.55;
-// const float uShadowStrength = 0.35;
-uniform vec3 uBaseColor;
 uniform float uShadowThreshold;
 uniform float uShadowStrength;
 
@@ -85,7 +82,8 @@ void main(void) {
 	vec4 color = vColor;
 	float pcf    = pcfSoftShadow(textureShadow);
 	pcf = 1.0 - smoothstep(0.0, uShadowThreshold, pcf);
-	color.rgb *= pcf * uBaseColor;
+	// color.rgb *= mix(uBaseColor, vExtra, .1);
+	color.rgb *= pcf;
 
     gl_FragColor = color;
 }

@@ -27,7 +27,7 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 		this.camera.setPerspective(70 * RAD, GL.aspectRatio, .1, 30);
 		let v = vec3.fromValues(-3, .37, -2);
-		this.orbitalControl.radius.setTo(2);
+		this.orbitalControl.radius.setTo(5);
 		this.orbitalControl.radius.value = 4.02;
 
 		this.orbitalControl.center[1] = 1.35;
@@ -47,6 +47,7 @@ class SceneApp extends alfrid.Scene {
 		this.cameraLight   = new alfrid.CameraPerspective();
 		this.cameraLight.setPerspective(90*RAD, 1.0, .5, 30);
 		this.cameraLight.lookAt(this.lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+		this.startDirection = vec3.fromValues(0, 1, 0);
 		mat4.multiply(this.shadowMatrix, this.cameraLight.projection, this.cameraLight.viewMatrix);
 
 		window.addEventListener('keydown', (e)=>this._onKey(e));
@@ -141,7 +142,9 @@ class SceneApp extends alfrid.Scene {
 			if(this._seasonIndex >=4) this._seasonIndex = 0;
 			let s = vec3.fromValues(random(-1, 1), 1, random(-1, 1));
 			vec3.normalize(s, s);
+			this.startDirection = vec3.clone(s);
 			vec3.scale(s, s, params.domeRadius);
+			vec3.scale(this.startDirection, this.startDirection, 2.0);
 
 			this._vDome.open(s);
 			this.orbitalControl.ry.easing = 0.0075;
@@ -214,8 +217,7 @@ class SceneApp extends alfrid.Scene {
 			this._fboShadowMap.unbind();
 
 			GL.setMatrices(this.camera);
-			// this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture());	
-			this._vShadow.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture(), this._fboShadowMap.getDepthTexture(), this.shadowMatrix, this.color);
+			this._vShadow.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboCurrentLife.getTexture(), this._fboShadowMap.getDepthTexture(), this.shadowMatrix, this.currentColor, this.nextColor, this.startDirection);
 		}
 
 		/*/
@@ -230,34 +232,24 @@ class SceneApp extends alfrid.Scene {
 
 	get color() {
 		function mix(a, b, p) { return a * (1.0 - p) + b * p; }
-
-		let index = this._seasonIndex + 1;
-		if(index>=4) {
-			index = 0;
-		}
-
-		let current = colors[this._seasonIndex];
-		let next = colors[index];
-
 		return [
-			mix(current[0], next[0], params.offset),
-			mix(current[1], next[1], params.offset),
-			mix(current[2], next[2], params.offset)
+			mix(this.currentColor[0], this.nextColor[0], params.offset),
+			mix(this.currentColor[1], this.nextColor[1], params.offset),
+			mix(this.currentColor[2], this.nextColor[2], params.offset)
 		]
 	}
 
 
-	get currentSeasonTexture() {
-		return this._textureSeasons[this._seasonIndex];
-	}
+	
+	get currentColor() { return colors[this._seasonIndex]; }
+	get nextColor() { return colors[this.nextIndex]; }
+	get currentSeasonTexture() { return this._textureSeasons[this._seasonIndex]; }
+	get nextSeasonTexture() { return this._textureSeasons[this.nextIndex]; }
 
-
-	get nextSeasonTexture() {
+	get nextIndex() {
 		let index = this._seasonIndex + 1;
-		if(index>=4) {
-			index = 0;
-		}
-		return this._textureSeasons[index];
+		if(index>=4) { index = 0; }
+		return index;
 	}
 
 

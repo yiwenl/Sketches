@@ -18,7 +18,7 @@ window.params = {
 	renderEnvironment:true,
 	renderParticles:true,
 	particleColor:[255, 255, 255],
-	time:Math.random()
+	time:Math.random() * 999
 };
 
 

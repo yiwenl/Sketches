@@ -49,13 +49,20 @@ class ViewRender extends alfrid.View {
 
 		this.shadowThreshold = 0.55;
 		this.shadowStrength = 0.25;
+		this.particleAlpha = 1.0;
+		this.waveLength = .5;
 
-		gui.add(this, 'shadowThreshold', 0, 1);
-		gui.add(this, 'shadowStrength', 0, 1);
+		// gui.add(this, 'shadowThreshold', 0, 1);
+		// gui.add(this, 'shadowStrength', 0, 1);
+		gui.add(this, 'particleAlpha', 0, 1);
+
+
+		this.shader.uniform("uShadowThreshold", "float", this.shadowThreshold);
+		this.shader.uniform("uShadowStrength", "float", this.shadowStrength);
 	}
 
 
-	render(textureCurr, textureNext, p, textureExtra, textureLife, textureShadow, shadowMatrix, color) {
+	render(textureCurr, textureNext, p, textureExtra, textureLife, textureShadow, shadowMatrix, color0, color1, startPoint) {
 		this.time += 0.1;
 
 		this.shader.bind();
@@ -67,10 +74,15 @@ class ViewRender extends alfrid.View {
 		this.shader.uniform("percent", "float", p);
 		this.shader.uniform("time", "float", params.time);
 		this.shader.uniform("uShadowMatrix", "uniformMatrix4fv", shadowMatrix);
-		this.shader.uniform("uShadowThreshold", "float", this.shadowThreshold);
-		this.shader.uniform("uShadowStrength", "float", this.shadowStrength);
-		// const color = [params.particleColor[0]/255, params.particleColor[1]/255, params.particleColor[2]/255];
-		this.shader.uniform("uBaseColor", "vec3", color);
+		
+		// this.shader.uniform("uBaseColor", "vec3", color);
+		this.shader.uniform("color0", "vec3", color0);
+		this.shader.uniform("color1", "vec3", color1);
+		this.shader.uniform("particleAlpha", "float", this.particleAlpha);
+		this.shader.uniform("startPoint", "vec3", startPoint);
+		this.shader.uniform("waveFront", "float", -.5 + params.offset * 3);
+		this.shader.uniform("waveLength", "float", 0.5);
+
 		
 		textureShadow.bind(4);
 		
