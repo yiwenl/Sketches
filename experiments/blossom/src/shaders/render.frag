@@ -7,6 +7,6 @@ void main(void) {
 	if(vColor.a <= 0.0) discard;
 
 	vec4 color = vColor;
-	color.rgb *= mix(vExtra.g, 1.0, .75);
+	// color.rgb *= mix(vExtra.g, 1.0, .75);
     gl_FragColor = color;
 }
