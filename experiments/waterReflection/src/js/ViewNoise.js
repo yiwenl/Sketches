@@ -1,6 +1,4 @@
 // ViewNoise.js
-
-
 import alfrid, { GL } from 'alfrid';
 const fs = require('../shaders/noise.frag');
 
@@ -19,7 +17,6 @@ class ViewNoise extends alfrid.View {
 
 	render() {
 		this.time += 0.01;
-		console.log(this.time);
 		this.shader.bind();
 		this.shader.uniform("time", "float", this.time);
 		GL.draw(this.mesh);

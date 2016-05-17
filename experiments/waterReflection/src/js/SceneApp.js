@@ -4,6 +4,7 @@ import alfrid , { Scene } from 'alfrid';
 import ViewCube from './ViewCube';
 import ViewReflection from './ViewReflection';
 import ViewNoise from './ViewNoise';
+import ViewNormal from './ViewNormal';
 
 const GL = alfrid.GL;
 
@@ -47,6 +48,7 @@ class SceneApp extends alfrid.Scene {
 		this._vCube = new ViewCube();
 		this._vReflection = new ViewReflection();
 		this._vNoise = new ViewNoise();
+		this._vNormal = new ViewNormal();
 	}
 
 
@@ -74,10 +76,16 @@ class SceneApp extends alfrid.Scene {
 		this._vNoise.render();
 		this._fboNoise.unbind();
 
+		this._fboNormal.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vNormal.render(this._fboNoise.getTexture());
+		this._fboNormal.unbind();
+
 		const size = 300;
 		GL.viewport(0, 0, size, size);
 		this._bCopy.draw(this._fboNoise.getTexture());
-
+		GL.viewport(size, 0, size, size);
+		this._bCopy.draw(this._fboNormal.getTexture());
 	}
 
 
