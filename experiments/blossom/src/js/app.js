@@ -34,8 +34,6 @@ window.colors = [
 const assets = [
 	{id:'aoTerrain', url:'assets/aoTerrain.jpg'},
 	{id:'aoTree', url:'assets/aoTree.jpg'},
-	{id:'bg1', url:'assets/bg1.jpg'},
-	{id:'bg2', url:'assets/bg2.jpg'},
 	{id:'winter', url:'assets/winter.jpg'},
 	{id:'spring', url:'assets/spring.jpg'},
 	{id:'summer', url:'assets/summer.jpg'},

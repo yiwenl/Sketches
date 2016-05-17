@@ -60,8 +60,6 @@ class SceneApp extends alfrid.Scene {
 	_initTextures() {
 		this._textureAOTerrain = new alfrid.GLTexture(getAsset('aoTerrain'));
 		this._textureAOTree = new alfrid.GLTexture(getAsset('aoTree'));
-		this._textureBg1 = new alfrid.GLTexture(getAsset('bg1'));
-		this._textureBg2 = new alfrid.GLTexture(getAsset('bg2'));
 
 		let tWinter = new alfrid.GLTexture(getAsset('winter'));
 		let tSpring = new alfrid.GLTexture(getAsset('spring'));
