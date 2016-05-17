@@ -4,7 +4,7 @@
 
 precision highp float;
 varying vec2 vTextureCoord;
-
+uniform sampler2D texture;
 uniform float time;
 
 float noise3D(vec3 p)
@@ -113,6 +113,7 @@ float fbm(vec3 p)
 
 void main(void) {
 	float n = fbm(vec3(time,vec2(vTextureCoord)))*0.5+0.5;
+	vec3 colorNoise = texture2D(texture, vTextureCoord * 2.0).rgb;
 
-    gl_FragColor = vec4(vec3(n), 1.0);
+    gl_FragColor = vec4(vec3(n) + colorNoise * 0.01, 1.0);
 }

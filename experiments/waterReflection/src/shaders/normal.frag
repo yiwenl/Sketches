@@ -6,8 +6,8 @@ precision highp float;
 varying vec2 vTextureCoord;
 uniform sampler2D texture;
 
-const float SHIFT = 0.001;
-const float HEIGHT = 0.25;
+const float SHIFT = 0.0001;
+const float HEIGHT = 0.5;
 
 vec3 getPos(vec2 uv) {
 	float d = texture2D(texture, uv).r * HEIGHT;
@@ -23,6 +23,6 @@ void main(void) {
 	vec3 vBottom = posBottom - posCurr;
 	vec3 normal = normalize(cross(vBottom, vRight));
 
-    gl_FragColor = vec4(normal, 1.0);
+    gl_FragColor = vec4(normal * .5 + .5, 1.0);
     // gl_FragColor = texture2D(texture, vTextureCoord);
 }

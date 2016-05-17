@@ -15,13 +15,14 @@ class ViewNoise extends alfrid.View {
 	}
 
 
-	render() {
-		this.time += 0.01;
+	render(texture) {
+		this.time += 0.002;
 		this.shader.bind();
 		this.shader.uniform("time", "float", this.time);
+		this.shader.uniform("texture", "uniform1i", 0);
+		texture.bind(0);
 		GL.draw(this.mesh);
 	}
-
 
 }
 

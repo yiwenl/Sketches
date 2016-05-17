@@ -7,6 +7,7 @@ import dat from 'dat-gui';
 const GL = alfrid.GL;
 const assets = [
 	{id:'normal', url:'assets/waterNormal.jpg'},
+	{id:'noise', url:'assets/noise.jpg'},
 ];
 
 if(document.body) {

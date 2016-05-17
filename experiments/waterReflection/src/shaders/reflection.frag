@@ -15,7 +15,7 @@ void main(void) {
 	vec3 flatNormal = waveNormal - dot (waveNormal, mirrorNormal) * mirrorNormal;
 	vec3 eyeNormal = uNormalMatrix * flatNormal;
     vec2 reflectOffset = normalize (eyeNormal.xy) * length (flatNormal);
-    reflectOffset = (reflectOffset - .5 ) * 0.01;
+    reflectOffset = (reflectOffset - .25 ) * 0.01;
 
     vec4 colorReflection = texture2D(textureReflection, vTextureCoord + reflectOffset);
 

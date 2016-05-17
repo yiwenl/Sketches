@@ -29,6 +29,7 @@ class SceneApp extends alfrid.Scene {
 		const REFLECTION_SIZE = 1024;
 		this._fboReflection = new alfrid.FrameBuffer(REFLECTION_SIZE, REFLECTION_SIZE);
 		this._textureNormal = new alfrid.GLTexture(getAsset('normal'));
+		this._textureNoise = new alfrid.GLTexture(getAsset('noise'));
 
 		const NOISE_SIZE = 1024;
 		this._fboNoise = new alfrid.FrameBuffer(NOISE_SIZE, NOISE_SIZE);
@@ -57,23 +58,9 @@ class SceneApp extends alfrid.Scene {
 		this._bAxis.draw();
 		this._bDots.draw();
 
-
-		// this._fboReflection.bind();
-		// GL.clear(0, 0, 0, 0);
-		// GL.gl.cullFace(GL.gl.FRONT);
-		// this._vCube.render(true);
-		// GL.gl.cullFace(GL.gl.BACK);
-		// this._fboReflection.unbind();
-
-		// GL.disable(GL.DEPTH_TEST);
-		// this._vReflection.render(this._fboReflection.getTexture(), this._textureNormal);
-		// GL.enable(GL.DEPTH_TEST);
-
-		// this._vCube.render(false);
-
 		this._fboNoise.bind();
 		GL.clear(0, 0, 0, 0);
-		this._vNoise.render();
+		this._vNoise.render(this._textureNoise);
 		this._fboNoise.unbind();
 
 		this._fboNormal.bind();
@@ -81,11 +68,28 @@ class SceneApp extends alfrid.Scene {
 		this._vNormal.render(this._fboNoise.getTexture());
 		this._fboNormal.unbind();
 
-		const size = 300;
+		this._fboReflection.bind();
+		GL.clear(0, 0, 0, 0);
+		GL.gl.cullFace(GL.gl.FRONT);
+		this._vCube.render(true);
+		GL.gl.cullFace(GL.gl.BACK);
+		this._fboReflection.unbind();
+
+		GL.disable(GL.DEPTH_TEST);
+		// this._vReflection.render(this._fboReflection.getTexture(), this._textureNormal);
+		this._vReflection.render(this._fboReflection.getTexture(), this._fboNormal.getTexture());
+		GL.enable(GL.DEPTH_TEST);
+
+		this._vCube.render(false);
+
+		
+		//*/
+		const size = 200;
 		GL.viewport(0, 0, size, size);
 		this._bCopy.draw(this._fboNoise.getTexture());
 		GL.viewport(size, 0, size, size);
 		this._bCopy.draw(this._fboNormal.getTexture());
+		//*/
 	}
 
 
