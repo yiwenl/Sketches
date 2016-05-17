@@ -21,12 +21,15 @@ class SceneApp extends alfrid.Scene {
 		super();
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = .4;
+
+		//	limit camera angle
 	}
 
 	_initTextures() {
 		console.log('init textures');
 
 		const REFLECTION_SIZE = 1024;
+		//	fullsize reflection fbo ? 
 		this._fboReflection = new alfrid.FrameBuffer(REFLECTION_SIZE, REFLECTION_SIZE);
 		this._textureNormal = new alfrid.GLTexture(getAsset('normal'));
 		this._textureNoise = new alfrid.GLTexture(getAsset('noise'));
@@ -34,7 +37,6 @@ class SceneApp extends alfrid.Scene {
 		const NOISE_SIZE = 1024;
 		this._fboNoise = new alfrid.FrameBuffer(NOISE_SIZE, NOISE_SIZE);
 		this._fboNormal = new alfrid.FrameBuffer(NOISE_SIZE, NOISE_SIZE);
-
 	}
 
 
@@ -54,6 +56,9 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		//	update mountain positioin ( keep moving forward )
+		//	update boat direction ( based on keyboard control )
+
 		GL.clear(0, 0, 0, 0);
 		this._bAxis.draw();
 		this._bDots.draw();
@@ -72,11 +77,15 @@ class SceneApp extends alfrid.Scene {
 		GL.clear(0, 0, 0, 0);
 		GL.gl.cullFace(GL.gl.FRONT);
 		this._vCube.render(true);
+		//	render skybox ( reflection map )
+
+		//	render mountains
+
+		//	render boat
 		GL.gl.cullFace(GL.gl.BACK);
 		this._fboReflection.unbind();
 
 		GL.disable(GL.DEPTH_TEST);
-		// this._vReflection.render(this._fboReflection.getTexture(), this._textureNormal);
 		this._vReflection.render(this._fboReflection.getTexture(), this._fboNormal.getTexture());
 		GL.enable(GL.DEPTH_TEST);
 
@@ -90,6 +99,11 @@ class SceneApp extends alfrid.Scene {
 		GL.viewport(size, 0, size, size);
 		this._bCopy.draw(this._fboNormal.getTexture());
 		//*/
+	}
+
+
+	renderReflection() {
+
 	}
 
 
