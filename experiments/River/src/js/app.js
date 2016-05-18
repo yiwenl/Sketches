@@ -9,6 +9,8 @@ const assets = [
 	{id:'normal', url:'assets/waterNormal.jpg'},
 	{id:'noise', url:'assets/noise.jpg'},
 	{id:'bg', url:'assets/bg.jpg'},
+	{id:'aoBoat', url:'assets/aoBoat.jpg'},
+	{id:'map', url:'assets/colorMap.jpg'},
 ];
 
 const PATH_DROP = 'assets/inkDrops/inkDrops'
@@ -20,6 +22,12 @@ for (let i=0; i<35; i++) {
 		url
 	});
 }
+
+
+window.params = {
+	debugNoise:false,
+	zOffset:new alfrid.EaseNumber(0),
+};
 
 if(document.body) {
 	_init();
@@ -77,4 +85,6 @@ function _init3D() {
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
+
+	gui.add(params, 'debugNoise');
 }

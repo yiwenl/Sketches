@@ -5,12 +5,12 @@
 precision highp float;
 varying vec2 vTextureCoord;
 uniform sampler2D texture;
+uniform float uHeight;
 
 const float SHIFT = 0.0001;
-const float HEIGHT = 0.5;
 
 vec3 getPos(vec2 uv) {
-	float d = texture2D(texture, uv).r * HEIGHT;
+	float d = texture2D(texture, uv).r * uHeight;
 	return vec3(uv.x, d, uv.y);
 }
 

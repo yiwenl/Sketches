@@ -11,6 +11,7 @@ class ViewMountain extends alfrid.View {
 	
 	constructor() {
 		super(vs, fs);
+		this.rotation = 0;
 	}
 
 
@@ -117,62 +118,24 @@ class ViewMountain extends alfrid.View {
 		this._position = vec3.create();
 		this._scale = random(1.0, 4);
 		this._modelMatrix = mat4.create();
-		this._needUpdate = true;
 		this.textureIndex = Math.floor(Math.random() * 35);
 
 	}
 
 
-	render(textureMountains, isFlipped=false) {
-		this.shader.bind();
-		
+	render(textureMountains, isFlipped=false, shader, isFirst) {
+		if(isFirst) {
+			shader.bind();
+		}
 		textureMountains[this.textureIndex].bind(0);
 
-		this.shader.uniform("position", "vec3", this._position);
-		this.shader.uniform("scale", "vec3", [this._scale, this._scale, this._scale]);
-
-		this.shader.uniform("uFlip", "float", isFlipped ? -1.0 : 1.0);
+		shader.uniform("position", "vec3", this._position);
+		shader.uniform("scale", "vec3", [this._scale, this._scale, this._scale]);
+		shader.uniform("uRotation", "float", this.rotation);
+		shader.uniform("uFlip", "float", isFlipped ? -1.0 : 1.0);
 
 		// GL.rotate(this._modelMatrix);
 		GL.draw(this.mesh);
-	}
-
-
-	get x() {
-		return this._position[0];
-	}
-
-	set x(value) {
-		this._position[0] = value;
-		this._needUpdate = true;
-	}
-
-	get y() {
-		return this._position[1];
-	}
-
-	set y(value) {
-		this._position[1] = value;
-		this._needUpdate = true;
-	}
-
-	get z() {
-		return this._position[2];
-	}
-
-	set z(value) {
-		this._position[2] = value;
-		this._needUpdate = true;
-	}
-
-
-	get scale() {
-		return this._position[2];
-	}
-
-	set scale(value) {
-		this._scale = value;
-		this._needUpdate = true;
 	}
 
 }
