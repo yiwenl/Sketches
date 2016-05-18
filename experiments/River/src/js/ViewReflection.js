@@ -8,7 +8,7 @@ class ViewReflection extends alfrid.View {
 	constructor() {
 		super(alfrid.ShaderLibs.bigTriangleVert, fs);
 		this.reflectionStrength = 0.02;
-		gui.add(this, 'reflectionStrength', 0.001, 0.02);
+		// gui.add(this, 'reflectionStrength', 0.001, 0.02);
 	}
 
 

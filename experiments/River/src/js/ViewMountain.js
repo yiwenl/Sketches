@@ -116,19 +116,22 @@ class ViewMountain extends alfrid.View {
 		const grey = 1.00;
 		this.time = Math.random();
 		this._position = vec3.create();
-		this._scale = random(1.0, 4);
+		this._scale = random(2.0, 4);
 		this._modelMatrix = mat4.create();
 		this.textureIndex = Math.floor(Math.random() * 35);
 
 	}
 
 
-	render(textureMountains, isFlipped=false, shader, isFirst) {
+	render(textureMountains, textureBg, isFlipped=false, shader, isFirst) {
 		if(isFirst) {
 			shader.bind();
 		}
+		
+		shader.uniform("texture", "uniform1i", 0);
 		textureMountains[this.textureIndex].bind(0);
-
+		shader.uniform("textureBg", "uniform1i", 1);
+		textureBg.bind(1);
 		shader.uniform("position", "vec3", this.position);
 		shader.uniform("scale", "vec3", [this._scale, this._scale, this._scale]);
 		shader.uniform("uRotation", "float", this.rotation);
@@ -136,6 +139,7 @@ class ViewMountain extends alfrid.View {
 		shader.uniform("uFogOffset", "float", params.fogOffset);
 		shader.uniform("uMaxRange", "float", params.maxRange);
 		shader.uniform("uFadeInRange", "float", params.fadeInRange);
+		shader.uniform("uTime", "float", params.globalTime);
 
 		// GL.rotate(this._modelMatrix);
 		GL.draw(this.mesh);

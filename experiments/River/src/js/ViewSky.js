@@ -2,11 +2,13 @@
 
 import alfrid, {GL} from 'alfrid';
 const vs = require('../shaders/basic.vert');
+const fs = require('../shaders/sky.frag');
 
 class ViewSky extends alfrid.View {
 	
 	constructor() {
-		super(vs, alfrid.ShaderLibs.copyFrag);
+		// super(vs, alfrid.ShaderLibs.copyFrag);
+		super(vs, fs);
 	}
 
 
@@ -19,10 +21,11 @@ class ViewSky extends alfrid.View {
 	}
 
 
-	render(texture, isFlipped=false) {
+	render(texture, isFlipping=false) {
 		this.shader.bind();
 		texture.bind(0);
-		this.shader.uniform("uFlip", "float", isFlipped ? -1.0 : 1.0);
+		this.shader.uniform("uFlip", "float", isFlipping ? -1.0 : 1.0);
+		this.shader.uniform("uGlobalTime", "float", params.globalTime+0.5);
 		GL.draw(this.mesh);
 	}
 

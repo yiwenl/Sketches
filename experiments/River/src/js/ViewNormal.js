@@ -13,7 +13,7 @@ class ViewNormal extends alfrid.View {
 	_init() {
 		this.mesh = alfrid.Geom.bigTriangle();
 		this.heightOffset = 0.15;
-		gui.add(this, 'heightOffset', 0, 0.5);
+		// gui.add(this, 'heightOffset', 0, 0.5);
 	}
 
 

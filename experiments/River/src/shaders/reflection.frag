@@ -22,9 +22,6 @@ void main(void) {
     reflectOffset = (reflectOffset - .25 ) * uReflectionStrength;
 
     vec4 colorReflection = texture2D(textureReflection, vTextureCoord + reflectOffset);
-
-    gl_FragColor = vec4(waveNormal, 1.0);
-    gl_FragColor = vec4(flatNormal, 1.0);
-    gl_FragColor = vec4(eyeNormal, 1.0);
+    colorReflection.rgb *= .9;
     gl_FragColor = colorReflection;
 }

@@ -27,6 +27,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.radius.setTo(6);
 		this.orbitalControl.radius.value = 7;
 		this.orbitalControl.center[1] = 1;
+		this.orbitalControl.lockZoom(true);
 		//	limit camera angle
 		this.orbitalControl.rx.limit(0.05, Math.PI * 0.1);
 		const range = 0.34;
@@ -37,7 +38,8 @@ class SceneApp extends alfrid.Scene {
 		console.log('init textures');
 
 		//	fullsize reflection fbo ? 
-		this._fboReflection = new alfrid.FrameBuffer(1024, 1024);
+		const REFLECTOIN_SIZE = 512*2;
+		this._fboReflection = new alfrid.FrameBuffer(REFLECTOIN_SIZE, REFLECTOIN_SIZE);
 		this._textureNormal = new alfrid.GLTexture(getAsset('normal'));
 		this._textureNoise = new alfrid.GLTexture(getAsset('noise'));
 		this._textureBg = new alfrid.GLTexture(getAsset('bg'));
@@ -50,7 +52,7 @@ class SceneApp extends alfrid.Scene {
 		this._textureWhite = new alfrid.GLTexture(canvas);
 		this._textureBoat = new alfrid.GLTexture(getAsset('aoBoat'));
 
-		const NOISE_SIZE = 512;
+		const NOISE_SIZE = 512/2;
 		this._fboNoise = new alfrid.FrameBuffer(NOISE_SIZE, NOISE_SIZE);
 		this._fboNormal = new alfrid.FrameBuffer(NOISE_SIZE, NOISE_SIZE);
 	}
@@ -70,7 +72,7 @@ class SceneApp extends alfrid.Scene {
 		this._textureMountains = [];
 		this._mountains = [];
 
-		const NUM_MOUNTAINS = 75;
+		const NUM_MOUNTAINS = 50;
 		const RANGE = 7;
 		const RANGE_Z = params.maxRange;
 		const RIVER_WIDTH = 2.3;
@@ -90,12 +92,11 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		params.globalTime += 0.001;
 		params.zOffset.value += .1;
 		if(params.zOffset.value > params.maxRange * 2.0) {
 			params.zOffset.setTo(params.zOffset.value - params.maxRange * 2.0);
 		}
-		//	update boat direction ( based on keyboard control )
-		// this._vBoat.rotation = -this.orbitalControl.ry.value;
 		
 		GL.clear(0, 0, 0, 0);
 
@@ -135,7 +136,7 @@ class SceneApp extends alfrid.Scene {
 				m.position[2] += params.maxRange * 2;
 			}
 
-			m.render(this._textureMountains, true, shader, i == 0);
+			m.render(this._textureMountains, this._textureBg, true, shader, i == 0);
 		});
 
 		//	render boat
@@ -149,9 +150,11 @@ class SceneApp extends alfrid.Scene {
 		GL.disable(GL.DEPTH_TEST);
 		this._vReflection.render(this._fboReflection.getTexture(), this._fboNormal.getTexture());
 		GL.enable(GL.DEPTH_TEST);
-	
+		
+
+		this._vSky.render(this._textureBg, false);
 		this._mountains.map( (m, i) => {
-			m.render(this._textureMountains, false, shader, i == 0);
+			m.render(this._textureMountains, this._textureBg, false, shader, i == 0);
 		});
 
 		//*/

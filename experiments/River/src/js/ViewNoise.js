@@ -8,7 +8,7 @@ class ViewNoise extends alfrid.View {
 		super(alfrid.ShaderLibs.bigTriangleVert, fs);
 		this.time = Math.random();
 		this.waveOffset = 0.35;
-		gui.add(this, 'waveOffset', 0, 1);
+		// gui.add(this, 'waveOffset', 0, 1);
 	}
 
 

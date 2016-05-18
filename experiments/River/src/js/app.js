@@ -29,7 +29,8 @@ window.params = {
 	zOffset:new alfrid.EaseNumber(0),
 	maxRange:15,
 	fadeInRange:1,
-	fogOffset:0.01
+	fogOffset:0.01,
+	globalTime:Math.random() * 0xFF
 };
 
 if(document.body) {
@@ -84,11 +85,11 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({width:300});
+	// window.gui = new dat.GUI({width:300});
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
-	gui.add(params, 'debugNoise');
-	gui.add(params, 'fogOffset', 0, 0.1);
+	// gui.add(params, 'debugNoise');
+	// gui.add(params, 'fogOffset', 0, 0.1);
 }
