@@ -7,6 +7,8 @@ class ViewReflection extends alfrid.View {
 	
 	constructor() {
 		super(alfrid.ShaderLibs.bigTriangleVert, fs);
+		this.reflectionStrength = 0.02;
+		gui.add(this, 'reflectionStrength', 0.001, 0.02);
 	}
 
 
@@ -23,6 +25,8 @@ class ViewReflection extends alfrid.View {
 
 		this.shader.uniform("textureNormal", "uniform1i", 1);
 		textureNormal.bind(1);
+
+		this.shader.uniform("uReflectionStrength", "float", this.reflectionStrength);
 		
 		GL.draw(this.mesh);
 	}

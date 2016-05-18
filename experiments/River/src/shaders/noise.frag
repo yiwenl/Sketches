@@ -110,10 +110,11 @@ float fbm(vec3 p)
     f += 0.03125*simplex3D( p );
 	return f;
 }
+uniform float uWaveOffset;
 
 void main(void) {
 	vec2 uv = vTextureCoord * 4.0;
-	uv.x *= .25;
+	uv.x *= uWaveOffset;
 	float n = fbm(vec3(time,vec2(uv)))*0.5+0.5;
 	vec3 colorNoise = texture2D(texture, vTextureCoord * 2.0).rgb;
 

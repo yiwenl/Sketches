@@ -72,10 +72,9 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas);
 
-	//	CREATE SCENE
-	let scene = new SceneApp();
-
 	//	INIT DAT-GUI
 	window.gui = new dat.GUI({width:300});
 
+	//	CREATE SCENE
+	let scene = new SceneApp();
 }

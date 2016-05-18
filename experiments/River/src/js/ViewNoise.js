@@ -7,6 +7,8 @@ class ViewNoise extends alfrid.View {
 	constructor() {
 		super(alfrid.ShaderLibs.bigTriangleVert, fs);
 		this.time = Math.random();
+		this.waveOffset = 0.35;
+		gui.add(this, 'waveOffset', 0, 1);
 	}
 
 
@@ -20,6 +22,7 @@ class ViewNoise extends alfrid.View {
 		this.shader.bind();
 		this.shader.uniform("time", "float", this.time);
 		this.shader.uniform("texture", "uniform1i", 0);
+		this.shader.uniform("uWaveOffset", "float", this.waveOffset);
 		texture.bind(0);
 		GL.draw(this.mesh);
 	}

@@ -21,7 +21,7 @@ class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = .24;
+		this.orbitalControl.rx.value = .1;
 		this.orbitalControl.radius.value = 10;
 		//	limit camera angle
 		this.orbitalControl.rx.limit(0, Math.PI/3);
@@ -121,7 +121,7 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		
-		/*/
+		//*/
 		const size = 200;
 		GL.viewport(0, 0, size, size);
 		this._bCopy.draw(this._fboNoise.getTexture());
