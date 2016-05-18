@@ -1,26 +1,29 @@
 // ViewReflection.js
 
-import alfrid from 'alfrid';
-let GL = alfrid.GL;
-const fs = require('../shaders/reflection.frag')
+import alfrid , { GL } from 'alfrid';
+const fs = require('../shaders/reflection.frag');
 
 class ViewReflection extends alfrid.View {
 	
 	constructor() {
-		super(null, fs);
+		super(alfrid.ShaderLibs.bigTriangleVert, fs);
 	}
 
 
 	_init() {
-		const size = params.mapSize * 2.0;
-		this.mesh = alfrid.Geom.plane(size, size, 1, false, 'xz');
+		this.mesh = alfrid.Geom.bigTriangle();
 	}
 
 
-	render(texture) {
+	render(textureReflection, textureNormal) {
 		this.shader.bind();
-		this.shader.uniform("texture", "uniform1i", 0);
-		texture.bind(0);
+
+		this.shader.uniform("textureReflection", "uniform1i", 0);
+		textureReflection.bind(0);
+
+		this.shader.uniform("textureNormal", "uniform1i", 1);
+		textureNormal.bind(1);
+		
 		GL.draw(this.mesh);
 	}
 

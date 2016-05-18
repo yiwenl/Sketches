@@ -1,101 +1,138 @@
 // SceneApp.js
 
-import alfrid , { Scene } from 'alfrid';
-import ViewObjModel from './ViewObjModel';
-import ViewBox from './ViewBox';
-import ViewMap from './ViewMap';
+import alfrid , { GL, Scene } from 'alfrid';
+import ViewCube from './ViewCube';
 import ViewReflection from './ViewReflection';
+import ViewNoise from './ViewNoise';
+import ViewNormal from './ViewNormal';
+import ViewMountain from './ViewMountain';
+import ViewSky from './ViewSky';
 
-const GL = alfrid.GL;
+var random = function(min, max) { return min + Math.random() * (max - min);	}
+window.getAsset = function(id) {
+	for(var i=0; i<assets.length; i++) {
+		if(id === assets[i].id) {
+			return assets[i].file;
+		}
+	}
+}
 
 class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = Math.PI/6;
-		this.orbitalControl.radius.value = 20;
+		this.orbitalControl.rx.value = this.orbitalControl.ry.value = .24;
+		this.orbitalControl.radius.value = 10;
+		//	limit camera angle
+		this.orbitalControl.rx.limit(0, Math.PI/3);
 	}
 
 	_initTextures() {
 		console.log('init textures');
-		function getAsset(id) {
-			for(var i=0; i<assets.length; i++) {
-				if(id === assets[i].id) {
-					return assets[i].file;
-				}
-			}
-		}
 
-		let irr_posx = alfrid.HDRLoader.parse(getAsset('irr_posx'))
-		let irr_negx = alfrid.HDRLoader.parse(getAsset('irr_negx'))
-		let irr_posy = alfrid.HDRLoader.parse(getAsset('irr_posy'))
-		let irr_negy = alfrid.HDRLoader.parse(getAsset('irr_negy'))
-		let irr_posz = alfrid.HDRLoader.parse(getAsset('irr_posz'))
-		let irr_negz = alfrid.HDRLoader.parse(getAsset('irr_negz'))
+		//	fullsize reflection fbo ? 
+		this._fboReflection = new alfrid.FrameBuffer(1024, 1024);
+		this._textureNormal = new alfrid.GLTexture(getAsset('normal'));
+		this._textureNoise = new alfrid.GLTexture(getAsset('noise'));
+		this._textureBg = new alfrid.GLTexture(getAsset('bg'));
 
-		this._textureIrr = new alfrid.GLCubeTexture([irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz]);
-
-		let rad_posx = alfrid.HDRLoader.parse(getAsset('rad_posx'))
-		let rad_negx = alfrid.HDRLoader.parse(getAsset('rad_negx'))
-		let rad_posy = alfrid.HDRLoader.parse(getAsset('rad_posy'))
-		let rad_negy = alfrid.HDRLoader.parse(getAsset('rad_negy'))
-		let rad_posz = alfrid.HDRLoader.parse(getAsset('rad_posz'))
-		let rad_negz = alfrid.HDRLoader.parse(getAsset('rad_negz'))
-
-		this._textureRad = new alfrid.GLCubeTexture([rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz]);
-
-		this._textureMap = new alfrid.GLTexture(getAsset('colorMap'));
-		this._textureHeight = new alfrid.GLTexture(getAsset('heightBlur'));
-
-		let canvas = document.createElement("canvas");
-		canvas.width = canvas.height = 4;
-		let ctx = canvas.getContext('2d');
-		ctx.fillStyle = '#FFF';
-		ctx.fillRect(0, 0, 4, 4);
-		this._textureWhite = new alfrid.GLTexture(canvas);
-
-		this._fboReflection = new alfrid.FrameBuffer(GL.width, GL.height);
+		const NOISE_SIZE = 512;
+		this._fboNoise = new alfrid.FrameBuffer(NOISE_SIZE, NOISE_SIZE);
+		this._fboNormal = new alfrid.FrameBuffer(NOISE_SIZE, NOISE_SIZE);
 	}
 
 
 	_initViews() {
+		console.log('init views');
+		
 		this._bCopy = new alfrid.BatchCopy();
 		this._bAxis = new alfrid.BatchAxis();
 		this._bDots = new alfrid.BatchDotsPlane();
 		this._bBall = new alfrid.BatchBall();
-		this._bSkybox = new alfrid.BatchSkybox();
 
-		this._vBox = new ViewBox();
-		this._vMap = new ViewMap();
+		this._vCube = new ViewCube();
 		this._vReflection = new ViewReflection();
+		this._vNoise = new ViewNoise();
+		this._vNormal = new ViewNormal();
+		this._vSky = new ViewSky();
+
+		this._textureMountains = [];
+		this._mountains = [];
+
+		const NUM_MOUNTAINS = 20;
+		const RANGE = 4;
+		const RANGE_Z = 5;
+		const RIVER_WIDTH = 1;
+		for(let i=0; i<NUM_MOUNTAINS; i++) {
+			let v = new ViewMountain();
+			let x = random(RIVER_WIDTH, RANGE);
+			if(Math.random() > .5) x *= -1;
+			v.x = x;
+			v.z = random(-RANGE_Z, RANGE_Z);
+			this._mountains.push(v);
+			if(!this._textureMountains[v.textureIndex]) {
+				this._textureMountains[v.textureIndex] = new alfrid.GLTexture(getAsset('inkDrops'+v.textureIndex));
+			}
+		}
 	}
 
 
 	render() {
+		//	update mountain positioin ( keep moving forward )
+		//	update boat direction ( based on keyboard control )
 		GL.clear(0, 0, 0, 0);
-		// this._bSkybox.draw(this._textureRad);
-		// this._bAxis.draw();
-		// this._bDots.draw();
 
-		// this._vModel.render(this._textureRad, this._textureIrr, this._textureAO);
-		
+		this._fboNoise.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vNoise.render(this._textureNoise);
+		this._fboNoise.unbind();
 
+		this._fboNormal.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vNormal.render(this._fboNoise.getTexture());
+		this._fboNormal.unbind();
 
 		this._fboReflection.bind();
 		GL.clear(0, 0, 0, 0);
 		GL.gl.cullFace(GL.gl.FRONT);
-		this._vBox.render(this._textureRad, this._textureIrr, this._textureWhite, true);
+		// this._vCube.render(true);
+		//	render skybox ( reflection map )
+		this._vSky.render(this._textureBg, true);
+
+		//	render mountains
+		for(let i=0; i<this._mountains.length; i++) {
+			let m = this._mountains[i];
+			m.render(this._textureMountains, true);
+		}
+
+		//	render boat
 		GL.gl.cullFace(GL.gl.BACK);
 		this._fboReflection.unbind();
-		// this._vMap.render(this._textureMap, this._textureHeight, this._textureRad, this._textureIrr, this._textureWhite);
 
-		// const size = 200;
-		// GL.viewport(0, 0, size, size/GL.aspectRatio);
-		// GL.disable(GL.DEPTH_TEST);
-		// this._bCopy.draw(this._fboReflection.getTexture());
-		// GL.enable(GL.DEPTH_TEST);
-		this._vBox.render(this._textureRad, this._textureIrr, this._textureWhite);
-		this._vReflection.render(this._fboReflection.getTexture());
+		GL.disable(GL.DEPTH_TEST);
+		this._vReflection.render(this._fboReflection.getTexture(), this._fboNormal.getTexture());
+		GL.enable(GL.DEPTH_TEST);
+
+
+		// this._vSky.render(this._textureBg);
+		for(let i=0; i<this._mountains.length; i++) {
+			let m = this._mountains[i];
+			m.render(this._textureMountains);
+		}
+
+		
+		/*/
+		const size = 200;
+		GL.viewport(0, 0, size, size);
+		this._bCopy.draw(this._fboNoise.getTexture());
+		GL.viewport(size, 0, size, size);
+		this._bCopy.draw(this._fboNormal.getTexture());
+		//*/
+	}
+
+
+	renderReflection() {
+
 	}
 
 

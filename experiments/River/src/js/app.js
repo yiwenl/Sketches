@@ -5,32 +5,21 @@ import AssetsLoader from 'assets-loader';
 import dat from 'dat-gui';
 
 const GL = alfrid.GL;
-
-window.params = {
-	mapSize:7,
-	mapY:2,
-	gamma:2.2,
-	exposure:5
-};
-
 const assets = [
-	{id:'colorMap', url:'assets/colorMap.jpg'},
-	{id:'heightBlur', url:'assets/heightBlur.jpg'},
-	{id:'irr_posx', url:'assets/irr_posx.hdr', type:'binary'},
-	{id:'irr_posx', url:'assets/irr_posx.hdr', type:'binary'},
-	{id:'irr_posy', url:'assets/irr_posy.hdr', type:'binary'},
-	{id:'irr_posz', url:'assets/irr_posz.hdr', type:'binary'},
-	{id:'irr_negx', url:'assets/irr_negx.hdr', type:'binary'},
-	{id:'irr_negy', url:'assets/irr_negy.hdr', type:'binary'},
-	{id:'irr_negz', url:'assets/irr_negz.hdr', type:'binary'},
-
-	{id:'rad_posx', url:'assets/rad_posx.hdr', type:'binary'},
-	{id:'rad_posy', url:'assets/rad_posy.hdr', type:'binary'},
-	{id:'rad_posz', url:'assets/rad_posz.hdr', type:'binary'},
-	{id:'rad_negx', url:'assets/rad_negx.hdr', type:'binary'},
-	{id:'rad_negy', url:'assets/rad_negy.hdr', type:'binary'},
-	{id:'rad_negz', url:'assets/rad_negz.hdr', type:'binary'}
+	{id:'normal', url:'assets/waterNormal.jpg'},
+	{id:'noise', url:'assets/noise.jpg'},
+	{id:'bg', url:'assets/bg.jpg'},
 ];
+
+const PATH_DROP = 'assets/inkDrops/inkDrops'
+for (let i=0; i<35; i++) {
+	let id = `inkDrops${i}`; 
+	let url = `${PATH_DROP}${i}.jpg`;
+	assets.push({
+		id,
+		url
+	});
+}
 
 if(document.body) {
 	_init();
@@ -74,6 +63,7 @@ function _onImageLoaded(o) {
 
 
 function _init3D() {
+
 	//	CREATE CANVAS
 	let canvas = document.createElement("canvas");
 	canvas.className = 'Main-Canvas';
@@ -82,13 +72,10 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas);
 
-	//	INIT DAT-GUI
-	window.gui = new dat.GUI({width:300});
-
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
-	
-	gui.add(params, 'gamma', 1, 5);
-	gui.add(params, 'exposure', 1, 25);
+	//	INIT DAT-GUI
+	window.gui = new dat.GUI({width:300});
+
 }

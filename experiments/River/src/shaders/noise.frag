@@ -112,8 +112,10 @@ float fbm(vec3 p)
 }
 
 void main(void) {
-	float n = fbm(vec3(time,vec2(vTextureCoord)))*0.5+0.5;
+	vec2 uv = vTextureCoord * 4.0;
+	uv.x *= .25;
+	float n = fbm(vec3(time,vec2(uv)))*0.5+0.5;
 	vec3 colorNoise = texture2D(texture, vTextureCoord * 2.0).rgb;
 
-    gl_FragColor = vec4(vec3(n) + colorNoise * 0.01, 1.0);
+    gl_FragColor = vec4(vec3(n) + colorNoise * 0.003 , 1.0);
 }
