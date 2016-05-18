@@ -28,6 +28,8 @@ window.params = {
 	debugNoise:false,
 	zOffset:new alfrid.EaseNumber(0),
 	maxRange:15,
+	fadeInRange:1,
+	fogOffset:0.01
 };
 
 if(document.body) {
@@ -88,4 +90,5 @@ function _init3D() {
 	let scene = new SceneApp();
 
 	gui.add(params, 'debugNoise');
+	gui.add(params, 'fogOffset', 0, 0.1);
 }

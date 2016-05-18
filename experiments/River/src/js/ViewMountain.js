@@ -133,6 +133,9 @@ class ViewMountain extends alfrid.View {
 		shader.uniform("scale", "vec3", [this._scale, this._scale, this._scale]);
 		shader.uniform("uRotation", "float", this.rotation);
 		shader.uniform("uFlip", "float", isFlipped ? -1.0 : 1.0);
+		shader.uniform("uFogOffset", "float", params.fogOffset);
+		shader.uniform("uMaxRange", "float", params.maxRange);
+		shader.uniform("uFadeInRange", "float", params.fadeInRange);
 
 		// GL.rotate(this._modelMatrix);
 		GL.draw(this.mesh);

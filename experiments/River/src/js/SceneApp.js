@@ -23,10 +23,14 @@ class SceneApp extends alfrid.Scene {
 		super();
 		GL.enableAlphaBlending();
 
-		this.orbitalControl.rx.value = .1;
-		this.orbitalControl.radius.value = 10;
+		this.orbitalControl.rx.value = 0.05;
+		this.orbitalControl.radius.setTo(6);
+		this.orbitalControl.radius.value = 7;
+		this.orbitalControl.center[1] = 1;
 		//	limit camera angle
-		this.orbitalControl.rx.limit(0, Math.PI/3);
+		this.orbitalControl.rx.limit(0.05, Math.PI * 0.1);
+		const range = 0.34;
+		this.orbitalControl.ry.limit(-range, range);
 	}
 
 	_initTextures() {
@@ -55,9 +59,6 @@ class SceneApp extends alfrid.Scene {
 	_initViews() {
 		console.log('init views');
 		this._bCopy = new alfrid.BatchCopy();
-		// this._bAxis = new alfrid.BatchAxis();
-		// this._bDots = new alfrid.BatchDotsPlane();
-		// this._bBall = new alfrid.BatchBall();
 
 		this._vReflection = new ViewReflection();
 		this._vNoise = new ViewNoise();
@@ -69,10 +70,10 @@ class SceneApp extends alfrid.Scene {
 		this._textureMountains = [];
 		this._mountains = [];
 
-		const NUM_MOUNTAINS = 40;
-		const RANGE = 4;
+		const NUM_MOUNTAINS = 75;
+		const RANGE = 7;
 		const RANGE_Z = params.maxRange;
-		const RIVER_WIDTH = 1.5;
+		const RIVER_WIDTH = 2.3;
 		for(let i=0; i<NUM_MOUNTAINS; i++) {
 			let v = new ViewMountain();
 			let x = random(RIVER_WIDTH, RANGE);
@@ -90,6 +91,9 @@ class SceneApp extends alfrid.Scene {
 
 	render() {
 		params.zOffset.value += .1;
+		if(params.zOffset.value > params.maxRange * 2.0) {
+			params.zOffset.setTo(params.zOffset.value - params.maxRange * 2.0);
+		}
 		//	update boat direction ( based on keyboard control )
 		// this._vBoat.rotation = -this.orbitalControl.ry.value;
 		
@@ -121,14 +125,14 @@ class SceneApp extends alfrid.Scene {
 		this._mountains.map( (m, i) => {
 
 			//	update mountain position
-			let offset = params.zOffset.value % (params.maxRange * 2);
+			let offset = params.zOffset.value;
+			let offsetX = Math.cos(m.position[2]/params.maxRange * Math.PI/2) * 5.0 - 4.5;
+			m.position[0] = m.orgPosition[0] + offsetX;
 			m.position[2] = m.orgPosition[2] + offset;
 			if(m.position[2] > params.maxRange) {
 				m.position[2] -= params.maxRange * 2;
-				// m.rotation = Math.random() * Math.PI * 2;
 			} else if(m.position[2] < -params.maxRange) {
 				m.position[2] += params.maxRange * 2;
-				// m.rotation = Math.random() * Math.PI * 2;
 			}
 
 			m.render(this._textureMountains, true, shader, i == 0);
