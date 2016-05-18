@@ -138,6 +138,12 @@ class ViewMountain extends alfrid.View {
 		GL.draw(this.mesh);
 	}
 
+
+	setPosition(x, z) {
+		this.position = [x, 0, z];
+		this.orgPosition = [x, 0, z];
+	}
+
 }
 
 export default ViewMountain;

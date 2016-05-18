@@ -54,11 +54,10 @@ class SceneApp extends alfrid.Scene {
 
 	_initViews() {
 		console.log('init views');
-		
 		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
-		this._bBall = new alfrid.BatchBall();
+		// this._bAxis = new alfrid.BatchAxis();
+		// this._bDots = new alfrid.BatchDotsPlane();
+		// this._bBall = new alfrid.BatchBall();
 
 		this._vReflection = new ViewReflection();
 		this._vNoise = new ViewNoise();
@@ -77,10 +76,11 @@ class SceneApp extends alfrid.Scene {
 		for(let i=0; i<NUM_MOUNTAINS; i++) {
 			let v = new ViewMountain();
 			let x = random(RIVER_WIDTH, RANGE);
+			let z = random(-RANGE_Z, RANGE_Z); 
 			if(Math.random() > .5) x *= -1;
-			v.x = x;
-			v.z = random(-RANGE_Z, RANGE_Z);
+			v.setPosition(x, z);
 			this._mountains.push(v);
+
 			if(!this._textureMountains[v.textureIndex]) {
 				this._textureMountains[v.textureIndex] = new alfrid.GLTexture(getAsset('inkDrops'+v.textureIndex));
 			}
@@ -89,9 +89,6 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
-		//	update mountain positioin ( keep moving forward )
-		
-
 		//	update boat direction ( based on keyboard control )
 		// this._vBoat.rotation = -this.orbitalControl.ry.value;
 		
@@ -110,7 +107,7 @@ class SceneApp extends alfrid.Scene {
 		this._vMap.render();
 
 		
-
+		//	render reflection
 		this._fboReflection.bind();
 		GL.clear(0, 0, 0, 0);
 		GL.gl.cullFace(GL.gl.FRONT);
@@ -120,31 +117,34 @@ class SceneApp extends alfrid.Scene {
 
 		//	render mountains
 		const shader = this._mountains[0].shader;
-		for(let i=0; i<this._mountains.length; i++) {
-			let m = this._mountains[i];
-			// m.render(this._textureMountains, true, shader, i == 0);
-		}
+		this._mountains.map( (m, i) => {
+
+			//	update mountain position
+			m.position[2] = m.orgPosition[2] + params.zOffset.value;
+			if(m.position[2] > params.maxRange) {
+				m.position[2] -= params.maxRange * 2;
+			} else if(m.position[2] < params.maxRange) {
+				m.position[2] += params.maxRange * 2;
+			}
+
+			m.render(this._textureMountains, true, shader, i == 0);
+		});
 
 		//	render boat
-
 		this._vBoat.render(this._textureBoat, true);
 
 		GL.gl.cullFace(GL.gl.BACK);
 		this._fboReflection.unbind();
 
-
-		
+		//	render for real
 /*
 		GL.disable(GL.DEPTH_TEST);
 		this._vReflection.render(this._fboReflection.getTexture(), this._fboNormal.getTexture());
 		GL.enable(GL.DEPTH_TEST);
 	
-
-		// this._vSky.render(this._textureBg);
-		for(let i=0; i<this._mountains.length; i++) {
-			let m = this._mountains[i];
-			m.render(this._textureMountains, false, shader, i == 0);
-		}
+		this._mountains.map( (m, i) => {
+			m.render(this._textureMountains, true, shader, i == 0);
+		});
 
 		*/
 
@@ -158,11 +158,6 @@ class SceneApp extends alfrid.Scene {
 			GL.viewport(size, 0, size, size);
 			this._bCopy.draw(this._fboNormal.getTexture());	
 		}
-	}
-
-
-	renderReflection() {
-
 	}
 
 
