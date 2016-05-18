@@ -121,7 +121,7 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		
-		//*/
+		/*/
 		const size = 200;
 		GL.viewport(0, 0, size, size);
 		this._bCopy.draw(this._fboNoise.getTexture());
