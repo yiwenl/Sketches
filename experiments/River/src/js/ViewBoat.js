@@ -9,8 +9,8 @@ class Viewboat extends alfrid.View {
 	constructor() {
 		super(vs, fs);
 
-		this.position = [0, 0, 0];
-		this.scale = 1;
+		this.position = [0, 0, 5];
+		this.scale = .1;
 		this.rotation = 0;
 	}
 

@@ -27,7 +27,7 @@ for (let i=0; i<35; i++) {
 window.params = {
 	debugNoise:false,
 	zOffset:new alfrid.EaseNumber(0),
-	maxRange:10,
+	maxRange:15,
 };
 
 if(document.body) {

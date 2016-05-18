@@ -18,19 +18,22 @@ float fogFactorExp2(const float dist, const float density) {
 }
 
 
-#define FOG_DENSITY 0.05
-const vec3 fogColor = vec4(245.0/255.0, 223.0/255.0, 212.0/255.0);
+#define FOG_DENSITY 0.07
+const vec3 fogColor = vec3(245.0/255.0, 223.0/255.0, 212.0/255.0);
 
 void main(void) {
 
 	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
-	float fogAmount = fog_exp2(fogDistance, FOG_DENSITY);
+	float fogAmount = fogFactorExp2(fogDistance, FOG_DENSITY);
 
 	const float MIN_Y = 0.005;
 	float opacity = smoothstep(0.0, MIN_Y, abs(vPosition.y));
     vec4 color = texture2D(texture, vTextureCoord);
-    color.rgb *= fogColor;
+    // color.rgb *= fogColor;
+    color.rgb = mix(color.rgb, fogColor, fogAmount);
     color *= opacity;
+    color.rgb *= opacity;
+    // color.rgb = vec3(fogAmount);
 
-    gl_FragCoord = color;
+    gl_FragColor = color;
 }

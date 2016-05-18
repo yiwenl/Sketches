@@ -129,7 +129,7 @@ class ViewMountain extends alfrid.View {
 		}
 		textureMountains[this.textureIndex].bind(0);
 
-		shader.uniform("position", "vec3", this._position);
+		shader.uniform("position", "vec3", this.position);
 		shader.uniform("scale", "vec3", [this._scale, this._scale, this._scale]);
 		shader.uniform("uRotation", "float", this.rotation);
 		shader.uniform("uFlip", "float", isFlipped ? -1.0 : 1.0);

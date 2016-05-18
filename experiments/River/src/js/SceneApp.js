@@ -71,7 +71,7 @@ class SceneApp extends alfrid.Scene {
 
 		const NUM_MOUNTAINS = 40;
 		const RANGE = 4;
-		const RANGE_Z = 10;
+		const RANGE_Z = params.maxRange;
 		const RIVER_WIDTH = 1.5;
 		for(let i=0; i<NUM_MOUNTAINS; i++) {
 			let v = new ViewMountain();
@@ -89,6 +89,7 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		params.zOffset.value += .1;
 		//	update boat direction ( based on keyboard control )
 		// this._vBoat.rotation = -this.orbitalControl.ry.value;
 		
@@ -104,7 +105,7 @@ class SceneApp extends alfrid.Scene {
 		this._vNormal.render(this._fboNoise.getTexture());
 		this._fboNormal.unbind();
 
-		this._vMap.render();
+		// this._vMap.render();
 
 		
 		//	render reflection
@@ -120,11 +121,14 @@ class SceneApp extends alfrid.Scene {
 		this._mountains.map( (m, i) => {
 
 			//	update mountain position
-			m.position[2] = m.orgPosition[2] + params.zOffset.value;
+			let offset = params.zOffset.value % (params.maxRange * 2);
+			m.position[2] = m.orgPosition[2] + offset;
 			if(m.position[2] > params.maxRange) {
 				m.position[2] -= params.maxRange * 2;
-			} else if(m.position[2] < params.maxRange) {
+				// m.rotation = Math.random() * Math.PI * 2;
+			} else if(m.position[2] < -params.maxRange) {
 				m.position[2] += params.maxRange * 2;
+				// m.rotation = Math.random() * Math.PI * 2;
 			}
 
 			m.render(this._textureMountains, true, shader, i == 0);
@@ -137,18 +141,18 @@ class SceneApp extends alfrid.Scene {
 		this._fboReflection.unbind();
 
 		//	render for real
-/*
+//*/
 		GL.disable(GL.DEPTH_TEST);
 		this._vReflection.render(this._fboReflection.getTexture(), this._fboNormal.getTexture());
 		GL.enable(GL.DEPTH_TEST);
 	
 		this._mountains.map( (m, i) => {
-			m.render(this._textureMountains, true, shader, i == 0);
+			m.render(this._textureMountains, false, shader, i == 0);
 		});
 
-		*/
+		//*/
 
-		// this._vBoat.render(this._textureBoat, false);
+		this._vBoat.render(this._textureBoat, false);
 
 		
 		if(params.debugNoise) {
