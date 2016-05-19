@@ -6,8 +6,8 @@ import ViewNoise from './ViewNoise';
 import ViewNormal from './ViewNormal';
 import ViewMountain from './ViewMountain';
 import ViewSky from './ViewSky';
-import ViewMap from './ViewMap';
 import ViewBoat from './ViewBoat';
+// import ViewGiant from './ViewGiant';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 window.getAsset = function(id) {
@@ -22,6 +22,9 @@ class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
+
+		const RAD = Math.PI / 180;
+		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 100);
 
 		this.orbitalControl.rx.value = 0.05;
 		this.orbitalControl.radius.setTo(6);
@@ -51,6 +54,7 @@ class SceneApp extends alfrid.Scene {
 		ctx.fillRect(0, 0, 4, 4);
 		this._textureWhite = new alfrid.GLTexture(canvas);
 		this._textureBoat = new alfrid.GLTexture(getAsset('aoBoat'));
+		this._textureGiant = new alfrid.GLTexture(getAsset('aoGiant'));
 
 		const NOISE_SIZE = 512/2;
 		this._fboNoise = new alfrid.FrameBuffer(NOISE_SIZE, NOISE_SIZE);
@@ -66,8 +70,8 @@ class SceneApp extends alfrid.Scene {
 		this._vNoise = new ViewNoise();
 		this._vNormal = new ViewNormal();
 		this._vSky = new ViewSky();
-		this._vMap = new ViewMap();
 		this._vBoat = new ViewBoat();
+		// this._vGiant = new ViewGiant();
 
 		this._textureMountains = [];
 		this._mountains = [];
@@ -160,6 +164,7 @@ class SceneApp extends alfrid.Scene {
 		//*/
 
 		this._vBoat.render(this._textureBoat, false);
+		// this._vGiant.render(this._textureGiant, false);
 
 		
 		if(params.debugNoise) {

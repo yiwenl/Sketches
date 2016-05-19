@@ -1,24 +1,24 @@
-// ViewBoat.js
+// ViewGiant.js
 
 import alfrid, { GL } from 'alfrid';
 const vs = require('../shaders/basic.vert');
-const fs = require('../shaders/boat.frag');
+const fs = require('../shaders/giant.frag');
 
-class Viewboat extends alfrid.View {
+class ViewGiant extends alfrid.View {
 	
 	constructor() {
 		super(vs, fs);
 
-		this.position = [0, 0.001, 5];
-		this.scale = .1;
-		this.rotation = .05;
+		this.position = [-7, 0.0, -8];
+		this.scale = 1;
+		this.rotation = Math.PI;
 	}
 
 
 	_init() {
 		// this.mesh;
 		const loader = new alfrid.ObjLoader();
-		loader.load('assets/boat.obj', (e)=>this._onObjLoaded(e), false);
+		loader.load('assets/giant.obj', (e)=>this._onObjLoaded(e), false);
 	}
 
 
@@ -39,10 +39,11 @@ class Viewboat extends alfrid.View {
 		this.shader.uniform("scale", "vec3", [this.scale, this.scale, this.scale]);
 		this.shader.uniform("uFlip", "float", isFlipping ? -1.0 : 1.0);
 		this.shader.uniform("uRotation", "float", this.rotation);
+		this.shader.uniform("uGlobalTime", "float", params.globalTime);
 		GL.draw(this.mesh);
 	}
 
 
 }
 
-export default Viewboat;
+export default ViewGiant;

@@ -19,10 +19,10 @@ class ViewMountain extends alfrid.View {
 		const NUM = 30;
 		const uvGap = 1.0 / NUM;
 		const SEED = Math.random() * 0xFF;
-		const SIZE = 0.5;
+		const SIZE = random(0.5, .7);
 		const posOffset = random(3.0, 7.0);
-		const power = random(2, 4);
-		const HEIGHT = random(.25, .6);
+		const power = random(2, 5);
+		const HEIGHT = random(.25, .7);
 		const NOISE_HEIGHT = random(.25, .35);
 
 		let positions = [];

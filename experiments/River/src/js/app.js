@@ -10,7 +10,7 @@ const assets = [
 	{id:'noise', url:'assets/noise.jpg'},
 	{id:'bg', url:'assets/bg.jpg'},
 	{id:'aoBoat', url:'assets/aoBoat.jpg'},
-	{id:'map', url:'assets/colorMap.jpg'},
+	{id:'aoGiant', url:'assets/aoGiant.jpg'},
 ];
 
 const PATH_DROP = 'assets/inkDrops/inkDrops'

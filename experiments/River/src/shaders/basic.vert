@@ -34,6 +34,7 @@ void main(void) {
 	gl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 	vTextureCoord = aTextureCoord;
 	vNormal       = aNormal;
+	vNormal.xz 	  = rotate(vNormal.xz, uRotation);
 	vPosition     = pos;
 
 	vOrgPosition  = aVertexPosition;
