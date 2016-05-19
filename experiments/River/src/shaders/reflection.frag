@@ -9,6 +9,13 @@ uniform sampler2D textureNormal;
 uniform mat3 uNormalMatrix;
 uniform float uReflectionStrength;
 
+float diffuse(vec3 N, vec3 L) {
+    return max(dot(N, normalize(L)), 0.0);
+}
+
+const vec3 LIGHT = vec3(0.0, 1.0, 1.0);
+
+
 void main(void) {
 	vec3 mirrorNormal = vec3(0.0, 1.0, 0.0);
     vec2 uv = vTextureCoord;
@@ -17,7 +24,9 @@ void main(void) {
 
 	vec3 flatNormal = waveNormal - dot (waveNormal, mirrorNormal) * mirrorNormal;
 	vec3 eyeNormal = uNormalMatrix * flatNormal;
-    vec2 reflectOffset = normalize (eyeNormal.xy) * length (flatNormal);
+    // float d = diffuse(eyeNormal, LIGHT);
+    // d = mix(d, 1.0, .9) * .95;
+    vec2 reflectOffset = normalize(eyeNormal.xy) * length(flatNormal);
     // reflectOffset = (reflectOffset - .25 ) * 0.01;
     reflectOffset = (reflectOffset - .25 ) * uReflectionStrength;
 
