@@ -72,7 +72,7 @@ class SceneApp extends alfrid.Scene {
 		this._textureMountains = [];
 		this._mountains = [];
 
-		const NUM_MOUNTAINS = 50;
+		const NUM_MOUNTAINS = 100;
 		const RANGE = 7;
 		const RANGE_Z = params.maxRange;
 		const RIVER_WIDTH = 2.3;

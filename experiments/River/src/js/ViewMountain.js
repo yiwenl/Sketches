@@ -22,7 +22,7 @@ class ViewMountain extends alfrid.View {
 		const SIZE = 0.5;
 		const posOffset = random(3.0, 7.0);
 		const power = random(2, 4);
-		const HEIGHT = random(.25, .4);
+		const HEIGHT = random(.25, .6);
 		const NOISE_HEIGHT = random(.25, .35);
 
 		let positions = [];
