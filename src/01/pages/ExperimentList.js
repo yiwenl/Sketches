@@ -9,8 +9,8 @@ const ExperimentList = ({
 	return (
 		<div className="Experiment-List">
 			{
-				experiments.map( (exp) => {
-					let dest = baseUrl + 'exps/'+exp.id.toString();
+				experiments.map( (exp, i) => {
+					let dest = baseUrl + 'exps/'+i.toString();
 					let divStyle = {
 						color: 'white',
 						backgroundImage: 'url(' + exp.cover + ')',
@@ -19,7 +19,7 @@ const ExperimentList = ({
 					return (
 						<Link 
 							to={dest} 
-							key={exp.id} 
+							key={i} 
 							className="Experiment-Item"
 							style={divStyle} />
 					);

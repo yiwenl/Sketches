@@ -7,47 +7,54 @@ Object.defineProperty(exports, '__esModule', {
 var ExpModel = [{
 	cover: 'assets/sketchCoverParticles.jpg',
 	url: 'http://yiwenl.github.io/Sketches/experiments/selfshadingParticles/dist/index.html',
-	id: 0,
 	opened: false
 }, {
 	cover: 'assets/sketchCoverReflection.jpg',
 	url: 'http://yiwenl.github.io/Sketches/experiments/reflectiveSoundVis/dist/index.html',
-	id: 1,
 	opened: false
 }, {
 	cover: 'assets/sketchCoverNefertiti.jpg',
 	url: 'http://yiwenl.github.io/Sketches/experiments/Nefertiti/dist/index.html',
-	id: 2,
 	opened: false
 }, {
 	cover: 'assets/sketchCoverFlocking.jpg',
 	url: 'http://yiwenl.github.io/Sketches/experiments/flockingBW/dist/index.html',
-	id: 3,
 	opened: false
 }, {
 	cover: 'assets/sketchCoverRosetta.jpg',
 	url: 'http://yiwenl.github.io/Sketches/experiments/rosetta/dist/index.html',
-	id: 4,
 	opened: false
 }, {
 	cover: 'assets/coverSketchNike.jpg',
 	url: 'http://yiwenl.github.io/Sketches/experiments/Bloom/dist/index.html',
-	id: 5,
 	opened: false
 }, {
 	cover: 'assets/coverSketchBloom.jpg',
 	url: 'http://yiwenl.github.io/Sketches/experiments/feathers/dist/index.html',
-	id: 6,
 	opened: false
 }, {
 	cover: 'assets/coverSketchClustering.jpg',
 	url: 'http://yiwenl.github.io/Sketches/experiments/flocking01/dist/index.html',
-	id: 7,
 	opened: false
 }, {
 	cover: 'assets/coverSketchRefraction.jpg',
 	url: 'http://yiwenl.github.io/Sketches/experiments/Refaction/dist/index.html',
-	id: 8,
+	opened: false
+}, {
+	cover: 'assets/textureProj.jpg',
+	url: 'http://yiwenl.github.io/Sketches/experiments/mask/dist/index.html',
+	opened: false
+}, {
+	cover: 'assets/costume.jpg',
+	url: 'http://yiwenl.github.io/Sketches/experiments/wrap/dist/index.html',
+	opened: false
+}, {
+	cover: 'assets/seasons.jpg',
+	url: 'http://yiwenl.github.io/Sketches/experiments/blossom/dist/index.html',
+	opened: false
+}, {
+	cover: 'assets/river.jpg',
+	url: 'http://yiwenl.github.io/Sketches/experiments/River/dist/index.html',
 	opened: false
 }];
 
@@ -93,6 +100,8 @@ var _pagesAbout2 = _interopRequireDefault(_pagesAbout);
 var _pagesExperiment = require('./pages/Experiment');
 
 var _pagesExperiment2 = _interopRequireDefault(_pagesExperiment);
+
+_ExpModel2['default'].reverse();
 
 console.log('Folder Static pages testing ', Math.floor(Math.random() * 100));
 //	CONSTRUCT MODELS
@@ -504,8 +513,8 @@ var ExperimentList = function ExperimentList(_ref) {
 	return _react2['default'].createElement(
 		'div',
 		{ className: 'Experiment-List' },
-		experiments.map(function (exp) {
-			var dest = baseUrl + 'exps/' + exp.id.toString();
+		experiments.map(function (exp, i) {
+			var dest = baseUrl + 'exps/' + i.toString();
 			var divStyle = {
 				color: 'white',
 				backgroundImage: 'url(' + exp.cover + ')',
@@ -513,7 +522,7 @@ var ExperimentList = function ExperimentList(_ref) {
 			};
 			return _react2['default'].createElement(_reactRouter.Link, {
 				to: dest,
-				key: exp.id,
+				key: i,
 				className: 'Experiment-Item',
 				style: divStyle });
 		})
