@@ -17,6 +17,8 @@ import About from './pages/About';
 import Experiment from './pages/Experiment';
 
 
+ExpModel.reverse();
+
 console.log('Folder Static pages testing ', Math.floor(Math.random() * 100));
 //	CONSTRUCT MODELS
 

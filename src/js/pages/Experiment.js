@@ -19,7 +19,7 @@ class Experiment extends Component {
 	}
 
 	render() {
-		let index = parseInt(this.props.params.exp);
+		let index = this.props.experiments.length - parseInt(this.props.params.exp)-1;
 		let url = this.props.experiments[index].url;
 		console.log('URL : ', url, this.props);
 		return (
