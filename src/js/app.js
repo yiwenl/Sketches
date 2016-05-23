@@ -16,8 +16,6 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Experiment from './pages/Experiment';
 
-ExpModel.reverse();
-
 
 console.log('Folder Static pages testing ', Math.floor(Math.random() * 100));
 //	CONSTRUCT MODELS
@@ -38,6 +36,9 @@ window.baseUrl = "/Sketches/";
 console.log('Location : ', window.location.href);
 if(window.location.href.indexOf('localhost') > -1) {
 	window.baseUrl = '/';
+	ExpModel.map((exp) => {
+		exp.cover = 'http://yiwenl.github.io/Sketches/' + exp.cover;
+	});
 } else {
 	ExpModel.map((exp) => {
 		exp.cover = 'http://yiwenl.github.io/Sketches/' + exp.cover;
