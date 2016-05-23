@@ -63,7 +63,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			<Router history={browserHistory}>
 				<Route path={baseUrl} component={App}>
 					<Route path={baseUrl + 'exps/:exp'} component={Experiment} />
-					<Route path={baseUrl + '/about'} component={About} />
+					<Route path={baseUrl + 'about'} component={About} />
 				</Route>
 			</Router>
 		</Provider>
