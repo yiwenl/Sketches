@@ -70,7 +70,7 @@ module.exports = {
   plugins: prod ? [
     new webpack.optimize.DedupePlugin(),
     new webpack.optimize.OccurenceOrderPlugin(),
-    new webpack.DefinePlugin({'process.env.NODE_ENV': '"development"'}),
+    new webpack.DefinePlugin({'process.env.NODE_ENV': '"production"'}),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         screw_ie8: true,
@@ -78,5 +78,8 @@ module.exports = {
       }
     }),
     new ExtractTextPlugin('css/main.css')
-  ] : [new webpack.optimize.OccurenceOrderPlugin()]
+  ] : [
+    new webpack.DefinePlugin({'process.env.NODE_ENV': '"development"'}),
+    new webpack.optimize.OccurenceOrderPlugin()
+  ]
 };
