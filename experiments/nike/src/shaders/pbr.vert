@@ -13,6 +13,10 @@ uniform mat4 uProjectionMatrix;
 uniform mat3 uNormalMatrix;
 uniform mat3 uModelViewMatrixInverse;
 
+uniform vec3 uPosition;
+uniform vec3 uScale;
+uniform vec3 uRotation;
+
 varying vec2 vTextureCoord;
 
 varying vec3 vNormal;
@@ -22,8 +26,26 @@ varying vec3 vEyePosition;
 varying vec3 vWsNormal;
 
 
+vec2 rotate(vec2 v, float a) {
+	float s = sin(a);
+	float c = cos(a);
+	mat2 m = mat2(c, -s, s, c);
+	return m * v;
+}
+
+
+vec3 rotate(vec3 v, vec3 r) {
+	v.yz = rotate(v.yz, r.x);
+	v.xz = rotate(v.xz, r.y);
+	v.xy = rotate(v.xy, r.z);
+
+	return v;
+}
+
+
 void main(void) {
-	vec3 position 			= aVertexPosition;
+	vec3 position 			= rotate(aVertexPosition, uRotation) * uScale;
+	position 				+= uPosition;
 	vec4 worldSpacePosition	= uModelMatrix * vec4(position, 1.0);
     vec4 viewSpacePosition	= uViewMatrix * worldSpacePosition;
 	

@@ -2,6 +2,8 @@
 
 import alfrid, { Scene } from 'alfrid';
 import ViewObjModel from './ViewObjModel';
+import ViewCrystals from './ViewCrystals';
+import Scheduler from 'scheduling';
 
 window.getAsset = function (id) {
 	for(var i = 0; i < assets.length; i++) {
@@ -17,6 +19,9 @@ class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
+		const RAD = Math.PI/180;
+		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 50);
+		this.orbitalControl.radius.value = 3;
 	}
 
 	_initTextures() {
@@ -43,22 +48,55 @@ class SceneApp extends alfrid.Scene {
 
 
 	_initViews() {
-		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
-		this._bBall = new alfrid.BatchBall();
-		this._bSkybox = new alfrid.BatchSkybox();
+		// this._bCopy = new alfrid.BatchCopy();
+		// this._bAxis = new alfrid.BatchAxis();
+		// this._bDots = new alfrid.BatchDotsPlane();
+		// this._bBall = new alfrid.BatchBall();
+		// this._bSkybox = new alfrid.BatchSkybox();
 		this._vModel = new ViewObjModel();
+
+		const strObj = getAsset('objCrystal');
+		this.meshCrystal = alfrid.ObjLoader.parse(strObj);
+
+		this._crystals = [];
+		const NUM = 50;
+
+		for(let i=0; i<NUM; i++) {
+			if(i === 0) {
+				const c = new ViewCrystals(i, NUM, this._vModel.mesh, this.meshCrystal);
+				this._crystals.push(c);	
+			} else {
+				Scheduler.defer( () => {
+					this._createCrystals(i, NUM);
+				})
+			}
+		}
+	}
+
+
+	_createCrystals(i, num) {
+		console.log('Create crystal :', i, num);
+		const c = new ViewCrystals(i, num, this._vModel.mesh, this.meshCrystal);
+		this._crystals.push(c);	
 	}
 
 
 	render() {
+		params.time += 0.01;
+		console.log(params.time);
 		GL.clear(0, 0, 0, 0);
-		this._bSkybox.draw(this._textureRad);
-		this._bAxis.draw();
-		this._bDots.draw();
+		// this._bSkybox.draw(this._textureRad);
+		// this._bAxis.draw();
+		// this._bDots.draw();
 
 		this._vModel.render(this._textureRad, this._textureIrr, this._textureAO);
+
+		const shader = this._crystals[0].shader;
+
+		this._crystals.map((crystal)=> {
+			crystal.render(this._textureRad, this._textureIrr, alfrid.GLTexture.whiteTexture(), shader);
+			return null;
+		});
 	}
 
 

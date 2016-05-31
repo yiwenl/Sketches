@@ -2,18 +2,24 @@ import '../scss/global.scss';
 import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 
 const GL = alfrid.GL;
 
 window.params = {
+	roughness:.95,
+	specular:0.4,
+	metallic:0,
 	gamma:2.2,
-	exposure:5
+	color:[120, 120, 130],
+	exposure:3,
+	time:Math.random() * 0xFF
 };
 
 const assets = [
 	{ id:'aomap', url:'assets/img/aomap.jpg' },
-	{ id:'objHead', url:'assets/obj/model.obj', type:'text' },
+	{ id:'objHead', url:'assets/obj/nike.obj', type:'text' },
+	{ id:'objCrystal', url:'assets/obj/crystal.obj', type:'text' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posy', url:'assets/img/irr_posy.hdr', type:'binary' },
@@ -81,12 +87,16 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
+	// window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
-	
-	gui.add(params, 'gamma', 1, 5);
-	gui.add(params, 'exposure', 1, 25);
+	// gui.add(params, 'roughness', 0, 1);
+	// gui.add(params, 'specular', 0, 1);
+	// gui.add(params, 'metallic', 0, 1);
+	// gui.addColor(params, 'color');
+
+	// gui.add(params, 'gamma', 1, 5);
+	// gui.add(params, 'exposure', 1, 25);
 }

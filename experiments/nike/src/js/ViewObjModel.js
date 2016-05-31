@@ -18,21 +18,18 @@ class ViewObjModel extends alfrid.View {
 		this.mesh = alfrid.ObjLoader.parse(strObj);
 		console.log(this.mesh);
 
-		this.roughness = .9;
-		this.specular = 0;
+		this.roughness = .95;
+		this.specular = 0.0;
 		this.metallic = 0;
 		this.baseColor = [1, 1, 1];
 		
-		gui.add(this, 'roughness', 0, 1);
-		gui.add(this, 'specular', 0, 1);
-		gui.add(this, 'metallic', 0, 1);
+		// gui.add(this, 'roughness', 0, 1);
+		// gui.add(this, 'specular', 0, 1);
+		// gui.add(this, 'metallic', 0, 1);
 	}
 
 
 	render(textureRad, textureIrr, textureAO) {
-		if(!this.mesh) {
-			return;
-		}
 		this.shader.bind();
 
 		this.shader.uniform('uAoMap', 'uniform1i', 0);
@@ -46,6 +43,9 @@ class ViewObjModel extends alfrid.View {
 		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
 		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
 		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
+
+		this.shader.uniform("uScale", "vec3", [1, 1, 1]);
+		this.shader.uniform("uPosition", "vec3", [0, -1, 0]);
 
 		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
 		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
