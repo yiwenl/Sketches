@@ -16,6 +16,7 @@ class ViewObjModel extends alfrid.View {
 	_init() {
 		let strObj = getAsset('objHead');
 		this.mesh = alfrid.ObjLoader.parse(strObj);
+		console.log(this.mesh);
 
 		this.roughness = .9;
 		this.specular = 0;

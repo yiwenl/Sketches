@@ -7,7 +7,7 @@
     "lint": "eslint -c .eslintrc src/**",
     "lint:fix": "eslint -c .eslintrc --fix src/**",
     "start": "webpack-dev-server",
-    "dev": "NODE_ENV=development webpack-dev-server --hot --inline --host 0.0.0.0 --colors --error-details --content-base dist ",
+    "dev": "NODE_ENV=development webpack-dev-server --hot --inline --host 0.0.0.0 --colors --error-details --content-base dist --port 8081",
     "build": "NODE_ENV=production webpack --progress --colors --error-details"
   },
   "repository": {},
