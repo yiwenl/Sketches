@@ -110,7 +110,7 @@ vec3 rotate(vec3 v, vec3 r) {
 void main(void) {
 	vec3 position 			= rotate(aVertexPosition, uRotation) * uScale;
 	const float posOffset   = 1.0;
-	float noise 			= snoise(aPosOffset * posOffset + uGlobalTime) * .5 + .5;
+	float noise 			= snoise(aPosOffset * posOffset + uGlobalTime * .2) * .5 + .5;
 	noise 					= smoothstep(.2, 1.0, noise);
 	position 				*= noise;
 	position 				+= uPosition + aPosOffset;

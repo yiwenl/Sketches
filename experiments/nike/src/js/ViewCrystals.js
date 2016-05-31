@@ -74,7 +74,7 @@ class ViewCrystals extends alfrid.View {
 			const vertexNike = _verticesNike[pivot];
 			const normalNike = _normalsNike[pivot];
 			const scaleXZ = random(sMin, sMax);
-			const scaleY = random(sMin, sMax) * 3.0;
+			const scaleY = random(sMin, sMax) * 4.0;
 
 			if(Math.random() > .1) {
 				continue;
