@@ -2,7 +2,7 @@ import '../scss/global.scss';
 import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-// import dat from 'dat-gui';
+import dat from 'dat-gui';
 
 const GL = alfrid.GL;
 
@@ -13,7 +13,9 @@ window.params = {
 	gamma:2.2,
 	color:[120, 120, 130],
 	exposure:3,
-	time:Math.random() * 0xFF
+	time:Math.random() * 0xFF,
+	numTouches:10,
+	minRadius:0.1
 };
 
 const assets = [
@@ -87,7 +89,7 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	// window.gui = new dat.GUI({ width:300 });
+	window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
 	let scene = new SceneApp();

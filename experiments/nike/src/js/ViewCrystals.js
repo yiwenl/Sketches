@@ -2,14 +2,17 @@
 
 import alfrid, { GL } from 'alfrid';
 
-const vs = require('../shaders/crystal.vert');
+let vs = require('../shaders/crystal.vert');
 const fs = require('../shaders/pbr.frag');
-var random = function(min, max) { return min + Math.random() * (max - min);	}
+const random = function(min, max) { return min + Math.random() * (max - min);	}
 
 class ViewCrystals extends alfrid.View {
 	
 	constructor(mIndex, mTotal, mMesh, mMeshCrystal) {
+
+		vs = vs.replace('${NUM}', Math.floor(params.numTouches));
 		super(vs, fs);
+
 		this._meshNike = mMesh;
 		this._meshCrystal = mMeshCrystal;
 		this._index = mIndex;
@@ -120,7 +123,16 @@ class ViewCrystals extends alfrid.View {
 	}
 
 
-	render(textureRad, textureIrr, textureAO, mShader) {
+	render(textureRad, textureIrr, textureAO, mShader, mTouches, mTouchForces) {
+		const forces = mTouchForces.map((f)=>(f.value));
+		let touches = [];
+		for(let i=0; i<mTouches.length; i++) {
+			touches = touches.concat(mTouches[i]);
+		}
+
+		if(Math.random() > .99) {
+			// console.log(touches);
+		}
 		this.roughness = params.roughness;
 		this.specular = params.specular;
 		this.metallic = params.metallic;
@@ -147,13 +159,16 @@ class ViewCrystals extends alfrid.View {
 		shader.uniform('uMetallic', 'uniform1f', this.metallic);
 		shader.uniform('uSpecular', 'uniform1f', this.specular);
 
-		shader.uniform("uScale", "vec3", [this._scale, this._scale, this._scale]);
-		shader.uniform("uPosition", "vec3", this._position);
-		shader.uniform("uRotation", "vec3", this._rotation);
-		shader.uniform("uGlobalTime", "float", params.time);
+		shader.uniform('uScale', 'vec3', [this._scale, this._scale, this._scale]);
+		shader.uniform('uPosition', 'vec3', this._position);
+		shader.uniform('uRotation', 'vec3', this._rotation);
+		shader.uniform('uGlobalTime', 'float', params.time);
 
 		shader.uniform('uExposure', 'uniform1f', params.exposure);
 		shader.uniform('uGamma', 'uniform1f', params.gamma);
+
+		shader.uniform('uTouches', 'vec3', touches);
+		shader.uniform('uTouchForces', 'float', forces);
 
 		GL.draw(this.mesh);
 	}

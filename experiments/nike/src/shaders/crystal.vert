@@ -1,10 +1,12 @@
-#define SHADER_NAME REFLECTION_VERTEX
+#define SHADER_NAME CRYSTAL_VERTEX
 
 precision highp float;
 attribute vec3 aVertexPosition;
 attribute vec2 aTextureCoord;
 attribute vec3 aNormal;
 attribute vec3 aPosOffset;
+
+const int NUM = ${NUM};
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
@@ -16,6 +18,9 @@ uniform vec3 uPosition;
 uniform vec3 uScale;
 uniform vec3 uRotation;
 uniform float uGlobalTime;
+
+uniform vec3 uTouches[NUM];
+uniform float uTouchForces[NUM];
 
 varying vec2 vTextureCoord;
 
@@ -106,13 +111,26 @@ vec3 rotate(vec3 v, vec3 r) {
 	return v;
 }
 
+const float radius = 0.2;
+
 
 void main(void) {
-	vec3 position 			= rotate(aVertexPosition, uRotation) * uScale;
-	const float posOffset   = 1.0;
-	float noise 			= snoise(aPosOffset * posOffset + uGlobalTime * .2) * .5 + .5;
-	noise 					= smoothstep(.2, 1.0, noise);
-	position 				*= noise;
+    float scale = 0.0;
+    for(int i=0; i<NUM; i++) {
+        vec3 t = uTouches[i];
+        float force = uTouchForces[i];
+        float distToTouch = distance(t, aPosOffset + uPosition);
+        if(distToTouch < radius) {
+            float f = 1.0 - distToTouch / radius;
+            f *= 0.5 * force;
+            scale += f;
+        }
+    }
+
+    scale = min(scale, 1.0);
+
+    // vec3 position           = rotate(aVertexPosition, uRotation) * uScale * scale;
+	vec3 position 			= aVertexPosition * scale;
 	position 				+= uPosition + aPosOffset;
 	vec4 worldSpacePosition	= uModelMatrix * vec4(position, 1.0);
     vec4 viewSpacePosition	= uViewMatrix * worldSpacePosition;
