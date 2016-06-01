@@ -124,10 +124,14 @@ class ViewCrystals extends alfrid.View {
 
 
 	render(textureRad, textureIrr, textureAO, mShader, mTouches, mTouchForces) {
-		const forces = mTouchForces.map((f)=>(f.value));
+		// const forces = mTouchForces.map((f)=>(f.value));
 		let touches = [];
 		for(let i=0; i<mTouches.length; i++) {
-			touches = touches.concat(mTouches[i]);
+			// touches = touches.concat(mTouches[i]);
+			touches.push(mTouches[i][0]);
+			touches.push(mTouches[i][1]);
+			touches.push(mTouches[i][2]);
+			touches.push(mTouchForces[i].value);
 		}
 
 		if(Math.random() > .99) {
@@ -167,8 +171,7 @@ class ViewCrystals extends alfrid.View {
 		shader.uniform('uExposure', 'uniform1f', params.exposure);
 		shader.uniform('uGamma', 'uniform1f', params.gamma);
 
-		shader.uniform('uTouches', 'vec3', touches);
-		shader.uniform('uTouchForces', 'float', forces);
+		shader.uniform('uTouches', 'vec4', touches);
 
 		GL.draw(this.mesh);
 	}

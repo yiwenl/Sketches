@@ -19,8 +19,7 @@ uniform vec3 uScale;
 uniform vec3 uRotation;
 uniform float uGlobalTime;
 
-uniform vec3 uTouches[NUM];
-uniform float uTouchForces[NUM];
+uniform vec4 uTouches[NUM];
 
 varying vec2 vTextureCoord;
 
@@ -117,12 +116,11 @@ const float radius = 0.2;
 void main(void) {
     float scale = 0.0;
     for(int i=0; i<NUM; i++) {
-        vec3 t = uTouches[i];
-        float force = uTouchForces[i];
-        float distToTouch = distance(t, aPosOffset + uPosition);
+        vec4 t = uTouches[i];
+        float distToTouch = distance(t.xyz, aPosOffset + uPosition);
         if(distToTouch < radius) {
             float f = 1.0 - distToTouch / radius;
-            f *= 0.5 * force;
+            f *= 0.5 * t.w;
             scale += f;
         }
     }

@@ -28,7 +28,7 @@ class SceneApp extends alfrid.Scene {
 		this._touchForces = [];
 		this._touches = [];
 		for(let i=0; i<params.numTouches; i++) {
-			const n = new alfrid.TweenNumber(0, 'expOut', 0.001);
+			const n = new alfrid.TweenNumber(0, 'expOut', 0.01);
 			this._touchForces.push(n);
 			this._touches.push([-999, 0, 0]);
 		}

@@ -8,13 +8,13 @@ const GL = alfrid.GL;
 
 window.params = {
 	roughness:.95,
-	specular:0.4,
-	metallic:0,
+	specular:0.7,
+	metallic:0.7,
 	gamma:2.2,
-	color:[120, 120, 130],
+	color:[97, 0, 0],
 	exposure:3,
 	time:Math.random() * 0xFF,
-	numTouches:10,
+	numTouches:20,
 	minRadius:0.1
 };
 
@@ -94,10 +94,10 @@ function _init3D() {
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
-	// gui.add(params, 'roughness', 0, 1);
-	// gui.add(params, 'specular', 0, 1);
-	// gui.add(params, 'metallic', 0, 1);
-	// gui.addColor(params, 'color');
+	gui.add(params, 'roughness', 0, 1);
+	gui.add(params, 'specular', 0, 1);
+	gui.add(params, 'metallic', 0, 1);
+	gui.addColor(params, 'color');
 
 	// gui.add(params, 'gamma', 1, 5);
 	// gui.add(params, 'exposure', 1, 25);
