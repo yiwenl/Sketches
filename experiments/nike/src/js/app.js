@@ -98,6 +98,8 @@ function _init3D() {
 	gui.add(params, 'specular', 0, 1);
 	gui.add(params, 'metallic', 0, 1);
 	gui.addColor(params, 'color');
+	console.log(gui);
+	gui.close();
 
 	// gui.add(params, 'gamma', 1, 5);
 	// gui.add(params, 'exposure', 1, 25);
