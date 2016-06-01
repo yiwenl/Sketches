@@ -83,11 +83,7 @@ class SceneApp extends alfrid.Scene {
 
 	render() {
 		params.time += 0.01;
-		console.log(params.time);
 		GL.clear(0, 0, 0, 0);
-		// this._bSkybox.draw(this._textureRad);
-		// this._bAxis.draw();
-		// this._bDots.draw();
 
 		this._vModel.render(this._textureRad, this._textureIrr, this._textureAO);
 

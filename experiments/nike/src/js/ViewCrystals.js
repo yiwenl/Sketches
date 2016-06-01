@@ -66,17 +66,17 @@ class ViewCrystals extends alfrid.View {
 		}
 
 		const totalIncre = Math.floor(_verticesNike.length/this._total);
-		const sMin = .05;
-		const sMax = .1;
+		const sMin = .1;
+		const sMax = .2;
 		let tmp = 0;
 		for (let i=0; i<totalIncre; i++) {
 			const pivot = i + this._index * totalIncre;
 			const vertexNike = _verticesNike[pivot];
 			const normalNike = _normalsNike[pivot];
 			const scaleXZ = random(sMin, sMax);
-			const scaleY = random(sMin, sMax) * 4.0;
+			const scaleY = random(sMin, sMax) * 3.0;
 
-			if(Math.random() > .1) {
+			if(Math.random() > .25) {
 				continue;
 			}
 
@@ -112,8 +112,6 @@ class ViewCrystals extends alfrid.View {
 		this.mesh.bufferNormal(normals);
 		this.mesh.bufferIndex(indices);
 		this.mesh.bufferData(posOffset, 'aPosOffset', 3);
-
-		console.log(tmp, totalIncre);
 
 		this.roughness = .8;
 		this.specular = 1.0;
