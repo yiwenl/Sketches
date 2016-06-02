@@ -35,6 +35,11 @@
 	height:280px;
 	box-sizing: border-box;
 	margin:10px;
+	transition: transform .25s ease-out;
+
+	&:hover {
+		transform:scale(.95);
+	}
 }
 
 .Experiment-Content {
