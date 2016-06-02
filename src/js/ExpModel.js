@@ -63,6 +63,11 @@ const ExpModel = [
 		cover:'assets/img/river.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/River/dist/index.html',
 		opened:false
+	},
+	{
+		cover:'assets/img/coverSketchCrystal.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/nike/dist/index.html',
+		opened:false
 	}
 ]
 
