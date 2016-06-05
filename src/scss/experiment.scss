@@ -60,9 +60,16 @@
 	z-index:9999;
 	top:0px;
 
+	opacity: .5;
+	transition: opacity .25s ease-out;
+
+	&:hover {
+		opacity:1;
+	}
+
 	svg {
 		width: 20px;
 		height: 20px;
-		fill: #ffffff; 
+		fill: #AAA; 
 	}
 }
