@@ -68,6 +68,26 @@ const ExpModel = [
 		cover:'assets/img/coverSketchCrystal.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/nike/dist/index.html',
 		opened:false
+	},
+	{
+		cover:'assets/img/coverSketchSoundVisCircles.jpg',
+		url:'http://www.bongiovi.tw/projects/soundVis/05/',
+		opened:false
+	},
+	{
+		cover:'assets/img/coverSketchSoundVisWaves.jpg',
+		url:'http://www.bongiovi.tw/projects/soundVis/07/',
+		opened:false
+	},
+	{
+		cover:'assets/img/sketchCoverFogMountain.jpg',
+		url:'http://www.bongiovi.tw/projects/kuafu/mountains/01/',
+		opened:false
+	},
+	{
+		cover:'assets/img/sketchCoverDandelion.jpg',
+		url:'http://www.bongiovi.tw/projects/leap/02/',
+		opened:false
 	}
 ]
 

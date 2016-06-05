@@ -10,7 +10,9 @@ window.params = {
 	terrainSize:30,
 	gamma:2.2,
 	exposure:5,
-	debugHitPlane: false
+	debugHitPlane: false,
+	minMountDist:1,
+	maxNumMountains:50
 };
 
 const assets = [
@@ -31,6 +33,13 @@ const assets = [
 	{ id:'rad_negy', url:'assets/img/rad_negy.hdr', type:'binary' },
 	{ id:'rad_negz', url:'assets/img/rad_negz.hdr', type:'binary' }
 ];
+
+
+for (let i=0; i<6; i++) {
+	const id = `brush${i}`;
+	const url = `assets/img/brushes/${id}.png`;
+	assets.push({id, url});
+}
 
 if(document.body) {
 	_init();

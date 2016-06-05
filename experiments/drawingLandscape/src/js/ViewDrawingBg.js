@@ -15,9 +15,10 @@ class ViewDrawingBg extends alfrid.View {
 	}
 
 
-	render(texture) {
+	render(texture, mSaturation) {
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
+		this.shader.uniform("uSaturation", "float", mSaturation);
 		texture.bind(0);
 		GL.draw(this.mesh);
 	}

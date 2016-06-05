@@ -6,10 +6,13 @@
 precision highp float;
 varying vec2 vTextureCoord;
 uniform sampler2D texture;
+uniform float uSaturation;
 
 
 void main(void) {
-    vec4 color = texture2D(texture, vTextureCoord);
+    vec3 color = texture2D(texture, vTextureCoord).rgb;
 	float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-	gl_FragColor = vec4(vec3(gray), 1.0);
+	vec3 colorGray = vec3(gray);
+	color = mix(colorGray, color, 1.0 - uSaturation);
+	gl_FragColor = vec4(color, 1.0);
 }
