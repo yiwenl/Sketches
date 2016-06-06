@@ -2,7 +2,6 @@
 
 import alfrid, { Scene } from 'alfrid';
 import ViewSphere from './ViewSphere';
-// import ViewObjModel from './ViewObjModel';
 
 window.getAsset = function (id) {
 	for(var i = 0; i < assets.length; i++) {
@@ -24,7 +23,7 @@ class SceneApp extends alfrid.Scene {
 
 		window.addEventListener('mousedown', () => {	this._isMouseDown = true; });
 		window.addEventListener('mouseup', () => {	this._isMouseDown = false; });
-		window.addEventListener('mousemove' (e) => this._onMove(e));
+		window.addEventListener('mousemove', (e) => this._onMove(e));
 	}
 
 	_initTextures() {
