@@ -6,6 +6,7 @@ import ViewHitTestPlane from './ViewHitTestPlane';
 import ViewDrawingBg from './ViewDrawingBg';
 import ViewStroke from './ViewStroke';
 import ViewMountains from './ViewMountains';
+import ViewSky from './ViewSky';
 import Drawing from './Drawing';
 
 window.getAsset = function (id) {
@@ -24,7 +25,7 @@ class SceneApp extends alfrid.Scene {
 		super();
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = .3;
-		this.camera.setPerspective(90 * RAD, GL.aspectRatio, .1, 100);
+		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 100);
 
 		this._inDrawingMode = false;
 		this._drawingOffset = new alfrid.TweenNumber(0);
@@ -58,13 +59,12 @@ class SceneApp extends alfrid.Scene {
 		let rad_negz = alfrid.HDRLoader.parse(getAsset('rad_negz'));
 
 		this._textureRad = new alfrid.GLCubeTexture([rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz]);
-		this._textureAO = new alfrid.GLTexture(getAsset('aomap'));
 		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 
 		this._brushIndex = 0;
 		this._textureBrush = new alfrid.GLTexture(getAsset(`brush${this._brushIndex}`));
+		this._textureBg = new alfrid.GLTexture(getAsset('bg'));
 	}
-
 
 	_initViews() {
 		this._bCopy = new alfrid.BatchCopy();
@@ -78,6 +78,7 @@ class SceneApp extends alfrid.Scene {
 		this._vDrawingBg = new ViewDrawingBg();
 		this._vStroke = new ViewStroke();
 		this._vMountains = new ViewMountains();
+		this._vSky = new ViewSky();
 	}
 
 	_onKey(e) {
@@ -114,8 +115,8 @@ class SceneApp extends alfrid.Scene {
 	_onUpdatePoints(points, toAddMountains) {
 		this._vStroke.updateStroke(points);
 		if(!toAddMountains) {	return; 	}
-		
-		let mountains = this._mountains;
+		let positions = this._mountains;
+		console.log('Positions : ', positions.length);
 
 		function distance(a, b) {
 			let v = vec3.create();
@@ -124,8 +125,9 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		function checkDist(p) {
-			for(let i=0; i<mountains.length; i++) {
-				let d = distance(p, mountains[i].position);
+			for(let i=0; i<positions.length; i++) {
+				let d = distance(p, positions[i]);
+				console.log(d );
 				if(d < params.minMountDist) {
 					return false;
 				}
@@ -134,26 +136,24 @@ class SceneApp extends alfrid.Scene {
 			return true;
 		}
 
+
+		console.log('Points : ', points.length);
+		let cnt = 0;
 		points.map( (p) => {
 			if(checkDist(p)) {
+				p[1] = 1;
+				this._mountains.push(p);
 				this.addMountain(p);
+				cnt ++;
 			}
 		});
+
+		console.log('Mountains :', cnt);
 	}
 
 
 	addMountain(p) {
-		this._mountains.push({position:p});
 		this._vMountains.addMountain(p);
-		if(this._mountains.length > params.maxNumMountains) {
-			this._mountains.shift();
-		}
-
-		//	hide first 5 mountains;
-
-		for(let i=0; i<5; i++) {
-			// this._mountains[i].hide();
-		}
 	}
 
 
@@ -162,35 +162,36 @@ class SceneApp extends alfrid.Scene {
 
 		this._fboRender.bind();
 		GL.clear(0, 0, 0, 0);
-		this._bAxis.draw();
-		this._bDots.draw();	
+		this._vSky.render(this._textureBg);
 
 		this._fboRender.unbind();
+
+		
 
 		GL.disable(GL.DEPTH_TEST);
 		this._vDrawingBg.render(this._fboRender.getTexture(), this._drawingOffset.value);	
 		GL.enable(GL.DEPTH_TEST);
 
 		
-		this._vMountains.render(this._textureRad, this._textureIrr);
+		this._vMountains.render(this._textureBg);
 		this._vStroke.render(this._textureBrush);
 
 		if(params.debugHitPlane) {
 			this._vHitPlane.render();
 		}
 
-		let size = .1 * .5;
-		let points = this._drawing.points;
+		// let size = .1 * .5;
+		// let points = this._drawing.points;
 
-		points.map( (p, i) => {
-			this._bBall.draw(p, [size, size, size], [1, 1, 1], 1);
-		});
+		// points.map( (p, i) => {
+		// 	this._bBall.draw(p, [size, size, size], [1, 1, 1], 1);
+		// });
 
 
-		size = .1;
-		this._vMountains.positions.map( (p) => {
-			this._bBall.draw(p, [size, size, size], [1, .7, .5], 1);
-		});
+		// size = .1;
+		// this._vMountains.positions.map( (p) => {
+		// 	this._bBall.draw(p, [size, size, size], [1, .7, .5], 1);
+		// });
 	}
 
 	resize() {

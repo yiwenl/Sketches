@@ -1,9 +1,9 @@
 // ViewMountains.js
 
-import alfrid, { GL } from 'alfrid';
+import alfrid, { GL, TweenNumber } from 'alfrid';
 import Perlin from './Perlin';
-import vs from '../shaders/pbr.vert';
-import fs from '../shaders/pbr.frag';
+import vs from '../shaders/mountain.vert';
+import fs from '../shaders/mountain.frag';
 const random = function(min, max) { return min + Math.random() * (max - min);	}
 
 class ViewMountains extends alfrid.View {
@@ -15,17 +15,11 @@ class ViewMountains extends alfrid.View {
 
 	_init() {
 		this.meshes = [];
-
-		this.roughness = .95;
-		this.specular = 0;
-		this.metallic = 0;
-		this.baseColor = [1, 1, 1];
+		this._textures = [];
 	}
 
 
 	addMountain(mPosition) {
-		console.log('Add Mountain : ', mPosition);
-
 		const NUM = 30;
 		const uvGap = 1.0 / NUM;
 		const SEED = Math.random() * 0xFF;
@@ -88,7 +82,7 @@ class ViewMountains extends alfrid.View {
 				positions.push(v2);
 				positions.push(v3);
 
-				let n = getNormal(v0, v1, v3);
+				let n = getNormal(v0, v1, v2);
 				normals.push(n);
 				normals.push(n);
 				normals.push(n);
@@ -119,35 +113,53 @@ class ViewMountains extends alfrid.View {
 		mountain.bufferIndex(indices);
 		mountain.bufferNormal(normals);
 
-		mountain.position = [mPosition[0], mPosition[1]-1, mPosition[2]];
+		mountain.position = [mPosition[0], mPosition[1]-1.0, mPosition[2]];
 		mountain.scale = random(2.0, 4);
 		mountain.rotation = Math.random() * Math.PI * 2.0;
 		mountain.textureIndex = Math.floor(Math.random() * 35);
+		mountain.heightOffset = new TweenNumber(0, 'expOut', random(0.005, 0.002));
+		setTimeout( () => {
+			mountain.heightOffset.value = 1.0;
+		}, random(500, 2000));
+
+		if(!this._textures[mountain.textureIndex]) {
+			this._textures[mountain.textureIndex] = new alfrid.GLTexture(getAsset('inkDrops'+mountain.textureIndex));
+		}
 
 		this.meshes.push(mountain);
+
+		if(this.meshes.length > params.maxNumMountains) {
+			this.meshes.shift();
+		}
+
+		if(this.meshes.length == params.maxNumMountains) {
+			for(let i=0; i<5; i++) {
+				this.meshes[i].heightOffset.easing = 'expIn';
+				this.meshes[i].heightOffset.value = 0;
+			}	
+		}
+		
+		console.log(this.meshes.length );
+		return mountain;
 	}
 
 
-	render(textureRad, textureIrr) {
+	render(textureBg) {
 		this.shader.bind();
 
-		this.shader.uniform('uRadianceMap', 'uniform1i', 0);
-		this.shader.uniform('uIrradianceMap', 'uniform1i', 1);
-		textureRad.bind(0);
-		textureIrr.bind(1);
-
-		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
-		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
-		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
-		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
-
-		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
-		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+		this.shader.uniform('texture', 'uniform1i', 0);
+		this.shader.uniform('textureBg', 'uniform1i', 1);
+		this.shader.uniform("uFogOffset", "float", params.fogOffset);
+		this.shader.uniform("uMaxRange", "float", params.maxRange);
+		this.shader.uniform("uFadeInRange", "float", params.fadeInRange);
+		textureBg.bind(1);
 
 		this.meshes.map((m)=> {
+			this._textures[m.textureIndex].bind(0);
 			this.shader.uniform("uPosition", "vec3", m.position);
 			this.shader.uniform("uScale", "vec3", [m.scale, m.scale, m.scale]);
 			this.shader.uniform("uRotation", "float", m.rotation);
+			this.shader.uniform("uHeightOffset", "float", m.heightOffset.value);
 			GL.draw(m);
 		});
 		// GL.draw(this.meshes);

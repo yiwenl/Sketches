@@ -8,9 +8,10 @@ attribute vec3 aNormal;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
-uniform vec3 position;
-uniform vec3 scale;
+uniform vec3 uPosition;
+uniform vec3 uScale;
 uniform float uRotation;
+uniform float uHeightOffset;
 
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
@@ -25,10 +26,11 @@ vec2 rotate(vec2 v, float a) {
 }
 
 void main(void) {
-	vec3 pos      = aVertexPosition * scale;
+	vec3 pos      = aVertexPosition * uScale;
 	pos.xz 		  = rotate(pos.xz, uRotation);
 
-	pos 		  += position;
+	pos 		  += uPosition;
+	pos.y 		  *= uHeightOffset;
 	gl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 	vTextureCoord = aTextureCoord;
 	vNormal       = aNormal;

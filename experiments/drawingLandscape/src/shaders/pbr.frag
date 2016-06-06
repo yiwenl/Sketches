@@ -4,6 +4,7 @@
 
 precision highp float;
 
+uniform sampler2D 	uColorMap;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
 
@@ -98,8 +99,9 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 void main() {
 	vec3 N 				= normalize( vWsNormal );
 	vec3 V 				= normalize( vEyePosition );
+	vec3 baseColor 		= texture2D( uColorMap, vTextureCoord).rgb;
 	
-	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
+	vec3 color 			= getPbr(N, V, baseColor, uRoughness, uMetallic, uSpecular);
 
 	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );

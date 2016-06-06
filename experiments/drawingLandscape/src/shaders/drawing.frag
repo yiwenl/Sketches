@@ -10,9 +10,9 @@ uniform float uSaturation;
 
 
 void main(void) {
-    vec3 color = texture2D(texture, vTextureCoord).rgb;
+    vec4 color = texture2D(texture, vTextureCoord);
 	float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
 	vec3 colorGray = vec3(gray);
-	color = mix(colorGray, color, 1.0 - uSaturation);
-	gl_FragColor = vec4(color, 1.0);
+	color.rgb = mix(colorGray, color.rgb, 1.0 - uSaturation);
+	gl_FragColor = color;
 }

@@ -12,11 +12,14 @@ window.params = {
 	exposure:5,
 	debugHitPlane: false,
 	minMountDist:2,
-	maxNumMountains:50
+	maxNumMountains:50,
+	maxRange:15,
+	fadeInRange:1,
+	fogOffset:0.01,
 };
 
 const assets = [
-	{ id:'aomap', url:'assets/img/aomap.jpg' },
+	{ id:'bg', url:'assets/img/bg.jpg' },
 	{ id:'objHead', url:'assets/obj/model.obj', type:'text' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
@@ -39,6 +42,16 @@ for (let i=0; i<6; i++) {
 	const id = `brush${i}`;
 	const url = `assets/img/brushes/${id}.png`;
 	assets.push({id, url});
+}
+
+const PATH_DROP = 'assets/img/inkDrops/inkDrops'
+for (let i=0; i<35; i++) {
+	let id = `inkDrops${i}`; 
+	let url = `${PATH_DROP}${i}.jpg`;
+	assets.push({
+		id,
+		url
+	});
 }
 
 if(document.body) {

@@ -61,11 +61,8 @@ class Drawing extends EventDispatcher {
 			v1 = [vertices[1][0], vertices[1][1]+offset, vertices[1][2]];
 			v2 = [vertices[2][0], vertices[2][1]+offset, vertices[2][2]];
 
-			// hit = this._ray.intersectTriangle(vertices[0], vertices[1], vertices[2]);
 			hit = this._ray.intersectTriangle(v0, v1, v2);
-			if(hit) {
-				break;
-			}
+			if(hit) {	break;	}
 		}
 
 		if(hit) {
@@ -87,7 +84,6 @@ class Drawing extends EventDispatcher {
 			return [ p[0], p[1]+bias*i, p[2]];
 		});
 
-		
 		this.trigger('onMove', {points: this.points});
 	}
 
