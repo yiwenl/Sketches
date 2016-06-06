@@ -1,16 +1,17 @@
 // ViewSky.js
 
 import alfrid, { GL } from 'alfrid';
+import fs from '../shaders/sky.frag';
 
 class ViewSky extends alfrid.View {
 	
 	constructor() {
-		super(null, alfrid.ShaderLibs.copyFrag);
+		super(null, fs);
 	}
 
 
 	_init() {
-		this.mesh = alfrid.Geom.sphere(30, 24, true);
+		this.mesh = alfrid.Geom.sphere(params.terrainSize, 24, true);
 	}
 
 
@@ -18,6 +19,7 @@ class ViewSky extends alfrid.View {
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
+		this.shader.uniform("uFogOffset", "float", params.fogOffset);
 		GL.draw(this.mesh);
 	}
 

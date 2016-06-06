@@ -113,7 +113,7 @@ class ViewMountains extends alfrid.View {
 		mountain.bufferIndex(indices);
 		mountain.bufferNormal(normals);
 
-		mountain.position = [mPosition[0], mPosition[1]-1.0, mPosition[2]];
+		mountain.position = [mPosition[0], mPosition[1], mPosition[2]];
 		mountain.scale = random(2.0, 4);
 		mountain.rotation = Math.random() * Math.PI * 2.0;
 		mountain.textureIndex = Math.floor(Math.random() * 35);
@@ -139,7 +139,6 @@ class ViewMountains extends alfrid.View {
 			}	
 		}
 		
-		console.log(this.meshes.length );
 		return mountain;
 	}
 

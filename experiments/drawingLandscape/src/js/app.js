@@ -7,7 +7,7 @@ import dat from 'dat-gui';
 const GL = alfrid.GL;
 
 window.params = {
-	terrainSize:30,
+	terrainSize:20,
 	gamma:2.2,
 	exposure:5,
 	debugHitPlane: false,
@@ -20,7 +20,8 @@ window.params = {
 
 const assets = [
 	{ id:'bg', url:'assets/img/bg.jpg' },
-	{ id:'objHead', url:'assets/obj/model.obj', type:'text' },
+	{ id:'aoTerrain', url:'assets/img/aoTerrain.jpg' },
+	{ id:'objTerrain', url:'assets/obj/terrain.obj', type:'text' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posy', url:'assets/img/irr_posy.hdr', type:'binary' },

@@ -52,7 +52,7 @@ class Drawing extends EventDispatcher {
 		const faceVertices = mesh.faces.map((face)=>(face.vertices));
 
 		let hit;
-		const offset = 1;
+		const offset = 0;
 		let v0, v1, v2;
 
 		for(let i = 0; i < faceVertices.length; i++) {
