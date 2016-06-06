@@ -1,27 +1,161 @@
 // ViewMountains.js
 
 import alfrid, { GL } from 'alfrid';
+import Perlin from './Perlin';
+import vs from '../shaders/pbr.vert';
+import fs from '../shaders/pbr.frag';
+const random = function(min, max) { return min + Math.random() * (max - min);	}
 
 class ViewMountains extends alfrid.View {
 	
 	constructor() {
-		super();
+		super(vs, fs);
 	}
 
 
 	_init() {
-		this.mesh;
+		this.meshes = [];
+
+		this.roughness = .95;
+		this.specular = 0;
+		this.metallic = 0;
+		this.baseColor = [1, 1, 1];
 	}
 
 
 	addMountain(mPosition) {
+		console.log('Add Mountain : ', mPosition);
+
+		const NUM = 30;
+		const uvGap = 1.0 / NUM;
+		const SEED = Math.random() * 0xFF;
+		const SIZE = random(0.5, .7);
+		const posOffset = random(3.0, 7.0);
+		const power = random(2, 5);
+		const HEIGHT = random(.25, .7);
+		const NOISE_HEIGHT = random(.25, .35);
+
+		let positions = [];
+		let coords = [];
+		let indices = [];
+		let count = 0;
+		let normals = [];
+
+
+		function getPosition(i, j) {
+			let px = i/NUM;
+			let py = j/NUM;
+			let hx = Math.sin(px*Math.PI);
+			let hy = Math.sin(py*Math.PI);
+			let h = hx * hy;
+			h = Math.pow(h, power);
+			const x = -SIZE + px * 2.0 * SIZE;
+			const z = SIZE - py * 2.0 * SIZE;
+			
+			const y = h * HEIGHT + Perlin.noise(x*posOffset, z*posOffset, SEED) * NOISE_HEIGHT * h;
+
+			return [x, y, z];
+		}
+
+		function getNormal(p0, p1, p2) {
+			const pp0 = vec3.clone(p0);
+			const pp1 = vec3.clone(p1);
+			const pp2 = vec3.clone(p2);
+
+			let v0 = vec3.create();
+			let v1 = vec3.create();
+
+			vec3.sub(v0, pp1, pp0);
+			vec3.sub(v1, pp2, pp0);
+
+			let n = vec3.create();
+			vec3.cross(n, v1, v0);
+			vec3.normalize(n, n);
+
+			return n;
+		}
+
 		
+		for(let j=0; j<NUM; j++) {
+			for(let i=0; i<NUM; i++) {
+				let v0 = getPosition(i, j);
+				let v1 = getPosition(i+1, j);
+				let v2 = getPosition(i+1, j+1);
+				let v3 = getPosition(i, j+1);
+
+				positions.push(v0);
+				positions.push(v1);
+				positions.push(v2);
+				positions.push(v3);
+
+				let n = getNormal(v0, v1, v3);
+				normals.push(n);
+				normals.push(n);
+				normals.push(n);
+				normals.push(n);
+
+				let u = i/NUM;
+				let v = j/NUM;
+
+				coords.push([u, v]);
+				coords.push([u+uvGap, v]);
+				coords.push([u+uvGap, v+uvGap]);
+				coords.push([u, v+uvGap]);
+
+				indices.push(count*4 + 0);
+				indices.push(count*4 + 1);
+				indices.push(count*4 + 2);
+				indices.push(count*4 + 0);
+				indices.push(count*4 + 2);
+				indices.push(count*4 + 3);
+
+				count++;
+			}
+		}
+
+		const mountain = new alfrid.Mesh(GL.TRIANGLES);
+		mountain.bufferVertex(positions);
+		mountain.bufferTexCoord(coords);
+		mountain.bufferIndex(indices);
+		mountain.bufferNormal(normals);
+
+		mountain.position = [mPosition[0], mPosition[1]-1, mPosition[2]];
+		mountain.scale = random(2.0, 4);
+		mountain.rotation = Math.random() * Math.PI * 2.0;
+		mountain.textureIndex = Math.floor(Math.random() * 35);
+
+		this.meshes.push(mountain);
 	}
 
 
-	render() {
+	render(textureRad, textureIrr) {
 		this.shader.bind();
-		GL.draw(this.mesh);
+
+		this.shader.uniform('uRadianceMap', 'uniform1i', 0);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 1);
+		textureRad.bind(0);
+		textureIrr.bind(1);
+
+		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
+		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
+		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
+		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
+
+		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
+		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+
+		this.meshes.map((m)=> {
+			this.shader.uniform("uPosition", "vec3", m.position);
+			this.shader.uniform("uScale", "vec3", [m.scale, m.scale, m.scale]);
+			this.shader.uniform("uRotation", "float", m.rotation);
+			GL.draw(m);
+		});
+		// GL.draw(this.meshes);
+	}
+
+
+	get positions() {
+		return this.meshes.map( m => m.position);
 	}
 
 }

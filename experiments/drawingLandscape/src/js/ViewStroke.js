@@ -1,13 +1,11 @@
 // ViewStroke.js
 
 import alfrid, { GL } from 'alfrid';
-import vs from '../shaders/pbr.vert';
-import fs from '../shaders/stroke.frag';
 
 class ViewStroke extends alfrid.View {
 	
 	constructor() {
-		super(vs, fs);
+		super(null, alfrid.ShaderLibs.copyFrag);
 		this._points = [];
 
 		this.mtxLeft = mat4.create();
@@ -19,11 +17,6 @@ class ViewStroke extends alfrid.View {
 
 	_init() {
 		this.mesh;
-
-		this.roughness = .9;
-		this.specular = 0.5;
-		this.metallic = 0.5;
-		this.baseColor = [1, 1, 1];
 	}
 
 
@@ -132,9 +125,6 @@ class ViewStroke extends alfrid.View {
 			addQuad(i, false);
 		}
 
-		// if(!this.mesh) {
-			
-		// }
 		this.mesh = null;
 		this.mesh = new alfrid.Mesh(GL.TRIANGLES);
 
@@ -145,25 +135,13 @@ class ViewStroke extends alfrid.View {
 	}
 
 
-	render(textureRad, textureIrr, textureColor) {
+	render(texture) {
 		if(!this.mesh) {
 			return;
 		}
 		this.shader.bind();
-		this.shader.uniform('uColorMap', 'uniform1i', 0);
-		this.shader.uniform('uRadianceMap', 'uniform1i', 1);
-		this.shader.uniform('uIrradianceMap', 'uniform1i', 2);
-		textureColor.bind(0);
-		textureRad.bind(1);
-		textureIrr.bind(2);
-
-		this.shader.uniform('uBaseColor', 'uniform3fv', [1, 1, 1]);
-		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
-		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
-		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
-
-		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
-		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+		this.shader.uniform("texture", "uniform1i", 0);
+		texture.bind(0);
 		GL.draw(this.mesh);
 	}
 

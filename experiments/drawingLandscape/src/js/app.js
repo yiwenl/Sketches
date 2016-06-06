@@ -11,7 +11,7 @@ window.params = {
 	gamma:2.2,
 	exposure:5,
 	debugHitPlane: false,
-	minMountDist:1,
+	minMountDist:2,
 	maxNumMountains:50
 };
 

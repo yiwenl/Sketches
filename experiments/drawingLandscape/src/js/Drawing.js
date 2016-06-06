@@ -94,6 +94,7 @@ class Drawing extends EventDispatcher {
 
 	_onUp(e) {
 		if(this._isLocked) return;
+		this.trigger('onUp', {points: this.points});
 		this._isMouseDown = false;
 
 		this.trigger('mouseup', {});
