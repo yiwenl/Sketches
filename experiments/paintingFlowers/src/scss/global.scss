@@ -40,6 +40,7 @@ h1,h2,h3,h4,text,p {
 	letter-spacing: 10px;
 	z-index: 999;
 	color:white;
+	pointer-events: none;
 
 	opacity: 0;
 	transition:opacity .5s ease-out;
@@ -57,6 +58,7 @@ h1,h2,h3,h4,text,p {
 	top:50%;
 	background:rgba(255, 255, 255, .5);
 	opacity: 0;
+	pointer-events: none;
 
 	transition:width .5s ease-out, opacity .5s ease-out;
 

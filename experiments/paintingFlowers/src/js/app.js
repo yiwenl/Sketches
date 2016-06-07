@@ -9,7 +9,9 @@ const GL = alfrid.GL;
 window.params = {
 	gamma:2.2,
 	exposure:5,
-	offset:1
+	offset:0,
+	numTouches: 40,
+	touchRadius: .35
 };
 
 const assets = [
@@ -81,13 +83,13 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
+	// window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
 	
-	gui.add(params, 'offset', 0, 1);
-	gui.add(params, 'gamma', 1, 5);
-	gui.add(params, 'exposure', 1, 25);
+	// gui.add(params, 'offset', 0, 1);
+	// gui.add(params, 'gamma', 1, 5);
+	// gui.add(params, 'exposure', 1, 25);
 }

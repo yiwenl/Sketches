@@ -22,6 +22,7 @@ varying vec3		vEyePosition;
 varying vec3		vWsNormal;
 varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
+varying float 		vOffset;
 
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.1415926535897932384626433832795
@@ -98,8 +99,9 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 void main() {
 	vec3 N 				= normalize( vWsNormal );
 	vec3 V 				= normalize( vEyePosition );
-	
-	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
+	float specular      = min(uSpecular + vOffset*.5, 1.0);
+	float roughness 	= max(uRoughness - vOffset*.5, 0.0);
+	vec3 color 			= getPbr(N, V, uBaseColor - vec3(0.0, vOffset * .85, vOffset * .85), roughness, uMetallic, specular);
 
 	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );
