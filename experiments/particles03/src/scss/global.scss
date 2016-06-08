@@ -24,3 +24,39 @@ html, body {
 	top:0;
 	user-select:none;
 }
+
+
+
+.Message {
+	position: absolute;
+	width: 100%;
+	top: calc(50% - 50px);
+	text-align: center;
+	font-family: Trebuchet MS, Verdana;
+	letter-spacing: 10px;
+	z-index: 999;
+	color:white;
+
+	opacity: 0;
+	transition:opacity .5s ease-out;
+
+	.isLoading & {
+		opacity: 1;
+	}
+}
+
+.Loading-Bar {
+	position: absolute;
+	z-index: 998;
+	width: 0%;
+	height:1px;
+	top:50%;
+	background:rgba(255, 255, 255, .5);
+	opacity: 0;
+
+	transition:width .5s ease-out, opacity .5s ease-out;
+
+	.isLoading & {
+		opacity: 1;
+	}
+}

@@ -35,10 +35,16 @@ class ViewRender extends alfrid.View {
 		this.mesh = new alfrid.Mesh(GL.POINTS);
 		this.mesh.bufferVertex(positions);
 		this.mesh.bufferIndex(indices);
+
+
+		this.roughness = .95;
+		this.specular = 1;
+		this.metallic = 0;
+		this.baseColor = [1, 1, 1];
 	}
 
 
-	render(textureCurr, textureNext, p, textureExtra) {
+	render(textureCurr, textureNext, p, textureExtra, textureSphere, textureRad, textureIrr) {
 		this.time += 0.1;
 		this.shader.bind();
 
@@ -51,10 +57,29 @@ class ViewRender extends alfrid.View {
 		this.shader.uniform('textureExtra', 'uniform1i', 2);
 		textureExtra.bind(2);
 
+		this.shader.uniform("textureSphere", "uniform1i", 3);
+		textureSphere.bind(3);
+
+		this.shader.uniform('uRadianceMap', 'uniform1i', 4);
+		textureRad.bind(4);
+
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 5);
+		textureIrr.bind(5);
+
+
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 
 		this.shader.uniform('percent', 'float', p);
 		this.shader.uniform('time', 'float', this.time);
+
+		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
+		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
+		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
+		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
+
+		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
+		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+
 		GL.draw(this.mesh);
 	}
 

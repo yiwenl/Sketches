@@ -5,8 +5,13 @@ import ViewAddVel from './ViewAddVel';
 import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
+import ViewSphere from './ViewSphere';
 
 const GL = alfrid.GL;
+
+window.getAsset = function(id) {
+	return assets.find( (a) => a.id === id).file;
+}
 
 class SceneApp extends alfrid.Scene {
 	constructor() {
@@ -16,10 +21,34 @@ class SceneApp extends alfrid.Scene {
 		this._count = 0;
 		this.orbitalControl.radius.value = 15;
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
+
+		this.cameraSphere = new alfrid.CameraPerspective();
+		this.cameraSphere.setPerspective(Math.PI/2, 1, .1, 100);
+		this.orbitalControlSphere = new alfrid.OrbitalControl(this.cameraSphere);
+		this.orbitalControlSphere.radius.setTo(1.5);
+		this.orbitalControlSphere.lockZoom(true);
 	}
 
 	_initTextures() {
 		console.log('init textures');
+
+		let irr_posx = alfrid.HDRLoader.parse(getAsset('irr_posx'));
+		let irr_negx = alfrid.HDRLoader.parse(getAsset('irr_negx'));
+		let irr_posy = alfrid.HDRLoader.parse(getAsset('irr_posy'));
+		let irr_negy = alfrid.HDRLoader.parse(getAsset('irr_negy'));
+		let irr_posz = alfrid.HDRLoader.parse(getAsset('irr_posz'));
+		let irr_negz = alfrid.HDRLoader.parse(getAsset('irr_negz'));
+
+		this._textureIrr = new alfrid.GLCubeTexture([irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz]);
+
+		let rad_posx = alfrid.HDRLoader.parse(getAsset('rad_posx'));
+		let rad_negx = alfrid.HDRLoader.parse(getAsset('rad_negx'));
+		let rad_posy = alfrid.HDRLoader.parse(getAsset('rad_posy'));
+		let rad_negy = alfrid.HDRLoader.parse(getAsset('rad_negy'));
+		let rad_posz = alfrid.HDRLoader.parse(getAsset('rad_posz'));
+		let rad_negz = alfrid.HDRLoader.parse(getAsset('rad_negz'));
+
+		this._textureRad = new alfrid.GLCubeTexture([rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz]);
 
 		//	FBOS
 		const numParticles = params.numParticles;
@@ -33,6 +62,9 @@ class SceneApp extends alfrid.Scene {
 		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
+
+		const sphereSize = 256;
+		this._fboSphere = new alfrid.FrameBuffer(sphereSize, sphereSize);
 	}
 
 
@@ -50,6 +82,7 @@ class SceneApp extends alfrid.Scene {
 		this._vAddVel = new ViewAddVel();
 		this._vRender = new ViewRender();
 		this._vSim 	  = new ViewSim();
+		this._vSphere = new ViewSphere();
 
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
@@ -97,6 +130,8 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		this.orbitalControlSphere.rx.setTo(this.orbitalControl.rx.value);
+		this.orbitalControlSphere.ry.setTo(this.orbitalControl.ry.value);
 
 		this._count ++;
 		if(this._count % params.skipCount == 0) {
@@ -107,14 +142,23 @@ class SceneApp extends alfrid.Scene {
 		let p = this._count / params.skipCount;
 
 		GL.clear(0, 0, 0, 0);
-		this._bAxis.draw();
-		this._bDots.draw();
 
-		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
+		this._fboSphere.bind();
+		GL.clear(0, 0, 0, 0);
+		GL.setMatrices(this.cameraSphere);
+		this._vSphere.render();
+		this._fboSphere.unbind();
+
+		GL.setMatrices(this.camera);
+
+		// this._bAxis.draw();
+		// this._bDots.draw();
+
+		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboSphere.getTexture(), this._textureRad, this._textureIrr);
 
 		// const size = 128;
 		// GL.viewport(0, 0, size, size);
-		// this._bCopy.draw(this._fboExtra.getTexture());
+		// this._bCopy.draw(this._fboSphere.getTexture());
 	}
 
 

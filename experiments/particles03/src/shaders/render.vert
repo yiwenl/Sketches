@@ -7,16 +7,26 @@ attribute vec3 aNormal;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
+uniform mat3 uNormalMatrix;
+uniform mat3 uModelViewMatrixInverse;
+
 uniform sampler2D textureCurr;
 uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
+uniform sampler2D textureSphere;
+uniform samplerCube uRadianceMap;
+uniform samplerCube uIrradianceMap;
+
 uniform vec2 uViewport;
 uniform float percent;
 uniform float time;
-varying vec4 vColor;
+
+varying vec3 vPosition;
+varying vec3 vWsPosition;
+varying vec3 vEyePosition;
 varying vec3 vNormal;
 
-const float radius = 0.05;
+const float radius = 0.075;
 
 void main(void) {
 	vec2 uv      = aVertexPosition.xy;
@@ -24,19 +34,20 @@ void main(void) {
 	vec3 posNext = texture2D(textureNext, uv).rgb;
 	vec3 pos     = mix(posCurr, posNext, percent);
 	vec3 extra   = texture2D(textureExtra, uv).rgb;
-	gl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
+
+	vec4 worldSpacePosition	= uModelMatrix * vec4(pos, 1.0);
+    vec4 viewSpacePosition	= uViewMatrix * worldSpacePosition;
+
+    vPosition				= viewSpacePosition.xyz;
+	vWsPosition				= worldSpacePosition.xyz;
+
+	vec4 eyeDirViewSpace	= viewSpacePosition - vec4( 0, 0, 0, 1 );
+	vEyePosition			= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );
+
+	gl_Position				= uProjectionMatrix * viewSpacePosition;
 	
 	gl_PointSize = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
 	
-
-	// float g 	 = sin(extra.r + time * mix(extra.b, 1.0, .5));
-	// g 			 = smoothstep(0.0, 1.0, g);
-	// g 			 = mix(g, 1.0, .5);
-
-	float g  	 = mix(extra.b, 1.0, 0.75);
-	vColor       = vec4(vec3(g), 1.0);
-
-	// gl_PointSize = 1.0;
 
 	vNormal 	 = aNormal;
 }
