@@ -6,6 +6,7 @@ import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 import ViewSphere from './ViewSphere';
+import ViewShadow from './ViewShadow';
 
 const GL = alfrid.GL;
 
@@ -27,6 +28,16 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControlSphere = new alfrid.OrbitalControl(this.cameraSphere);
 		this.orbitalControlSphere.radius.setTo(1.5);
 		this.orbitalControlSphere.lockZoom(true);
+
+		//	shadow and light 
+		this.lightPosition = [.5, 10, 1];
+		this.shadowMatrix  = mat4.create();
+
+		const RAD = Math.PI/180;
+		this.cameraLight   = new alfrid.CameraPerspective();
+		this.cameraLight.setPerspective(90 * RAD, GL.aspectRatio, .5, 400);
+		this.cameraLight.lookAt(this.lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+		mat4.multiply(this.shadowMatrix, this.cameraLight.projection, this.cameraLight.viewMatrix);
 	}
 
 	_initTextures() {
@@ -65,6 +76,9 @@ class SceneApp extends alfrid.Scene {
 
 		const sphereSize = 256;
 		this._fboSphere = new alfrid.FrameBuffer(sphereSize, sphereSize);
+
+		const shadowMapSize = 1024;
+		this._fboShadowMap = new alfrid.FrameBuffer(shadowMapSize, shadowMapSize);
 	}
 
 
@@ -83,6 +97,7 @@ class SceneApp extends alfrid.Scene {
 		this._vRender = new ViewRender();
 		this._vSim 	  = new ViewSim();
 		this._vSphere = new ViewSphere();
+		this._vShadow = new ViewShadow();
 
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
@@ -143,22 +158,27 @@ class SceneApp extends alfrid.Scene {
 
 		GL.clear(0, 0, 0, 0);
 
+		//	render sphere texture
 		this._fboSphere.bind();
 		GL.clear(0, 0, 0, 0);
 		GL.setMatrices(this.cameraSphere);
 		this._vSphere.render();
 		this._fboSphere.unbind();
 
+
+		//	render shadow map
+		this._fboShadowMap.bind();
+		GL.clear(0, 0, 0, 0);
+		GL.setMatrices(this.cameraLight);
+		this._vShadow.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
+		this._fboShadowMap.unbind();
+
 		GL.setMatrices(this.camera);
-
-		// this._bAxis.draw();
-		// this._bDots.draw();
-
 		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboSphere.getTexture(), this._textureRad, this._textureIrr);
 
-		// const size = 128;
-		// GL.viewport(0, 0, size, size);
-		// this._bCopy.draw(this._fboSphere.getTexture());
+		const size = 128;
+		GL.viewport(0, 0, size, size);
+		this._bCopy.draw(this._fboShadowMap.getDepthTexture());
 	}
 
 

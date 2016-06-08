@@ -25,6 +25,7 @@ window.params = {
 	numParticles:256 * 2,
 	skipCount:10,
 	maxRadius: 4.5,
+	globalTime: Math.random() * 0xFFF,
 	gamma:2.2,
 	exposure:5
 };
