@@ -101,7 +101,8 @@ void main() {
 	vec3 V 				= normalize( vEyePosition );
 	float specular      = min(uSpecular + vOffset*.5, 1.0);
 	float roughness 	= max(uRoughness - vOffset*.5, 0.0);
-	vec3 color 			= getPbr(N, V, uBaseColor - vec3(0.0, vOffset * .85, vOffset * .85), roughness, uMetallic, specular);
+	// vec3 color 			= getPbr(N, V, uBaseColor - vec3(vOffset * .5, vOffset * .85, vOffset * .85), roughness, uMetallic, specular);
+	vec3 color 			= getPbr(N, V, uBaseColor - vec3(vOffset * .995, vOffset * .995, vOffset * .995), roughness, uMetallic, specular);
 
 	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );

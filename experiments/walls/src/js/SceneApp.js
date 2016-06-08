@@ -56,21 +56,21 @@ class SceneApp extends alfrid.Scene {
 
 
 	_initSound() {
+		console.log(Sono);
+
 		var that = this;
-		require('soundcloud-badge')({
-		    client_id: 'e8b7a335a5321247b38da4ccc07b07a2'
-		  , song: 'https://soundcloud.com/rsheehan/rhian-sheehan-la-bo-te-musique'
-		  // , song: 'https://soundcloud.com/dee-san/oscillate-01'
-		  , dark: false
-		  , getFonts: true
-		}, function(err, src, data, div) {
-		  if (err) throw err;
-		  var audio = new Audio
-		  audio.src = src
-		  audio.play()
-		  audio.loop = true;
-		  audio.volume = 1.0;
-		  that.audio = audio;
+		this.soundOffset = 0;
+		this.preSoundOffset = 0;
+		this.sound = Sono.load({
+		    url: ['assets/audio/01.mp3'],
+		    // url: ['assets/audio/Oscillate.mp3'],
+		    volume: 0.0,
+		    loop: true,
+		    onComplete: function(sound) {
+		    	console.debug("Sound Loaded");
+		    	that.analyser = sound.effect.analyser(128);
+		    	sound.play();
+		    }
 		});
 	}
 
