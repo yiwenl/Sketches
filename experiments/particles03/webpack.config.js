@@ -42,9 +42,6 @@ module.exports = {
     filename:'js/bundle.js',
     publicPath: isDevelopment ? `http://${serverIp}:8081/assets/` : ''
   },
-  node: {
-    fs: "empty"
-  },
   module: {
     loaders: [
       {
@@ -58,8 +55,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        loader: 'style!css',
-        exclude: /node_modules/,
+        loader: 'style!css'
       },
       {
         test: /\.scss$/,

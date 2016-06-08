@@ -2,9 +2,12 @@
 
 import alfrid, { Scene } from 'alfrid';
 import ViewObjModel from './ViewObjModel';
+import ViewWalls from './ViewWalls';
+import ViewFloor from './ViewFloor';
+import Sono from './libs/sono.min';
 
 window.getAsset = function (id) {
-	for(var i = 0; i < assets.length; i++) {
+	for(let i = 0; i < assets.length; i++) {
 		if(id === assets[i].id) {
 			return assets[i].file;
 		}
@@ -16,10 +19,12 @@ const GL = alfrid.GL;
 class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
+		this.steps = 0;
 		GL.enableAlphaBlending();
-
+		this.orbitalControl.rx.value = this.orbitalControl.ry.value = .3;
 
 		this._initSound();
+		this.sums = [];
 	}
 
 	_initTextures() {
@@ -40,8 +45,6 @@ class SceneApp extends alfrid.Scene {
 		let rad_negz = alfrid.HDRLoader.parse(getAsset('rad_negz'));
 
 		this._textureRad = new alfrid.GLCubeTexture([rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz]);
-
-		this._textureAO = new alfrid.GLTexture(getAsset('aomap'));
 	}
 
 
@@ -50,32 +53,29 @@ class SceneApp extends alfrid.Scene {
 		this._bAxis = new alfrid.BatchAxis();
 		this._bDots = new alfrid.BatchDotsPlane();
 		this._bBall = new alfrid.BatchBall();
-		this._bSkybox = new alfrid.BatchSkybox();
-		this._vModel = new ViewObjModel();
+
+		this._vWalls = new ViewWalls();
+		this._vFloor = new ViewFloor();
 	}
 
 
 	_initSound() {
-		var that = this;
-		require('soundcloud-badge')({
-		    client_id: 'e8b7a335a5321247b38da4ccc07b07a2'
-		  , song: 'https://soundcloud.com/rsheehan/rhian-sheehan-la-bo-te-musique'
-		  // , song: 'https://soundcloud.com/dee-san/oscillate-01'
-		  , dark: false
-		  , getFonts: true
-		}, function(err, src, data, div) {
-		  if (err) throw err;
-		  var audio = new Audio
-		  audio.src = src
-		  audio.play()
-		  audio.loop = true;
-		  audio.volume = 1.0;
-		  that.audio = audio;
+		this.soundOffset = 0;
+		this.preSoundOffset = 0;
+		this.sound = Sono.load({
+		    url: ['assets/audio/03.mp3'],
+		    volume: 0.01,
+		    loop: false,
+		    onComplete: (sound) => {
+		    	this.analyser = sound.effect.analyser(128);
+		    	sound.play();
+		    	this.sound = sound;
+		    }
 		});
 	}
 
 	render() {
-		if(!this.audio) {
+		if(!this.analyser) {
 			return;
 		}
 
@@ -84,13 +84,36 @@ class SceneApp extends alfrid.Scene {
 		GL.clear(0, 0, 0, 0);
 		// this._bSkybox.draw(this._textureRad);
 		// this._bAxis.draw();
-		// this._bDots.draw();
-
-		this._vModel.render(this._textureRad, this._textureIrr, this._textureAO);
+		this._bDots.draw();
+		this._vWalls.render(this._textureRad, this._textureIrr);
+		this._vFloor.render(this._textureRad, this._textureIrr);
 	}
 
 	_getSoundData() {
+		// console.log(this.sound.currentTime, this.sound.duration);
+		if(this.sound.currentTime === this.sound.duration) return;
+		this.steps ++;
+		this.frequencies = this.analyser.getFrequencies();
+		let f = this.analyser.getFrequencies();
 
+		let sum = 0;
+		let num = f.length/2;
+
+		for(let i=0; i<num; i++) {
+			sum += f[i];
+		}
+
+		sum /= num;
+		this.sum = sum;
+
+		if(this.steps % 3 === 0) {
+			// this._vWalls.addWall(sum);
+		}
+		
+
+		// console.log(sum);
+		this.sums.push(sum);
+		console.log(this.sums.length);
 	}
 
 
