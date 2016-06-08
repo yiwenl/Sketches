@@ -1,9 +1,8 @@
-// pbr.frag
-
 #extension GL_EXT_shader_texture_lod : enable
 
 precision highp float;
 
+uniform sampler2D textureSphere;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
 
@@ -19,9 +18,9 @@ uniform float		uGamma;
 varying vec3        vNormal;
 varying vec3        vPosition;
 varying vec3		vEyePosition;
-varying vec3		vWsNormal;
 varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
+
 
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.1415926535897932384626433832795
@@ -88,15 +87,18 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 	vec3 reflectance	= EnvBRDFApprox( specularColor, roughness4, NoV );
 	
 	// combine the specular IBL and the BRDF
-    vec3 diffuse  		= diffuseColor * irradiance;
-    vec3 _specular 		= radiance * reflectance;
+	vec3 diffuse  		= diffuseColor * irradiance;
+	vec3 _specular 		= radiance * reflectance;
 	color				= diffuse + _specular;
 
 	return color;
 }
 
-void main() {
-	vec3 N 				= normalize( vWsNormal );
+void main(void) {
+	vec4 sphereColor = texture2D(textureSphere, gl_PointCoord.xy);
+	if(sphereColor.a <= 0.01) discard;
+
+	vec3 N 				= normalize( sphereColor.rgb);
 	vec3 V 				= normalize( vEyePosition );
 	
 	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
@@ -111,5 +113,4 @@ void main() {
 
 	// output the fragment color
     gl_FragColor		= vec4( color, 1.0 );
-
 }

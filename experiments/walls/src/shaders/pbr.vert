@@ -23,7 +23,7 @@ varying vec3 vWsNormal;
 
 
 void main(void) {
-	vec3 position 			= aVertexPosition * 2.0;
+	vec3 position 			= aVertexPosition;
 	vec4 worldSpacePosition	= uModelMatrix * vec4(position, 1.0);
     vec4 viewSpacePosition	= uViewMatrix * worldSpacePosition;
 	

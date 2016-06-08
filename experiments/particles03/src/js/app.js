@@ -5,12 +5,6 @@ import AssetsLoader from 'assets-loader';
 import dat from 'dat-gui';
 
 const GL = alfrid.GL;
-
-window.params = {
-	gamma:2.2,
-	exposure:5
-};
-
 const assets = [
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
@@ -27,6 +21,14 @@ const assets = [
 	{ id:'rad_negy', url:'assets/img/rad_negy.hdr', type:'binary' },
 	{ id:'rad_negz', url:'assets/img/rad_negz.hdr', type:'binary' }
 ];
+window.params = {
+	numParticles:256 * 2,
+	skipCount:10,
+	maxRadius: 4.5,
+	globalTime: Math.random() * 0xFFF,
+	gamma:2.2,
+	exposure:5
+};
 
 if(document.body) {
 	_init();
@@ -62,7 +64,7 @@ function _onImageLoaded(o) {
 
 	//	ASSETS
 	console.log('Image Loaded : ', o);
-	// document.body.classList.remove('isLoading');
+	document.body.classList.remove('isLoading');
 	window.assets = o;	
 
 	_init3D();
@@ -70,6 +72,7 @@ function _onImageLoaded(o) {
 
 
 function _init3D() {
+
 	//	CREATE CANVAS
 	let canvas = document.createElement('canvas');
 	canvas.className = 'Main-Canvas';
@@ -78,13 +81,11 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas);
 
-	//	INIT DAT-GUI
-	// window.gui = new dat.GUI({ width:300 });
-
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
-	
-	// gui.add(params, 'gamma', 1, 5);
-	// gui.add(params, 'exposure', 1, 25);
+	//	INIT DAT-GUI
+	window.gui = new dat.GUI({ width:300 });
+	gui.add(params, 'maxRadius', 0.0, 10.0);
+
 }
