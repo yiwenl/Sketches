@@ -2,7 +2,7 @@ import '../scss/global.scss';
 import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 
 const GL = alfrid.GL;
 const assets = [
@@ -22,9 +22,9 @@ const assets = [
 	{ id:'rad_negz', url:'assets/img/rad_negz.hdr', type:'binary' }
 ];
 window.params = {
-	numParticles:256 * 2,
+	numParticles:256,
 	skipCount:10,
-	maxRadius: 4.5,
+	maxRadius: 7.5,
 	globalTime: Math.random() * 0xFFF,
 	gamma:2.2,
 	exposure:5
@@ -85,7 +85,7 @@ function _init3D() {
 	let scene = new SceneApp();
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
-	gui.add(params, 'maxRadius', 0.0, 10.0);
+	// window.gui = new dat.GUI({ width:300 });
+	// gui.add(params, 'maxRadius', 0.0, 10.0);
 
 }

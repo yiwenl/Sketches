@@ -2,7 +2,6 @@
 
 precision highp float;
 attribute vec3 aVertexPosition;
-attribute vec2 aTextureCoord;
 attribute vec3 aNormal;
 
 uniform mat4 uModelMatrix;
@@ -30,12 +29,15 @@ void main(void) {
 	vec3 pos     = mix(posCurr, posNext, percent);
 	vec3 extra   = texture2D(textureExtra, uv).rgb;
 
-	gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
+	vec4 V = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
+	gl_Position = V;
 	
-	gl_PointSize = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
 
-
-    vTextureCoord = aTextureCoord;
     vNormal = aNormal;
-    vColor = vec4(1.0);
+    float d 	 = V.z/V.w;
+	d 			 = d*.5 + .5;
+	vColor       = vec4(d, d, d, 1.0);
+
+	// gl_PointSize = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
+	gl_PointSize = 2.0;
 }

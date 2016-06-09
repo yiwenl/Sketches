@@ -20,6 +20,7 @@ varying vec3        vPosition;
 varying vec3		vEyePosition;
 varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
+varying vec3 		vExtra;
 
 
 #define saturate(x) clamp(x, 0.0, 1.0)
@@ -110,7 +111,7 @@ void main(void) {
 	
 	// gamma correction
 	color				= pow( color, vec3( 1.0 / uGamma ) );
-
+	
 	// output the fragment color
     gl_FragColor		= vec4( color, 1.0 );
 }

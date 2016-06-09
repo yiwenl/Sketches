@@ -25,8 +25,9 @@ varying vec3 vPosition;
 varying vec3 vWsPosition;
 varying vec3 vEyePosition;
 varying vec3 vNormal;
-
+varying vec3 vExtra;
 const float radius = 0.075;
+
 
 void main(void) {
 	vec2 uv      = aVertexPosition.xy;
@@ -46,8 +47,9 @@ void main(void) {
 
 	gl_Position				= uProjectionMatrix * viewSpacePosition;
 	
-	gl_PointSize = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
+	gl_PointSize = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w * (1.0 + extra.r * 2.0);
 	
 
 	vNormal 	 = aNormal;
+	vExtra = extra;
 }
