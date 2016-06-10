@@ -34,7 +34,7 @@ void main(void) {
 
     vNormal = aNormal;
     vNormal = uNormalMatrix * texture2D(textureNormal, uv).rgb;
-    vColor = mix(mapColor, vec3(1.0), .1);
+    vColor = mix(mapColor, vec3(1.0), 0.2);
 
     // const float radius = 0.0075;
     gl_PointSize = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w * (1.0 + aVertexPosition.y * 3.0);

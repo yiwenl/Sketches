@@ -28,11 +28,11 @@ vec2 envMapEquirect(vec3 wcNormal) {
 void main(void) {
 	if(distance(center, gl_PointCoord) > .5) discard;
 
-	vec2 uv = envMapEquirect(vNormal.xzy);
+	vec2 uv = envMapEquirect(vNormal);
 	vec3 colorLight = texture2D(textureLight, uv).rgb;
 	colorLight = mix(colorLight, vec3(1.0), .2);
 	
-    gl_FragColor = vec4(vColor * colorLight, 1.0);
+  gl_FragColor = vec4(vColor * colorLight, 1.0);
     // gl_FragColor = vec4(uv, 0.0, 1.0);
     // gl_FragColor = vec4(vNormal * .5 + .5, 1.0);
 }
