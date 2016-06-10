@@ -37,10 +37,11 @@ class ViewRender extends alfrid.View {
 		this.mesh.bufferIndex(indices);
 
 
-		this.roughness = 1;
+		this.roughness = .9;
 		this.specular = 0;
 		this.metallic = 0;
-		this.baseColor = [0, 0, 0];
+		let grey = 1;
+		this.baseColor = [grey, grey, grey];
 	}
 
 
