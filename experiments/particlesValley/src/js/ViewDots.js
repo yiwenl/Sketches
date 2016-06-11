@@ -5,7 +5,12 @@ import vs from '../shaders/dots.vert';
 import fs from '../shaders/dots.frag';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
-
+const tmp = vec3.create();
+const tmpDist = vec3.create();
+function distance(a, b) {
+	vec3.sub(tmpDist, a, b);
+	return vec3.length(tmpDist);
+}
 const NUM = 256;
 
 class ViewDots extends alfrid.View {
@@ -25,8 +30,7 @@ class ViewDots extends alfrid.View {
 
 		for(let j=0; j<NUM; j++) {
 			for(let i=0; i<NUM; i++) {
-				positions.push([i+random(-range, range), Math.random(), j+random(-range, range)]);
-				// extra.push([Math.random(), Math.random(), Math.random()]);
+				positions.push([i+random(-range, range) - NUM/2, Math.random(), j+random(-range, range) - NUM/2]);
 				coords.push([i/NUM, j/NUM]);
 				indices.push(count);
 				count ++;
@@ -48,12 +52,13 @@ class ViewDots extends alfrid.View {
 	}
 
 
-	render(texture, uvOffset, num, textureNormal) {
+	render(texture, uvOffset, num, textureNormal, cameraPosition) {
 		let pos = [0, 0, 0];
 		let totalsize = NUM * this.scale;
-		// console.log(uvOffset);
-		pos[0] = uvOffset[0] * NUM * num - NUM * num/2;
-		pos[2] = uvOffset[1] * NUM * num - NUM * num/2;
+		pos[0] = uvOffset[0] * NUM * num - NUM * num/2 + NUM/2;
+		pos[2] = uvOffset[1] * NUM * num - NUM * num/2 + NUM/2;
+		vec3.multiply(tmp, pos, [this.scale, 1, this.scale * 2]);
+		let d = distance(cameraPosition, tmp);
 
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
@@ -68,6 +73,12 @@ class ViewDots extends alfrid.View {
 		this.shader.uniform("uPosition", "vec3", pos);
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 		GL.draw(this.mesh);
+
+		return {
+			pos:tmp,
+			near:d<18,
+			dist:d,
+		};
 	}
 
 
