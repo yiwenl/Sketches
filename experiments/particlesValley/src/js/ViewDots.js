@@ -11,7 +11,7 @@ function distance(a, b) {
 	vec3.sub(tmpDist, a, b);
 	return vec3.length(tmpDist);
 }
-const NUM = 256;
+const NUM = 200;
 
 class ViewDots extends alfrid.View {
 	
@@ -21,38 +21,56 @@ class ViewDots extends alfrid.View {
 
 
 	_init() {
-		const positions = [];
-		const extra = [];
-		const coords = [];
-		const indices = [];
-		const range = 0.75;
-		let count = 0;
 
-		for(let j=0; j<NUM; j++) {
-			for(let i=0; i<NUM; i++) {
-				positions.push([i+random(-range, range) - NUM/2, Math.random(), j+random(-range, range) - NUM/2]);
-				coords.push([i/NUM, j/NUM]);
-				indices.push(count);
-				count ++;
+		function createMesh(scale) {
+			let positions = [];
+			let extra = [];
+			let coords = [];
+			let indices = [];
+			let range = 0.75;
+			let count = 0;	
+			const _num = NUM/scale;
+
+			for(let j=0; j<_num; j++) {
+				for(let i=0; i<_num; i++) {
+					positions.push([ (i+random(-range, range)) * scale - NUM/2, Math.random(), (j+random(-range, range)) * scale - NUM/2]);
+					coords.push([i/_num, j/_num]);
+					indices.push(count);
+					count ++;
+				}
 			}
+
+			let mesh = new alfrid.Mesh(GL.POINTS);
+			mesh.bufferVertex(positions);
+			mesh.bufferTexCoord(coords);
+			mesh.bufferIndex(indices);
+
+			return mesh;
 		}
 
-		this.mesh = new alfrid.Mesh(GL.POINTS);
-		this.mesh.bufferVertex(positions);
-		this.mesh.bufferTexCoord(coords);
-		this.mesh.bufferIndex(indices);
-		// this.mesh.bufferData('aExtra', extra, 3);
+		this.mesh = createMesh(1);
+		this.meshFar = createMesh(2);
+		this.meshFarest = createMesh(4);
 
-		this.scale = 0.02;
-		this.dotSize = 0.0025;
+
+		this.scale = 0.02 / 2;
+		this.dotSize = 0.005;
 		this.maxHeight = 1.2;
+		this.noiseHeight = 0.5;
 		gui.add(this, 'scale', 0.01, 0.05);
 		gui.add(this, 'dotSize', 0.0005, 0.02);
 		gui.add(this, 'maxHeight', 0, 3);
+		gui.add(this, 'noiseHeight', 0, 1);
+
+
+		this.near = 10.1;
+		this.far = 15.1;
+		gui.add(this, 'near', 0.1, 20.2);
+		gui.add(this, 'far', 15.1, 30.3);
 	}
 
 
-	render(texture, uvOffset, num, textureNormal, cameraPosition) {
+	render(texture, uvOffset, num, textureNoise, cameraPosition) {
 		let pos = [0, 0, 0];
 		let totalsize = NUM * this.scale;
 		pos[0] = uvOffset[0] * NUM * num - NUM * num/2 + NUM/2;
@@ -63,20 +81,28 @@ class ViewDots extends alfrid.View {
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
-		this.shader.uniform("textureNormal", "uniform1i", 1);
-		textureNormal.bind(1);
+		this.shader.uniform("textureNoise", "uniform1i", 1);
+		textureNoise.bind(1);
 		this.shader.uniform("uvOffset", "vec2", uvOffset);
 		this.shader.uniform("scale", "vec3", [this.scale, 1, this.scale * 2]);
 		this.shader.uniform("numSeg", "float", num);
 		this.shader.uniform("uMaxHeight", "float", this.maxHeight);
+		this.shader.uniform("uNoiseHeight", "float", this.noiseHeight);
 		this.shader.uniform("radius", "float", this.dotSize);
 		this.shader.uniform("uPosition", "vec3", pos);
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
-		GL.draw(this.mesh);
+
+		if(d < this.near) {
+			GL.draw(this.mesh);	
+		} else if(d < this.far) {
+			GL.draw(this.meshFar);
+		} else {
+			GL.draw(this.meshFarest);
+		}
+		
 
 		return {
 			pos:tmp,
-			near:d<18,
 			dist:d,
 		};
 	}
