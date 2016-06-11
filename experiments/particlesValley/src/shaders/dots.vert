@@ -17,7 +17,6 @@ uniform float numSeg;
 uniform float uMaxHeight;
 
 uniform sampler2D texture;
-uniform sampler2D textureNormal;
 uniform vec3 uPosition;
 uniform vec2 uViewport;
 
@@ -35,7 +34,6 @@ void main(void) {
     vTextureCoord = uv;
 
     vNormal = aNormal;
-    vNormal = uNormalMatrix * texture2D(textureNormal, uv).rgb;
     vColor = mix(mapColor, vec3(1.0), 0.2);
 
     // const float radius = 0.0075;

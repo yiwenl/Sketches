@@ -26,8 +26,7 @@ class SceneApp extends alfrid.Scene {
 		console.log('init textures');
 		this._textureMap      = new alfrid.GLTexture(getAsset('map'));
 		this._textureLightMap = new alfrid.GLTexture(getAsset('lightmap'));
-		const fboSize         = 1024;
-		this._fboNormal       = new alfrid.FrameBuffer(fboSize, fboSize*2);
+		const fboNoiseSize 	  = 512;
 	}
 
 
@@ -37,12 +36,6 @@ class SceneApp extends alfrid.Scene {
 		this._bDots   = new alfrid.BatchDotsPlane();
 		this._bBall   = new alfrid.BatchBall();
 		this._vDots   = new ViewDots();
-		this._vNormal = new ViewNormal();
-
-		this._fboNormal.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vNormal.render(this._textureMap);
-		this._fboNormal.unbind();
 	}
 
 
@@ -61,7 +54,7 @@ class SceneApp extends alfrid.Scene {
 		
 		for(let j=0; j<num; j++) {
 			for(let i=0; i<num; i++) {
-				this._vDots.render(this._textureMap, [i/num, j/num], num, this._fboNormal.getTexture());
+				this._vDots.render(this._textureMap, [i/num, j/num], num, alfrid.GLTexture.whiteTexture());
 			}
 		}
 
