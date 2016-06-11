@@ -14,6 +14,8 @@ uniform vec3 scale;
 uniform vec2 uvOffset;
 uniform float radius;
 uniform float numSeg;
+uniform float uMaxHeight;
+
 uniform sampler2D texture;
 uniform sampler2D textureNormal;
 uniform vec3 uPosition;
@@ -27,7 +29,7 @@ void main(void) {
 	vec3 pos = (aVertexPosition + uPosition) * scale;
 	vec2 uv = aTextureCoord /numSeg + uvOffset;
 	vec3 mapColor = texture2D(texture, uv).rgb;
-	pos.y = mapColor.r * .25;
+	pos.y = mapColor.r * uMaxHeight;
 
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
     vTextureCoord = uv;

@@ -24,22 +24,19 @@ class SceneApp extends alfrid.Scene {
 
 	_initTextures() {
 		console.log('init textures');
-		this._textureMap = new alfrid.GLTexture(getAsset('map'));
+		this._textureMap      = new alfrid.GLTexture(getAsset('map'));
 		this._textureLightMap = new alfrid.GLTexture(getAsset('lightmap'));
-		const fboSize = 1024;
-		this._fboNormal = new alfrid.FrameBuffer(fboSize, fboSize*2);
+		const fboSize         = 1024;
+		this._fboNormal       = new alfrid.FrameBuffer(fboSize, fboSize*2);
 	}
 
 
 	_initViews() {
-		console.log('init views');
-
-		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
-		this._bBall = new alfrid.BatchBall();
-
-		this._vDots = new ViewDots();
+		this._bCopy   = new alfrid.BatchCopy();
+		this._bAxis   = new alfrid.BatchAxis();
+		this._bDots   = new alfrid.BatchDotsPlane();
+		this._bBall   = new alfrid.BatchBall();
+		this._vDots   = new ViewDots();
 		this._vNormal = new ViewNormal();
 
 		this._fboNormal.bind();
@@ -53,8 +50,6 @@ class SceneApp extends alfrid.Scene {
 		GL.clear(0, 0, 0, 0);
 
 		this.time += 0.001;
-		this.orbitalControl.ry.value += 0.01;
-		this.orbitalControl.rx.value = .3 + Math.sin(this.time * 3) * .2;
 		const r = 5;
 		const x = Math.cos(this.time) * r;
 		const z = Math.sin(this.time) * r;
@@ -62,13 +57,11 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.center[2] = z;
 		this.orbitalControl.positionOffset[0] = x;
 		this.orbitalControl.positionOffset[2] = z;
-		// this._bAxis.draw();
-		// this._bDots.draw();
 
 		
 		for(let j=0; j<num; j++) {
 			for(let i=0; i<num; i++) {
-				this._vDots.render(this._textureMap, [i/num, j/num], num, this._fboNormal.getTexture(), this._textureLightMap);
+				this._vDots.render(this._textureMap, [i/num, j/num], num, this._fboNormal.getTexture());
 			}
 		}
 
