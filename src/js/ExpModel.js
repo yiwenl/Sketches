@@ -88,6 +88,11 @@ const ExpModel = [
 		cover:'assets/img/sketchCoverDandelion.jpg',
 		url:'http://www.bongiovi.tw/projects/leap/02/',
 		opened:false
+	},
+	{
+		cover:'assets/img/coverSketchParticleValley.jpg',
+		url:'yiwenl.github.io/Sketches/experiments/particlesValley/dist/index.html',
+		opened:false
 	}
 ]
 
