@@ -113,7 +113,7 @@ float fbm(float x, float y, float z) {
 
 void main(void) {
 	const float posOffset = 5.0;
-	float noise = fbm(vTextureCoord.x * posOffset * 0.5, vTextureCoord.y * posOffset + uTime * 0.1, uTime * 0.03) * .5 + .5;
+	float noise = fbm(vTextureCoord.x * posOffset * 0.5, vTextureCoord.y * posOffset + uTime * 0.2, uTime * 0.03) * .5 + .5;
 
     gl_FragColor = vec4(noise, noise, noise, 1.0);
 }

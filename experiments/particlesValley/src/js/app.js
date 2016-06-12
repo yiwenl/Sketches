@@ -10,6 +10,12 @@ const assets = [
 	{ id:'map', url:'assets/img/ripple.png' },
 ];
 
+window.params = {
+	numParticles:256,
+	skipCount:10,
+	dotSize:0.005,
+}
+
 if(document.body) {
 	_init();
 } else {

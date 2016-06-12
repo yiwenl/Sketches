@@ -54,11 +54,10 @@ class ViewDots extends alfrid.View {
 
 
 		this.scale = 0.02 / 2;
-		this.dotSize = 0.005;
 		this.maxHeight = 1.2;
-		this.noiseHeight = 0.5;
+		this.noiseHeight = 1;
 		gui.add(this, 'scale', 0.01, 0.05);
-		gui.add(this, 'dotSize', 0.0005, 0.02);
+		gui.add(params, 'dotSize', 0.0005, 0.02);
 		gui.add(this, 'maxHeight', 0, 3);
 		gui.add(this, 'noiseHeight', 0, 1);
 
@@ -88,7 +87,7 @@ class ViewDots extends alfrid.View {
 		this.shader.uniform("numSeg", "float", num);
 		this.shader.uniform("uMaxHeight", "float", this.maxHeight);
 		this.shader.uniform("uNoiseHeight", "float", this.noiseHeight);
-		this.shader.uniform("radius", "float", this.dotSize);
+		this.shader.uniform("radius", "float", params.dotSize);
 		this.shader.uniform("uPosition", "vec3", pos);
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 

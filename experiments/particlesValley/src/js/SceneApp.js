@@ -3,14 +3,13 @@
 import alfrid, { Scene } from 'alfrid';
 import ViewDots from './ViewDots';
 import ViewNoise from './ViewNoise';
+import ViewSave from './ViewSave';
+import ViewRender from './ViewRender';
 
 const GL = alfrid.GL;
 const num = 8;
 console.log( num * 256 * 256);
-
-window.getAsset = function(id) {
-	return assets.find( (a) => a.id === id).file;
-}
+window.getAsset = function(id) {	return assets.find( (a) => a.id === id).file;	}
 
 class SceneApp extends alfrid.Scene {
 	constructor() {
@@ -36,6 +35,18 @@ class SceneApp extends alfrid.Scene {
 		this._textureLightMap = new alfrid.GLTexture(getAsset('lightmap'));
 		const fboNoiseSize 	  = 512;
 		this._fboNoise = new alfrid.FrameBuffer(fboNoiseSize, fboNoiseSize);
+
+		const numParticles = params.numParticles;
+		const o = {
+			minFilter:GL.NEAREST,
+			magFilter:GL.NEAREST
+		};
+
+		this._fboCurrentPos = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
 	}
 
 
@@ -44,9 +55,28 @@ class SceneApp extends alfrid.Scene {
 		this._bAxis   = new alfrid.BatchAxis();
 		this._bDots   = new alfrid.BatchDotsPlane();
 		this._bBall   = new alfrid.BatchBall();
-
+		
 		this._vDots   = new ViewDots();
-		this._vNoise = new ViewNoise();
+		this._vNoise  = new ViewNoise();
+		
+		this._vRender = new ViewRender();
+		
+		this._vSave   = new ViewSave();
+		GL.setMatrices(this.cameraOrtho);
+
+		this._fboCurrentPos.bind();
+		this._vSave.render(0);
+		this._fboCurrentPos.unbind();
+
+		this._fboExtra.bind();
+		this._vSave.render(1);
+		this._fboExtra.unbind();
+
+		this._fboTargetPos.bind();
+		this._bCopy.draw(this._fboCurrentPos.getTexture());
+		this._fboTargetPos.unbind();
+
+		GL.setMatrices(this.camera);
 
 		this.debug = false;
 		gui.add(this, 'debug');
@@ -54,6 +84,14 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		this._count ++;
+		if(this._count % params.skipCount == 0) {
+			this._count = 0;
+			// this.updateFbo();
+		}
+
+		let p = this._count / params.skipCount;
+
 		GL.clear(0, 0, 0, 0);
 
 		//	noise
@@ -76,7 +114,6 @@ class SceneApp extends alfrid.Scene {
 		const cameraPos = [this.cameraPos.x, this.cameraPos.y, this.cameraPos.z];
 
 		const s = .3/2;
-		this._bBall.draw(this.orbitalControl.center, [s, s, s], [1, .5, 0.25])
 		let c0 = [1, 0.25, 0.5];
 		let c1 = [0.5, 0.5, .5];
 		let c2 = [1, 0.0, 0.15];
@@ -98,6 +135,8 @@ class SceneApp extends alfrid.Scene {
 				
 			}
 		}
+
+		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
 
 		const size = 200;
 		GL.viewport(0, 0, size/2, size);
