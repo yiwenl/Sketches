@@ -51,6 +51,7 @@ class ViewRender extends alfrid.View {
 
 		this.shader.uniform('percent', 'float', p);
 		this.shader.uniform("radius", "float", params.dotSize * 0.75);
+		this.shader.uniform("particleAlpha", "float", params.particlesAlpha.value);
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 		this.shader.uniform("uInvertOffset", "float", params.invertOffset.value);
 		GL.draw(this.mesh);

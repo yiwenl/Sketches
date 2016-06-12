@@ -2,7 +2,7 @@ import '../scss/global.scss';
 import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 
 const GL = alfrid.GL;
 const assets = [
@@ -15,6 +15,7 @@ window.params = {
 	skipCount:10,
 	dotSize:0.005,
 	invertOffset:new alfrid.TweenNumber(0),
+	particlesAlpha:new alfrid.TweenNumber(1),
 }
 
 if(document.body) {
@@ -61,6 +62,8 @@ function _onImageLoaded(o) {
 	_init3D();
 }
 
+let state = 0;
+let scene;
 
 function _init3D() {
 
@@ -73,23 +76,32 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
+	// window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
-	const scene = new SceneApp();
+	scene = new SceneApp();
 
 
 	window.addEventListener('keydown', (e)=> {
-		// console.log(e.keyCode);
+		console.log(e.keyCode);
 
 		if( e.keyCode === 32) {
-			toggle();
+			toggleState();
+		} else if(e.keyCode === 84) {
+			toggleTheme();
 		}
 	})
 }
 
 
-function toggle() {
+function toggleState() {
+	state = state === 0 ? 1 : 0;
+	scene.setState(state);
+	params.particlesAlpha.easing = state === 0 ? 'expIn' : 'expOut';
+	params.particlesAlpha.value = state === 0 ? 1 : 0;
+}
+
+function toggleTheme() {
 	params.invertOffset.value = params.invertOffset.value === 0 ? 1 : 0;
 	document.body.classList.remove('is-invert');
 	if(params.invertOffset.targetValue === 1) {

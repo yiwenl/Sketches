@@ -27,7 +27,7 @@ class ViewSave extends alfrid.View {
 		const pixels = ctx.getImageData(0, 0, img.width, img.height).data;
 		const totalSize = NUM * vDots.scale * 8;
 		const points = [];
-		const MIN_HEIGHT = 150;
+		const MIN_HEIGHT = 120;
 		let r, index, x, y, z;
 
 
@@ -37,7 +37,7 @@ class ViewSave extends alfrid.View {
 				index = i/4;
 				z = Math.floor(index / img.width);
 				x = index % img.width;
-				y = r / 255 * vDots.maxHeight;
+				y = r / 255 * vDots.maxHeight + vDots.noiseHeight * .5;
 
 				x /= img.width;
 				z /= img.height;

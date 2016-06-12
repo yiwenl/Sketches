@@ -11,6 +11,7 @@ uniform sampler2D textureCurr;
 uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
 uniform float radius;
+uniform float particleAlpha;
 uniform float percent;
 uniform vec2 uViewport;
 varying vec4 vColor;
@@ -27,7 +28,7 @@ void main(void) {
 
 	if(posNext.y < posCurr.y) opacity = 0.0;
 	
-	vColor       = vec4(1.0, 1.0, 1.0, opacity);
+	vColor       = vec4(1.0, 1.0, 1.0, opacity * particleAlpha);
 
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
     gl_PointSize = distOffset * (1.0 + extra.x * 1.0);

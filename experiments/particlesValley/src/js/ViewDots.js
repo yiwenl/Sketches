@@ -56,16 +56,16 @@ class ViewDots extends alfrid.View {
 		this.scale = 0.02 / 2;
 		this.maxHeight = 1.2;
 		this.noiseHeight = 1;
-		gui.add(this, 'scale', 0.01, 0.05);
-		gui.add(params, 'dotSize', 0.0005, 0.02);
-		gui.add(this, 'maxHeight', 0, 3);
-		gui.add(this, 'noiseHeight', 0, 1);
+		// gui.add(this, 'scale', 0.01, 0.05);
+		// gui.add(params, 'dotSize', 0.0005, 0.02);
+		// gui.add(this, 'maxHeight', 0, 3);
+		// gui.add(this, 'noiseHeight', 0, 1);
 
 
 		this.near = 10.1;
 		this.far = 15.1;
-		gui.add(this, 'near', 0.1, 20.2);
-		gui.add(this, 'far', 15.1, 30.3);
+		// gui.add(this, 'near', 0.1, 20.2);
+		// gui.add(this, 'far', 15.1, 30.3);
 	}
 
 

@@ -7,6 +7,8 @@ import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewAddVel from './ViewAddVel';
 import ViewSimulation from './ViewSimulation';
+import ViewFxaa from './ViewFxaa';
+import ViewChroma from './ViewChroma';
 
 const GL = alfrid.GL;
 const num = 8;
@@ -18,24 +20,18 @@ class SceneApp extends alfrid.Scene {
 		super();
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
 		GL.enableAlphaBlending();
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
 		this.time = 0;
 		this._count = 0;
-
+		this.cameraRadius = 0;
+		this.setState(0);
 		this.cameraPos = { x:0.1, y:0.1, z:0.1};
-		// const range = 30;
-		// this.fCamera = gui.addFolder('camera position');
-		// this.fCamera.add(this.cameraPos, 'x', -range, range).listen();
-		// this.fCamera.add(this.cameraPos, 'y', -range, range).listen();
-		// this.fCamera.add(this.cameraPos, 'z', -range, range).listen();
-		// this.fCamera.open();
 	}
 
 	_initTextures() {
 		// console.log('init textures');
 		this._textureMap      = new alfrid.GLTexture(getAsset('map'));
 		this._textureLightMap = new alfrid.GLTexture(getAsset('lightmap'));
-		const fboNoiseSize 	  = 512;
+		const fboNoiseSize 	  = 512/2;
 		this._fboNoise = new alfrid.FrameBuffer(fboNoiseSize, fboNoiseSize);
 
 		const numParticles = params.numParticles;
@@ -50,6 +46,9 @@ class SceneApp extends alfrid.Scene {
 		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
+
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboChroma = new alfrid.FrameBuffer(GL.width, GL.height);
 	}
 
 
@@ -65,6 +64,8 @@ class SceneApp extends alfrid.Scene {
 		this._vAddVel = new ViewAddVel();
 		this._vRender = new ViewRender();
 		this._vSim    = new ViewSimulation();
+		this._vChroma = new ViewChroma();
+		this._vFxaa   = new ViewFxaa();
 		
 		this._vSave   = new ViewSave(this._vDots);
 		GL.setMatrices(this.cameraOrtho);
@@ -88,7 +89,40 @@ class SceneApp extends alfrid.Scene {
 		GL.setMatrices(this.camera);
 
 		this.debug = false;
-		gui.add(this, 'debug');
+		this.post = false;
+		// gui.add(this, 'debug');
+
+		window.addEventListener('mousedown', ()=>this._onDown());
+		window.addEventListener('mouseup', ()=>this._onUp());
+	}
+
+	_onDown() {
+		this.cameraRadius = this.orbitalControl.radius.value;
+		this.orbitalControl.radius.value -= 1;
+	}
+
+	_onUp() {
+		this.orbitalControl.radius.value = this.cameraRadius;
+	}
+
+
+	setState(state) {
+		console.log('State : ', state);
+		this.state = state;
+		if(state === 0) {
+			this.orbitalControl.rx.value = 0.3;
+			this.orbitalControl.rx.limit(0.1, Math.PI/2 * .3);
+			this.orbitalControl.radius.limit(7, 13);
+			this.orbitalControl.lockZoom(false);
+			this._vDots.far = 15.1;
+		} else {
+			this.orbitalControl.rx.limit(Math.PI/2-.1, Math.PI/2);
+			this.orbitalControl.rx.value = Math.PI/2;
+			this.orbitalControl.radius.value = 11;
+			this._vDots.far = 25.1;
+			
+			this.orbitalControl.lockZoom(true);
+		}
 	}
 
 
@@ -133,6 +167,13 @@ class SceneApp extends alfrid.Scene {
 		this._vNoise.render();
 		this._fboNoise.unbind();
 
+
+		if(this.post) {
+			this._fboRender.bind();
+			GL.clear(0, 0, 0, 0);	
+		}
+		
+
 		this.time += 0.001;
 		const r = 0;
 		const x = Math.cos(this.time) * r;
@@ -169,23 +210,19 @@ class SceneApp extends alfrid.Scene {
 			}
 		}
 
-		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
-/*
-		const size = 200;
-		GL.viewport(0, 0, size, size);
-		this._bCopy.draw(this._fboCurrentPos.getTexture());
-
-		GL.viewport(size, 0, size, size);
-		this._bCopy.draw(this._fboTargetVel.getTexture());
-
-		GL.viewport(size*2, 0, size, size);
-		this._bCopy.draw(this._fboExtra.getTexture());
-
+		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());	
 		
-		const size = 150;
-		GL.viewport(0, 0, size, size*2);
-		this._bCopy.draw(this._textureMap);
-*/
+
+		if (this.post) {
+			this._fboRender.unbind();
+
+			this._fboChroma.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vChroma.render(this._fboRender.getTexture());
+			this._fboChroma.unbind();
+
+			this._vFxaa.render(this._fboChroma.getTexture());	
+		}
 	}
 
 
