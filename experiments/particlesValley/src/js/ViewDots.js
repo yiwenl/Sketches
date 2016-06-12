@@ -90,6 +90,7 @@ class ViewDots extends alfrid.View {
 		this.shader.uniform("radius", "float", params.dotSize);
 		this.shader.uniform("uPosition", "vec3", pos);
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
+		this.shader.uniform("uInvertOffset", "float", params.invertOffset.value);
 
 		if(d < this.near) {
 			GL.draw(this.mesh);	

@@ -8,6 +8,12 @@ html, body {
 	overflow:hidden;
 	position: static;
 	background: #000;
+
+	transition: background .5s ease-out;
+
+	&.is-invert {
+		background: #fff;
+	}
 }
 
 html {

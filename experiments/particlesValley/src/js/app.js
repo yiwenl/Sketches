@@ -14,6 +14,7 @@ window.params = {
 	numParticles:128 * 2,
 	skipCount:10,
 	dotSize:0.005,
+	invertOffset:new alfrid.TweenNumber(0),
 }
 
 if(document.body) {
@@ -77,4 +78,21 @@ function _init3D() {
 	//	CREATE SCENE
 	const scene = new SceneApp();
 
+
+	window.addEventListener('keydown', (e)=> {
+		// console.log(e.keyCode);
+
+		if( e.keyCode === 32) {
+			toggle();
+		}
+	})
+}
+
+
+function toggle() {
+	params.invertOffset.value = params.invertOffset.value === 0 ? 1 : 0;
+	document.body.classList.remove('is-invert');
+	if(params.invertOffset.targetValue === 1) {
+		document.body.classList.add('is-invert');
+	}
 }
