@@ -5,6 +5,8 @@ import ViewDots from './ViewDots';
 import ViewNoise from './ViewNoise';
 import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
+import ViewAddVel from './ViewAddVel';
+import ViewSimulation from './ViewSimulation';
 
 const GL = alfrid.GL;
 const num = 8;
@@ -17,8 +19,9 @@ class SceneApp extends alfrid.Scene {
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
-		// this.orbitalControl.rx.value = Math.PI /2 - 0.1;
+		// this.orbitalControl.radius.value = 40;
 		this.time = 0;
+		this._count = 0;
 
 		const range = 30;
 		this.cameraPos = { x:0.1, y:0.1, z:0.1};
@@ -44,6 +47,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._fboCurrentPos = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+		this._fboOriginPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
@@ -59,7 +63,9 @@ class SceneApp extends alfrid.Scene {
 		this._vDots   = new ViewDots();
 		this._vNoise  = new ViewNoise();
 		
+		this._vAddVel = new ViewAddVel();
 		this._vRender = new ViewRender();
+		this._vSim    = new ViewSimulation();
 		
 		this._vSave   = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
@@ -76,6 +82,10 @@ class SceneApp extends alfrid.Scene {
 		this._bCopy.draw(this._fboCurrentPos.getTexture());
 		this._fboTargetPos.unbind();
 
+		this._fboOriginPos.bind();
+		this._bCopy.draw(this._fboCurrentPos.getTexture());
+		this._fboOriginPos.unbind();
+
 		GL.setMatrices(this.camera);
 
 		this.debug = false;
@@ -83,11 +93,35 @@ class SceneApp extends alfrid.Scene {
 	}
 
 
+	updateFbo() {
+		//	Update Velocity : bind target Velocity, render simulation with current velocity / current position
+		this._fboTargetVel.bind();
+		GL.clear(0, 0, 0, 1);
+		this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture());
+		this._fboTargetVel.unbind();
+
+		//	Update position : bind target Position, render addVel with current position / target velocity;
+		this._fboTargetPos.bind();
+		GL.clear(0, 0, 0, 1);
+		this._vAddVel.render(this._fboCurrentPos.getTexture(), this._fboTargetVel.getTexture(), this._fboOriginPos.getTexture());
+		this._fboTargetPos.unbind();
+
+		//	SWAPPING : PING PONG
+		let tmpVel          = this._fboCurrentVel;
+		this._fboCurrentVel = this._fboTargetVel;
+		this._fboTargetVel  = tmpVel;
+
+		let tmpPos          = this._fboCurrentPos;
+		this._fboCurrentPos = this._fboTargetPos;
+		this._fboTargetPos  = tmpPos;
+
+	}
+
 	render() {
 		this._count ++;
 		if(this._count % params.skipCount == 0) {
 			this._count = 0;
-			// this.updateFbo();
+			this.updateFbo();
 		}
 
 		let p = this._count / params.skipCount;
@@ -137,16 +171,22 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
-
+/*
 		const size = 200;
-		GL.viewport(0, 0, size/2, size);
-		this._bCopy.draw(this._fboNoise.getTexture());
+		GL.viewport(0, 0, size, size);
+		this._bCopy.draw(this._fboCurrentPos.getTexture());
 
-		/*
+		GL.viewport(size, 0, size, size);
+		this._bCopy.draw(this._fboTargetVel.getTexture());
+
+		GL.viewport(size*2, 0, size, size);
+		this._bCopy.draw(this._fboExtra.getTexture());
+
+		
 		const size = 150;
 		GL.viewport(0, 0, size, size*2);
 		this._bCopy.draw(this._textureMap);
-		*/
+*/
 	}
 
 

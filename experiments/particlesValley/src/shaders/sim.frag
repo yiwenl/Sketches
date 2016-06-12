@@ -8,7 +8,6 @@ uniform sampler2D textureVel;
 uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
 uniform float time;
-uniform float maxRadius;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -117,18 +116,13 @@ void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
-	float posOffset = (0.5 + extra.r * 0.2) * .25;
+	float posOffset = mix(1.0, extra.b, 0.1) * 0.1;
 	vec3 acc        = curlNoise(pos * posOffset + time * .3);
+	acc.y 			= acc.y *.5 + .55;
 	
-	vel += acc * .02;
+	vel 			+= acc * vec3(.01, .02, .01);
 
-	float dist = length(pos);
-	if(dist > maxRadius) {
-		float f = (dist - maxRadius) * .005;
-		vel -= normalize(pos) * f;
-	}
-
-	const float decrease = .93;
+	const float decrease = .92;
 	vel *= decrease;
 
 	gl_FragColor = vec4(vel, 1.0);
