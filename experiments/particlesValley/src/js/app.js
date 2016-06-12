@@ -11,7 +11,7 @@ const assets = [
 ];
 
 window.params = {
-	numParticles:128,
+	numParticles:128 * 2,
 	skipCount:10,
 	dotSize:0.005,
 }

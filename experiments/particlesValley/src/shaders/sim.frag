@@ -120,7 +120,7 @@ void main(void) {
 	vec3 acc        = curlNoise(pos * posOffset + time * .3);
 	acc.y 			= acc.y *.5 + .55;
 	
-	vel 			+= acc * vec3(.01, .02, .01);
+	vel 			+= acc * vec3(.01, .015, .01);
 
 	const float decrease = .92;
 	vel *= decrease;

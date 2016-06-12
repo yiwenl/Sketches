@@ -19,17 +19,16 @@ class SceneApp extends alfrid.Scene {
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
-		// this.orbitalControl.radius.value = 40;
 		this.time = 0;
 		this._count = 0;
 
-		const range = 30;
 		this.cameraPos = { x:0.1, y:0.1, z:0.1};
-		this.fCamera = gui.addFolder('camera position');
-		this.fCamera.add(this.cameraPos, 'x', -range, range).listen();
-		this.fCamera.add(this.cameraPos, 'y', -range, range).listen();
-		this.fCamera.add(this.cameraPos, 'z', -range, range).listen();
-		this.fCamera.open();
+		// const range = 30;
+		// this.fCamera = gui.addFolder('camera position');
+		// this.fCamera.add(this.cameraPos, 'x', -range, range).listen();
+		// this.fCamera.add(this.cameraPos, 'y', -range, range).listen();
+		// this.fCamera.add(this.cameraPos, 'z', -range, range).listen();
+		// this.fCamera.open();
 	}
 
 	_initTextures() {
@@ -67,7 +66,7 @@ class SceneApp extends alfrid.Scene {
 		this._vRender = new ViewRender();
 		this._vSim    = new ViewSimulation();
 		
-		this._vSave   = new ViewSave();
+		this._vSave   = new ViewSave(this._vDots);
 		GL.setMatrices(this.cameraOrtho);
 
 		this._fboCurrentPos.bind();
