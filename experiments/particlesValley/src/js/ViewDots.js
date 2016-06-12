@@ -77,19 +77,19 @@ class ViewDots extends alfrid.View {
 		let waveHeight = new TweenNumber( random(0.25, 0.5), 'sinusoidalIn');
 		waveFront.value = random(10, 20);
 		waveHeight.value = 0;
+		let waveLength = random(.5, 1);
 
 		const wave = {
 			center,
 			waveFront,
 			waveHeight,
+			waveLength,
 		}
 
 		this.waves.push(wave);
 		if(this.waves.length > NUM_WAVES) {
 			this.waves.shift();
 		}
-
-		console.log(this.waves.length);
 	}
 
 
@@ -105,10 +105,12 @@ class ViewDots extends alfrid.View {
 				waveCenters.push(wave.center[2]);
 				waves.push(wave.waveFront.value);
 				waves.push(wave.waveHeight.value);
+				waves.push(wave.waveLength);
 			} else {
 				waveCenters.push(0);
 				waveCenters.push(0);
 				waveCenters.push(0);
+				waves.push(0);
 				waves.push(0);
 				waves.push(0);
 			}
@@ -141,7 +143,7 @@ class ViewDots extends alfrid.View {
 		this.shader.uniform("uInvertOffset", "float", params.invertOffset.value);
 
 		this.shader.uniform("uWaveCenters", "vec3", waveCenters);
-		this.shader.uniform("uWaves", "vec2", waves);
+		this.shader.uniform("uWaves", "vec3", waves);
 
 		if(d < this.near) {
 			GL.draw(this.mesh);	

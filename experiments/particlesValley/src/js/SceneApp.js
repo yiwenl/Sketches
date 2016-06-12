@@ -126,7 +126,7 @@ class SceneApp extends alfrid.Scene {
 		this.state = state;
 		if(state === 0) {
 			this.orbitalControl.rx.value = 0.3;
-			// this.orbitalControl.rx.limit(0.1, Math.PI/2 * .3);
+			this.orbitalControl.rx.limit(0.1, Math.PI/2 * .3);
 			this.orbitalControl.radius.limit(7, 13);
 			this.orbitalControl.lockZoom(false);
 			this._vDots.near = 10.1;

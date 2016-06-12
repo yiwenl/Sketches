@@ -19,7 +19,7 @@ uniform float uMaxHeight;
 uniform float uNoiseHeight;
 
 uniform vec3 uWaveCenters[NUM];
-uniform vec2 uWaves[NUM];
+uniform vec3 uWaves[NUM];
 
 uniform sampler2D texture;
 uniform sampler2D textureNoise;
@@ -31,7 +31,8 @@ varying vec3 vNormal;
 varying vec3 vColor;
 
 
-const float waveLength = .5;
+const float PI = 3.141592657;
+const float PI_2 = PI * 0.5;
 
 
 float getWaveHeight(vec3 pos) {
@@ -41,15 +42,22 @@ float getWaveHeight(vec3 pos) {
     float distToWave;
     float distToWaveFront;
     float waveFront;
+    float waveHeight;
+    float waveLength;
 
     for(int i=0; i<NUM; i++) {
         waveCenter = uWaveCenters[i];
         distToWave = distance(waveCenter, pos);
         waveFront = uWaves[i].x;
+        waveHeight = uWaves[i].y;
+        waveLength = uWaves[i].z;
+
         distToWaveFront = distance(distToWave, waveFront);
 
         if(distToWaveFront < waveLength) {
-            h += smoothstep(0.0, 1.0, 1.0 - distToWaveFront / waveLength) * uWaves[i].y;
+            float tmp = 1.0 - distToWaveFront / waveLength;
+            tmp = pow(sin(tmp * PI_2), 2.0);
+            h += tmp * waveHeight;
         }
 
     }

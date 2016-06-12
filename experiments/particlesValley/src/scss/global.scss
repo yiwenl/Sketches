@@ -7,7 +7,13 @@ html, body {
 
 	overflow:hidden;
 	position: static;
-	background: #000;
+
+	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#282828+0,000000+100 */
+	background: #282828; /* Old browsers */
+	background: -moz-radial-gradient(center, ellipse cover,  #282828 0%, #000000 100%); /* FF3.6-15 */
+	background: -webkit-radial-gradient(center, ellipse cover,  #282828 0%,#000000 100%); /* Chrome10-25,Safari5.1-6 */
+	background: radial-gradient(ellipse at center,  #282828 0%,#000000 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#282828', endColorstr='#000000',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 
 	transition: background .5s ease-out;
 
@@ -78,6 +84,7 @@ $grey: 225;
 	font-family: Trebuchet MS, Verdana;
 	letter-spacing: 5px;
 	font-size: 12px;
+	display:none;
 
 	position: absolute;
 	user-select: none;
