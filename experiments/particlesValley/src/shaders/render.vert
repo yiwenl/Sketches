@@ -14,8 +14,10 @@ uniform float radius;
 uniform float particleAlpha;
 uniform float percent;
 uniform vec2 uViewport;
+
 varying vec4 vColor;
 varying vec3 vNormal;
+
 
 void main(void) {
 	float opacity = 1.0;

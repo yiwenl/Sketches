@@ -1,8 +1,9 @@
 // ViewDots.js
 
-import alfrid, { GL } from 'alfrid';
+import alfrid, { GL, TweenNumber } from 'alfrid';
 import vs from '../shaders/dots.vert';
 import fs from '../shaders/dots.frag';
+const NUM_WAVES = 10;
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 const tmp = vec3.create();
@@ -16,7 +17,9 @@ const NUM = 200;
 class ViewDots extends alfrid.View {
 	
 	constructor() {
-		super(vs,  fs);
+		let newVs = vs.replace('${NUM}', NUM_WAVES);
+		super(newVs, fs);
+		this.waves = [];
 	}
 
 
@@ -68,8 +71,53 @@ class ViewDots extends alfrid.View {
 		// gui.add(this, 'far', 15.1, 30.3);
 	}
 
+	addWave(center) {
+		let speed = random(0.01, 0.02) * .25;
+		let waveFront = new TweenNumber(0, 'linear', speed);
+		let waveHeight = new TweenNumber( random(0.25, 0.5), 'sinusoidalIn');
+		waveFront.value = random(10, 20);
+		waveHeight.value = 0;
+
+		const wave = {
+			center,
+			waveFront,
+			waveHeight,
+		}
+
+		this.waves.push(wave);
+		if(this.waves.length > NUM_WAVES) {
+			this.waves.shift();
+		}
+
+		console.log(this.waves.length);
+	}
+
 
 	render(texture, uvOffset, num, textureNoise, cameraPosition) {
+		const waveCenters = [];
+		const waves = []
+		let wave;
+		for(let i=0; i<NUM_WAVES; i++) {
+			if(this.waves[i]) {
+				wave = this.waves[i];
+				waveCenters.push(wave.center[0]);
+				waveCenters.push(wave.center[1]);
+				waveCenters.push(wave.center[2]);
+				waves.push(wave.waveFront.value);
+				waves.push(wave.waveHeight.value);
+			} else {
+				waveCenters.push(0);
+				waveCenters.push(0);
+				waveCenters.push(0);
+				waves.push(0);
+				waves.push(0);
+			}
+		}
+
+		if(Math.random() > 0.99) {
+			// console.log(this.waves);	
+		}
+
 		let pos = [0, 0, 0];
 		let totalsize = NUM * this.scale;
 		pos[0] = uvOffset[0] * NUM * num - NUM * num/2 + NUM/2;
@@ -92,6 +140,9 @@ class ViewDots extends alfrid.View {
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 		this.shader.uniform("uInvertOffset", "float", params.invertOffset.value);
 
+		this.shader.uniform("uWaveCenters", "vec3", waveCenters);
+		this.shader.uniform("uWaves", "vec2", waves);
+
 		if(d < this.near) {
 			GL.draw(this.mesh);	
 		} else if(d < this.far) {
@@ -99,12 +150,6 @@ class ViewDots extends alfrid.View {
 		} else {
 			GL.draw(this.meshFarest);
 		}
-		
-
-		return {
-			pos:tmp,
-			dist:d,
-		};
 	}
 
 

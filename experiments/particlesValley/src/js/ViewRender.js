@@ -3,6 +3,7 @@
 import alfrid, { GL } from 'alfrid';
 import vs from '../shaders/render.vert';
 import fs from '../shaders/render.frag';
+var random = function(min, max) { return min + Math.random() * (max - min);	}
 
 class ViewRender extends alfrid.View {
 	

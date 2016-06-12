@@ -89,6 +89,8 @@ function _init3D() {
 			toggleState();
 		} else if(e.keyCode === 84) {
 			toggleTheme();
+		} else if(e.keyCode === 80) {
+			scene.post = !scene.post;
 		}
 	})
 }

@@ -1,4 +1,5 @@
 // dots.vert
+const int NUM = ${NUM};
 
 precision highp float;
 attribute vec3 aVertexPosition;
@@ -17,6 +18,9 @@ uniform float numSeg;
 uniform float uMaxHeight;
 uniform float uNoiseHeight;
 
+uniform vec3 uWaveCenters[NUM];
+uniform vec2 uWaves[NUM];
+
 uniform sampler2D texture;
 uniform sampler2D textureNoise;
 uniform vec3 uPosition;
@@ -26,12 +30,40 @@ varying vec2 vTextureCoord;
 varying vec3 vNormal;
 varying vec3 vColor;
 
+
+const float waveLength = .5;
+
+
+float getWaveHeight(vec3 pos) {
+    float h = 0.0;
+
+    vec3 waveCenter;
+    float distToWave;
+    float distToWaveFront;
+    float waveFront;
+
+    for(int i=0; i<NUM; i++) {
+        waveCenter = uWaveCenters[i];
+        distToWave = distance(waveCenter, pos);
+        waveFront = uWaves[i].x;
+        distToWaveFront = distance(distToWave, waveFront);
+
+        if(distToWaveFront < waveLength) {
+            h += smoothstep(0.0, 1.0, 1.0 - distToWaveFront / waveLength) * uWaves[i].y;
+        }
+
+    }
+
+    return h;
+}
+
 void main(void) {
 	vec3 pos = (aVertexPosition + uPosition) * scale;
 	vec2 uv = aTextureCoord /numSeg + uvOffset;
 	vec3 mapColor = texture2D(texture, uv).rgb;
     float noiseHeight = texture2D(textureNoise, uv).r;
 	pos.y = (mapColor.r + noiseHeight * uNoiseHeight) * uMaxHeight;
+    pos.y        += getWaveHeight(pos);
 
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
     vTextureCoord = uv;

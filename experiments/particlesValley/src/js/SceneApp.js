@@ -1,6 +1,6 @@
 // SceneApp.js
 
-import alfrid, { Scene } from 'alfrid';
+import alfrid, { Scene, Ray } from 'alfrid';
 import ViewDots from './ViewDots';
 import ViewNoise from './ViewNoise';
 import ViewSave from './ViewSave';
@@ -9,6 +9,7 @@ import ViewAddVel from './ViewAddVel';
 import ViewSimulation from './ViewSimulation';
 import ViewFxaa from './ViewFxaa';
 import ViewChroma from './ViewChroma';
+import ViewHitPlane from './ViewHitPlane';
 
 const GL = alfrid.GL;
 const num = 8;
@@ -22,9 +23,11 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 		this.time = 0;
 		this._count = 0;
-		this.cameraRadius = 0;
 		this.setState(0);
+		this._ray = new Ray([0, 0, 0], [0, 0, -1]);
 		this.cameraPos = { x:0.1, y:0.1, z:0.1};
+
+		GL.canvas.addEventListener('mousedown', (e)=>this._onDown(e));
 	}
 
 	_initTextures() {
@@ -66,6 +69,7 @@ class SceneApp extends alfrid.Scene {
 		this._vSim    = new ViewSimulation();
 		this._vChroma = new ViewChroma();
 		this._vFxaa   = new ViewFxaa();
+		this._vHit 	  = new ViewHitPlane();
 		
 		this._vSave   = new ViewSave(this._vDots);
 		GL.setMatrices(this.cameraOrtho);
@@ -91,26 +95,38 @@ class SceneApp extends alfrid.Scene {
 		this.debug = false;
 		this.post = false;
 		// gui.add(this, 'debug');
-
-		window.addEventListener('mousedown', ()=>this._onDown());
-		window.addEventListener('mouseup', ()=>this._onUp());
 	}
 
-	_onDown() {
-		this.cameraRadius = this.orbitalControl.radius.value;
-		this.orbitalControl.radius.value -= 1;
-	}
+	_onDown(e) {
+		const mx = (e.clientX / GL.width) * 2.0 - 1.0;
+		const my = - (e.clientY / GL.height) * 2.0 + 1.0;
+		this.camera.generateRay([mx, my, 0], this._ray);
+		const mesh = this._vHit.mesh;
+		const faceVertices = mesh.faces.map((face)=>(face.vertices));
+		const offset = 1;
+		let v0, v1, v2;
+		let hit;
 
-	_onUp() {
-		this.orbitalControl.radius.value = this.cameraRadius;
-	}
+		for(let i = 0; i < faceVertices.length; i++) {
+			const vertices = faceVertices[i];
+			v0 = [vertices[0][0], vertices[0][1]+offset, vertices[0][2]];
+			v1 = [vertices[1][0], vertices[1][1]+offset, vertices[1][2]];
+			v2 = [vertices[2][0], vertices[2][1]+offset, vertices[2][2]];
 
+			hit = this._ray.intersectTriangle(v0, v1, v2);
+			if(hit) {	break;	}
+		}
+
+		if(hit) {
+			this._vDots.addWave(vec3.clone(hit));
+		}
+	}
 
 	setState(state) {
 		this.state = state;
 		if(state === 0) {
 			this.orbitalControl.rx.value = 0.3;
-			this.orbitalControl.rx.limit(0.1, Math.PI/2 * .3);
+			// this.orbitalControl.rx.limit(0.1, Math.PI/2 * .3);
 			this.orbitalControl.radius.limit(7, 13);
 			this.orbitalControl.lockZoom(false);
 			this._vDots.near = 10.1;
@@ -212,7 +228,6 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());	
-		
 
 		if (this.post) {
 			this._fboRender.unbind();
