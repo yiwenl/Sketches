@@ -71,7 +71,8 @@ void main(void) {
 	vec3 mapColor = texture2D(texture, uv).rgb;
     float noiseHeight = texture2D(textureNoise, uv).r;
 	pos.y = (mapColor.r + noiseHeight * uNoiseHeight) * uMaxHeight;
-    pos.y        += getWaveHeight(pos);
+    float wh = getWaveHeight(pos);
+    pos.y        += wh;
 
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
     vTextureCoord = uv;
@@ -84,5 +85,5 @@ void main(void) {
     gl_PointSize = distOffset * (1.0 + aVertexPosition.y * 1.0);
     distOffset = smoothstep(0.0, 0.5, distOffset);
     distOffset = mix(distOffset, 1.0, .5);
-    vColor = mix(mapColor, vec3(1.0), 0.2) * distOffset;
+    vColor = mix(mapColor, vec3(1.0), 0.2) * distOffset + wh * 0.5;
 }

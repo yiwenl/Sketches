@@ -3,7 +3,7 @@
 import alfrid, { GL, TweenNumber } from 'alfrid';
 import vs from '../shaders/dots.vert';
 import fs from '../shaders/dots.frag';
-const NUM_WAVES = 10;
+
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 const tmp = vec3.create();
@@ -12,7 +12,10 @@ function distance(a, b) {
 	vec3.sub(tmpDist, a, b);
 	return vec3.length(tmpDist);
 }
-const NUM = 200;
+const IS_MOBILE = GL.isMobile;
+const NUM = IS_MOBILE ? 80 : 200;
+const NUM_WAVES = IS_MOBILE ? 5 : 10;
+
 
 class ViewDots extends alfrid.View {
 	
@@ -74,7 +77,7 @@ class ViewDots extends alfrid.View {
 	addWave(center) {
 		let speed = random(0.01, 0.02) * .25;
 		let waveFront = new TweenNumber(0, 'linear', speed);
-		let waveHeight = new TweenNumber( random(0.25, 0.5), 'sinusoidalIn');
+		let waveHeight = new TweenNumber( random(0.25, 0.5) * (IS_MOBILE ? 0.5 : 1), 'sinusoidalIn');
 		waveFront.value = random(10, 20);
 		waveHeight.value = 0;
 		let waveLength = random(.5, 1);
@@ -145,12 +148,16 @@ class ViewDots extends alfrid.View {
 		this.shader.uniform("uWaveCenters", "vec3", waveCenters);
 		this.shader.uniform("uWaves", "vec3", waves);
 
-		if(d < this.near) {
-			GL.draw(this.mesh);	
-		} else if(d < this.far) {
+		if (IS_MOBILE) {
 			GL.draw(this.meshFar);
 		} else {
-			GL.draw(this.meshFarest);
+			if(d < this.near) {
+				GL.draw(this.mesh);	
+			} else if(d < this.far) {
+				GL.draw(this.meshFar);
+			} else {
+				GL.draw(this.meshFarest);
+			}	
 		}
 	}
 

@@ -101,4 +101,15 @@ $grey: 225;
 	.is-invert & {
 		color: rgba(20, 20, 20, 1);
 	}
+
+	.is-mobile & {
+		font-size:36px;
+	}
+}
+
+
+.description {
+	.is-mobile & {
+		display: none;
+	}
 }

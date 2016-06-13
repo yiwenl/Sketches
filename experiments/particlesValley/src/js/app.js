@@ -75,6 +75,10 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas);
 
+	if (GL.isMobile) {
+		document.body.classList.add('is-mobile');
+	}
+
 	//	INIT DAT-GUI
 	// window.gui = new dat.GUI({ width:300 });
 

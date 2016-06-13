@@ -12,8 +12,8 @@ import ViewChroma from './ViewChroma';
 import ViewHitPlane from './ViewHitPlane';
 
 const GL = alfrid.GL;
+const IS_MOBILE = GL.isMobile;
 const num = 8;
-console.log( num * 256 * 256);
 window.getAsset = function(id) {	return assets.find( (a) => a.id === id).file;	}
 
 class SceneApp extends alfrid.Scene {
@@ -28,30 +28,34 @@ class SceneApp extends alfrid.Scene {
 		this.cameraPos = { x:0.1, y:0.1, z:0.1};
 
 		GL.canvas.addEventListener('mousedown', (e)=>this._onDown(e));
+		GL.canvas.addEventListener('touchstart', (e)=>this._onDown(e));
 	}
 
 	_initTextures() {
 		// console.log('init textures');
 		this._textureMap      = new alfrid.GLTexture(getAsset('map'));
 		this._textureLightMap = new alfrid.GLTexture(getAsset('lightmap'));
-		const fboNoiseSize 	  = 512/2;
+		const fboNoiseSize 	  = IS_MOBILE ? 64 : 256;
 		this._fboNoise = new alfrid.FrameBuffer(fboNoiseSize, fboNoiseSize);
 
-		const numParticles = params.numParticles;
-		const o = {
-			minFilter:GL.NEAREST,
-			magFilter:GL.NEAREST
-		};
+		if (!IS_MOBILE) {
+			const numParticles = params.numParticles;
+			const o = {
+				minFilter:GL.NEAREST,
+				magFilter:GL.NEAREST
+			};
 
-		this._fboCurrentPos = new alfrid.FrameBuffer(numParticles, numParticles, o);
-		this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
-		this._fboOriginPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
-		this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
-		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
-		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
 
-		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
-		this._fboChroma = new alfrid.FrameBuffer(GL.width, GL.height);
+			this._fboCurrentPos = new alfrid.FrameBuffer(numParticles, numParticles, o);
+			this._fboTargetPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+			this._fboOriginPos  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+			this._fboCurrentVel = new alfrid.FrameBuffer(numParticles, numParticles, o);
+			this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
+			this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
+
+			this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
+			this._fboChroma = new alfrid.FrameBuffer(GL.width, GL.height);	
+		}
 	}
 
 
@@ -71,26 +75,30 @@ class SceneApp extends alfrid.Scene {
 		this._vFxaa   = new ViewFxaa();
 		this._vHit 	  = new ViewHitPlane();
 		
-		this._vSave   = new ViewSave(this._vDots);
-		GL.setMatrices(this.cameraOrtho);
 
-		this._fboCurrentPos.bind();
-		this._vSave.render(0);
-		this._fboCurrentPos.unbind();
+		if (!IS_MOBILE) {
+			this._vSave   = new ViewSave(this._vDots);
+			GL.setMatrices(this.cameraOrtho);
 
-		this._fboExtra.bind();
-		this._vSave.render(1);
-		this._fboExtra.unbind();
+			this._fboCurrentPos.bind();
+			this._vSave.render(0);
+			this._fboCurrentPos.unbind();
 
-		this._fboTargetPos.bind();
-		this._bCopy.draw(this._fboCurrentPos.getTexture());
-		this._fboTargetPos.unbind();
+			this._fboExtra.bind();
+			this._vSave.render(1);
+			this._fboExtra.unbind();
 
-		this._fboOriginPos.bind();
-		this._bCopy.draw(this._fboCurrentPos.getTexture());
-		this._fboOriginPos.unbind();
+			this._fboTargetPos.bind();
+			this._bCopy.draw(this._fboCurrentPos.getTexture());
+			this._fboTargetPos.unbind();
 
-		GL.setMatrices(this.camera);
+			this._fboOriginPos.bind();
+			this._bCopy.draw(this._fboCurrentPos.getTexture());
+			this._fboOriginPos.unbind();
+
+			GL.setMatrices(this.camera);
+		}
+		
 
 		this.debug = false;
 		this.post = false;
@@ -98,8 +106,15 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	_onDown(e) {
-		const mx = (e.clientX / GL.width) * 2.0 - 1.0;
-		const my = - (e.clientY / GL.height) * 2.0 + 1.0;
+		let mx, my;
+		if(e.touches) {
+			mx = (e.touches[0].pageX / GL.width) * 2.0 - 1.0;
+			my = - (e.touches[0].pageY / GL.height) * 2.0 + 1.0;
+		} else {
+			mx = (e.clientX / GL.width) * 2.0 - 1.0;
+			my = - (e.clientY / GL.height) * 2.0 + 1.0;	
+		}
+		
 		this.camera.generateRay([mx, my, 0], this._ray);
 		const mesh = this._vHit.mesh;
 		const faceVertices = mesh.faces.map((face)=>(face.vertices));
@@ -123,27 +138,36 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	setState(state) {
-		this.state = state;
-		if(state === 0) {
+		if(IS_MOBILE) {
 			this.orbitalControl.rx.value = 0.3;
-			this.orbitalControl.rx.limit(0.1, Math.PI/2 * .3);
-			this.orbitalControl.radius.limit(7, 13);
-			this.orbitalControl.lockZoom(false);
-			this._vDots.near = 10.1;
-			this._vDots.far = 15.1;
+			this.orbitalControl.rx.limit(0.2, Math.PI/2);
 		} else {
-			this.orbitalControl.rx.limit(Math.PI/2-.1, Math.PI/2);
-			this.orbitalControl.rx.value = Math.PI/2;
-			this.orbitalControl.radius.value = 11;
-			this._vDots.near = 1.1;
-			this._vDots.far = 25.1;
-			
-			this.orbitalControl.lockZoom(true);
+			this.state = state;
+			if(state === 0) {
+				this.orbitalControl.rx.value = 0.3;
+				this.orbitalControl.rx.limit(0.1, Math.PI/2 * .3);
+				this.orbitalControl.radius.limit(7, 13);
+				this.orbitalControl.lockZoom(false);
+				this._vDots.near = 10.1;
+				this._vDots.far = 15.1;
+			} else {
+				this.orbitalControl.rx.limit(Math.PI/2-.1, Math.PI/2);
+				this.orbitalControl.rx.value = Math.PI/2;
+				this.orbitalControl.radius.value = 11;
+				this._vDots.near = 1.1;
+				this._vDots.far = 25.1;
+				
+				this.orbitalControl.lockZoom(true);
+			}
 		}
+		
 	}
 
 
 	updateFbo() {
+		if (IS_MOBILE) {
+			return;
+		}
 		//	Update Velocity : bind target Velocity, render simulation with current velocity / current position
 		this._fboTargetVel.bind();
 		GL.clear(0, 0, 0, 1);
@@ -227,7 +251,10 @@ class SceneApp extends alfrid.Scene {
 			}
 		}
 
-		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());	
+		if (!IS_MOBILE) {
+			this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());		
+		}
+		
 
 		if (this.post) {
 			this._fboRender.unbind();
