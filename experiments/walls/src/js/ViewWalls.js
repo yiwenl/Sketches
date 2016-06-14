@@ -8,7 +8,10 @@ const BOX_WIDTH = 0.1;
 const BOX_DEPTH = 0.025;
 const STARTING_RADIUS = 0.5;
 const INDEX_INCREASE = 24;
+const RADIUS_INCREASE = 0.15;
 const mtx = mat4.create();
+
+const NUM_MESHES = 2;
 
 class ViewWalls extends alfrid.View {
 	
@@ -33,7 +36,7 @@ class ViewWalls extends alfrid.View {
 		this.baseColor = [1, 1, 1];
 
 		this.meshes = [];
-		this.meshes.push(this.mesh);
+		// this.meshes.push(this.mesh);
 
 		this.positions = [];
 		this.coords = [];
@@ -43,12 +46,15 @@ class ViewWalls extends alfrid.View {
 
 
 		this._hasStarted = false;
+
+		while(this.meshes.length < NUM_MESHES) {
+			this.addWall();
+		}
 	}
 
 
-	addWall(mAmp) {
-		if(this.count > 700) {
-
+	addWall(mAmp=1) {
+		if(this.count >= 1000) {
 			const mesh = new alfrid.Mesh(GL.TRIANGLES);
 			mesh.bufferVertex(this.positions);
 			mesh.bufferTexCoord(this.coords);
@@ -63,9 +69,9 @@ class ViewWalls extends alfrid.View {
 
 			// this.mesh = new alfrid.Mesh(GL.TRIANGLES);
 			this.meshes.push(mesh);
+			console.log('Add MESH', this.meshes, mesh.vertices.length);
 		}
 
-		console.log(this.mesh.vertices.length, this.count);
 		let cx = Math.cos(this.angle) * this.radius;
 		let cz = Math.sin(this.angle) * this.radius;
 
@@ -79,7 +85,7 @@ class ViewWalls extends alfrid.View {
 
 
 		function getPos(v, angle, height) {
-			let h = height * 0.01;
+			let h = height;
 			let newV = rotate(v, angle);
 			let y = newV[1] * h + h/2;
 			return [newV[0]+cx, y, newV[2]+cz];
@@ -90,7 +96,7 @@ class ViewWalls extends alfrid.View {
 		for(let i=0; i<this._verticesCube.length; i++) {
 			this.positions.push(getPos(this._verticesCube[i], angle, mAmp));
 			this.normals.push(rotate(this._normalsCube[i], angle));
-			this.coords.push([0, 0]);
+			this.coords.push([this.radius, this.angle]);
 		}
 
 		for(let i=0; i<this._indicesCube.length; i++) {
@@ -98,14 +104,7 @@ class ViewWalls extends alfrid.View {
 		}
 
 
-		this.mesh.bufferVertex(this.positions, true);
-		this.mesh.bufferTexCoord(this.coords, true);
-		this.mesh.bufferNormal(this.normals, true);
-		this.mesh.bufferIndex(this.indices, true);
-
-
-		const RADIUS_INCREASE = 0.15;
-		// this.radius += RADIUS_INCREASE;
+		
 		const lengthCircle = Math.PI * 2 * this.radius;
 		const numCubes = lengthCircle/(BOX_WIDTH+0.05);
 		const angleIncrease = Math.PI * 2.0 / numCubes;
@@ -113,15 +112,14 @@ class ViewWalls extends alfrid.View {
 		const radiusIncrease = RADIUS_INCREASE / numCubes;
 		this.radius += radiusIncrease;
 		this.count ++;
-
-		this._hasStarted = true;
 	}
 
 
 	render(textureRad, textureIrr) {
-		if(!this.mesh || !this._hasStarted) {
+		if(!this.meshes) {
 			return;
 		}
+
 		this.shader.bind();
 
 		this.shader.uniform('uRadianceMap', 'uniform1i', 0);
@@ -136,6 +134,7 @@ class ViewWalls extends alfrid.View {
 
 		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
 		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+
 
 		GL.draw(this.meshes);
 	}

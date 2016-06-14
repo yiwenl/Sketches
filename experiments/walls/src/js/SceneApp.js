@@ -6,13 +6,19 @@ import ViewWalls from './ViewWalls';
 import ViewFloor from './ViewFloor';
 import Sono from './libs/sono.min';
 
-window.getAsset = function (id) {
-	for(let i = 0; i < assets.length; i++) {
-		if(id === assets[i].id) {
-			return assets[i].file;
-		}
-	}
-};
+import ViewFxaa from './ViewFxaa';
+import ViewChroma from './ViewChroma';
+import ViewSSAO from './ViewSSAO';
+import ViewPost from './ViewPost';
+
+// import EffectComposer from './effectComposer/EffectComposer';
+// import PassFXAA from './effectComposer/passes/PassFXAA';
+// import Pass from './effectComposer/Pass';
+// import PassBlur from './effectComposer/passes/PassBlur';
+
+import fsChroma from '../shaders/chroma.frag';
+
+window.getAsset = function(id) {	return assets.find(a => a.id === id).file;	}
 
 const GL = alfrid.GL;
 
@@ -22,9 +28,11 @@ class SceneApp extends alfrid.Scene {
 		this.steps = 0;
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = .3;
+		this.orbitalControl.rx.limit(0, Math.PI/2);
 
 		this._initSound();
 		this.sums = [];
+		this.time = 0;
 	}
 
 	_initTextures() {
@@ -45,6 +53,11 @@ class SceneApp extends alfrid.Scene {
 		let rad_negz = alfrid.HDRLoader.parse(getAsset('rad_negz'));
 
 		this._textureRad = new alfrid.GLCubeTexture([rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz]);
+
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost = new alfrid.FrameBuffer(GL.width, GL.height);
+		const aoSize = 1024;
+		this._fboSSAO = new alfrid.FrameBuffer(aoSize, aoSize);
 	}
 
 
@@ -56,6 +69,15 @@ class SceneApp extends alfrid.Scene {
 
 		this._vWalls = new ViewWalls();
 		this._vFloor = new ViewFloor();
+		this._vPost = new ViewPost();
+		this._vFxaa = new ViewFxaa();
+		this._vSSAO = new ViewSSAO();
+
+		// this._composer = new EffectComposer();
+		// this.passChroma = new Pass(fsChroma);
+		// this.passChroma.uniform('resolution', 'vec2', [GL.width, GL.height]);
+		// this._composer.addPass(this.passChroma);
+		// this._composer.addPass(new PassFXAA());
 	}
 
 
@@ -75,18 +97,31 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	render() {
-		if(!this.analyser) {
-			return;
-		}
+		if(!this.analyser) {	return;	}
 
 		document.body.classList.remove('isLoading');
 		this._getSoundData();
 		GL.clear(0, 0, 0, 0);
-		// this._bSkybox.draw(this._textureRad);
-		// this._bAxis.draw();
-		this._bDots.draw();
+		// this._bDots.draw();
+
+		this._fboRender.bind();
+		GL.clear(1, 1, 1, 1);
 		this._vWalls.render(this._textureRad, this._textureIrr);
-		this._vFloor.render(this._textureRad, this._textureIrr);
+		// this._vFloor.render(this._textureRad, this._textureIrr);
+		this._fboRender.unbind();
+
+		this._fboSSAO.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vSSAO.render(this._fboRender.getDepthTexture());
+		this._fboSSAO.unbind();
+
+		this._fboPost.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vPost.render(this._fboRender.getTexture(), this._fboSSAO.getTexture());
+		this._fboPost.unbind();
+
+		this._vFxaa.render(this._fboPost.getTexture());
+		// this._bCopy.draw(this._fboPost.getTexture());
 	}
 
 	_getSoundData() {
@@ -111,15 +146,16 @@ class SceneApp extends alfrid.Scene {
 		}
 		
 
-		// console.log(sum);
-		this.sums.push(sum);
-		console.log(this.sums.length);
+		// this.sums.push(sum);
+		// console.log(this.sums.length);
 	}
 
 
 	resize() {
 		GL.setSize(window.innerWidth, window.innerHeight);
 		this.camera.setAspectRatio(GL.aspectRatio);
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboPost = new alfrid.FrameBuffer(GL.width, GL.height);
 	}
 }
 
