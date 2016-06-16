@@ -93,6 +93,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchParticleValley.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/particlesValley/dist/index.html',
 		opened:false
+	},
+	{
+		cover:'assets/img/coverSketchBubbles.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/particles03/dist/index.html',
+		opened:false
 	}
 ]
 
