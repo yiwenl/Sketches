@@ -9,6 +9,7 @@ uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
 uniform float time;
 uniform float maxRadius;
+uniform float uSpeed;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -121,6 +122,7 @@ void main(void) {
 	vec3 acc        = curlNoise(pos * posOffset + time * .3);
 	
 	vel += acc * .02;
+	vel *= uSpeed;
 
 	float dist = length(pos);
 	if(dist > maxRadius) {

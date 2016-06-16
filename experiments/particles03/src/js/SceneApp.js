@@ -7,6 +7,7 @@ import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 import ViewSphere from './ViewSphere';
 import ViewShadow from './ViewShadow';
+import ViewNoise from './ViewNoise';
 
 const GL = alfrid.GL;
 
@@ -73,6 +74,9 @@ class SceneApp extends alfrid.Scene {
 
 		const shadowMapSize = 1024;
 		this._fboShadowMap = new alfrid.FrameBuffer(shadowMapSize, shadowMapSize);
+
+		const noiseSize = 128;
+		this._fboNoise = new alfrid.FrameBuffer(noiseSize, noiseSize);
 	}
 
 
@@ -81,8 +85,8 @@ class SceneApp extends alfrid.Scene {
 		
 		//	helpers
 		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
+		// this._bAxis = new alfrid.BatchAxis();
+		// this._bDots = new alfrid.BatchDotsPlane();
 		this._bSkybox = new alfrid.BatchSkybox();
 
 
@@ -92,6 +96,7 @@ class SceneApp extends alfrid.Scene {
 		this._vSim 	  = new ViewSim();
 		this._vSphere = new ViewSphere();
 		this._vShadow = new ViewShadow();
+		this._vNoise = new ViewNoise();
 
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
@@ -159,6 +164,12 @@ class SceneApp extends alfrid.Scene {
 		this._vSphere.render();
 		this._fboSphere.unbind();
 
+		//	noise
+		this._fboNoise.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vNoise.render();
+		this._fboNoise.unbind();
+
 
 		//	render shadow map
 		// this._fboShadowMap.bind();
@@ -168,16 +179,15 @@ class SceneApp extends alfrid.Scene {
 		// this._vShadow.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
 		// this._fboShadowMap.unbind();
 
-		GL.viewport(0, 0, GL.width, GL.height);
-		
-		// this._bSkybox.draw(this._textureRad);
 		GL.setMatrices(this.camera);
-		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboSphere.getTexture(), this._textureRad, this._textureIrr);
+		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboSphere.getTexture(), this._textureRad, this._textureIrr, this._fboNoise.getTexture());
+		this._bSkybox.draw(this._textureIrr);
 
-
-		const size = 200;
-		GL.viewport(0, 0, size, size);
-		this._bCopy.draw(this._fboSphere.getTexture());
+		// const size = 200;
+		// GL.viewport(0, 0, size, size);
+		// this._bCopy.draw(this._fboSphere.getTexture());
+		// GL.viewport(size, 0, size, size);
+		// this._bCopy.draw(this._fboNoise.getTexture());
 	}
 
 

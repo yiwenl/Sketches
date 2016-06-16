@@ -3,6 +3,8 @@
 precision highp float;
 
 uniform sampler2D textureSphere;
+uniform sampler2D textureNoise;
+
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
 
@@ -96,13 +98,16 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 }
 
 void main(void) {
-	vec4 sphereColor = texture2D(textureSphere, gl_PointCoord.xy);
+	vec2 uv = gl_PointCoord.xy;
+	vec2 noise = texture2D(textureNoise, gl_PointCoord*.1 + vExtra.xy * .8).rg  - .5;
+	uv -= noise * 0.2;
+	vec4 sphereColor = texture2D(textureSphere, uv);
 	if(sphereColor.a <= 0.01) discard;
 
 	vec3 N 				= normalize( sphereColor.rgb);
 	vec3 V 				= normalize( vEyePosition );
 	
-	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
+	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular + vExtra.r * .5);
 
 	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );

@@ -49,7 +49,7 @@ class ViewRender extends alfrid.View {
 	}
 
 
-	render(textureCurr, textureNext, p, textureExtra, textureSphere, textureRad, textureIrr) {
+	render(textureCurr, textureNext, p, textureExtra, textureSphere, textureRad, textureIrr, textureNoise) {
 		this.time += 0.1;
 		this.shader.bind();
 
@@ -65,8 +65,8 @@ class ViewRender extends alfrid.View {
 		this.shader.uniform("textureSphere", "uniform1i", 3);
 		textureSphere.bind(3);
 
-		// this.shader.uniform("textureShadow", "uniform1i", 4);
-		// textureShadow.bind(4);
+		this.shader.uniform("textureNoise", "uniform1i", 4);
+		textureNoise.bind(4);
 
 		this.shader.uniform('uRadianceMap', 'uniform1i', 5);
 		textureRad.bind(5);
