@@ -10,7 +10,7 @@ class ViewSim extends alfrid.View {
 	constructor() {
 		super(alfrid.ShaderLibs.bigTriangleVert, fsSim);
 		this.time = Math.random() * 0xFF;
-		this.speed = new alfrid.TweenNumber(1, 0.15);
+		this.speed = new alfrid.TweenNumber(1, 0.2);
 	}
 
 
@@ -25,9 +25,16 @@ class ViewSim extends alfrid.View {
 
 		window.addEventListener('keydown', (e)=> {
 			if(e.keyCode === 32) {
-				this.speed.value = this.speed.value === 1 ? 0 : 1;
+				this.toggle();
 			}
 		});
+
+
+		gui.add(this, 'toggle');
+	}
+
+	toggle() {
+		this.speed.value = this.speed.value === 1 ? 0 : 1;
 	}
 
 

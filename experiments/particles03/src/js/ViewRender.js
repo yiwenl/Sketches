@@ -40,12 +40,14 @@ class ViewRender extends alfrid.View {
 		this.roughness = 0.5;
 		this.specular = 0.5;
 		this.metallic = 1;
+		this.radius = 0.03;
 		let grey = 1;
 		this.baseColor = [grey, grey, grey];
 
 		gui.add(this, 'roughness', 0, 1);
 		gui.add(this, 'specular', 0, 1);
-		gui.add(this, 'metallic', 0, 1);
+		gui.add(this, 'radius', 0.01, 0.1);
+		// gui.add(this, 'metallic', 0, 1);
 	}
 
 
@@ -86,6 +88,7 @@ class ViewRender extends alfrid.View {
 		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
 		// this.shader.uniform("uShadowMatrix", "uniformMatrix4fv", shadowMatrix);
 
+		this.shader.uniform('uRadius', 'uniform1f', this.radius);
 		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
 		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
 

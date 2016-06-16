@@ -21,7 +21,7 @@ window.params = {
 	maxRadius: 7.5,
 	globalTime: Math.random() * 0xFFF,
 	gamma:2.2,
-	exposure:15
+	exposure:5
 };
 
 if(document.body) {
@@ -82,6 +82,7 @@ function _init3D() {
 	let scene = new SceneApp();
 
 	
-	// gui.add(params, 'maxRadius', 0.0, 10.0);
+	gui.add(params, 'gamma', 1.0, 10.0);
+	gui.add(params, 'exposure', 1.0, 30.0);
 
 }

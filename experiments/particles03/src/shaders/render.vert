@@ -20,6 +20,7 @@ uniform samplerCube uIrradianceMap;
 uniform vec2 uViewport;
 uniform float percent;
 uniform float time;
+uniform float uRadius;
 
 varying vec3 vPosition;
 varying vec3 vWsPosition;
@@ -47,7 +48,7 @@ void main(void) {
 
 	gl_Position				= uProjectionMatrix * viewSpacePosition;
 	
-	gl_PointSize = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w * (1.0 + extra.r * 2.0);
+	gl_PointSize = uViewport.y * uProjectionMatrix[1][1] * uRadius / gl_Position.w * (1.0 + extra.r * 5.0);
 	
 
 	vNormal 	 = aNormal;

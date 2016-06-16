@@ -8,6 +8,9 @@ import ViewSim from './ViewSim';
 import ViewSphere from './ViewSphere';
 import ViewShadow from './ViewShadow';
 import ViewNoise from './ViewNoise';
+import EffectComposer from './post/EffectComposer';
+import PassBlur from './post/passes/PassBlur';
+import ViewAdd from './ViewAdd';
 
 const GL = alfrid.GL;
 
@@ -69,14 +72,18 @@ class SceneApp extends alfrid.Scene {
 		this._fboTargetVel  = new alfrid.FrameBuffer(numParticles, numParticles, o);
 		this._fboExtra  	= new alfrid.FrameBuffer(numParticles, numParticles, o);
 
-		const sphereSize = 256;
-		this._fboSphere = new alfrid.FrameBuffer(sphereSize, sphereSize);
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 
-		const shadowMapSize = 1024;
-		this._fboShadowMap = new alfrid.FrameBuffer(shadowMapSize, shadowMapSize);
+		const sphereSize = 128;
+		this._fboSphere = new alfrid.FrameBuffer(sphereSize, sphereSize);
 
 		const noiseSize = 128;
 		this._fboNoise = new alfrid.FrameBuffer(noiseSize, noiseSize);
+
+		const blurSize = 256 * 2;
+		this._composerBlur = new EffectComposer(blurSize, blurSize);
+		const passBlur = new PassBlur(9);
+		this._composerBlur.addPass(passBlur);
 	}
 
 
@@ -95,8 +102,8 @@ class SceneApp extends alfrid.Scene {
 		this._vRender = new ViewRender();
 		this._vSim 	  = new ViewSim();
 		this._vSphere = new ViewSphere();
-		this._vShadow = new ViewShadow();
 		this._vNoise = new ViewNoise();
+		this._vAdd = new ViewAdd();
 
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
@@ -144,6 +151,7 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		this.orbitalControl.ry.value += 0.01;
 		this.orbitalControlSphere.rx.setTo(this.orbitalControl.rx.value);
 		this.orbitalControlSphere.ry.setTo(this.orbitalControl.ry.value);
 
@@ -171,29 +179,24 @@ class SceneApp extends alfrid.Scene {
 		this._fboNoise.unbind();
 
 
-		//	render shadow map
-		// this._fboShadowMap.bind();
-		// GL.clear(1, 1, 1, 1);
-		// GL.gl.depthFunc(GL.gl.LEQUAL);
-		// GL.setMatrices(this.cameraLight);
-		// this._vShadow.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
-		// this._fboShadowMap.unbind();
-
+		this._fboRender.bind();
+		GL.clear(0, 0, 0, 0);
 		GL.setMatrices(this.camera);
 		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboSphere.getTexture(), this._textureRad, this._textureIrr, this._fboNoise.getTexture());
 		this._bSkybox.draw(this._textureIrr);
+		this._fboRender.unbind();
 
-		// const size = 200;
-		// GL.viewport(0, 0, size, size);
-		// this._bCopy.draw(this._fboSphere.getTexture());
-		// GL.viewport(size, 0, size, size);
-		// this._bCopy.draw(this._fboNoise.getTexture());
+		this._composerBlur.render(this._fboRender.getTexture());
+		// this._bCopy.draw(this._composerBlur.getTexture());
+
+		this._vAdd.render(this._fboRender.getTexture(), this._composerBlur.getTexture());
 	}
 
 
 	resize() {
 		GL.setSize(window.innerWidth, window.innerHeight);
 		this.camera.setAspectRatio(GL.aspectRatio);
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 	}
 }
 
