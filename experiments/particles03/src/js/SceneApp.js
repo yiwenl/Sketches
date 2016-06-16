@@ -21,6 +21,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._count = 0;
 		this.orbitalControl.radius.value = 15;
+		this.orbitalControl.ry.value = Math.PI * 0.25;
 		this.orbitalControl.rx.value = 0.3;
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
 
@@ -138,7 +139,6 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
-		this.orbitalControl.ry.value += 0.02;
 		this.orbitalControlSphere.rx.setTo(this.orbitalControl.rx.value);
 		this.orbitalControlSphere.ry.setTo(this.orbitalControl.ry.value);
 
