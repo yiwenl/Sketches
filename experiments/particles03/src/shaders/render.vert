@@ -26,7 +26,7 @@ varying vec3 vWsPosition;
 varying vec3 vEyePosition;
 varying vec3 vNormal;
 varying vec3 vExtra;
-const float radius = 0.075;
+const float radius = 0.02;
 
 
 void main(void) {

@@ -52,15 +52,7 @@ class SceneApp extends alfrid.Scene {
 		let irr_negz = alfrid.HDRLoader.parse(getAsset('irr_negz'));
 
 		this._textureIrr = new alfrid.GLCubeTexture([irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz]);
-
-		let rad_posx = alfrid.HDRLoader.parse(getAsset('rad_posx'));
-		let rad_negx = alfrid.HDRLoader.parse(getAsset('rad_negx'));
-		let rad_posy = alfrid.HDRLoader.parse(getAsset('rad_posy'));
-		let rad_negy = alfrid.HDRLoader.parse(getAsset('rad_negy'));
-		let rad_posz = alfrid.HDRLoader.parse(getAsset('rad_posz'));
-		let rad_negz = alfrid.HDRLoader.parse(getAsset('rad_negz'));
-
-		this._textureRad = new alfrid.GLCubeTexture([rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz]);
+		this._textureRad = alfrid.GLCubeTexture.parseDDS(getAsset('radiance'));
 
 		//	FBOS
 		const numParticles = params.numParticles;
@@ -178,9 +170,14 @@ class SceneApp extends alfrid.Scene {
 
 		GL.viewport(0, 0, GL.width, GL.height);
 		
-		this._bSkybox.draw(this._textureIrr);
+		// this._bSkybox.draw(this._textureRad);
 		GL.setMatrices(this.camera);
 		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture(), this._fboSphere.getTexture(), this._textureRad, this._textureIrr);
+
+
+		const size = 200;
+		GL.viewport(0, 0, size, size);
+		this._bCopy.draw(this._fboSphere.getTexture());
 	}
 
 

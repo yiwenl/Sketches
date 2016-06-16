@@ -15,7 +15,7 @@
   "author": "Yi-Wen Lin",
   "license": "ISC",
   "devDependencies": {
-    "alfrid": "^0.1.9",
+    "alfrid": "^0.1.10",
     "assets-loader": "^0.4.0",
     "autoprefixer-loader": "^3.2.0",
     "babel": "^6.5.2",

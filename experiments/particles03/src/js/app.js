@@ -2,10 +2,11 @@ import '../scss/global.scss';
 import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-// import dat from 'dat-gui';
+import dat from 'dat-gui';
 
 const GL = alfrid.GL;
 const assets = [
+	{ id:'radiance', url:'assets/img/studio_radiance.dds', type:'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posy', url:'assets/img/irr_posy.hdr', type:'binary' },
@@ -13,21 +14,14 @@ const assets = [
 	{ id:'irr_negx', url:'assets/img/irr_negx.hdr', type:'binary' },
 	{ id:'irr_negy', url:'assets/img/irr_negy.hdr', type:'binary' },
 	{ id:'irr_negz', url:'assets/img/irr_negz.hdr', type:'binary' },
-
-	{ id:'rad_posx', url:'assets/img/rad_posx.hdr', type:'binary' },
-	{ id:'rad_posy', url:'assets/img/rad_posy.hdr', type:'binary' },
-	{ id:'rad_posz', url:'assets/img/rad_posz.hdr', type:'binary' },
-	{ id:'rad_negx', url:'assets/img/rad_negx.hdr', type:'binary' },
-	{ id:'rad_negy', url:'assets/img/rad_negy.hdr', type:'binary' },
-	{ id:'rad_negz', url:'assets/img/rad_negz.hdr', type:'binary' }
 ];
 window.params = {
-	numParticles:256,
+	numParticles:128,
 	skipCount:10,
 	maxRadius: 7.5,
 	globalTime: Math.random() * 0xFFF,
 	gamma:2.2,
-	exposure:5
+	exposure:15
 };
 
 if(document.body) {
@@ -81,11 +75,13 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas);
 
+	//	INIT DAT-GUI
+	window.gui = new dat.GUI({ width:300 });
+
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
-	//	INIT DAT-GUI
-	// window.gui = new dat.GUI({ width:300 });
+	
 	// gui.add(params, 'maxRadius', 0.0, 10.0);
 
 }
