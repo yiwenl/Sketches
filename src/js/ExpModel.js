@@ -11,7 +11,7 @@ const ExpModel = [
 	},
 	{
 		cover:'assets/img/sketchCoverNefertiti.jpg',
-		url:'http://yiwenl.github.io/Sketches/experiments/Nefertiti/dist/index.html',
+		url:'http://yiwenl.github.io/Sketches/experiments/Nefertiti1/dist/index.html',
 		opened:false
 	},
 	{
