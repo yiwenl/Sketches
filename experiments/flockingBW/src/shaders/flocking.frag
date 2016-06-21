@@ -62,7 +62,7 @@ void main(void) {
 			} else if(percent < maxThreshold) {
 				velParticle = texture2D(textureVel, uvParticles).rgb;
 				delta = map(percent, minThreshold, maxThreshold, 0.0, 1.0);
-				avgDir = (vel + velParticle) * .5;
+				avgDir = mix(vel, velParticle, .6);
 				if(length(avgDir) > 0.0) {
 					avgDir = normalize(avgDir);
 					f = ( 1.0 - cos( delta * PI_2 ) * 0.5 + 0.5 );
