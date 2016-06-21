@@ -48,13 +48,16 @@ class ViewLines extends alfrid.View {
 	}
 
 
-	render(fbos) {
+	render(fbos, textureGradient) {
 		this.shader.bind();
 
 		for(let i=0; i<fbos.length; i++) {
 			this.shader.uniform(`texture${i}`, "uniform1i", i);
 			fbos[i].getTexture(0).bind(i);
 		}
+
+		this.shader.uniform("textureGradient", "uniform1i", fbos.length);
+		textureGradient.bind(fbos.length);
 		GL.draw(this.mesh);
 	}
 

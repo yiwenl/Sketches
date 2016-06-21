@@ -5,12 +5,27 @@ import AssetsLoader from 'assets-loader';
 import dat from 'dat-gui';
 
 const GL = alfrid.GL;
-const assets = [];
+const assets = [
+	{ id:'gradient', url:'assets/img/gradient.jpg' },
+	{ id:'radiance', url:'assets/img/studio_radiance.dds', type: 'binary' },
+	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
+	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
+	{ id:'irr_posy', url:'assets/img/irr_posy.hdr', type:'binary' },
+	{ id:'irr_posz', url:'assets/img/irr_posz.hdr', type:'binary' },
+	{ id:'irr_negx', url:'assets/img/irr_negx.hdr', type:'binary' },
+	{ id:'irr_negy', url:'assets/img/irr_negy.hdr', type:'binary' },
+	{ id:'irr_negz', url:'assets/img/irr_negz.hdr', type:'binary' },
+];
+
 window.params = {
 	numParticles:64,
 	skipCount:1,
 	maxRadius: 4,
 	numFbos: 10,
+	debug: false,
+	mode: 'dots',
+	gamma:2.2,
+	exposure:5
 };
 
 if(document.body) {
@@ -68,11 +83,14 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas);
 
+	//	INIT DAT-GUI
+	window.gui = new dat.GUI({ width:300 });
+
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
-	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
-	gui.add(params, 'maxRadius', 0.0, 10.0);
+	gui.add(params, 'debug');
+	const modes = ['dots', 'lines'];
+	gui.add(params, 'mode', modes);
 
 }

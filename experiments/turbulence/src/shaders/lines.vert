@@ -34,10 +34,16 @@ vec3 getPosition(vec3 mValue) {
 	} 
 }
 
+uniform sampler2D textureGradient;
 varying vec3 vNormal;
+varying vec4 vColor;
 
 void main(void) {
 	vec3 position = getPosition(aVertexPosition);
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
     vNormal = aNormal;
+
+    // float g = mix(aVertexPosition.z/10.0, 1.0, .5);
+    float g = aVertexPosition.z/10.0;
+    vColor = vec4(vec3(g), 1.0);
 }

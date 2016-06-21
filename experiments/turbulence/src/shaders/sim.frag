@@ -11,6 +11,7 @@ uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
 uniform float time;
 uniform float maxRadius;
+uniform	vec3 uTouch;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -127,10 +128,11 @@ void main(void) {
 
 
 	//	avoiding
-	const float radius = .25;
+	float radius = .25;
 	vec2 uvParticles;
 	vec3 posParticle, dir;
 	float dist, fApply, force;
+	float neighbour = 0.0;
 
 	for(float y=0.0; y<NUM; y++) {
 		for(float x=0.0; x<NUM; x++) {
@@ -145,14 +147,27 @@ void main(void) {
 			force = 0.001 / (dist/radius);
 			dir = normalize(posParticle - pos);
 			vel -= dir * force * fApply;
+
+			neighbour += fApply * 0.025;
 		}
 	}
+
+	//	avoiding touch
+	radius = 1.0;
+	dist = distance(pos, uTouch);
+	fApply = step(dist, radius);
+	force = 0.1 / (dist/radius);
+	dir = normalize(uTouch - pos);
+	vel -= dir * force * fApply;
+
 
 	const float maxSpeed = 0.05;
 	float speed = length(vel);
 	fApply = step(maxSpeed, speed);
 	vec3 maxVel = normalize(vel) * maxSpeed;
 	vel = mix(vel, maxVel, fApply);
+
+	neighbour = smoothstep(0.0, 1.0, neighbour);
 
 
 	const float decrease = .93;
@@ -163,5 +178,5 @@ void main(void) {
 	gl_FragData[0] = vec4(pos, 1.0);
 	gl_FragData[1] = vec4(vel, 1.0);
 	gl_FragData[2] = vec4(extra, 1.0);
-	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+	gl_FragData[3] = vec4(vec3(neighbour), 1.0);
 }
