@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "sketch_site",
   "scripts": {
+    "createSketch": "node createSketch.js",
     "start": "webpack-dev-server",
     "dev": "NODE_ENV=development webpack-dev-server --hot --inline --host 0.0.0.0 --colors --error-details --content-base ",
     "build": "NODE_ENV=production webpack --progress --colors --error-details && node createSketch.js"

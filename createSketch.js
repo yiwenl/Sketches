@@ -1,12 +1,11 @@
 // test.js
 "use strict"
+
 const copyDir = require('copy-dir');
-
 const sketches = require('./src/js/ExpModel.js');
+console.log('Number of Sketches : ', sketches.length);
 
-console.log('Data : ', sketches.length);
-
-for (let i=0; i<sketches.length; i++) {
+sketches.map( (sketch, i) => {
 	copyDir('./exps/_template', `./exps/${i}`, function(err) {
 		if(err) {
 			console.log(err);		
@@ -14,4 +13,4 @@ for (let i=0; i<sketches.length; i++) {
 			console.log(`Created : ./exps/${i}`);
 		}
 	});	
-}
+});
