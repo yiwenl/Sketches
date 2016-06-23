@@ -19,7 +19,8 @@ import Experiment from './pages/Experiment';
 
 ExpModel.reverse();
 
-console.log('Folder Static pages testing ', Math.floor(Math.random() * 100));
+// console.log('Folder Static pages testing ', Math.floor(Math.random() * 100));
+// console.log('Sketches : ', ExpModel);
 //	CONSTRUCT MODELS
 
 const experimentsReducer = (state=ExpModel, action) => {
@@ -57,7 +58,6 @@ const store = createStore(reducer, applyMiddleware(middleware));
 const history = syncHistoryWithStore(browserHistory, store);
 
 window.addEventListener('DOMContentLoaded', () => {
-	console.log('Loaded');
 	render(
 		<Provider store={store}>
 			<Router history={browserHistory}>

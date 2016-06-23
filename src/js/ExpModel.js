@@ -106,7 +106,5 @@ const ExpModel = [
 	}
 ]
 
-
-
-
-export default ExpModel;
+module.exports = ExpModel;
+// export default ExpModel;
