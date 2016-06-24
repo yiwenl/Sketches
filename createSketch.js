@@ -26,6 +26,7 @@ function replace(str, pattern, strToReplace) {	return str.replace(new RegExp(pat
 function readTemplate(sketch, i, folderPath) {
 	const url = `http://yiwenl.github.io/Sketches/exps/${i}/`;
 	const cover = sketch.cover;
+	const title = sketch.title;
 
 	console.log('Create Folder : ', folderPath, url, cover);
 
@@ -35,6 +36,7 @@ function readTemplate(sketch, i, folderPath) {
 		} else {
 			str = replace(str, '{{URL}}', url);
 			str = replace(str, '{{COVER}}', cover);
+			str = replace(str, '{{TITLE}}', title);
 			saveHTML(str, folderPath);
 		}
 	});
