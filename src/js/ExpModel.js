@@ -103,6 +103,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchTurbulence.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/turbulence/dist/index.html',
 		title:'Turbulence'
+	},
+	{
+		cover:'assets/img/coverSketchBlackGold.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/blackGold/dist/index.html',
+		title:'Black and Gold'
 	}
 ]
 
