@@ -1,14 +1,15 @@
 // ViewObjModel.js
 
-import alfrid from 'alfrid';
-let GL = alfrid.GL;
+import alfrid, { GL } from 'alfrid';
 const vs = require('../shaders/pbr.vert');
 const fs = require('../shaders/pbr.frag');
+const fsFallback = require('../shaders/pbrFallback.frag');
 
 class ViewObjModel extends alfrid.View {
 	
 	constructor() {
-		super(vs, fs);
+		let hasTextureLodSupport = GL.getExtension('EXT_shader_texture_lod') !== null;
+		super(vs, hasTextureLodSupport ? fs : fsFallback);
 		this.time = Math.random() * 0xFF;
 	}
 

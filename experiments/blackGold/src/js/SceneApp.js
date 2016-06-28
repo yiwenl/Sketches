@@ -109,9 +109,6 @@ class SceneApp extends alfrid.Scene {
 			mat4.multiply(this.drawingMatrix, this.cameraDrawing.projection, this.cameraDrawing.viewMatrix);
 		}
 		GL.clear(0, 0, 0, 0);
-		// this._bSkybox.draw(this._textureRad);
-		// this._bAxis.draw();
-		// this._bDots.draw();
 
 		this._fboStroke.bind();
 		GL.setMatrices(this.cameraDrawing);

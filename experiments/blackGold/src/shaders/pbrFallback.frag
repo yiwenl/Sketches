@@ -1,7 +1,5 @@
 // pbr.frag
 
-#extension GL_EXT_shader_texture_lod : enable
-
 precision highp float;
 
 uniform sampler2D 	uAoMap;
@@ -84,7 +82,8 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 	float mip			= numMips - 1.0 + log2(roughness);
 	vec3 lookup			= -reflect( V, N );
 	lookup				= fix_cube_lookup( lookup, 512.0, mip );
-	vec3 radiance		= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );
+	// vec3 radiance		= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );
+	vec3 radiance		= pow( textureCube( uRadianceMap, lookup).rgb, vec3( 2.2 ) );
 	vec3 irradiance		= pow( textureCube( uIrradianceMap, N ).rgb, vec3( 1 ) );
 	
 	// get the approximate reflectance
