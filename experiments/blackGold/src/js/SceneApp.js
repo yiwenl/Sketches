@@ -125,7 +125,7 @@ class SceneApp extends alfrid.Scene {
 		this._vHitPlane.render([this.orbitalControl.rx.value, this.orbitalControl.ry.value], this._drawingOffset.value);
 
 		const size = 200;
-		GL.viewport(0, 0, size, size);
+		GL.viewport(0, 60, size, size);
 		this._bCopy.draw(this._fboStroke.getTexture());
 	}
 
