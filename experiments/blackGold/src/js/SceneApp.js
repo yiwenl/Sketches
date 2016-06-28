@@ -18,7 +18,7 @@ class SceneApp extends alfrid.Scene {
 
 		//	camera for stroke
 		this.cameraDrawing = new alfrid.CameraPerspective();
-		this.cameraDrawing.setPerspective(Math.PI * .125, 1, 0.1, 2000);
+		this.cameraDrawing.setPerspective(Math.PI * .25, 1, 0.1, 2000);
 		this.drawingMatrix = mat4.create();
 
 		//	drawing
@@ -31,7 +31,16 @@ class SceneApp extends alfrid.Scene {
 		this._drawingOffset = new alfrid.TweenNumber(0);
 
 		window.addEventListener('keydown', (e)=>this._onKey(e));
-		this.setInDrawingMode(false);
+		window.addEventListener('touchstart', ()=> {
+			this.setInDrawingMode(true);
+		});
+
+		if(GL.isMobile) {
+			this.setInDrawingMode(true);
+		} else {
+			this.setInDrawingMode(false);
+		}
+		
 	}
 
 	_initTextures() {
@@ -119,7 +128,10 @@ class SceneApp extends alfrid.Scene {
 
 		GL.setMatrices(this.camera);
 		this._vModel.render(this._textureRad, this._textureIrr, this._textureAO, this._fboStroke.getTexture(), this.drawingMatrix);
-		this._vHitPlane.render([this.orbitalControl.rx.value, this.orbitalControl.ry.value], this._drawingOffset.value);
+		if(!GL.isMobile) {
+			this._vHitPlane.render([this.orbitalControl.rx.value, this.orbitalControl.ry.value], this._drawingOffset.value);	
+		}
+		
 
 		const size = 200;
 		GL.viewport(0, 60, size, size);

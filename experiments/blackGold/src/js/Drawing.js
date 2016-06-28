@@ -3,6 +3,14 @@
 import { Ray, EventDispatcher, GL } from 'alfrid';
 import MathUtils from './MathUtils';
 
+function getMouse(e) {
+	if(e.touches) {
+		return {x:e.touches[0].pageX, y:e.touches[0].pageY};
+	} else {
+		return {x:e.clientX, y:e.clientY};
+	}
+}
+
 
 class Drawing extends EventDispatcher {
 	constructor(mCamera, mMesh) {
@@ -13,8 +21,14 @@ class Drawing extends EventDispatcher {
 		this.bias = vec3.create();
 
 		window.addEventListener('mousedown', (e)=>this._onDown(e));
+		window.addEventListener('touchstart', (e)=>this._onDown(e));
 		window.addEventListener('mousemove', (e)=>this._onMove(e));
+		window.addEventListener('touchmove', (e)=>{
+			e.preventDefault();
+			this._onMove(e);
+		});
 		window.addEventListener('mouseup', (e)=>this._onUp(e));
+		window.addEventListener('touchend', ()=>this._onUp());
 
 		this._isLocked = true;
 		this._isMouseDown = false;
@@ -46,8 +60,10 @@ class Drawing extends EventDispatcher {
 		if(this._isLocked) return;
 		if(!this._isMouseDown) return;
 
-		const mx = (e.clientX / GL.width) * 2.0 - 1.0;
-		const my = - (e.clientY / GL.height) * 2.0 + 1.0;
+		const o = getMouse(e);
+
+		const mx = (o.x / GL.width) * 2.0 - 1.0;
+		const my = - (o.y / GL.height) * 2.0 + 1.0;
 
 		this.camera.generateRay([mx, my, 0], this._ray);
 		const mesh = this.mesh;
@@ -106,10 +122,12 @@ class Drawing extends EventDispatcher {
 
 	_onUp(e) {
 		if(this._isLocked) return;
-		this.trigger('onUp', {points: this.points});
 		this._isMouseDown = false;
 
-		this.trigger('mouseup', {});
+		if(!GL.isMobile) {
+			this.trigger('onUp', {points: this.points});
+		}
+		
 	}
 
 
