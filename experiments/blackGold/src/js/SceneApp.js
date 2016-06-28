@@ -14,11 +14,12 @@ class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
-		// this.orbitalControl.rx.limit(-.3, .3);
-		const range = Math.PI * .35;
-		// this.orbitalControl.ry.limit(-range, range);
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
-		this.orbitalControl.radius.value = 7.5;
+
+		//	camera for stroke
+		this.cameraDrawing = new alfrid.CameraPerspective();
+		this.cameraDrawing.setPerspective(Math.PI * .125, 1, 0.1, 2000);
+		this.drawingMatrix = mat4.create();
 
 		//	drawing
 		this._drawing = new Drawing(this.camera, this._vHitPlane.mesh);
@@ -46,6 +47,9 @@ class SceneApp extends alfrid.Scene {
 		this._textureAO = new alfrid.GLTexture(getAsset('aomap'));
 		this._brushIndex = 0;
 		this._textureBrush = new alfrid.GLTexture(getAsset(`brush${this._brushIndex}`));
+
+		const fboSize = 1024;
+		this._fboStroke = new alfrid.FrameBuffer(fboSize, fboSize);
 	}
 
 
@@ -76,7 +80,7 @@ class SceneApp extends alfrid.Scene {
 		//	camera
 		if(this._inDrawingMode) {
 			this.orbitalControl.lock(true);
-			this.orbitalControl.radius.value = 8.5;
+			this.orbitalControl.radius.value = 7.5;
 			this._drawingOffset.value = 1;
 			this._drawing.lock(false);
 			this._drawing.clear();
@@ -86,7 +90,7 @@ class SceneApp extends alfrid.Scene {
 			this._textureBrush.updateTexture(getAsset(`brush${this._brushIndex}`));
 		} else {
 			this.orbitalControl.lock(false);
-			this.orbitalControl.radius.value = 7.5;
+			this.orbitalControl.radius.value = 6.5;
 			this._drawingOffset.value = 0;
 			this._drawing.lock(true);
 		}
@@ -100,17 +104,29 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		if(this._inDrawingMode) {
+			this.cameraDrawing.lookAt(this.camera.position, [0, 0, 0], [0, 1, 0]);
+			mat4.multiply(this.drawingMatrix, this.cameraDrawing.projection, this.cameraDrawing.viewMatrix);
+		}
 		GL.clear(0, 0, 0, 0);
 		// this._bSkybox.draw(this._textureRad);
-		this._bAxis.draw();
-		this._bDots.draw();
+		// this._bAxis.draw();
+		// this._bDots.draw();
 
-		this._vModel.render(this._textureRad, this._textureIrr, this._textureAO);
-		GL.disable(GL.CULL_FACE);
+		this._fboStroke.bind();
+		GL.setMatrices(this.cameraDrawing);
+		GL.clear(0, 0, 0, 0);
 		this._vStroke.render(this._textureBrush);
-		GL.enable(GL.CULL_FACE);
+		this._fboStroke.unbind();
 
+
+		GL.setMatrices(this.camera);
+		this._vModel.render(this._textureRad, this._textureIrr, this._textureAO, this._fboStroke.getTexture(), this.drawingMatrix);
 		this._vHitPlane.render([this.orbitalControl.rx.value, this.orbitalControl.ry.value], this._drawingOffset.value);
+
+		const size = 200;
+		GL.viewport(0, 0, size, size);
+		this._bCopy.draw(this._fboStroke.getTexture());
 	}
 
 

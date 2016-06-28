@@ -1,11 +1,12 @@
 // ViewStroke.js
 
 import alfrid, { GL } from 'alfrid';
+import fs from '../shaders/stroke.frag';
 
 class ViewStroke extends alfrid.View {
 	
 	constructor() {
-		super(null, alfrid.ShaderLibs.copyFrag);
+		super(null, fs);
 		this._points = [];
 
 		this.mtxLeft = mat4.create();

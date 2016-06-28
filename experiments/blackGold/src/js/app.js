@@ -2,7 +2,7 @@ import '../scss/global.scss';
 import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 
 const GL = alfrid.GL;
 
@@ -27,7 +27,7 @@ const assets = [
 
 for (let i=0; i<6; i++) {
 	const id = `brush${i}`;
-	const url = `assets/img/brushes/${id}.png`;
+	const url = `assets/img/brushes/${id}.jpg`;
 	assets.push({id, url});
 }
 
@@ -87,7 +87,7 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
+	// window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
 	let scene = new SceneApp();

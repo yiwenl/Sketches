@@ -5,6 +5,7 @@
 precision highp float;
 
 uniform sampler2D 	uAoMap;
+uniform sampler2D 	uTextureBrush;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
 
@@ -24,6 +25,7 @@ varying vec3		vEyePosition;
 varying vec3		vWsNormal;
 varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
+varying vec4 		vDrawingCoord;
 
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.1415926535897932384626433832795
@@ -166,13 +168,18 @@ void main() {
 	vec3 V 				= normalize( vEyePosition );
 	
 	vec3 color;
-	const float posOffset = 0.5;
-	float noise 		= snoise(vWsPosition*posOffset + uTime * 0.1) * 0.5 + 0.5;
-	if(noise < 1.0) {
+
+	vec4 drawingCoord	= vDrawingCoord / vDrawingCoord.w;
+
+	const float drawingBias     = .00005;
+    vec4 colorDrawing = texture2DProj(uTextureBrush, drawingCoord, drawingBias);
+
+	if(colorDrawing.a < 0.01) {
 		color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);	
 	} else {
-		const vec3 colorGold = vec3(1.000, 0.766, 0.276);
+		vec3 colorGold = vec3(1.000, 0.766, 0.276);
 		color 			= getPbr(N, V, colorGold, 0.95, 0.85, 0.95);
+		color 			*= colorDrawing.rgb;
 	}
 	
 

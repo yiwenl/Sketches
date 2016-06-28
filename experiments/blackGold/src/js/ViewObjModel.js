@@ -22,26 +22,25 @@ class ViewObjModel extends alfrid.View {
 		this.roughness = .97;
 		this.specular = 0;
 		this.metallic = 0;
-		const grey = 0.01;
+		const grey = 0.015;
 		this.baseColor = [grey, grey, grey];
-		
-		gui.add(this, 'roughness', 0, 1);
-		gui.add(this, 'specular', 0, 1);
-		gui.add(this, 'metallic', 0, 1);
 	}
 
 
-	render(textureRad, textureIrr, textureAO) {
+	render(textureRad, textureIrr, textureAO, textureBrush, drawingMatrix) {
 		this.time += 0.01;
 		this.shader.bind();
 
 		this.shader.uniform('uAoMap', 'uniform1i', 0);
-		this.shader.uniform('uRadianceMap', 'uniform1i', 1);
-		this.shader.uniform('uIrradianceMap', 'uniform1i', 2);
+		this.shader.uniform("uTextureBrush", "uniform1i", 1);
+		this.shader.uniform('uRadianceMap', 'uniform1i', 2);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 3);
 		textureAO.bind(0);
-		textureRad.bind(1);
-		textureIrr.bind(2);
+		textureBrush.bind(1);
+		textureRad.bind(2);
+		textureIrr.bind(3);
 
+		this.shader.uniform("uDrawingMatrix", "uniformMatrix4fv", drawingMatrix);
 		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
 		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
 		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
