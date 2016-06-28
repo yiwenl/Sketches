@@ -37,6 +37,7 @@ class SceneApp extends alfrid.Scene {
 
 		if(GL.isMobile) {
 			this.setInDrawingMode(true);
+			this.orbitalControl.rx.value = this.orbitalControl.ry.value = -0.2;
 		} else {
 			this.setInDrawingMode(false);
 		}
