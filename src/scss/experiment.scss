@@ -35,10 +35,12 @@
 	height:280px;
 	box-sizing: border-box;
 	margin:10px;
-	transition: transform .25s ease-out;
+	transition: transform .25s ease-out, filter .25s ease-out;
+	filter: grayscale(60%);
 
 	&:hover {
 		transform:scale(.95);
+		filter: grayscale(0%);
 	}
 }
 
