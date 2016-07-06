@@ -59,7 +59,7 @@ class SceneApp extends Scene {
 
 		this._textureMountains = [];
 		this._mountains = [];
-		const RANGE = 7;
+		const RANGE = 20;
 
 		for(let i=0; i<NUM_MOUNTAINS; i++) {
 			let v = new ViewMountain();
