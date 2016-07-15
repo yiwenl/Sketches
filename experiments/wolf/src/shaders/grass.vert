@@ -12,6 +12,8 @@ uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat3 uModelViewMatrixInverse;
+uniform mat3 uNormalMatrix;
+
 uniform vec3 uPositionOffset;
 uniform sampler2D textureNoise;
 uniform float uNumTiles;
@@ -20,7 +22,10 @@ uniform vec3 uTouch;
 
 varying vec2 vTextureCoord;
 varying vec2 vUV;
-varying vec3 vNormal;
+varying vec3 vWsNormal;
+varying vec3 vPosition;
+varying vec3 vWsPosition;
+varying vec3 vEyePosition;
 varying vec3 vColor;
 
 
@@ -52,6 +57,8 @@ vec2 rotate(vec2 v, float a) {
 	return m * v;
 }
 
+const vec3 DEFAULT_NORMAL = vec3(0.0, 0.0, 1.0);
+
 void main(void) {
 	//	get height map
 	vec2 uv            = aUVOffset / uNumTiles + uUVOffset;
@@ -63,7 +70,7 @@ void main(void) {
 	float thetaY       = aNormal.y * PI * 2.0;
 	
 	vec3 posRelative   = aVertexPosition + vec3(0.0, noise.g, 0.0);
-	// posRelative.xz  = rotate(posRelative.xz, thetaY);
+	posRelative.xz     = rotate(posRelative.xz, thetaY);
 	posRelative        = uModelViewMatrixInverse * posRelative;
 	vec3 posRelativeMV = posRelative;
 	posRelativeMV.xy   = rotate(posRelativeMV.xy, thetaZ);
@@ -71,7 +78,6 @@ void main(void) {
 
 
 	//	get rotation axis
-	// vec3 dirToCenter = normalize(vec3(pos.x - uTouch.x, 0.0, pos.z - uTouch.z));
 	vec3 dirToCenter = normalize(pos - uTouch);
 	const vec3 YAXIS = vec3(0.0, 1.0, 0.0);
 	vec3 axis 	  = normalize(rotate(dirToCenter, YAXIS, PI * .5));
@@ -83,21 +89,24 @@ void main(void) {
 	if(distTouTouch < radius) {
 		angle = distTouTouch / radius;
 		angle = sin(angle * PI * .5);
-		// if(pos.x < uTouch.x) {
-		// 	angle *= -1.0;
-		// }
-		
-		// posRelativeMV    = posRelative;
-		// posRelativeMV.xy = rotate(posRelativeMV.xy, thetaZ + angle);
-		// pos              = posRelativeMV + aPosOffset + uPositionOffset;
 		pos = rotate(posRelativeMV, axis, (1.0 - angle) * maxRotation) + aPosOffset + uPositionOffset;
 		
 	}
-	// pos.y *= angle;
 	vUV.x = angle;
 
-	gl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
-	vTextureCoord = aTextureCoord;
-	vNormal       = aNormal;
-	vColor		  = aColor;
+	vec4 worldSpacePosition = uModelMatrix * vec4(pos, 1.0);
+	vec4 viewSpacePosition  = uViewMatrix * worldSpacePosition;
+	vPosition               = viewSpacePosition.xyz;
+	vWsPosition             = worldSpacePosition.xyz;
+	
+	vec4 eyeDirViewSpace    = viewSpacePosition - vec4( 0, 0, 0, 1 );
+	vEyePosition            = -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );
+	
+	gl_Position             = uProjectionMatrix * viewSpacePosition;
+	vTextureCoord           = aTextureCoord;
+	vec3 N                  = uNormalMatrix * DEFAULT_NORMAL;
+	N.xz                    = rotate(N.xz, -thetaY);
+	// N.xz 					*= -1.0;
+	vWsNormal               = N;
+	vColor                  = aColor;
 }

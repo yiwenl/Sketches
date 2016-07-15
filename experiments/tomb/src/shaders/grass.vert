@@ -5,7 +5,6 @@ attribute vec3 aVertexPosition;
 attribute vec2 aTextureCoord;
 attribute vec2 aUVOffset;
 attribute vec3 aNormal;
-attribute vec3 aColor;
 attribute vec3 aPosOffset;
 
 uniform mat4 uModelMatrix;
@@ -21,7 +20,6 @@ uniform vec3 uTouch;
 varying vec2 vTextureCoord;
 varying vec2 vUV;
 varying vec3 vNormal;
-varying vec3 vColor;
 
 
 const vec3 touch = vec3(0.0, 3.0, 0.0);
@@ -99,5 +97,4 @@ void main(void) {
 	gl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 	vTextureCoord = aTextureCoord;
 	vNormal       = aNormal;
-	vColor		  = aColor;
 }

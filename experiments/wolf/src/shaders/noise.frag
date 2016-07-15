@@ -114,7 +114,7 @@ vec3 curlNoise( vec3 p ){
 void main(void) {
 	// const float speed = 0.25;
 	// float g = snoise(vec3(vTextureCoord - vec2(0.0, uTime * uSpeed), 0.05 * uTime));
-    vec3 noise = curlNoise(vec3(vTextureCoord - vec2(0.0, uTime * uSpeed), 0.1 * uTime));
+    vec3 noise = curlNoise(vec3(vTextureCoord + vec2(0.0, uTime * uSpeed), 0.1 * uTime));
     // gl_FragColor = texture2D(texture, vTextureCoord);
     // gl_FragColor = vec4(g, g, g, 1.0);
     gl_FragColor = vec4(noise * 0.5 + .5, 1.0);

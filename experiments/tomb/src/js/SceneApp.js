@@ -147,7 +147,7 @@ class SceneApp extends alfrid.Scene {
 		this._vGrass.render(this._fboNoise.getTexture(), this.hit);
 		this._vHitPlane.render();
 		const s = 3;
-		// this._bBall.draw(this.hit, [s, s, s], [.7, 0, 0], 0.5);
+		this._bBall.draw(this.hit, [s, s, s], [.7, 0, 0], 0.5);
 
 		const size = 200;
 

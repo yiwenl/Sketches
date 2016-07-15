@@ -4,17 +4,6 @@ import alfrid, { GL } from 'alfrid';
 import vs from '../shaders/grass.vert';
 import fs from '../shaders/grass.frag';
 var random = function(min, max) { return min + Math.random() * (max - min);	}
-const colours = [
-	[64/255, 109/255, 26/255],
-	[97/255, 148/255, 41/255],
-	[113/255, 162/255, 55/255],
-	[98/255, 154/255, 39/255],
-	[128/255, 171/255, 71/255]
-];
-
-const getColor = function() {
-	return colours[Math.floor(Math.random() * colours.length)];
-}
 
 class ViewGrass extends alfrid.View {
 	
@@ -26,7 +15,6 @@ class ViewGrass extends alfrid.View {
 	_init() {
 		const positions = [];
 		const posOffset = [];
-		const colors = [];
 		const normals = [];
 		const indices = [];
 		const coords = [];
@@ -34,10 +22,10 @@ class ViewGrass extends alfrid.View {
 		let count = 0;
 
 		const numSeg = 3;
-		const NUM_GRASS = 3000;
+		const NUM_GRASS = 5000;
 		const RANGE = params.grassRange;
 		const uvOffset = 1/numSeg;
-		let width, height, h, tx, tz, uvx, uvz, rx, ry, color;
+		let width, height, h, tx, tz, uvx, uvz, rx, ry;
 
 		for(let j=0; j < NUM_GRASS; j++) {
 			height = random(2, 3);
@@ -51,7 +39,6 @@ class ViewGrass extends alfrid.View {
 			rx = Math.random();
 			ry = Math.random();
 
-			color = getColor();
 
 			for(let i=0; i<numSeg; i++) {
 				positions.push([ width, h * (i+1), 0]);
@@ -68,11 +55,6 @@ class ViewGrass extends alfrid.View {
 				normals.push([rx, ry, 1]);
 				normals.push([rx, ry, 1]);
 				normals.push([rx, ry, 1]);
-
-				colors.push(color);
-				colors.push(color);
-				colors.push(color);
-				colors.push(color);
 
 				uv.push([uvx, uvz]);
 				uv.push([uvx, uvz]);
@@ -99,7 +81,6 @@ class ViewGrass extends alfrid.View {
 		this.mesh = new alfrid.Mesh(GL.TIRANGLES);
 		this.mesh.bufferVertex(positions);
 		this.mesh.bufferData(posOffset, 'aPosOffset', 3);
-		this.mesh.bufferData(colors, 'aColor', 3);
 		this.mesh.bufferData(uv, 'aUVOffset', 2);
 		this.mesh.bufferTexCoord(coords);
 		this.mesh.bufferNormal(normals);

@@ -4,7 +4,6 @@
 precision highp float;
 varying vec2 vTextureCoord;
 varying vec2 vUV;
-varying vec3 vColor;
 
 void main(void) {
 	// float d           = abs(vTextureCoord.x - .5) * 2.0;
@@ -15,6 +14,6 @@ void main(void) {
 
 	float a = 1.0;
 	float g = mix(vTextureCoord.y, 1.0, .25);
-    // gl_FragColor = vec4(vec3(vUV.r), a);
-    gl_FragColor = vec4(vec3(g) * vColor * 1.2, a);
+    gl_FragColor = vec4(vec3(vUV.r), a);
+    gl_FragColor = vec4(vec3(g), a);
 }

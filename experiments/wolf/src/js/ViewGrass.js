@@ -34,13 +34,13 @@ class ViewGrass extends alfrid.View {
 		let count = 0;
 
 		const numSeg = 3;
-		const NUM_GRASS = 3000;
+		const NUM_GRASS = 5000;
 		const RANGE = params.grassRange;
 		const uvOffset = 1/numSeg;
 		let width, height, h, tx, tz, uvx, uvz, rx, ry, color;
 
 		for(let j=0; j < NUM_GRASS; j++) {
-			height = random(2, 3);
+			height = random(1, 2);
 			width = random(.1, .2) * .5;
 			h = height / numSeg;
 			tx = random(-RANGE, RANGE);
@@ -104,10 +104,15 @@ class ViewGrass extends alfrid.View {
 		this.mesh.bufferTexCoord(coords);
 		this.mesh.bufferNormal(normals);
 		this.mesh.bufferIndex(indices);
+
+		this.roughness = 1.0;
+		this.specular = 0.5;
+		this.metallic = 0;
+		this.baseColor = [1, 1, 1];
 	}
 
 
-	render(textureNoise, touch) {
+	render(textureNoise, touch, textureRad, textureIrr) {
 		const numTiles = params.numTiles;
 		const pos = [0, 0, 0];
 		const uvOffset = [0, 0];
@@ -120,6 +125,18 @@ class ViewGrass extends alfrid.View {
 		this.shader.uniform("textureNoise", "uniform1i", 0);
 		this.shader.uniform("uTouch", "vec3", touch);
 		textureNoise.bind(0);
+
+		this.shader.uniform('uRadianceMap', 'uniform1i', 1);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 2);
+		textureRad.bind(1);
+		textureIrr.bind(2);
+
+		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
+		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
+		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
+
+		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
+		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
 
 		for(let j=0; j<numTiles; j++) {
 			for(let i=0; i<numTiles; i++) {

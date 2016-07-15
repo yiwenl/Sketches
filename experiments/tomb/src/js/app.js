@@ -1,9 +1,9 @@
 import '../scss/global.scss';
-import alfrid, { Camera } from 'alfrid';
+import alfrid, { Camera, Scheduler } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
 import dat from 'dat-gui';
-import Stats from 'stats.js';
+import Stats from './lib/stats.min.js';
 
 const GL = alfrid.GL;
 const assets = [];
@@ -12,7 +12,7 @@ window.params = {
 	skipCount:10,
 	maxRadius: 2.5,
 	grassRange: 10,
-	numTiles: 4,
+	numTiles: 5,
 	speed: 0.25
 };
 
@@ -77,12 +77,11 @@ function _init3D() {
 	//	INIT DAT-GUI
 	window.gui = new dat.GUI({ width:300 });
 	// gui.add(params, 'maxRadius', 0.0, 10.0);
-	// gui.add(params, 'speed', 0.0, 1.0);
-
+	gui.add(params, 'speed', 0.0, 1.0);
 
 	const stats = new Stats();
-	document.body.appendChild(stats.dom);
-	alfrid.Scheduler.addEF(()=> {
+	document.body.appendChild(stats.domElement);
+	Scheduler.addEF(()=> {
 		stats.update();
 	});
 }
