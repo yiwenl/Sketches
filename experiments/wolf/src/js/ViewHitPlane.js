@@ -10,7 +10,7 @@ class ViewHitPlane extends alfrid.View {
 
 
 	_init() {
-		const size = params.numTiles * params.grassRange * 2.0;
+		const size = params.numTiles * params.grassRange * 3.0;
 		this.mesh = alfrid.Geom.plane(size, size, 1, 'xz');
 	}
 

@@ -27,6 +27,7 @@ varying vec3 vPosition;
 varying vec3 vWsPosition;
 varying vec3 vEyePosition;
 varying vec3 vColor;
+varying float vHeight;
 
 
 const vec3 touch = vec3(0.0, 3.0, 0.0);
@@ -64,17 +65,23 @@ void main(void) {
 	vec2 uv            = aUVOffset / uNumTiles + uUVOffset;
 	vUV                = uv;
 	vec3 noise         = texture2D(textureNoise, uv).rgb;
+
+	// float heightOffset = 0.0;
+	// const vec2 center = vec2(.5);
+	// float distToCenter = distance(uv, center);
+	// if(distToCenter < .5) {
+	// 	heightOffset = 1.0 - distToCenter / 0.5;
+	// }
 	
 	//	vertex position
-	float thetaZ       = (aNormal.x - 0.5) * 0.5 + (noise.r - 0.5) * 0.75;
-	float thetaY       = aNormal.y * PI * 2.0;
+	float thetaZ       = (aPosOffset.y - 0.5) * 0.5 + (noise.r - 0.5) * 0.75;
 	
-	vec3 posRelative   = aVertexPosition + vec3(0.0, noise.g, 0.0);
-	posRelative.xz     = rotate(posRelative.xz, thetaY);
+	vec3 posRelative   = aVertexPosition + vec3(0.0, noise.g * 5.0, 0.0);
 	posRelative        = uModelViewMatrixInverse * posRelative;
 	vec3 posRelativeMV = posRelative;
 	posRelativeMV.xy   = rotate(posRelativeMV.xy, thetaZ);
-	vec3 pos           = posRelativeMV + aPosOffset + uPositionOffset;
+	vec3 posOffset 	   = aPosOffset * vec3(1.0, 0.0, 1.0); 
+	vec3 pos           = posRelativeMV + posOffset + uPositionOffset;
 
 
 	//	get rotation axis
@@ -89,7 +96,7 @@ void main(void) {
 	if(distTouTouch < radius) {
 		angle = distTouTouch / radius;
 		angle = sin(angle * PI * .5);
-		pos = rotate(posRelativeMV, axis, (1.0 - angle) * maxRotation) + aPosOffset + uPositionOffset;
+		pos = rotate(posRelativeMV, axis, (1.0 - angle) * maxRotation) + posOffset + uPositionOffset;
 		
 	}
 	vUV.x = angle;
@@ -104,9 +111,8 @@ void main(void) {
 	
 	gl_Position             = uProjectionMatrix * viewSpacePosition;
 	vTextureCoord           = aTextureCoord;
-	vec3 N                  = uNormalMatrix * DEFAULT_NORMAL;
-	N.xz                    = rotate(N.xz, -thetaY);
-	// N.xz 					*= -1.0;
+	vec3 N                  = uNormalMatrix * aNormal;
 	vWsNormal               = N;
 	vColor                  = aColor;
+	vHeight 				= noise.g;
 }

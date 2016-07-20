@@ -18,7 +18,7 @@ class ViewWolf extends alfrid.View {
 		super(vs, fs);
 		this._frame = 15;
 		this.scale = 6.0;
-		this.position = [0, 2.5, -0.5];
+		this.position = [0, 2.5, -6.5];
 	}
 
 
@@ -47,7 +47,7 @@ class ViewWolf extends alfrid.View {
 		gui.add(this, 'metallic', 0, 1);
 
 		this._textureWhite = alfrid.GLTexture.whiteTexture();
-		const gap = 1000/30;
+		const gap = 1000/40;
 		setInterval(()=> {
 			this._frame ++;
 			if(this._frame >= NUM_FRAMES) this._frame = 0;
@@ -55,7 +55,7 @@ class ViewWolf extends alfrid.View {
 	}
 
 
-	render(textureRad, textureIrr) {
+	render(textureRad, textureIrr, yOffset) {
 		if(!this.mesh) {
 			return;
 		}
@@ -64,8 +64,8 @@ class ViewWolf extends alfrid.View {
 		this.shader.uniform('uAoMap', 'uniform1i', 0);
 		this.shader.uniform('uRadianceMap', 'uniform1i', 1);
 		this.shader.uniform('uIrradianceMap', 'uniform1i', 2);
-		// this.aoMap.bind(0);
-		this._textureWhite.bind(0);
+		this.aoMap.bind(0);
+		// this._textureWhite.bind(0);
 		textureRad.bind(1);
 		textureIrr.bind(2);
 
@@ -74,7 +74,7 @@ class ViewWolf extends alfrid.View {
 		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
 		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
 
-		this.shader.uniform("uPosition", "vec3", this.position);
+		this.shader.uniform("uPosition", "vec3", [this.position[0], this.position[1] + yOffset, this.position[2]]);
 		this.shader.uniform("uScale", "vec3", [this.scale, this.scale, this.scale]);
 
 		this.shader.uniform('uExposure', 'uniform1f', params.exposure);

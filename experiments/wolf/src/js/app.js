@@ -10,12 +10,20 @@ const GL = alfrid.GL;
 window.params = {
 	gamma:2.2,
 	exposure:5,
-	grassRange: 10,
-	numTiles: 5,
-	speed: 0.25
+	grassRange: 5,
+	numTiles: 8,
+	speed: 0.25,
+	lodThresholdLow: 30,
+	lodThresholdHigh: 18,
+	fogOffset:0.8,
+	fogColor:[249/255, 247/255, 245/255],
+	zOffset:0,
 };
 
 const assets = [
+	{ id:'background', url:'assets/img/background.jpg' },
+	{ id:'grass', url:'assets/img/grass.png' },
+	{ id:'ground', url:'assets/img/ground.jpg' },
 	{ id:'radiance', url:'assets/img/studio_radiance.dds', type: 'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
@@ -114,6 +122,9 @@ function _init3D() {
 	
 	gui.add(params, 'gamma', 1, 5);
 	gui.add(params, 'exposure', 1, 25);
+	gui.add(params, 'lodThresholdHigh', 5, 50);
+	gui.add(params, 'lodThresholdLow', 5, 50);
+	gui.add(params, 'fogOffset', 0, 1);
 
 
 	const stats = new Stats();

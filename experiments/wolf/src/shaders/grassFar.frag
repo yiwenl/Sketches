@@ -25,17 +25,6 @@ uniform float		uFogOffset;
 uniform vec3		uFogColor;
 
 
-const float PI = 3.141592657;
-const float TwoPI = PI * 2.0;
-#define FOG_DENSITY 0.05
-float fogFactorExp2(const float dist, const float density) {
-  const float LOG2 = -1.442695;
-  float d = density * dist;
-  float f = 1.0 - clamp(exp2(d * d * LOG2), 0.0, 1.0);
-
-  return smoothstep(uFogOffset, 1.0, f);
-}
-
 #define saturate(x) clamp(x, 0.0, 1.0)
 
 
@@ -80,47 +69,27 @@ vec3 correctGamma(vec3 color, float g) {
 	return pow(color, vec3(1.0/g));
 }
 
-vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, float specular) {
-	vec3 diffuseColor	= baseColor - baseColor * metallic;
-	vec3 specularColor	= mix( vec3( 0.08 * specular ), baseColor, specular );	
 
-	vec3 color;
-	float roughness4 = pow(roughness, 4.0);
-	
-	// sample the pre-filtered cubemap at the corresponding mipmap level
-	float numMips		= 6.0;
-	float mip			= numMips - 1.0 + log2(roughness);
-	vec3 lookup			= -reflect( V, N );
-	lookup				= fix_cube_lookup( lookup, 512.0, mip );
-	vec3 radiance		= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );
-	vec3 irradiance		= pow( textureCube( uIrradianceMap, N ).rgb, vec3( 1 ) );
-	
-	// get the approximate reflectance
-	float NoV			= saturate( dot( N, V ) );
-	vec3 reflectance	= EnvBRDFApprox( specularColor, roughness4, NoV );
-	
-	// combine the specular IBL and the BRDF
-    vec3 diffuse  		= diffuseColor * irradiance;
-    vec3 _specular 		= radiance * reflectance;
-	color				= diffuse + _specular;
+const float PI = 3.141592657;
+const float TwoPI = PI * 2.0;
+#define FOG_DENSITY 0.05
+float fogFactorExp2(const float dist, const float density) {
+  const float LOG2 = -1.442695;
+  float d = density * dist;
+  float f = 1.0 - clamp(exp2(d * d * LOG2), 0.0, 1.0);
 
-	return color;
+  return smoothstep(uFogOffset, 1.0, f);
 }
 
 
 void main(void) {
-	// float d           = abs(vTextureCoord.x - .5) * 2.0;
-	// const float range = 0.01;
-	// float v           = 1.0 - vTextureCoord.y;
-	// float a           = 1.0 - smoothstep(v-range, v+range, d);
-	// if(a              <= 0.01) discard;
 
 	float g 			= mix(vTextureCoord.y, 1.0, .25);
 
     vec3 N 				= normalize( vWsNormal );
 	vec3 V 				= normalize( vEyePosition );
 	
-	vec3 color 			= getPbr(N, V, vColor, uRoughness, uMetallic, uSpecular) * g;
+	vec3 color 			= pow( textureCube( uIrradianceMap, N ).rgb, vec3( 1 ) ) * vColor * g * 1.2;
 
 	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );
@@ -133,7 +102,6 @@ void main(void) {
 	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
 	float fogAmount   = fogFactorExp2(fogDistance, FOG_DENSITY);
 	color.rgb         = mix(color.rgb, uFogColor, fogAmount);
-
 
 	// output the fragment color
     gl_FragColor		= vec4( color, 1.0 );
