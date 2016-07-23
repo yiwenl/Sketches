@@ -108,7 +108,6 @@ class SceneParticle extends alfrid.Scene {
 		this._fboTargetVel.bind();
 		GL.clear(0, 0, 0, 1);
 		this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), this._fboSpeed.getTexture());
-		// this._vSim.render(this._fboCurrentVel.getTexture(), this._fboCurrentPos.getTexture(), this._fboExtra.getTexture(), this._fboSpeed.getTexture() );
 		this._fboTargetVel.unbind();
 
 
@@ -150,9 +149,6 @@ class SceneParticle extends alfrid.Scene {
 		this._fboRender.unbind();
 
 		this._vPost.render(this._fboRender.getDepthTexture());	
-
-		const size = 200;
-
 	}
 
 	resize() {

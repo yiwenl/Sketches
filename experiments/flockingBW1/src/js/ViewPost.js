@@ -12,12 +12,12 @@ class ViewPost extends alfrid.View {
 
 	_init() {
 		this.mesh = alfrid.Geom.bigTriangle();
-		this.shader.uniform("texture", "uniform1i", 0);
 	}
 
 
 	render(texture) {
 		this.shader.bind();
+		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
 		this.shader.uniform("invert", "uniform1f", params.isInvert);
 		GL.draw(this.mesh);
