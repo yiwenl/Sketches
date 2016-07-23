@@ -22,6 +22,7 @@ varying vec3		vEyePosition;
 varying vec3		vWsNormal;
 varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
+varying float 		vDist;
 
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.1415926535897932384626433832795
@@ -99,7 +100,8 @@ void main() {
 	vec3 N 				= normalize( vWsNormal );
 	vec3 V 				= normalize( vEyePosition );
 	
-	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
+	float metallic 		= min(uMetallic+vDist*2.0, 1.0);
+	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, metallic, uSpecular);
 
 	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );
@@ -111,5 +113,6 @@ void main() {
 
 	// output the fragment color
     gl_FragColor		= vec4( color, 1.0 );
+    // gl_FragColor		= vec4( vec3(vDist), 1.0 );
 
 }

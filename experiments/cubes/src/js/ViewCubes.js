@@ -6,7 +6,7 @@ import alfrid, { GL } from 'alfrid';
 const vs = require('../shaders/cubes.vert');
 const fs = require('../shaders/pbr.frag');
 
-const numCubes = 20;
+let numCubes, cubeSize;
 
 class ViewCubes extends alfrid.View {
 	
@@ -17,7 +17,9 @@ class ViewCubes extends alfrid.View {
 
 
 	_init() {
-		const cubeSize = .15;
+		numCubes = params.numCubes;
+		cubeSize = params.cubeSize;
+		// const cubeSize = .15;
 		const meshCube = alfrid.Geom.cube(cubeSize, cubeSize, cubeSize);
 
 		const mesh = new alfrid.Mesh();
@@ -54,18 +56,14 @@ class ViewCubes extends alfrid.View {
 		this.mesh = mesh;
 
 		this.roughness = .5;
-		this.specular = 1;
+		this.specular = 0;
 		this.metallic = 0.5;
 		this.baseColor = [1, 1, 1];
 
-
-		gui.add(this, 'roughness', 0, 1);
-		gui.add(this, 'specular', 0, 1);
-		gui.add(this, 'metallic', 0, 1);
 	}
 
 
-	render(textureRad, textureIrr, textureAO) {
+	render(textureRad, textureIrr, textureAO, hit) {
 		if(!this.mesh) {
 			return;
 		}
@@ -88,6 +86,7 @@ class ViewCubes extends alfrid.View {
 		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
 		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
 		this.shader.uniform("uTime", "float", this.time);
+		this.shader.uniform("uHit", "vec3", hit);
 
 		GL.drawInstance(this.mesh);
 	}

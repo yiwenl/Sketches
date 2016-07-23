@@ -14,6 +14,7 @@ uniform mat4 uProjectionMatrix;
 uniform mat3 uNormalMatrix;
 uniform mat3 uModelViewMatrixInverse;
 uniform float uTime;
+uniform vec3 uHit;
 
 varying vec2 vTextureCoord;
 
@@ -22,6 +23,7 @@ varying vec3 vPosition;
 varying vec3 vWsPosition;
 varying vec3 vEyePosition;
 varying vec3 vWsNormal;
+varying float vDist;
 
 
 vec4 permute(vec4 x) {  return mod(((x*34.0)+1.0)*x, 289.0);    }
@@ -90,9 +92,21 @@ float snoise(float x, float y, float z){
 
 
 void main(void) {
-	const float posOffset = 1.1;
-	float noise  			= snoise(aOffset * posOffset + uTime) * .5 + .7;
+	const float posOffset = 0.5;
+	float noise  			= snoise(aOffset * posOffset + uTime) + 1.0;
 	noise 					= min(noise, 1.0);
+
+    float distToTouch       = distance(aOffset, uHit);
+    const float maxRadius   = 2.0;
+    float tmp = 0.0;
+    if(distToTouch < maxRadius) {
+        tmp = 1.0 - distToTouch / maxRadius;
+    }
+    vDist                   = tmp;
+    noise                   -= tmp * 2.0;
+    noise                   = max(noise, 0.0);
+
+
 	vec3 position 			= aVertexPosition * noise + aOffset;
 	vec4 worldSpacePosition	= uModelMatrix * vec4(position, 1.0);
     vec4 viewSpacePosition	= uViewMatrix * worldSpacePosition;

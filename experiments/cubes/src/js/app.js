@@ -8,7 +8,9 @@ const GL = alfrid.GL;
 
 window.params = {
 	gamma:2.2,
-	exposure:5
+	exposure:5,
+	numCubes:30,
+	cubeSize:0.15,
 };
 
 const assets = [
@@ -80,11 +82,11 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
+	// window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
 	
-	gui.add(params, 'gamma', 1, 5);
-	gui.add(params, 'exposure', 1, 25);
+	// gui.add(params, 'gamma', 1, 5);
+	// gui.add(params, 'exposure', 1, 25);
 }

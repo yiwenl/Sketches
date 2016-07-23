@@ -1,8 +1,9 @@
 // SceneApp.js
 
-import alfrid, { Scene, GL } from 'alfrid';
+import alfrid, { Scene, GL, Ray } from 'alfrid';
 // import ViewObjModel from './ViewObjModel';
 import ViewCubes from './ViewCubes';
+import ViewHitTest from './ViewHitTest';
 
 window.getAsset = function(id) {
 	return assets.find( (a) => a.id === id).file;
@@ -12,6 +13,11 @@ class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
+		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+
+		this._ray = new Ray([0, 0, 0], [0, 0, -1]);
+		this.hit = [999, 999, 999];
+		GL.canvas.addEventListener('mousemove', (e)=>this._onMove(e));
 	}
 
 	_initTextures() {
@@ -37,17 +43,52 @@ class SceneApp extends alfrid.Scene {
 		this._bSkybox = new alfrid.BatchSkybox();
 		// this._vModel = new ViewObjModel();
 		this._vCubes = new ViewCubes();
+		this._vHit = new ViewHitTest();
+	}
+
+	_onMove(e) {
+		let mx, my;
+		if(e.touches) {
+			mx = (e.touches[0].pageX / GL.width) * 2.0 - 1.0;
+			my = - (e.touches[0].pageY / GL.height) * 2.0 + 1.0;
+		} else {
+			mx = (e.clientX / GL.width) * 2.0 - 1.0;
+			my = - (e.clientY / GL.height) * 2.0 + 1.0;	
+		}
+		
+		this.camera.generateRay([mx, my, 0], this._ray);
+		const mesh = this._vHit.mesh;
+		const faceVertices = mesh.faces.map((face)=>(face.vertices));
+		const offset = 0;
+		let v0, v1, v2;
+		let hit = [999, 999, 999];
+
+		for(let i = 0; i < faceVertices.length; i++) {
+			const vertices = faceVertices[i];
+			v0 = [vertices[0][0], vertices[0][1]+offset, vertices[0][2]];
+			v1 = [vertices[1][0], vertices[1][1]+offset, vertices[1][2]];
+			v2 = [vertices[2][0], vertices[2][1]+offset, vertices[2][2]];
+
+			hit = this._ray.intersectTriangle(v0, v1, v2);
+			if(hit) {
+				console.log('Hit :', hit);
+				break;	
+			}
+		}
+
+		this.hit = hit || [999, 999, 999];
 	}
 
 
 	render() {
 		GL.clear(0, 0, 0, 0);
 		// this._bSkybox.draw(this._textureRad);
-		this._bAxis.draw();
+		// this._bAxis.draw();
 		this._bDots.draw();
 
 		// this._vModel.render(this._textureRad, this._textureIrr, this._textureAO);
-		this._vCubes.render(this._textureRad, this._textureIrr, this._textureAO);
+		this._vCubes.render(this._textureRad, this._textureIrr, this._textureAO, this.hit);
+		// this._vHit.render();
 	}
 
 
