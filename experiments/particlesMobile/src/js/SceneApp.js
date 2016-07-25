@@ -35,6 +35,7 @@ class SceneApp extends alfrid.Scene {
 		GL.canvas.addEventListener('touchmove', (e)=>this._onMove(e));
 		GL.canvas.addEventListener('touchend', ()=> {
 			this.touchCount = 0;
+			this._isTouching = false;
 		});
 		GL.canvas.addEventListener('mouseup', ()=> {
 			this.touchCount = 0;

@@ -130,7 +130,7 @@ void main(void) {
 		vel -= normalize(pos) * f;
 	}
 
-	float hitRadius = 2.0 + uStrength;
+	float hitRadius = 2.0 + uStrength * 3.0;
 	dist = distance(pos, uHit);
 	if(dist < hitRadius) {
 		vec3 dir = normalize(uHit - pos);
