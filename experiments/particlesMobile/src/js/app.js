@@ -3,32 +3,14 @@ import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
 import dat from 'dat-gui';
-import Stats from 'stats.js';
 
 const GL = alfrid.GL;
-
+const assets = [];
 window.params = {
-	gamma:2.2,
-	exposure:5,
-	grassRange: 5,
-	numTiles: 8,
-	lodThresholdLow: 30,
-	lodThresholdHigh: 18,
+	numParticles:GL.isMobile ? 256 : 256*2,
+	skipCount:10,
+	maxRadius: 2.5
 };
-
-const assets = [
-	{ id:'sky', url:'assets/img/background.jpg' },
-	{ id:'aomap', url:'assets/img/aomap.jpg' },
-	{ id:'objHead', url:'assets/obj/model.obj', type:'text' },
-	{ id:'radiance', url:'assets/img/studio_radiance.dds', type: 'binary' },
-	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
-	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
-	{ id:'irr_posy', url:'assets/img/irr_posy.hdr', type:'binary' },
-	{ id:'irr_posz', url:'assets/img/irr_posz.hdr', type:'binary' },
-	{ id:'irr_negx', url:'assets/img/irr_negx.hdr', type:'binary' },
-	{ id:'irr_negy', url:'assets/img/irr_negy.hdr', type:'binary' },
-	{ id:'irr_negz', url:'assets/img/irr_negz.hdr', type:'binary' },
-];
 
 if(document.body) {
 	_init();
@@ -75,8 +57,8 @@ function _onImageLoaded(o) {
 }
 
 
-
 function _init3D() {
+
 	//	CREATE CANVAS
 	let canvas = document.createElement('canvas');
 	canvas.className = 'Main-Canvas';
@@ -85,19 +67,11 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas);
 
-	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
-
 	//	CREATE SCENE
 	let scene = new SceneApp();
-	
-	gui.add(params, 'gamma', 1, 5);
-	gui.add(params, 'exposure', 1, 25);
 
-	const stats = new Stats();
-	document.body.appendChild(stats.domElement);
+	//	INIT DAT-GUI
+	window.gui = new dat.GUI({ width:300 });
+	gui.add(params, 'maxRadius', 0.0, 10.0);
 
-	alfrid.Scheduler.addEF(()=> {
-		stats.update();
-	});
 }
