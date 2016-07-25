@@ -8,7 +8,7 @@ const GL = alfrid.GL;
 const assets = [];
 window.params = {
 	numParticles:GL.isMobile ? 256 : 256*2,
-	skipCount:10,
+	skipCount:5,
 	maxRadius: 2.5
 };
 
