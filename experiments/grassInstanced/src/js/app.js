@@ -10,8 +10,9 @@ const GL = alfrid.GL;
 window.params = {
 	gamma:2.2,
 	exposure:5,
-	grassRange: 5,
-	numTiles: 8,
+	grassRange: 10,
+	numTiles: 4,
+	pushStrength: 1.0,
 	lodThresholdLow: 30,
 	lodThresholdHigh: 18,
 };
@@ -20,7 +21,7 @@ const assets = [
 	{ id:'sky', url:'assets/img/background.jpg' },
 	{ id:'aomap', url:'assets/img/aomap.jpg' },
 	{ id:'objHead', url:'assets/obj/model.obj', type:'text' },
-	{ id:'radiance', url:'assets/img/studio_radiance.dds', type: 'binary' },
+	{ id:'radiance', url:'assets/img/sky_radiance.dds', type: 'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posy', url:'assets/img/irr_posy.hdr', type:'binary' },
@@ -93,6 +94,7 @@ function _init3D() {
 	
 	gui.add(params, 'gamma', 1, 5);
 	gui.add(params, 'exposure', 1, 25);
+	gui.add(params, 'pushStrength', 0, 5);
 
 	const stats = new Stats();
 	document.body.appendChild(stats.domElement);

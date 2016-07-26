@@ -34,7 +34,7 @@ void main(void) {
 	vColor       = vec4(vec3(g), 1.0);
 
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
-    gl_PointSize = distOffset * (1.0 + extra.x * 1.0);
+    gl_PointSize = distOffset * (1.0 + extra.x * 1.0) * 1.5;
 
 	vNormal 	 = aNormal;
 }

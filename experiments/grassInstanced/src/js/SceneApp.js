@@ -16,6 +16,9 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 		this.camera.setPerspective(90 * Math.PI / 180, GL.aspectRatio, 0.1, 100);
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+		// this.orbitalControl.rx.limit(.1, .3);
+		this.orbitalControl.center[1] = 1;
+		console.log(this.orbitalControl.center);
 
 		this._ray = new Ray([0, 0, 0], [0, 0, -1]);
 		this.hit = [999, 999, 999];
@@ -35,7 +38,7 @@ class SceneApp extends alfrid.Scene {
 		this.camera.generateRay([mx, my, 0], this._ray);
 		const mesh = this._vHit.mesh;
 		const faceVertices = mesh.faces.map((face)=>(face.vertices));
-		const offset = -1;
+		const offset = 1;
 		let v0, v1, v2;
 		let hit = [999, 999, 999];
 
@@ -83,12 +86,15 @@ class SceneApp extends alfrid.Scene {
 
 	render() {
 		GL.clear(0, 0, 0, 0);
-		// this._bSkybox.draw(this._textureRad);
-		this._bAxis.draw();
-		this._bDots.draw();
+		this._bSkybox.draw(this._textureRad);
+		// this._bAxis.draw();
+		// this._bDots.draw();
 
-		this._vSky.render();
-		this._vGrass.render(this.hit);
+		// this._vSky.render();
+		this._vGrass.render(this.hit, this._textureRad, this._textureIrr);
+
+		const size = 5;
+		this._bBall.draw(this.hit, [size, size, size], [1, 1, 1], .05);
 	}
 
 

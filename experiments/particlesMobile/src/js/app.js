@@ -7,7 +7,7 @@ import AssetsLoader from 'assets-loader';
 const GL = alfrid.GL;
 const assets = [];
 window.params = {
-	numParticles:GL.isMobile ? 256 : 256*2,
+	numParticles:GL.isMobile ? 128 : 256*2,
 	skipCount:5,
 	maxRadius: 2.5
 };

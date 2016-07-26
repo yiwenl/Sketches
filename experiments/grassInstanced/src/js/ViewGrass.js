@@ -1,8 +1,8 @@
 // ViewGrass.js
 
 import alfrid, { GL } from 'alfrid';
-import vs from '../shaders/grass.vert';
-import fs from '../shaders/grass.frag';
+import vs from '../shaders/grassSimple.vert';
+import fs from '../shaders/grassSimple.frag';
 
 const random = function (min, max) { return min + Math.random() * (max - min);	};
 const colours = [
@@ -24,6 +24,18 @@ const flatDistance = function(a, b) {
 	return Math.sqrt( dx * dx + dz * dz );
 }
 
+
+const isSameDirection = function(pos) {
+	const a = vec3.fromValues(pos[0], 0, pos[2]);
+	vec3.normalize(a, a);
+	const p = GL.camera.position;
+	const b = vec3.fromValues(p[0], 0.0, p[2]);
+	vec3.normalize(b, b);
+	const d = vec3.dot(a, b);
+
+	return d < 0.5;
+}
+
 class ViewGrass extends alfrid.View {
 	
 	constructor() {
@@ -36,7 +48,7 @@ class ViewGrass extends alfrid.View {
 		const coords = [];
 		const indices = [0, 1, 2, 0, 2, 3];
 		const normals = [];
-		const NUM_GRASS = 5000;
+		const NUM_GRASS = 5000 * 5;
 		const RANGE = params.grassRange;
 
 		const W = .1;
@@ -80,19 +92,42 @@ class ViewGrass extends alfrid.View {
 		}
 
 		this.mesh = getMesh(NUM_GRASS);
-		this.meshFewer = getMesh(NUM_GRASS * 0.5);
-		this.meshFewest = getMesh(NUM_GRASS * 0.1);
+		this.meshFewer = getMesh(NUM_GRASS * 0.25);
+		this.meshFewest = getMesh(NUM_GRASS * 0.05);
+
+		this.roughness = 1;
+		this.specular = 0;
+		this.metallic = 0;
+		this.baseColor = [1, 1, 1];
+
+		gui.add(this, 'roughness', 0, 1);
+		gui.add(this, 'specular', 0, 1);
+		gui.add(this, 'metallic', 0, 1);
 	}
 
 
-	render(mHit) {
+	render(mHit, textureRad, textureIrr) {
 		this.shader.bind();
 
+		this.shader.uniform('uRadianceMap', 'uniform1i', 0);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 1);
+		textureRad.bind(0);
+		textureIrr.bind(1);
+
+		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
+		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
+		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
+		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
+		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+
+		this.shader.uniform("uHit", "vec3", mHit);
+		this.shader.uniform("uPushStrength", "float", params.pushStrength);
 		const numTiles = params.numTiles;
 		const pos = [0, 0, 0];
 		const uvOffset = [0, 0];
 		const r = params.grassRange * 2.0;
 		const start = (-numTiles / 2 + 0.5) * r;
+		let count = 0;
 
 		for(let j = 0; j < numTiles; j++) {
 			for(let i = 0; i < numTiles; i++) {
@@ -103,19 +138,25 @@ class ViewGrass extends alfrid.View {
 				uvOffset[1] = j/numTiles;
 				this.shader.uniform('uPositionOffset', 'vec3', pos);
 				this.shader.uniform('uUVOffset', 'vec2', uvOffset);
-				this.shader.uniform("uHit", "vec3", mHit);
 
 				// GL.drawInstance(this.mesh);
 				const distToCam = flatDistance(pos, GL.camera.position);
 				if( distToCam < params.lodThresholdHigh) {
 					GL.drawInstance(this.mesh);	
+					count += 5000;
 				} else if(distToCam < params.lodThresholdLow) {
+					if(!isSameDirection(pos)) continue;
 					GL.drawInstance(this.meshFewer);
+					count += 5000 * 0.25;
 				} else {
+					if(!isSameDirection(pos)) continue;
 					GL.drawInstance(this.meshFewest);
+					count += 5000 * 0.05;
 				}
 			}
 		}
+
+		// console.log('total grass:', count);
 	}
 
 

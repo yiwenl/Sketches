@@ -119,8 +119,12 @@ void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
-	float posOffset = (0.5 + extra.r * 0.2) * .25;
+	float posOffset = (0.5 + extra.r * 0.5) * .25;
 	vec3 acc        = curlNoise(pos * posOffset + time * .3);
+	// float ax 		= snoise(pos.xyz * posOffset + time * 0.3);
+	// float ay 		= snoise(pos.yzx * posOffset + time * 0.3);
+	// float az 		= snoise(pos.zxy * posOffset + time * 0.3);
+	// vec3 acc = vec3(ax, ay, az);
 	
 	vel += acc * .02;
 
