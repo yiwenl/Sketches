@@ -126,7 +126,7 @@ class ViewGrass extends alfrid.View {
 	}
 
 
-	render(mHit, textureGrass, textureNoise, textureNormal) {
+	render(mHit, textureGrass, textureNoise) {
 		this.shader.bind();
 		this.shader.uniform("uHit", "vec3", mHit);
 		this.shader.uniform("uPushStrength", "float", params.pushStrength);
@@ -137,9 +137,6 @@ class ViewGrass extends alfrid.View {
 
 		this.shader.uniform("textureNoise", "uniform1i", 1);
 		textureNoise.bind(1);
-
-		this.shader.uniform("textureNormal", "uniform1i", 2);
-		textureNormal.bind(2);
 
 		GL.drawInstance(this.mesh);	
 	}

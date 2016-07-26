@@ -60,7 +60,7 @@ class SceneApp extends alfrid.Scene {
 		this._textureGrass = new alfrid.GLTexture(getAsset('grass'));
 
 		const noiseSize  	= 64;
-		this._fboNoise  	= new alfrid.FrameBuffer(noiseSize, noiseSize, {}, true);
+		this._fboNoise  	= new alfrid.FrameBuffer(noiseSize, noiseSize, {type:GL.UNSIGNED_BYTE});
 	}
 
 
@@ -92,7 +92,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._vSky.render();
 		GL.disable(GL.CULL_FACE);
-		this._vGrass.render(this.hit, this._textureGrass, this._fboNoise.getTexture(0), this._fboNoise.getTexture(1));
+		this._vGrass.render(this.hit, this._textureGrass, this._fboNoise.getTexture());
 		GL.enable(GL.CULL_FACE);
 
 		this._vHit.render();

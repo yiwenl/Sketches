@@ -48,12 +48,12 @@ void main(void) {
 		position.xz -= dir.xz * f;
 	}
 
-	vec2 uvNoise = aPosOffset.xz / uRange * 0.5 + 0.5;
-	vec3 noise   = texture2D(textureNoise, uvNoise).xyz;
-	position.y   += noise.x * 0.25;
-	position.xz  += (noise.yz - 0.5) * uPushStrength * 1.5 * aTextureCoord.y;
-	vUVNoise     = uvNoise;
-
+	vec2 uvNoise  = aPosOffset.xz / uRange * 0.5 + 0.5;
+	vec3 noise    = texture2D(textureNoise, uvNoise).xyz;
+	position.y    += noise.x * 0.25;
+	position.xz   += (noise.yz - 0.5) * uPushStrength * 1.5 * aTextureCoord.y;
+	vUVNoise      = uvNoise;
+	
 	vec3 normal   = aNormal;
 	normal.xz     = rotate(normal.xz, aExtra.x);
 	

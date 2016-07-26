@@ -2,8 +2,6 @@
 
 #define SHADER_NAME NOISE_FRAG
 
-#extension GL_EXT_draw_buffers : require 
-
 precision mediump float;
 uniform float uTime;
 varying vec2 vTextureCoord;
@@ -118,21 +116,5 @@ void main(void) {
 	const float gap = 0.005;
 	const float posOffset = 0.5;
 	vec3 noise = curlNoise(vec3(vTextureCoord * posOffset, uTime));
-	vec2 uvRight = vTextureCoord + vec2(gap, 0.0);
-	vec2 uvBottom = vTextureCoord + vec2(0.0, gap);
-	vec3 noiseRight = curlNoise(vec3(uvRight * posOffset, uTime));
-	vec3 noiseBottom = curlNoise(vec3(uvBottom * posOffset, uTime));
-
-	const float offset = 0.3;
-	vec3 pCurr = vec3(vTextureCoord.x, (noise.x * .5 + .5)*offset, vTextureCoord.y);
-	vec3 pRight = vec3(uvRight.x, (noiseRight.x * .5 + .5)*offset, uvRight.y);
-	vec3 pBottom = vec3(uvBottom.x, (noiseBottom.x * .5 + .5)*offset, uvBottom.y);
-	vec3 vRight = pRight - pCurr;
-	vec3 vBottom = pBottom - pCurr;
-    vec3 normal = normalize(cross(vBottom, vRight)) * .5 + .5;
-
-    gl_FragData[0] = vec4(noise * 0.5 + .5, 1.0);
-	gl_FragData[1] = vec4(normal, 1.0);
-	gl_FragData[2] = vec4(1.0);
-	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+    gl_FragColor = vec4(noise * .5 + .5, 1.0);
 }
