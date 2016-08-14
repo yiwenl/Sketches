@@ -129,7 +129,7 @@ void main(void) {
 	vel += acc * .02;
 
 	float dist = length(pos);
-	float f = (dist - maxRadius) * .0035;
+	float f = (dist - maxRadius) * .004;
 	vel -= normalize(pos) * f * when_gt(dist, maxRadius);
 	vel *= decrease;
 

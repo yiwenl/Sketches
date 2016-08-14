@@ -34,22 +34,29 @@ vec3 rotate(vec3 v, vec3 axis, float angle) {
 	return (m * vec4(v, 1.0)).xyz;
 }
 
+
+#define PI 3.141592653
+
 void main(void) {
-	vec3 curr               = texture2D(textureCurr, aUV).xyz;
-	vec3 next               = texture2D(textureNext, aUV).xyz;
-	vec3 extra              = texture2D(textureExtra, aUV).xyz;
-	vec3 now                = mix(curr, next, percent);
+	vec3 curr     = texture2D(textureCurr, aUV).xyz;
+	vec3 next     = texture2D(textureNext, aUV).xyz;
+	vec3 extra    = texture2D(textureExtra, aUV).xyz;
+	vec3 now      = mix(curr, next, percent);
 	
-	vec3 dir                = normalize( mix(now, next, 0.1) - curr);
-	vec3 up                 = vec3(0.0, 0.0, 1.0);
-	vec3 axis               = normalize(cross(dir, up));
-	float angle             = acos(dot(dir, up));
+	vec3 dir      = normalize( mix(now, next, 0.1) - curr);
+	vec3 up       = vec3(0.0, 0.0, 1.0);
+	vec3 axis     = normalize(cross(dir, up));
+	float theta   = extra.b * PI;
+	float angle   = acos(dot(dir, up));
 	
-	vec3 position           = aVertexPosition * (extra.r * 0.25);
-	position                = rotate(position, axis, angle);
-	position                += now;
-	gl_Position             = uProjectionMatrix * uViewMatrix * vec4(position, 1.0);
+	vec3 position = aVertexPosition * (extra.r * 0.25);
+	position      = rotate(position, up, theta);
+	position      = rotate(position, axis, angle);
+	position      += now;
+	gl_Position   = uProjectionMatrix * uViewMatrix * vec4(position, 1.0);
 	
-	vTextureCoord           = aTextureCoord;
-	vNormal                 = rotate(aNormal, axis, angle);
+	vTextureCoord = aTextureCoord;
+	vec3 N        = rotate(aNormal, up, theta);
+	N             = rotate(N, axis, angle);
+	vNormal       = N;
 }
