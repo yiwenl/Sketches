@@ -19,10 +19,9 @@ class SceneApp extends alfrid.Scene {
 		const RAD = Math.PI / 180;
 
 		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 200);
-		this.orbitalControl.radius.value = 50;
 		this.orbitalControl.radius.value = 17;
 		this.orbitalControl.rx.value = .3;
-		this.orbitalControl.ry.value = Math.PI - .13;
+		this.orbitalControl.ry.value = Math.PI - 0.1;
 
 		const yOffset = 0;
 		this.orbitalControl.center[1] = yOffset + 1;
@@ -77,15 +76,13 @@ class SceneApp extends alfrid.Scene {
 		const textureHeight = this._fboNoise.getTexture(0);
 		const textureNormal = this._fboNoise.getTexture(1);
 
-
 		this._vDome.render(this._textureDay, this._textureNight);
 		this._vFloor.render(textureHeight, textureNormal);
 		GL.disable(GL.CULL_FACE);
 		this._vGrass.render(textureHeight, textureNormal);
 		GL.enable(GL.CULL_FACE);
 
-
-		// this._vWolf.render(this._textureRad, this._textureIrr, -.5, textureHeight);
+		this._vWolf.render(this._textureRad, this._textureIrr, -.5, textureHeight);
 
 		// const size = 200;
 		// for(let i=0; i<4; i++) {
