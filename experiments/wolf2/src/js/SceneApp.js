@@ -4,7 +4,8 @@ import alfrid, { Scene, GL } from 'alfrid';
 import ViewWolf from './ViewWolf';
 import ViewGrass from './ViewGrass';
 import ViewNoise from './ViewNoise';
-import ViewDebug from './ViewDebug';
+import ViewFloor from './ViewFloor';
+import ViewDome from './ViewDome';
 import ViewDebugDots from './ViewDebugDots';
 
 window.getAsset = function(id) {
@@ -19,9 +20,9 @@ class SceneApp extends alfrid.Scene {
 
 		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 200);
 		this.orbitalControl.radius.value = 50;
+		this.orbitalControl.radius.value = 17;
 		this.orbitalControl.rx.value = .3;
-		// this.orbitalControl.rx.limit(0.2, 0.4);
-		// this.orbitalControl.ry.value = Math.PI- 0.3;
+		this.orbitalControl.ry.value = Math.PI - .13;
 
 		const yOffset = 0;
 		this.orbitalControl.center[1] = yOffset + 1;
@@ -42,7 +43,10 @@ class SceneApp extends alfrid.Scene {
 
 		this._textureGrass = new alfrid.GLTexture(getAsset('grass'));
 		const noiseSize  	= 64;
-		this._fboNoise  	= new alfrid.FrameBuffer(noiseSize, noiseSize, {type:GL.UNSIGNED_BYTE});
+		this._fboNoise  	= new alfrid.FrameBuffer(noiseSize, noiseSize, {type:GL.UNSIGNED_BYTE}, true);
+
+		this._textureDay = new alfrid.GLTexture(getAsset('day'));	
+		this._textureNight = new alfrid.GLTexture(getAsset('night'));	
 	}
 
 
@@ -54,9 +58,10 @@ class SceneApp extends alfrid.Scene {
 		this._vWolf = new ViewWolf();
 		this._vGrass = new ViewGrass();
 		this._vNoise = new ViewNoise();
+		this._vDome = new ViewDome();
 
-		this._vDebug = new ViewDebug();
-		this._vDots = new ViewDebugDots();
+		this._vFloor = new ViewFloor();
+		// this._vDots = new ViewDebugDots();
 	}
 
 
@@ -69,14 +74,24 @@ class SceneApp extends alfrid.Scene {
 		this._vNoise.render();
 		this._fboNoise.unbind();
 
-		this._vDebug.render(this._fboNoise.getTexture());
-		this._vDots.render(this._fboNoise.getTexture());
+		const textureHeight = this._fboNoise.getTexture(0);
+		const textureNormal = this._fboNoise.getTexture(1);
 
-		// GL.disable(GL.CULL_FACE);
-		// this._vGrass.render(this.hit, this._textureGrass, this._fboNoise.getTexture(), this._fboNoise.getTexture());
-		// GL.enable(GL.CULL_FACE);
 
-		// this._vWolf.render(this._textureRad, this._textureIrr, 0.0);
+		this._vDome.render(this._textureDay, this._textureNight);
+		this._vFloor.render(textureHeight, textureNormal);
+		GL.disable(GL.CULL_FACE);
+		this._vGrass.render(textureHeight, textureNormal);
+		GL.enable(GL.CULL_FACE);
+
+
+		// this._vWolf.render(this._textureRad, this._textureIrr, -.5, textureHeight);
+
+		// const size = 200;
+		// for(let i=0; i<4; i++) {
+		// 	GL.viewport(i *size, 0, size, size); 
+		// 	this._bCopy.draw(this._fboNoise.getTexture(i));
+		// }
 	}
 
 

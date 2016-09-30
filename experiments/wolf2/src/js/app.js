@@ -3,24 +3,28 @@ import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
 import dat from 'dat-gui';
+import Stats from 'stats.js';
 
 const GL = alfrid.GL;
 
 window.params = {
 	gamma:2.2,
 	exposure:5,
-	terrainSize:75,
+	terrainSize:55,
 	maxHeight:2,
 	grassRange:20,
 	pushStrength:0,
-	speed:0.01,
+	speed:-0.01,
 	time:0,
 	noiseScale:2.5,
-	isOne:false
+	isOne:false,
+	grassColor:[98, 152, 83]
 };
 
 const assets = [
-	{ id:'background', url:'assets/img/background.jpg' },
+	{ id:'day', url:'assets/img/day.jpg' },
+	{ id:'sunset', url:'assets/img/sunset.jpg' },
+	{ id:'night', url:'assets/img/winter.jpg' },
 	{ id:'grass', url:'assets/img/grass.png' },
 	{ id:'ground', url:'assets/img/ground.jpg' },
 	{ id:'radiance', url:'assets/img/studio_radiance.dds', type: 'binary' },
@@ -121,4 +125,12 @@ function _init3D() {
 	gui.add(params, 'gamma', 1, 5);
 	gui.add(params, 'exposure', 1, 25);
 	gui.add(params, 'maxHeight', 0, 5);
+	gui.addColor(params, 'grassColor');
+
+
+	const stats = new Stats();
+	document.body.appendChild(stats.domElement);
+	alfrid.Scheduler.addEF(()=> {
+		stats.update();
+	});
 }

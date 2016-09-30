@@ -1,5 +1,5 @@
 // noise.frag
-
+#extension GL_EXT_draw_buffers : require 
 #define SHADER_NAME NOISE_FRAG
 
 precision mediump float;
@@ -74,8 +74,34 @@ float snoise(float x, float y, float z){
 }
 
 
+float getNoise(vec2 uv) {
+    return snoise(uv.x * uNoiseScale, uv.y * uNoiseScale + uTime, uSeed);
+}
+
+float getNoise(vec2 uv, vec2 offset) {
+    return getNoise(uv + offset);
+}
+
 
 void main(void) {
-    float noise = snoise(vTextureCoord.x * uNoiseScale, vTextureCoord.y * uNoiseScale + uTime, uSeed);
-	gl_FragColor = vec4(noise, noise, noise, 1.0);
+    const vec2 size     = vec2(2.0, 0.0);
+    const vec3 off      = vec3(-1.0, 0, 1.0);
+    float s11           = getNoise(vTextureCoord);
+    float s01           = getNoise(vTextureCoord, off.xy);
+    float s21           = getNoise(vTextureCoord, off.zy);
+    float s10           = getNoise(vTextureCoord, off.yx);
+    float s12           = getNoise(vTextureCoord, off.yz);
+
+    // vec3 va             = normalize(vec3(size.xy, s21 - s01));
+    // vec3 vb             = normalize(vec3(size.yx, s12 - s10));
+    vec3 va             = normalize(vec3(size.x, s21-s01, size.y)); 
+    vec3 vb             = normalize(vec3(size.y, s12-s10, -size.x));
+    vec4 bump           = vec4( cross(va,vb) * .5 + .5, 1.0 );
+
+    float noise         = s11;
+
+    gl_FragData[0]      = vec4(noise, noise, noise, 1.0);
+    gl_FragData[1]      = bump;
+    gl_FragData[2]      = vec4(1.0, 1.0, 0.0, 1.0);
+    gl_FragData[3]      = vec4(1.0, 0.0, 1.0, 1.0);
 }

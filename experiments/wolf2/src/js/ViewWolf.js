@@ -19,6 +19,12 @@ class ViewWolf extends alfrid.View {
 		this._frame = 0;
 		this.scale = 6.0;
 		this.position = [0, 2.5, -6.5];
+
+		const { terrainSize } = params;
+
+		let u = this.position[0] / terrainSize * .5 + .5;
+		let v = 1.0 - (this.position[2] / terrainSize * .5 + .5);
+		this._uvOffset = [u, v];
 	}
 
 
@@ -55,19 +61,26 @@ class ViewWolf extends alfrid.View {
 	}
 
 
-	render(textureRad, textureIrr, yOffset) {
-		if(!this.mesh) {
-			return;
-		}
+	_getHeight() {
+	}
+
+
+	render(textureRad, textureIrr, yOffset, textureHeight) {
+		this._getHeight();
+
+		const { maxHeight } = params;
+
 		this.shader.bind();
 
 		this.shader.uniform('uAoMap', 'uniform1i', 0);
-		this.shader.uniform('uRadianceMap', 'uniform1i', 1);
-		this.shader.uniform('uIrradianceMap', 'uniform1i', 2);
+		this.shader.uniform('uRadianceMap', 'uniform1i', 2);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 3);
+		this.shader.uniform("uHeightMap", "uniform1i", 1);
+		
 		this.aoMap.bind(0);
-		// this._textureWhite.bind(0);
-		textureRad.bind(1);
-		textureIrr.bind(2);
+		textureHeight.bind(1);
+		textureRad.bind(2);
+		textureIrr.bind(3);
 
 		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
 		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
@@ -79,6 +92,9 @@ class ViewWolf extends alfrid.View {
 
 		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
 		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+
+		this.shader.uniform("uMaxHeight", "float", maxHeight);
+		this.shader.uniform("uUVOffset", "vec2", this._uvOffset);
 
 		GL.draw(this.mesh);
 	}

@@ -16,6 +16,10 @@ uniform mat3 uModelViewMatrixInverse;
 uniform vec3 uPosition;
 uniform vec3 uScale;
 
+uniform vec2 uUVOffset;
+uniform sampler2D uHeightMap;
+uniform float uMaxHeight;
+
 varying vec2 vTextureCoord;
 
 varying vec3 vNormal;
@@ -27,6 +31,8 @@ varying vec3 vWsNormal;
 
 void main(void) {
 	vec3 position 			= aVertexPosition * uScale + uPosition;
+	float colorHeight 		= texture2D(uHeightMap, uUVOffset).r * uMaxHeight;
+	position.y 				+= colorHeight;
 	vec4 worldSpacePosition	= uModelMatrix * vec4(position, 1.0);
     vec4 viewSpacePosition	= uViewMatrix * worldSpacePosition;
 	
