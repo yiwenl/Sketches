@@ -3,7 +3,7 @@ import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
 // import dat from 'dat-gui';
-import Stats from 'stats.js';
+// import Stats from 'stats.js';
 
 const GL = alfrid.GL;
 
@@ -130,9 +130,9 @@ function _init3D() {
 	gui.add(scene, 'switch');
 	//*/
 
-	const stats = new Stats();
-	document.body.appendChild(stats.domElement);
-	alfrid.Scheduler.addEF(()=> {
-		stats.update();
-	});
+	// const stats = new Stats();
+	// document.body.appendChild(stats.domElement);
+	// alfrid.Scheduler.addEF(()=> {
+	// 	stats.update();
+	// });
 }
