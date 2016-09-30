@@ -48,7 +48,7 @@ class ViewGrass extends alfrid.View {
 		}
 
 		function addPlane(angle) {
-			const yOffset = 0;
+			const yOffset = 0.2;
 			positions.push(rotate([-W, 0+yOffset, 0], angle));
 			positions.push(rotate([ W, 0+yOffset, 0], angle));
 			positions.push(rotate([ W, H+yOffset, 0], angle));

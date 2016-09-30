@@ -38,7 +38,7 @@ float getShadow(vec2 uv) {
 	uv.y = contrast(uv.y, 0.5);
 	float distWolf = distance(uv, uUVWolf);
 	float shadowWolf = smoothstep(RANGE, 0.0, distWolf);
-	return shadowWolf * 0.3;
+	return shadowWolf * 0.2;
 }
 
 void main(void) {
