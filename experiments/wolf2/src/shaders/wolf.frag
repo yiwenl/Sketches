@@ -16,6 +16,7 @@ uniform float		uSpecular;
 
 uniform float		uExposure;
 uniform float		uGamma;
+uniform float		uLightIntensity;
 
 varying vec3		vEyePosition;
 varying vec3		vWsNormal;
@@ -109,6 +110,8 @@ void main() {
 	
 	// gamma correction
 	color				= pow( color, vec3( 1.0 / uGamma ) );
+
+	color 				*= mix(uLightIntensity, 1.0, .5);
 
 	// output the fragment color
     gl_FragColor		= vec4( color, 1.0 );

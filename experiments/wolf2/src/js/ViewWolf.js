@@ -17,8 +17,8 @@ class ViewWolf extends alfrid.View {
 	constructor() {
 		super(vs, fs);
 		this._frame = 0;
-		this.scale = 6.0;
-		this.position = [0, 2.5, -6.5];
+		this.scale = 5.0;
+		this.position = [0, 2.5, -8.5];
 
 		const { terrainSize } = params;
 
@@ -47,10 +47,6 @@ class ViewWolf extends alfrid.View {
 		this.specular = 0.0;
 		this.metallic = 0;
 		this.baseColor = [1, 1, 1];
-		
-		gui.add(this, 'roughness', 0, 1);
-		gui.add(this, 'specular', 0, 1);
-		gui.add(this, 'metallic', 0, 1);
 
 		this._textureWhite = alfrid.GLTexture.whiteTexture();
 		const gap = 1000/40;
@@ -65,7 +61,7 @@ class ViewWolf extends alfrid.View {
 	}
 
 
-	render(textureRad, textureIrr, yOffset, textureHeight) {
+	render(textureRad, textureIrr, yOffset, textureHeight, lightIntensity) {
 		this._getHeight();
 
 		const { maxHeight } = params;
@@ -95,6 +91,7 @@ class ViewWolf extends alfrid.View {
 
 		this.shader.uniform("uMaxHeight", "float", maxHeight);
 		this.shader.uniform("uUVOffset", "vec2", this.uvOffset);
+		this.shader.uniform("uLightIntensity", "float", lightIntensity);
 
 		GL.draw(this.mesh);
 	}

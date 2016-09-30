@@ -20,13 +20,28 @@ class SceneApp extends alfrid.Scene {
 
 		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 200);
 		this.orbitalControl.radius.value = 17;
-		this.orbitalControl.rx.value = .3;
+		this.orbitalControl.rx.value = .25;
+		this.orbitalControl.rx.limit(.2, .3);
 		this.orbitalControl.ry.value = Math.PI - 0.1;
+		this.orbitalControl.lockZoom(true);
 
 		const yOffset = 0;
 		this.orbitalControl.center[1] = yOffset + 1;
 		this.orbitalControl.positionOffset[1] = yOffset;
-		this.hit = [0, 0, 0];
+		this._isDay = true;
+		this._lightIntensity = new alfrid.EaseNumber(1, 0.01);
+
+		window.addEventListener('keydown', (e)=>this._onKey(e));
+		window.addEventListener('mousedown', (e)=>this._onDown(e));
+		window.addEventListener('touchstart', (e)=>this._onDown(e));
+	}
+
+	_onDown(e) {
+		this.orbitalControl.ry.easing = .05;
+	}
+
+	_onKey(e) {
+		if(e.keyCode === 32) {	this.switch();	}
 	}
 
 	_initTextures() {
@@ -63,6 +78,13 @@ class SceneApp extends alfrid.Scene {
 		// this._vDots = new ViewDebugDots();
 	}
 
+	switch() {
+		this._isDay = !this._isDay;
+		this._vDome.switch(this.camera.position);
+		this.orbitalControl.ry.easing = 0.01;
+		this.orbitalControl.ry.value += Math.PI;
+		this._lightIntensity.value = this._isDay ? 1 : .5;
+	}
 
 	render() {
 		params.time += params.speed;
@@ -77,13 +99,18 @@ class SceneApp extends alfrid.Scene {
 		const textureHeight = this._fboNoise.getTexture(0);
 		const textureNormal = this._fboNoise.getTexture(1);
 
-		this._vDome.render(this._textureDay, this._textureNight);
-		this._vFloor.render(textureHeight, textureNormal, wolfUV);
+		if(this._isDay) {
+			this._vDome.render(this._textureDay, this._textureNight);	
+		} else {
+			this._vDome.render(this._textureNight, this._textureDay);
+		}
+		
+		this._vFloor.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
 		GL.disable(GL.CULL_FACE);
-		this._vGrass.render(textureHeight, textureNormal, wolfUV);
+		this._vGrass.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
 		GL.enable(GL.CULL_FACE);
 
-		this._vWolf.render(this._textureRad, this._textureIrr, -.5, textureHeight);
+		this._vWolf.render(this._textureRad, this._textureIrr, -.5, textureHeight, this._lightIntensity.value);
 	}
 
 

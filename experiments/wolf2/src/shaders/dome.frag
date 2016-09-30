@@ -31,7 +31,7 @@ void main(void) {
 	float front 		= 1.0 - scale;
 
 	vec3 color 			= mix(colorCurr, colorNext, offset);
-	color.rgb 			*= front * 2.0 + 1.0;
+	color.rgb 			*= front * 1.15 + 1.0;
 	
     gl_FragColor 		= vec4(color, 1.0);
 }

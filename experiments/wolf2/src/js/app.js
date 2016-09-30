@@ -2,16 +2,16 @@ import '../scss/global.scss';
 import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-import dat from 'dat-gui';
+// import dat from 'dat-gui';
 import Stats from 'stats.js';
 
 const GL = alfrid.GL;
 
 window.params = {
-	gamma:2.2,
+	gamma:5.2,
 	exposure:5,
 	terrainSize:55,
-	maxHeight:2,
+	maxHeight:1,
 	grassRange:20,
 	pushStrength:0,
 	speed:-0.01,
@@ -93,7 +93,7 @@ function _init() {
 
 function _onImageLoaded(o) {
 	//	ASSETS
-	console.log('Image Loaded : ', o);
+	// console.log('Image Loaded : ', o);
 	window.assets = o;
 	const loader = document.body.querySelector('.Loading-Bar');
 	loader.style.width = '100%';
@@ -117,16 +117,18 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
+	// window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
 	
+	/*/
 	gui.add(params, 'gamma', 1, 5);
 	gui.add(params, 'exposure', 1, 25);
 	gui.add(params, 'maxHeight', 0, 5);
 	gui.addColor(params, 'grassColor');
-
+	gui.add(scene, 'switch');
+	//*/
 
 	const stats = new Stats();
 	document.body.appendChild(stats.domElement);

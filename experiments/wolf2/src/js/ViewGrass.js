@@ -17,6 +17,12 @@ const getColor = function() {
 	return colours[Math.floor(Math.random() * colours.length)];
 }
 
+const distance = function(a, b) {
+	let dx = a[0] - b[0];
+	let dz = a[2] - b[2];
+	return Math.sqrt( dx * dx + dz * dz);
+}
+
 class ViewGrass extends alfrid.View {
 	
 	constructor() {
@@ -91,9 +97,34 @@ class ViewGrass extends alfrid.View {
 			const positionOffsets = [];
 			const colors = [];
 			const extras = [];
+			let cnt = 0;
+
+			function checkDist(pos) {
+				if(positionOffsets.length == 0) {
+					return false;
+				}
+
+				const MIN_DIST = 1.14;
+				let p, d;
+				for(let i=0; i<positionOffsets.length; i++) {
+					p = positionOffsets[i];
+					d = distance(p, pos);
+
+					if( d < MIN_DIST) {
+						return true;
+					}
+				}
+
+				return false;
+			}
 
 			for(let i = 0; i < numInstances; i++) {
-				let pos = [random(-RANGE, RANGE), random(1, 2.5), random(-RANGE, RANGE)];
+				let pos;
+				cnt = 0;
+				do {
+					pos = [random(-RANGE, RANGE), random(1, 1.5), random(-RANGE, RANGE)];	
+					cnt ++;
+				} while(checkDist(pos) && cnt < 1002);
 
 				positionOffsets.push(pos);
 				colors.push(getColor());
@@ -113,7 +144,7 @@ class ViewGrass extends alfrid.View {
 	}
 
 
-	render(textureHeight, textureNormal, uvWolf) {
+	render(textureHeight, textureNormal, uvWolf, lightIntensity) {
 		const { maxHeight, terrainSize, speed, noiseScale, isOne } = params;
 		const totalDist = terrainSize / noiseScale;
 		this._traveled += speed;
@@ -131,6 +162,7 @@ class ViewGrass extends alfrid.View {
 		this.shader.uniform("uTerrainSize", "float", terrainSize/2);
 		this.shader.uniform("uDistForward", "float", distForward);
 		this.shader.uniform("uUVWolf", "vec2", uvWolf);
+		this.shader.uniform("uLightIntensity", "float", lightIntensity);
 
 		GL.draw(this.mesh);
 	}

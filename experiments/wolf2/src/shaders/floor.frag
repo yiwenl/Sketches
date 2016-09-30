@@ -6,6 +6,7 @@ uniform sampler2D texture;
 uniform sampler2D textureNormal;
 uniform vec3 uBaseColor;
 uniform vec2 uUVWolf;
+uniform float uLightIntensity;
 
 float diffuse(vec3 N, vec3 L) {
 	return max(dot(N, normalize(L)), 0.0);
@@ -40,6 +41,8 @@ void main(void) {
 
 	float shadowWolf = getShadow(vTextureCoord);
 	color -= shadowWolf;
+
+	color 		*= uLightIntensity;
 
     gl_FragColor = vec4(color, 1.0);
 }

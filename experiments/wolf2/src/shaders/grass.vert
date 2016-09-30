@@ -41,6 +41,7 @@ void main(void) {
 
 	vec2 uv = vec2(u, v);
 	float colorHeight 	= texture2D(textureHeight, uv).r;
+	position.y 			*= aPosOffset.y;
 	position.y 			+= colorHeight * uMaxHeight;
 
 
