@@ -16,7 +16,7 @@ function getNumber(value) {
 class ViewWolf extends alfrid.View {
 	constructor() {
 		super(vs, fs);
-		this._frame = 15;
+		this._frame = 0;
 		this.scale = 6.0;
 		this.position = [0, 2.5, -6.5];
 	}

@@ -10,7 +10,7 @@ varying vec2 vUV;
 
 void main(void) {
 	vec4 color   = texture2D(texture, vTextureCoord);
-	if(color.a <= 0.5) discard;
+	if(color.a <= 0.75) discard;
 
 	float shadow = mix(vTextureCoord.y, 1.0, .25);
 	color.rgb    *= shadow;

@@ -3,6 +3,8 @@ import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
 import dat from 'dat-gui';
+import CoordinateGetter from './CoordinateGetter';
+import HeightMapExporter from './HeightMapExporter';
 
 const GL = alfrid.GL;
 const assets = [

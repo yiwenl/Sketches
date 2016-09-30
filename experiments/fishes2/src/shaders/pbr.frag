@@ -1,6 +1,7 @@
 // pbr.frag
 
 #extension GL_EXT_shader_texture_lod : enable
+#extension GL_EXT_draw_buffers : require 
 
 precision mediump float;
 
@@ -25,6 +26,12 @@ varying vec2 		vTextureCoord;
 
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.1415926535897932384626433832795
+
+float luma(vec3 color) {
+  return dot(color, vec3(0.299, 0.587, 0.114));
+}
+
+#define threshold 0.95
 
 
 // Filmic tonemapping from
@@ -109,7 +116,15 @@ void main() {
 	// gamma correction
 	color				= pow( color, vec3( 1.0 / uGamma ) );
 
+	float br 			= luma(color);
+	float tt 			= br;
+	if(tt < threshold) tt = 0.0;
+
 	// output the fragment color
-    gl_FragColor		= vec4( color, 1.0 );
+    // gl_FragColor		= vec4( color, 1.0 );
+    gl_FragData[0] = vec4( color, 1.0 );
+    gl_FragData[1] = vec4( vec3(br), 1.0 );
+    gl_FragData[2] = vec4( vec3(tt), 1.0 );
+    gl_FragData[3] = vec4( color, 1.0 );
 
 }

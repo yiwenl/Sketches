@@ -38,6 +38,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._fboCurrent  	= new alfrid.FrameBuffer(numParticles, numParticles, o, true);
 		this._fboTarget  	= new alfrid.FrameBuffer(numParticles, numParticles, o, true);
+		this._fboRender     = new alfrid.FrameBuffer(GL.width, GL.height, {}, true);
 	}
 
 
@@ -91,8 +92,11 @@ class SceneApp extends alfrid.Scene {
 		GL.clear(0, 0, 0, 0);
 
 		// this._bSkybox.draw(this._textureRad);
-		this._bAxis.draw();
-		this._bDots.draw();
+		// this._bAxis.draw();
+		// this._bDots.draw();
+
+		this._fboRender.bind();
+		GL.clear(0, 0, 0, 0);
 
 		this._vFishes.render(
 			this._textureRad, 
@@ -103,10 +107,16 @@ class SceneApp extends alfrid.Scene {
 			this._fboCurrent.getTexture(2)
 		);
 
+		this._fboRender.unbind();
+		const size = GL.width / 3;
+		GL.viewport(0, 0, size, size);
+		this._bCopy.draw(this._fboRender.getTexture(0));
 
-		const size = 300;
-		// GL.viewport(0, 0, size, size);
-		// this._bCopy.draw(this._fboTarget.getTexture(0));
+		GL.viewport(size, 0, size, size);
+		this._bCopy.draw(this._fboRender.getTexture(1));
+
+		GL.viewport(size*2, 0, size, size);
+		this._bCopy.draw(this._fboRender.getTexture(2));
 	}
 
 
