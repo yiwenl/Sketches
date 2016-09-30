@@ -19,6 +19,7 @@ uniform sampler2D textureNormal;
 uniform float uDistForward;
 
 varying vec2 vTextureCoord;
+varying vec2 vUV;
 varying vec3 vNormal;
 varying vec3 vGrassNormal;
 varying vec3 vPosition;
@@ -48,6 +49,7 @@ void main(void) {
     vNormal 			= aNormal;
     vColor 				= aColor;
     vHeight 			= colorHeight;
+    vUV					= uv;
 
 
     vGrassNormal 		= texture2D(textureNormal, uv).rgb * 2.0 - 1.0;

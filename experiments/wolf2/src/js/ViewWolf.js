@@ -24,7 +24,7 @@ class ViewWolf extends alfrid.View {
 
 		let u = this.position[0] / terrainSize * .5 + .5;
 		let v = 1.0 - (this.position[2] / terrainSize * .5 + .5);
-		this._uvOffset = [u, v];
+		this.uvOffset = [u, v];
 	}
 
 
@@ -94,7 +94,7 @@ class ViewWolf extends alfrid.View {
 		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
 
 		this.shader.uniform("uMaxHeight", "float", maxHeight);
-		this.shader.uniform("uUVOffset", "vec2", this._uvOffset);
+		this.shader.uniform("uUVOffset", "vec2", this.uvOffset);
 
 		GL.draw(this.mesh);
 	}

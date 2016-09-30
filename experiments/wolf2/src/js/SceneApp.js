@@ -73,22 +73,17 @@ class SceneApp extends alfrid.Scene {
 		this._vNoise.render();
 		this._fboNoise.unbind();
 
+		const wolfUV = this._vWolf.uvOffset;
 		const textureHeight = this._fboNoise.getTexture(0);
 		const textureNormal = this._fboNoise.getTexture(1);
 
 		this._vDome.render(this._textureDay, this._textureNight);
-		this._vFloor.render(textureHeight, textureNormal);
+		this._vFloor.render(textureHeight, textureNormal, wolfUV);
 		GL.disable(GL.CULL_FACE);
-		this._vGrass.render(textureHeight, textureNormal);
+		this._vGrass.render(textureHeight, textureNormal, wolfUV);
 		GL.enable(GL.CULL_FACE);
 
 		this._vWolf.render(this._textureRad, this._textureIrr, -.5, textureHeight);
-
-		// const size = 200;
-		// for(let i=0; i<4; i++) {
-		// 	GL.viewport(i *size, 0, size, size); 
-		// 	this._bCopy.draw(this._fboNoise.getTexture(i));
-		// }
 	}
 
 

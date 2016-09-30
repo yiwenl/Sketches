@@ -113,7 +113,7 @@ class ViewGrass extends alfrid.View {
 	}
 
 
-	render(textureHeight, textureNormal) {
+	render(textureHeight, textureNormal, uvWolf) {
 		const { maxHeight, terrainSize, speed, noiseScale, isOne } = params;
 		const totalDist = terrainSize / noiseScale;
 		this._traveled += speed;
@@ -130,6 +130,7 @@ class ViewGrass extends alfrid.View {
 		this.shader.uniform("uMaxHeight", "float", maxHeight);
 		this.shader.uniform("uTerrainSize", "float", terrainSize/2);
 		this.shader.uniform("uDistForward", "float", distForward);
+		this.shader.uniform("uUVWolf", "vec2", uvWolf);
 
 		GL.draw(this.mesh);
 	}
