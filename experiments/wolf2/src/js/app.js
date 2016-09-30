@@ -13,8 +13,10 @@ window.params = {
 	maxHeight:2,
 	grassRange:20,
 	pushStrength:0,
-	speed:0.002,
-	time:0
+	speed:0.01,
+	time:0,
+	noiseScale:2.5,
+	isOne:false
 };
 
 const assets = [
@@ -118,4 +120,5 @@ function _init3D() {
 	
 	gui.add(params, 'gamma', 1, 5);
 	gui.add(params, 'exposure', 1, 25);
+	gui.add(params, 'maxHeight', 0, 5);
 }

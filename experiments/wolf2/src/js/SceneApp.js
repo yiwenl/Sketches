@@ -4,6 +4,8 @@ import alfrid, { Scene, GL } from 'alfrid';
 import ViewWolf from './ViewWolf';
 import ViewGrass from './ViewGrass';
 import ViewNoise from './ViewNoise';
+import ViewDebug from './ViewDebug';
+import ViewDebugDots from './ViewDebugDots';
 
 window.getAsset = function(id) {
 	return assets.find( (a) => a.id === id).file;
@@ -15,11 +17,11 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 		const RAD = Math.PI / 180;
 
-		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 100);
-		this.orbitalControl.radius.value = 12;
-		this.orbitalControl.rx.value = 0.3;
+		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 200);
+		this.orbitalControl.radius.value = 50;
+		this.orbitalControl.rx.value = .3;
 		// this.orbitalControl.rx.limit(0.2, 0.4);
-		this.orbitalControl.ry.value = Math.PI- 0.3;
+		// this.orbitalControl.ry.value = Math.PI- 0.3;
 
 		const yOffset = 0;
 		this.orbitalControl.center[1] = yOffset + 1;
@@ -47,11 +49,14 @@ class SceneApp extends alfrid.Scene {
 	_initViews() {
 		this._bCopy = new alfrid.BatchCopy();
 		this._bBall = new alfrid.BatchBall();
-		this._bSkybox = new alfrid.BatchSkybox();
+		// this._bSkybox = new alfrid.BatchSkybox();
 
 		this._vWolf = new ViewWolf();
 		this._vGrass = new ViewGrass();
 		this._vNoise = new ViewNoise();
+
+		this._vDebug = new ViewDebug();
+		this._vDots = new ViewDebugDots();
 	}
 
 
@@ -64,11 +69,14 @@ class SceneApp extends alfrid.Scene {
 		this._vNoise.render();
 		this._fboNoise.unbind();
 
-		GL.disable(GL.CULL_FACE);
-		this._vGrass.render(this.hit, this._textureGrass, this._fboNoise.getTexture(), this._fboNoise.getTexture());
-		GL.enable(GL.CULL_FACE);
+		this._vDebug.render(this._fboNoise.getTexture());
+		this._vDots.render(this._fboNoise.getTexture());
 
-		this._vWolf.render(this._textureRad, this._textureIrr, 0.0);
+		// GL.disable(GL.CULL_FACE);
+		// this._vGrass.render(this.hit, this._textureGrass, this._fboNoise.getTexture(), this._fboNoise.getTexture());
+		// GL.enable(GL.CULL_FACE);
+
+		// this._vWolf.render(this._textureRad, this._textureIrr, 0.0);
 	}
 
 
