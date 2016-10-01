@@ -1,11 +1,12 @@
 // SceneApp.js
 
-import alfrid, { Scene, GL } from 'alfrid';
+import alfrid, { Scene, GL, GLTexture } from 'alfrid';
 import ViewWolf from './ViewWolf';
 import ViewGrass from './ViewGrass';
 import ViewNoise from './ViewNoise';
 import ViewFloor from './ViewFloor';
 import ViewDome from './ViewDome';
+import ViewClouds from './ViewClouds';
 import ViewDebugDots from './ViewDebugDots';
 
 window.getAsset = function(id) {
@@ -32,8 +33,11 @@ class SceneApp extends alfrid.Scene {
 		this._lightIntensity = new alfrid.EaseNumber(1, 0.01);
 
 		window.addEventListener('keydown', (e)=>this._onKey(e));
+		window.addEventListener('touchstart', (e)=>{
+			this.switch();
+			this._onDown(e);
+		});
 		window.addEventListener('mousedown', (e)=>this._onDown(e));
-		window.addEventListener('touchstart', (e)=>this._onDown(e));
 	}
 
 	_onDown(e) {
@@ -56,8 +60,12 @@ class SceneApp extends alfrid.Scene {
 		this._textureRad = alfrid.GLCubeTexture.parseDDS(getAsset('radiance'));
 
 		this._textureGrass = new alfrid.GLTexture(getAsset('grass'));
-		const noiseSize  	= 64;
-		this._fboNoise  	= new alfrid.FrameBuffer(noiseSize, noiseSize, {type:GL.UNSIGNED_BYTE}, true);
+
+		if(!GL.isMobile) {
+			const noiseSize  	= 64;
+			this._fboNoise  	= new alfrid.FrameBuffer(noiseSize, noiseSize, {type:GL.UNSIGNED_BYTE}, true);	
+		}
+		
 
 		this._textureDay = new alfrid.GLTexture(getAsset('day'));	
 		this._textureNight = new alfrid.GLTexture(getAsset('night'));	
@@ -65,17 +73,14 @@ class SceneApp extends alfrid.Scene {
 
 
 	_initViews() {
-		this._bCopy = new alfrid.BatchCopy();
-		this._bBall = new alfrid.BatchBall();
-		// this._bSkybox = new alfrid.BatchSkybox();
-
 		this._vWolf = new ViewWolf();
 		this._vGrass = new ViewGrass();
-		this._vNoise = new ViewNoise();
 		this._vDome = new ViewDome();
-
 		this._vFloor = new ViewFloor();
-		// this._vDots = new ViewDebugDots();
+		this._vClouds = new ViewClouds();
+		if(!GL.isMobile) {
+			this._vNoise = new ViewNoise();	
+		}
 	}
 
 	switch() {
@@ -84,31 +89,43 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.ry.easing = 0.01;
 		this.orbitalControl.ry.value += Math.PI;
 		this._lightIntensity.value = this._isDay ? 1 : .5;
+		this._vClouds.opacity.easing = this._isDay ? 'expIn' : 'expOut';
+		this._vClouds.opacity.value = this._isDay ? 1 : 0;
 	}
 
 	render() {
 		params.time += params.speed;
 		GL.clear(0, 0, 0, 0);
 
-		this._fboNoise.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vNoise.render();
-		this._fboNoise.unbind();
-
 		const wolfUV = this._vWolf.uvOffset;
-		const textureHeight = this._fboNoise.getTexture(0);
-		const textureNormal = this._fboNoise.getTexture(1);
+		let textureHeight, textureNormal;
+		if(GL.isMobile) {
+			textureHeight = GLTexture.greyTexture();
+			textureNormal = GLTexture.greyTexture();
+		} else {
+			this._fboNoise.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vNoise.render();
+			this._fboNoise.unbind();
+			
+			textureHeight = this._fboNoise.getTexture(0);
+			textureNormal = this._fboNoise.getTexture(1);
+		}
 
 		if(this._isDay) {
 			this._vDome.render(this._textureDay, this._textureNight);	
 		} else {
 			this._vDome.render(this._textureNight, this._textureDay);
 		}
+
 		
-		this._vFloor.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
+		
+		
 		GL.disable(GL.CULL_FACE);
+		this._vClouds.render();
 		this._vGrass.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
 		GL.enable(GL.CULL_FACE);
+		this._vFloor.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
 
 		this._vWolf.render(this._textureRad, this._textureIrr, -.5, textureHeight, this._lightIntensity.value);
 	}

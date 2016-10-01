@@ -22,8 +22,8 @@ window.params = {
 };
 
 const assets = [
+	{ id:'cloud', url:'assets/img/cloud.png' },
 	{ id:'day', url:'assets/img/day.jpg' },
-	{ id:'sunset', url:'assets/img/sunset.jpg' },
 	{ id:'night', url:'assets/img/winter.jpg' },
 	{ id:'grass', url:'assets/img/grass.png' },
 	{ id:'ground', url:'assets/img/ground.jpg' },

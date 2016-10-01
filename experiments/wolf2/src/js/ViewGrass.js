@@ -36,7 +36,7 @@ class ViewGrass extends alfrid.View {
 		const coords = [];
 		const indices = [];
 		const normals = [];
-		const NUM_GRASS = 2000;
+		const NUM_GRASS = GL.isMobile ? 500 : 2000;
 		const RANGE = params.terrainSize/2;
 		let index = 0;
 
@@ -124,7 +124,7 @@ class ViewGrass extends alfrid.View {
 				do {
 					pos = [random(-RANGE, RANGE), random(1, 1.5), random(-RANGE, RANGE)];	
 					cnt ++;
-				} while(checkDist(pos) && cnt < 1002);
+				} while(checkDist(pos) && cnt < 100);
 
 				positionOffsets.push(pos);
 				colors.push(getColor());
