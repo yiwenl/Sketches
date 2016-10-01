@@ -92,16 +92,20 @@ void main(void) {
     float s10           = getNoise(vTextureCoord, off.yx);
     float s12           = getNoise(vTextureCoord, off.yz);
 
-    // vec3 va             = normalize(vec3(size.xy, s21 - s01));
-    // vec3 vb             = normalize(vec3(size.yx, s12 - s10));
     vec3 va             = normalize(vec3(size.x, s21-s01, size.y)); 
     vec3 vb             = normalize(vec3(size.y, s12-s10, -size.x));
     vec4 bump           = vec4( cross(va,vb) * .5 + .5, 1.0 );
 
     float noise         = s11;
 
+    // float noisex        = snoise(vec3(vTextureCoord.xy*uNoiseScale, uTime * 0.25));
+    // float noisey        = snoise(vec3(vTextureCoord.yx*uNoiseScale, uTime * 0.25));
+
+    float noisex        = snoise(vTextureCoord.x * uNoiseScale, vTextureCoord.y * uNoiseScale + uTime, uTime);
+    float noisey        = snoise(vTextureCoord.y * uNoiseScale + uTime, vTextureCoord.x * uNoiseScale, uTime);
+
     gl_FragData[0]      = vec4(noise, noise, noise, 1.0);
     gl_FragData[1]      = bump;
-    gl_FragData[2]      = vec4(1.0, 1.0, 0.0, 1.0);
+    gl_FragData[2]      = vec4(noisex, noisey, 0.0, 1.0);
     gl_FragData[3]      = vec4(1.0, 0.0, 1.0, 1.0);
 }

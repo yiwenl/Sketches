@@ -122,7 +122,7 @@ class ViewGrass extends alfrid.View {
 				let pos;
 				cnt = 0;
 				do {
-					pos = [random(-RANGE, RANGE), random(1, 1.5), random(-RANGE, RANGE)];	
+					pos = [random(-RANGE, RANGE), random(1.5, 1.25), random(-RANGE, RANGE)];	
 					cnt ++;
 				} while(checkDist(pos) && cnt < 100);
 
@@ -133,7 +133,7 @@ class ViewGrass extends alfrid.View {
 
 			mesh.bufferInstance(positionOffsets, 'aPosOffset');
 			mesh.bufferInstance(colors, 'aColor');
-			// mesh.bufferInstance(extras, 'aExtra');
+			mesh.bufferInstance(extras, 'aExtra');
 
 			return mesh;
 		}
@@ -144,7 +144,7 @@ class ViewGrass extends alfrid.View {
 	}
 
 
-	render(textureHeight, textureNormal, uvWolf, lightIntensity) {
+	render(textureHeight, textureNormal, uvWolf, lightIntensity, textureNoise) {
 		const { maxHeight, terrainSize, speed, noiseScale, isOne } = params;
 		const totalDist = terrainSize / noiseScale;
 		this._traveled += speed;
@@ -157,6 +157,8 @@ class ViewGrass extends alfrid.View {
 		textureHeight.bind(1);
 		this.shader.uniform("textureNormal", "uniform1i", 2);
 		textureNormal.bind(2);
+		this.shader.uniform("textureNoise", "uniform1i", 3);
+		textureNoise.bind(3);
 
 		this.shader.uniform("uMaxHeight", "float", maxHeight);
 		this.shader.uniform("uTerrainSize", "float", terrainSize/2);

@@ -22,15 +22,17 @@ class SceneApp extends alfrid.Scene {
 		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 200);
 		this.orbitalControl.radius.value = 17;
 		this.orbitalControl.rx.value = .25;
-		this.orbitalControl.rx.limit(.2, .3);
+		// this.orbitalControl.rx.limit(.2, .3);
 		this.orbitalControl.ry.value = Math.PI - 0.1;
-		this.orbitalControl.lockZoom(true);
+		// this.orbitalControl.lockZoom(true);
 
 		const yOffset = 0;
 		this.orbitalControl.center[1] = yOffset + 1;
 		this.orbitalControl.positionOffset[1] = yOffset;
 		this._isDay = true;
 		this._lightIntensity = new alfrid.EaseNumber(1, 0.01);
+
+		this._isLocked = false;
 
 		window.addEventListener('keydown', (e)=>this._onKey(e));
 		window.addEventListener('touchstart', (e)=>{
@@ -73,6 +75,8 @@ class SceneApp extends alfrid.Scene {
 
 
 	_initViews() {
+		this._bCopy = new alfrid.BatchCopy();
+
 		this._vWolf = new ViewWolf();
 		this._vGrass = new ViewGrass();
 		this._vDome = new ViewDome();
@@ -84,6 +88,8 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	switch() {
+		if(this._isLocked == true) return;
+		this._isLocked = true;
 		this._isDay = !this._isDay;
 		this._vDome.switch(this.camera.position);
 		this.orbitalControl.ry.easing = 0.01;
@@ -91,6 +97,10 @@ class SceneApp extends alfrid.Scene {
 		this._lightIntensity.value = this._isDay ? 1 : .5;
 		this._vClouds.opacity.easing = this._isDay ? 'expIn' : 'expOut';
 		this._vClouds.opacity.value = this._isDay ? 1 : 0;
+
+		setTimeout(()=> {
+			this._isLocked = false;
+		}, 2000);
 	}
 
 	render() {
@@ -98,10 +108,11 @@ class SceneApp extends alfrid.Scene {
 		GL.clear(0, 0, 0, 0);
 
 		const wolfUV = this._vWolf.uvOffset;
-		let textureHeight, textureNormal;
+		let textureHeight, textureNormal, textureNoise;
 		if(GL.isMobile) {
 			textureHeight = GLTexture.greyTexture();
 			textureNormal = GLTexture.greyTexture();
+			textureNoise = GLTexture.greyTexture();
 		} else {
 			this._fboNoise.bind();
 			GL.clear(0, 0, 0, 0);
@@ -110,6 +121,7 @@ class SceneApp extends alfrid.Scene {
 			
 			textureHeight = this._fboNoise.getTexture(0);
 			textureNormal = this._fboNoise.getTexture(1);
+			textureNoise = this._fboNoise.getTexture(2);
 		}
 
 		if(this._isDay) {
@@ -119,11 +131,9 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		
-		
-		
 		GL.disable(GL.CULL_FACE);
 		this._vClouds.render();
-		this._vGrass.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
+		this._vGrass.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value, textureNoise);
 		GL.enable(GL.CULL_FACE);
 		this._vFloor.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
 
