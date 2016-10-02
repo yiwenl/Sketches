@@ -49,11 +49,24 @@ class ViewWolf extends alfrid.View {
 		this.baseColor = [1, 1, 1];
 
 		this._textureWhite = alfrid.GLTexture.whiteTexture();
-		const gap = 1000/40;
-		setInterval(()=> {
-			this._frame ++;
-			if(this._frame >= NUM_FRAMES) this._frame = 0;
-		}, gap);
+		// const gap = 1000/50;
+		// setInterval(()=> {
+			
+		// }, gap);
+
+		this._nextFrame();
+	}
+
+
+	_nextFrame() {
+		this._frame ++;
+		if(this._frame >= NUM_FRAMES) this._frame = 0;
+
+		const ratio = 10 / 0.01;
+		let t = -(params.speed + 0.01);
+		const fps = 40 + t * ratio;
+		const gap = 1000 / fps;
+		setTimeout(()=>this._nextFrame(), gap);
 	}
 
 

@@ -24,10 +24,12 @@ html {
 	text-size-adjust: none;
 }
 
-h1,h2,h3,h4,text,p {
+h1,h2,h3,h4,text,p,a {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-webkit-font-smoothing: antialiased;
 	font-family: 'Open Sans', sans-serif;
+	margin: 0;
+	padding: 0;
 }
 
 .Main-Canvas {
@@ -44,6 +46,41 @@ h1,h2,h3,h4,text,p {
 	.isLoading & {
 		opacity: 0;
 	}
+}
+
+
+.desc {
+	position: absolute;
+	z-index: 9;
+	width: 100%;
+	bottom: 20px;
+	text-align: center;
+	color:white;
+	pointer-events: none;
+}
+
+a {
+	position: absolute;
+	z-index: 10;
+	width: 50%;
+	bottom: 20px;
+	left:20px;
+	text-align: left;
+	color:white;
+	text-decoration: none;
+}
+
+.animate-in {
+	opacity: 1;
+
+	transition: opacity .5s ease-in-out .75s;
+
+	.isLoading & {
+		opacity: 0;
+		transition: opacity .0s ease-out;
+	}
+
+	display:none;
 }
 
 

@@ -33,8 +33,10 @@ class SceneApp extends alfrid.Scene {
 		this._lightIntensity = new alfrid.EaseNumber(1, 0.01);
 
 		this._isLocked = false;
+		this._speed = new alfrid.EaseNumber(0.01, 0.005);
 
 		window.addEventListener('keydown', (e)=>this._onKey(e));
+		window.addEventListener('keyup', (e)=>this._onKeyUp(e));
 		window.addEventListener('touchstart', (e)=>{
 			this.switch();
 			this._onDown(e);
@@ -48,6 +50,14 @@ class SceneApp extends alfrid.Scene {
 
 	_onKey(e) {
 		if(e.keyCode === 32) {	this.switch();	}
+		else if(e.keyCode === 38) {
+			this._speed.value = 0.025;
+		}
+	}
+
+
+	_onKeyUp() {
+		this._speed.value = 0.01;
 	}
 
 	_initTextures() {
@@ -104,6 +114,7 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	render() {
+		params.speed = - this._speed.value;
 		params.time += params.speed;
 		GL.clear(0, 0, 0, 0);
 
