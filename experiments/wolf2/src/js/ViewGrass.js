@@ -36,7 +36,7 @@ class ViewGrass extends alfrid.View {
 		const coords = [];
 		const indices = [];
 		const normals = [];
-		const NUM_GRASS = GL.isMobile ? 500 : 2200;
+		const NUM_GRASS = GL.isMobile ? 500 : 2000;
 		const RANGE = params.terrainSize/2 * 0.8;
 
 		this.range = RANGE;
