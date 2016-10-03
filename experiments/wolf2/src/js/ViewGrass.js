@@ -28,15 +28,20 @@ class ViewGrass extends alfrid.View {
 	constructor() {
 		super(vs, fs);
 		this._traveled = 0;
+		this.reset();
 	}
 
 
-	_init() {
+	reset() {
+		if(this.mesh) {
+			this.mesh = null;
+		}
+
 		const positions = [];
 		const coords = [];
 		const indices = [];
 		const normals = [];
-		const NUM_GRASS = GL.isMobile ? 500 : 2000;
+		const NUM_GRASS = GL.isMobile ? 500 : params.numGrass;
 		const RANGE = params.terrainSize/2 * 0.8;
 
 		this.range = RANGE;
@@ -57,7 +62,7 @@ class ViewGrass extends alfrid.View {
 		}
 
 		function addPlane(angle) {
-			const yOffset = 0.2;
+			const yOffset = 0.0;
 			positions.push(rotate([-W, 0+yOffset, 0], angle));
 			positions.push(rotate([ W, 0+yOffset, 0], angle));
 			positions.push(rotate([ W, H+yOffset, 0], angle));
@@ -149,6 +154,9 @@ class ViewGrass extends alfrid.View {
 
 
 	render(textureHeight, textureNormal, uvWolf, lightIntensity, textureNoise) {
+		if(!this.mesh) {
+			return;
+		}
 		const { maxHeight, terrainSize, speed, noiseScale, isOne } = params;
 		const totalDist = terrainSize / noiseScale;
 		this._traveled += speed;

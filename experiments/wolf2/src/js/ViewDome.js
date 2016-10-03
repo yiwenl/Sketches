@@ -9,6 +9,8 @@ class ViewDome extends alfrid.View {
 	
 	constructor() {
 		super(vs, fs);
+
+		this._shaderCopy = new alfrid.GLShader(null, alfrid.ShaderLibs.copyFrag);
 	}
 
 
@@ -33,6 +35,15 @@ class ViewDome extends alfrid.View {
 
 	render(textureCurr, textureNext) {
 		this.percent = 1.0 - (this.waveFront.value + 5.0) / (this.radius * 2 + 5);
+
+		// console.log(this.percent);
+
+		if(this.percent === 1) {
+			this._shaderCopy.bind();
+			this.shader.uniform("texture", "uniform1i", 0);
+			textureCurr.bind(0);
+		}
+
 		this.shader.bind();
 		this.shader.uniform("textureCurr", "uniform1i", 0);
 		textureCurr.bind(0);

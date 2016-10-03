@@ -56,6 +56,12 @@ class SceneApp extends alfrid.Scene {
 	}
 
 
+	resetGrass() {
+		console.log('Reset Grass');
+		this._vGrass.reset();
+	}
+
+
 	_onKeyUp() {
 		this._speed.value = 0.01;
 	}

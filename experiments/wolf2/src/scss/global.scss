@@ -72,7 +72,7 @@ a {
 
 .animate-in {
 	opacity: 1;
-
+	user-select: none;
 	transition: opacity .5s ease-in-out .75s;
 
 	.isLoading & {
