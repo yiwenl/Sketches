@@ -2,7 +2,7 @@ import '../scss/global.scss';
 import alfrid, { Camera } from 'alfrid';
 import SceneApp from './SceneApp';
 import AssetsLoader from 'assets-loader';
-// import dat from 'dat-gui';
+import dat from 'dat-gui';
 // import Stats from 'stats.js';
 
 const GL = alfrid.GL;
@@ -18,6 +18,7 @@ window.params = {
 	time:0,
 	noiseScale:2.5,
 	isOne:false,
+	numGrass:700,
 	grassColor:[98, 152, 83]
 };
 
@@ -117,10 +118,18 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	// window.gui = new dat.GUI({ width:300 });
+	window.gui = new dat.GUI({ width:300 });
+	let maxRange = 5000;
+	console.log('Location :', window.location, window.location.search, window.location.href);
+	if(window.location.href.indexOf('numGrass') > -1) {
+		maxRange = parseInt(window.location.href.split('Grass=')[1]);
+	}
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
+	gui.add(params, 'numGrass', 500, maxRange).onFinishChange(()=> {
+		scene.resetGrass();
+	});
 	
 	/*/
 	gui.add(params, 'gamma', 1, 5);
