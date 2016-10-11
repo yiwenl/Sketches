@@ -82,6 +82,14 @@ a {
 }
 
 
+.button_vr {
+	position: absolute;
+	margin: 20px;
+	z-index: 9999999;
+	display: none;
+}
+
+
 .Message {
 	position: absolute;
 	z-index: 999;

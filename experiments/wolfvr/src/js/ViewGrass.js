@@ -36,7 +36,7 @@ class ViewGrass extends alfrid.View {
 		const coords = [];
 		const indices = [];
 		const normals = [];
-		const NUM_GRASS = GL.isMobile ? 500 : 2000;
+		const NUM_GRASS = GL.isMobile ? 500 : 5000;
 		const RANGE = params.terrainSize/2 * 0.8;
 
 		this.range = RANGE;
@@ -164,11 +164,15 @@ class ViewGrass extends alfrid.View {
 		this.shader.uniform("textureNoise", "uniform1i", 3);
 		textureNoise.bind(3);
 
+		this.shader.uniform("uVRViewMatrix", "mat4", mView);
+		this.shader.uniform("uVRProjectionMatrix", "mat4", mProj);
+
 		this.shader.uniform("uMaxHeight", "float", maxHeight);
 		this.shader.uniform("uTerrainSize", "float", this.range);
 		this.shader.uniform("uDistForward", "float", distForward);
 		this.shader.uniform("uUVWolf", "vec2", uvWolf);
 		this.shader.uniform("uLightIntensity", "float", lightIntensity);
+		this.shader.uniform("uYOffset", "float", params.yOffset);
 
 		GL.draw(this.mesh);
 	}

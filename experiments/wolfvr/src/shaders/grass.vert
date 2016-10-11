@@ -11,6 +11,8 @@ attribute vec3 aExtra;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
+uniform mat4 uVRViewMatrix;
+uniform mat4 uVRProjectionMatrix;
 
 uniform float uMaxHeight;
 uniform float uTerrainSize;
@@ -19,6 +21,7 @@ uniform sampler2D textureHeight;
 uniform sampler2D textureNormal;
 uniform sampler2D textureNoise;
 uniform float uDistForward;
+uniform float uYOffset;
 
 varying vec2 vTextureCoord;
 varying vec2 vUV;
@@ -46,7 +49,7 @@ void main(void) {
 	position.xz 		= rotate(position.xz, aExtra.y);
 	vPosition 			= posOffset;
 	position 			= posOffset + position * vec3(1.0, aPosOffset.y, 1.0);
-	
+
 	float u 			= (position.x / uTerrainSize * 0.5 + 0.5);
 	float v 			= 1.0-(position.z / uTerrainSize * 0.5 + 0.5);
 
@@ -58,9 +61,10 @@ void main(void) {
 	vec2 wind 			= texture2D(textureNoise, uv).rg - .5;
 	wind 				*= aTextureCoord.y;
 	position.xz 		+= wind * 2.0;
+	position.y 			+= uYOffset;
 
 
-    gl_Position 		= uProjectionMatrix * uViewMatrix * vec4(position, 1.0);
+    gl_Position 		= uVRProjectionMatrix * uVRViewMatrix * vec4(position, 1.0);
     vTextureCoord 		= aTextureCoord;
     vNormal 			= aNormal;
     vColor 				= aColor;

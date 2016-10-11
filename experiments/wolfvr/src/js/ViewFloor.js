@@ -22,6 +22,10 @@ class ViewFloor extends alfrid.View {
 	render(texture, textureNormal, uvWolf, lightIntensity) {
 		const { maxHeight } = params;
 		this.shader.bind();
+
+		this.shader.uniform("uVRViewMatrix", "mat4", mView);
+		this.shader.uniform("uVRProjectionMatrix", "mat4", mProj);
+
 		this.shader.uniform("texture", "uniform1i", 0);
 		this.shader.uniform("textureNormal", "uniform1i", 1);
 		texture.bind(0);
@@ -34,6 +38,8 @@ class ViewFloor extends alfrid.View {
 		this.shader.uniform('uBaseColor', 'uniform3fv', color);
 		this.shader.uniform("uUVWolf", "vec2", uvWolf);
 		this.shader.uniform("uLightIntensity", "float", lightIntensity);
+
+		this.shader.uniform("uYOffset", "float", params.yOffset);
 
 		GL.draw(this.mesh);
 	}

@@ -85,6 +85,9 @@ class ViewWolf extends alfrid.View {
 		this.shader.uniform('uRadianceMap', 'uniform1i', 2);
 		this.shader.uniform('uIrradianceMap', 'uniform1i', 3);
 		this.shader.uniform("uHeightMap", "uniform1i", 1);
+
+		this.shader.uniform("uVRViewMatrix", "mat4", mView);
+		this.shader.uniform("uVRProjectionMatrix", "mat4", mProj);
 		
 		this.aoMap.bind(0);
 		textureHeight.bind(1);
@@ -105,6 +108,8 @@ class ViewWolf extends alfrid.View {
 		this.shader.uniform("uMaxHeight", "float", maxHeight);
 		this.shader.uniform("uUVOffset", "vec2", this.uvOffset);
 		this.shader.uniform("uLightIntensity", "float", lightIntensity);
+
+		this.shader.uniform("uYOffset", "float", params.yOffset);
 
 		GL.draw(this.mesh);
 	}

@@ -50,6 +50,9 @@ class SceneApp extends alfrid.Scene {
 			this._onDown(e);
 		});
 		window.addEventListener('mousedown', (e)=>this._onDown(e));
+
+
+		window.requestAnimationFrame(()=>this.onAnimationFrame());
 	}
 
 	_onDown(e) {
@@ -121,7 +124,19 @@ class SceneApp extends alfrid.Scene {
 		}, 2000);
 	}
 
+	onAnimationFrame() {
+	}
+	
 	render() {
+
+		// if(Math.random() > 0.99) {
+		// 	console.log(vrDisplay, frameData);
+		// }
+
+		if(vrDisplay != null) {
+			vrDisplay.requestAnimationFrame(()=>this.onAnimationFrame());
+			vrDisplay.getFrameData(frameData);
+		}
 		params.speed = - this._speed.value;
 		params.time += params.speed;
 		GL.clear(0, 0, 0, 0);
@@ -142,18 +157,22 @@ class SceneApp extends alfrid.Scene {
 		GL.viewport(0, 0, w2, window.innerHeight);
 		GL.scissor(0, 0, w2, window.innerHeight);
 		this.cameraOrientation.setEyePostion(x, -y);
-		this._renderScene(0, 0, w2, window.innerHeight);
+		this._renderScene('left');
 
 		//	right
 		GL.viewport(w2, 0, w2, window.innerHeight);
 		GL.scissor(w2, 0, w2, window.innerHeight);
 		this.cameraOrientation.setEyePostion(-x, -y);
-		this._renderScene(w2, 0, w2, window.innerHeight);
+		this._renderScene('right');
 
 		GL.disable(GL.SCISSOR_TEST);
 	}
 
-	_renderScene() {
+	_renderScene(mDir) {
+		window.mProj = frameData[`${mDir}ProjectionMatrix`];
+		window.mView = frameData[`${mDir}ViewMatrix`];
+		
+
 		GL.setMatrices(this.cameraOrientation);	
 		const wolfUV = this._vWolf.uvOffset;
 		let textureHeight, textureNormal, textureNoise;
@@ -169,10 +188,10 @@ class SceneApp extends alfrid.Scene {
 
 		
 		GL.disable(GL.CULL_FACE);
-		this._vClouds.render();
+		// this._vClouds.render();
 		this._vGrass.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value, textureNoise);
 		GL.enable(GL.CULL_FACE);
-		this._vFloor.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
+		// this._vFloor.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
 
 		this._vWolf.render(this._textureRad, this._textureIrr, -.5, textureHeight, this._lightIntensity.value);
 	}

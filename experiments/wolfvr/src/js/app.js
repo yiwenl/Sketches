@@ -18,7 +18,8 @@ window.params = {
 	time:0,
 	noiseScale:2.5,
 	isOne:false,
-	grassColor:[98, 152, 83]
+	grassColor:[98, 152, 83],
+	yOffset:-1.95
 };
 
 const assets = [
@@ -105,7 +106,8 @@ function _onImageLoaded(o) {
 	}, 250);
 }
 
-
+window.vrDisplay = null;
+window.frameData = null;
 
 function _init3D() {
 	//	CREATE CANVAS
@@ -120,6 +122,50 @@ function _init3D() {
 	// window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
+	
+
+	console.log('getVR', navigator.getVRDisplays);
+
+	if (navigator.getVRDisplays) {
+		window.frameData = new VRFrameData();
+
+		console.log('Frame Data : ', frameData);
+
+		navigator.getVRDisplays().then(function (displays) {
+		          // Use the first display in the array if one is available. If multiple
+		          // displays are present you may want to present the user with a way to
+		          // select which display they wish to use.
+			if (displays.length > 0) {
+				window.vrDisplay = displays[0];
+				vrDisplay.depthNear = 0.1;
+				vrDisplay.depthFar = 1024.0;
+
+				console.log('VR display : ', vrDisplay, vrDisplay.capabilities.canPresent);
+				if (vrDisplay.capabilities.canPresent) {
+					let btnVR = document.body.querySelector('.button_vr');
+					btnVR.style.display = 'block';
+					btnVR.addEventListener('click', onVRRequestPresent);
+
+					window.addEventListener('vrdisplaypresentchange', onVRPresentChange, false);
+
+					window.addEventListener('vrdisplayactivate', onVRRequestPresent, false);
+					window.addEventListener('vrdisplaydeactivate', onVRExitPresent, false);
+				}
+
+				// window.frameData = frameData;
+				// window.vrDisplay = vrDisplay;
+			// Being able to re-center your view is a useful thing in VR. It's
+			// good practice to provide your users with a simple way to do so.
+				// VRSamplesUtil.addButton("Reset Pose", "R", null, function () { vrDisplay.resetPose(); });
+			} else {
+				// VRSamplesUtil.addInfo("WebVR supported, but no VRDisplays found.", 3000);
+			}
+		});
+
+
+
+	}
+
 	let scene = new SceneApp();
 	
 	/*/
@@ -135,4 +181,65 @@ function _init3D() {
 	// alfrid.Scheduler.addEF(()=> {
 	// 	stats.update();
 	// });
+}
+
+
+function onVRRequestPresent () {
+	console.log('on Present : ', GL.canvas);
+        // This can only be called in response to a user gesture.
+	vrDisplay.requestPresent([{ source: GL.canvas }]).then(function () {
+	// Nothing to do because we're handling things in onVRPresentChange.
+		console.log(' on request VR ');
+	}, function () {
+		
+		// VRSamplesUtil.addError("requestPresent failed.", 2000);
+	});
+}
+
+function onVRExitPresent () {
+// No sense in exiting presentation if we're not actually presenting.
+// (This may happen if we get an event like vrdisplaydeactivate when
+// we weren't presenting.)
+	if (!vrDisplay.isPresenting)
+		return;
+
+	vrDisplay.exitPresent().then(function () {
+	// Nothing to do because we're handling things in onVRPresentChange.
+	}, function () {
+		// VRSamplesUtil.addError("exitPresent failed.", 2000);
+	});
+}
+
+function onResize() {
+
+}
+
+function onVRPresentChange () {
+	console.log('present change', vrDisplay.isPresenting);
+        // When we begin or end presenting, the canvas should be resized to the
+        // recommended dimensions for the display.
+	onResize();
+
+	if (vrDisplay.isPresenting) {
+		if (vrDisplay.capabilities.hasExternalDisplay) {
+		// Because we're not mirroring any images on an external screen will
+		// freeze while presenting. It's better to replace it with a message
+		// indicating that content is being shown on the VRDisplay.
+		// presentingMessage.style.display = "block";
+
+		// On devices with an external display the UA may not provide a way
+		// to exit VR presentation mode, so we should provide one ourselves.
+		// VRSamplesUtil.removeButton(vrPresentButton);
+		// vrPresentButton = VRSamplesUtil.addButton("Exit VR", "E", "media/icons/cardboard64.png", onVRExitPresent);
+		}
+	} else {
+		// If we have an external display take down the presenting message and
+		// change the button back to "Enter VR".
+		if (vrDisplay.capabilities.hasExternalDisplay) {
+			// presentingMessage.style.display = "";
+
+			// VRSamplesUtil.removeButton(vrPresentButton);
+			// vrPresentButton = VRSamplesUtil.addButton("Enter VR", "E", "media/icons/cardboard64.png", onVRRequestPresent);
+		}
+	}
 }
