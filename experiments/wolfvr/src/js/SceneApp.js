@@ -134,38 +134,52 @@ class SceneApp extends alfrid.Scene {
 		// }
 
 		if(vrDisplay != null) {
-			vrDisplay.requestAnimationFrame(()=>this.onAnimationFrame());
+			
+			//	get frame data
 			vrDisplay.getFrameData(frameData);
+
+
+			//	rendering
+			params.speed = - this._speed.value;
+			params.time += params.speed;
+			GL.clear(0, 0, 0, 0);
+
+			this._fboNoise.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vNoise.render();
+			this._fboNoise.unbind();
+			
+			// this._renderScene();
+
+			const y = 2.35;
+			const x = 0.5;
+			GL.enable(GL.SCISSOR_TEST);
+			const w2 = window.innerWidth/2;
+
+			//	left
+			GL.viewport(0, 0, w2, window.innerHeight);
+			GL.scissor(0, 0, w2, window.innerHeight);
+			this.cameraOrientation.setEyePostion(x, -y);
+			this._renderScene('left');
+
+			//	right
+			GL.viewport(w2, 0, w2, window.innerHeight);
+			GL.scissor(w2, 0, w2, window.innerHeight);
+			this.cameraOrientation.setEyePostion(-x, -y);
+			this._renderScene('right');
+
+			GL.disable(GL.SCISSOR_TEST);
+
+
+			//	submit frame
+			if(vrDisplay.isPresenting) {
+				vrDisplay.submitFrame();	
+			}
+			
+			// vrDisplay.requestAnimationFrame(()=>this.onAnimationFrame());
 		}
-		params.speed = - this._speed.value;
-		params.time += params.speed;
-		GL.clear(0, 0, 0, 0);
 
-		this._fboNoise.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vNoise.render();
-		this._fboNoise.unbind();
 		
-		// this._renderScene();
-
-		const y = 2.35;
-		const x = 0.5;
-		GL.enable(GL.SCISSOR_TEST);
-		const w2 = window.innerWidth/2;
-
-		//	left
-		GL.viewport(0, 0, w2, window.innerHeight);
-		GL.scissor(0, 0, w2, window.innerHeight);
-		this.cameraOrientation.setEyePostion(x, -y);
-		this._renderScene('left');
-
-		//	right
-		GL.viewport(w2, 0, w2, window.innerHeight);
-		GL.scissor(w2, 0, w2, window.innerHeight);
-		this.cameraOrientation.setEyePostion(-x, -y);
-		this._renderScene('right');
-
-		GL.disable(GL.SCISSOR_TEST);
 	}
 
 	_renderScene(mDir) {

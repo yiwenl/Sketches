@@ -191,7 +191,7 @@ function onVRRequestPresent () {
 	// Nothing to do because we're handling things in onVRPresentChange.
 		console.log(' on request VR ');
 	}, function () {
-		
+		console.debug("requestPresent failed.");
 		// VRSamplesUtil.addError("requestPresent failed.", 2000);
 	});
 }
@@ -215,7 +215,7 @@ function onResize() {
 }
 
 function onVRPresentChange () {
-	console.log('present change', vrDisplay.isPresenting);
+	console.log('present change', vrDisplay.isPresenting, vrDisplay.capabilities.hasExternalDisplay);
         // When we begin or end presenting, the canvas should be resized to the
         // recommended dimensions for the display.
 	onResize();
