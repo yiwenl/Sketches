@@ -18,7 +18,7 @@ class ViewWolf extends alfrid.View {
 		super(vs, fs);
 		this._frame = 0;
 		this.scale = 5.0;
-		this.position = [0, 2.5, -8.5];
+		this.position = [0, 2.5, 0.5];
 
 		const { terrainSize } = params;
 

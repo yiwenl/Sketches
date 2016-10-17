@@ -49,6 +49,10 @@ class ViewClouds extends alfrid.View {
 		this.shader.uniform("texture", "uniform1i", 0);
 		this.shader.uniform("uTime", "float", this.time);
 		this.shader.uniform("uOpacity", "float", this.opacity.value);
+
+		this.shader.uniform("uVRViewMatrix", "mat4", mView);
+		this.shader.uniform("uVRProjectionMatrix", "mat4", mProj);
+		
 		this._texture.bind(0);
 		GL.draw(this.mesh);
 		GL.enable(GL.DEPTH_TEST);

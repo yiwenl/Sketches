@@ -14,12 +14,12 @@ window.params = {
 	maxHeight:1,
 	grassRange:20,
 	pushStrength:0,
-	speed:-0.01,
+	speed:-0.001,
 	time:0,
 	noiseScale:2.5,
 	isOne:false,
 	grassColor:[98, 152, 83],
-	yOffset:-1.95
+	yOffset:-7.95
 };
 
 const assets = [
@@ -142,8 +142,8 @@ function _init3D() {
 
 				console.log('VR display : ', vrDisplay, vrDisplay.capabilities.canPresent);
 				if (vrDisplay.capabilities.canPresent) {
-					let btnVR = document.body.querySelector('.button_vr');
-					btnVR.style.display = 'block';
+					document.body.classList.add('hasVR');
+					let btnVR = document.body.querySelector('#enterVr');
 					btnVR.addEventListener('click', onVRRequestPresent);
 
 					window.addEventListener('vrdisplaypresentchange', onVRPresentChange, false);

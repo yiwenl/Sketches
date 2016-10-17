@@ -108,6 +108,30 @@ a {
 	}
 }
 
+
+#enterVr {
+	position: absolute;
+    font-size: 14px;
+    margin-bottom: 50px;
+    width: 100%;
+    text-align: center;
+    z-index: 9999;
+    bottom: 0;
+    color: white;
+    letter-spacing: 3px;
+    cursor: pointer;
+    display: none;
+    opacity: 0;
+    transition: opacity .5s ease-out;
+
+    .hasVR & {
+    	display:block;
+    	opacity: 1;
+    }
+
+}
+
+
 .Loading-Bar {
 	position: absolute;
 	z-index: 998;
