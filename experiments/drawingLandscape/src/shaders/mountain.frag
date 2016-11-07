@@ -1,18 +1,31 @@
 // mountain.frag
-#define SHADER_NAME SIMPLE_TEXTURE
+#extension GL_EXT_shader_texture_lod : enable
 
 precision highp float;
-varying vec2 vTextureCoord;
-varying vec3 vPosition;
-varying vec3 vNormal;
-uniform sampler2D texture;
-uniform sampler2D textureBg;
+varying vec3        vNormal;
+varying vec3        vPosition;
+varying vec3		vEyePosition;
+varying vec3		vWsNormal;
+varying vec3		vWsPosition;
+varying vec2 		vTextureCoord;
+
+uniform sampler2D 	texture;
+uniform sampler2D 	uNoiseMap;
+uniform samplerCube uRadianceMap;
+uniform samplerCube uIrradianceMap;
+
+uniform float		uRoughness;
+uniform float		uMetallic;
+uniform float		uSpecular;
+uniform float		uExposure;
+uniform float		uGamma;
+
 uniform float uFogOffset;
 uniform float uMaxRange;
 uniform float uFadeInRange;
 uniform vec3 uPosition;
 
-const float PI = 3.141592657;
+#define PI 3.1415926535897932384626433832795
 const float TwoPI = PI * 2.0;
 
 float fogFactorExp2(const float dist, const float density) {
@@ -21,29 +34,117 @@ float fogFactorExp2(const float dist, const float density) {
   return 1.0 - clamp(exp2(d * d * LOG2), 0.0, 1.0);
 }
 
-vec2 envMapEquirect(vec3 wcNormal, float flipEnvMap) {
-  float phi = acos(-wcNormal.y);
-  float theta = atan(flipEnvMap * wcNormal.x, wcNormal.z) + PI;
-  return vec2(theta / TwoPI, phi / PI);
-}
-
-vec2 envMapEquirect(vec3 wcNormal) {
-    return envMapEquirect(wcNormal, -1.0);
-}
-
 #define FOG_DENSITY 0.05
 const vec3 fogColor = vec3(254.0/255.0, 242.0/255.0, 226.0/255.0);
 const vec3 groundColor = vec3(0.30196078431372547, 0.2980392156862745, 0.28627450980392155);
 
+#define saturate(x) clamp(x, 0.0, 1.0)
+
+// Filmic tonemapping from
+// http://filmicgames.com/archives/75
+
+const float A = 0.15;
+const float B = 0.50;
+const float C = 0.10;
+const float D = 0.20;
+const float E = 0.02;
+const float F = 0.30;
+
+vec3 Uncharted2Tonemap( vec3 x )
+{
+	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+}
+
+// https://www.unrealengine.com/blog/physically-based-shading-on-mobile
+vec3 EnvBRDFApprox( vec3 SpecularColor, float Roughness, float NoV )
+{
+	const vec4 c0 = vec4( -1, -0.0275, -0.572, 0.022 );
+	const vec4 c1 = vec4( 1, 0.0425, 1.04, -0.04 );
+	vec4 r = Roughness * c0 + c1;
+	float a004 = min( r.x * r.x, exp2( -9.28 * NoV ) ) * r.x + r.y;
+	vec2 AB = vec2( -1.04, 1.04 ) * a004 + r.zw;
+	return SpecularColor * AB.x + AB.y;
+}
+
+
+// http://the-witness.net/news/2012/02/seamless-cube-map-filtering/
+vec3 fix_cube_lookup( vec3 v, float cube_size, float lod ) {
+	float M = max(max(abs(v.x), abs(v.y)), abs(v.z));
+	float scale = 1.0 - exp2(lod) / cube_size;
+	if (abs(v.x) != M) v.x *= scale;
+	if (abs(v.y) != M) v.y *= scale;
+	if (abs(v.z) != M) v.z *= scale;
+	return v;
+}
+
+vec3 correctGamma(vec3 color, float g) {
+	return pow(color, vec3(1.0/g));
+}
+
+vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, float specular) {
+	vec3 diffuseColor	= baseColor - baseColor * metallic;
+	vec3 specularColor	= mix( vec3( 0.08 * specular ), baseColor, specular );	
+
+	vec3 color;
+	float roughness4 = pow(roughness, 4.0);
+	
+	// sample the pre-filtered cubemap at the corresponding mipmap level
+	float numMips		= 6.0;
+	float mip			= numMips - 1.0 + log2(roughness);
+	vec3 lookup			= -reflect( V, N );
+	lookup				= fix_cube_lookup( lookup, 512.0, mip );
+	vec3 radiance		= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );
+	vec3 irradiance		= pow( textureCube( uIrradianceMap, N ).rgb, vec3( 1 ) );
+	
+	// get the approximate reflectance
+	float NoV			= saturate( dot( N, V ) );
+	vec3 reflectance	= EnvBRDFApprox( specularColor, roughness4, NoV );
+	
+	// combine the specular IBL and the BRDF
+    vec3 diffuse  		= diffuseColor * irradiance;
+    vec3 _specular 		= radiance * reflectance;
+	color				= diffuse + _specular;
+
+	return color;
+}
+
+float contrast(float mValue, float mScale, float mMidPoint) {
+	return clamp( (mValue - mMidPoint) * mScale + mMidPoint, 0.0, 1.0);
+}
+
+float contrast(float mValue, float mScale) {
+	return contrast(mValue,  mScale, .5);
+}
+
+vec3 contrast(vec3 mValue, float mScale, float mMidPoint) {
+	return vec3( contrast(mValue.r, mScale, mMidPoint), contrast(mValue.g, mScale, mMidPoint), contrast(mValue.b, mScale, mMidPoint) );
+}
+
+vec3 contrast(vec3 mValue, float mScale) {
+	return contrast(mValue, mScale, .5);
+}
+
 void main(void) {
+	vec3 noise 			= texture2D( uNoiseMap, vTextureCoord * 6.0).rgb - .5;
+	vec3 N 				= normalize( vWsNormal + noise * 2.2 );
+	vec3 V 				= normalize( vEyePosition );
+	vec3 baseColor 		= texture2D( texture, vTextureCoord).rgb;
+	baseColor 			= contrast(baseColor, 1.8);
+	vec4 color 			= vec4(getPbr(N, V, baseColor, uRoughness, uMetallic, uSpecular), 1.0);
+
+	// apply the tone-mapping
+	color.rgb			= Uncharted2Tonemap( color.rgb * uExposure );
+	// white balance
+	color.rgb			= color.rgb * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );
+	
+	// gamma correction
+	color.rgb			= pow( color.rgb, vec3( 1.0 / uGamma ) );
 
 	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
 	float fogAmount = fogFactorExp2(fogDistance, FOG_DENSITY);
 
 	const float MIN_Y = 0.005;
 	float opacity = smoothstep(uPosition[1], MIN_Y + uPosition[1], vPosition.y );
-
-	vec4 color = texture2D(texture, vTextureCoord);
 	color.rgb = mix(color.rgb, fogColor, fogAmount+uFogOffset);
 
 	float distOffset = 0.0;
@@ -55,8 +156,7 @@ void main(void) {
 	color.rgb = mix(groundColor, color.rgb, opacity);
 	color.rgb = mix(color.rgb, fogColor, distOffset);
 	color.a *= opacity;
-
-
+	// color.rgb = vWsNormal * .5 + .5;
 
 	gl_FragColor = color;
 }

@@ -176,7 +176,7 @@ class SceneApp extends alfrid.Scene {
 		
 
 
-		this._vMountains.render(this._textureBg);
+		this._vMountains.render(this._textureRad, this._textureIrr, this._textureNoise);
 		this._vStroke.render(this._textureBrush, this._textureBrushNormal, this._textureRad, this._textureIrr);
 
 		if(params.debugHitPlane) {
