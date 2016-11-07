@@ -16,12 +16,15 @@ window.params = {
 	maxRange:15,
 	fadeInRange:1,
 	fogOffset:0.01,
+	fogDensity:0.05,
 };
 
 const assets = [
 	{ id:'bg', url:'assets/img/bg.jpg' },
+	{ id:'noise', url:'assets/img/noise.jpg' },
 	{ id:'aoTerrain', url:'assets/img/aoTerrain.jpg' },
 	{ id:'objTerrain', url:'assets/obj/terrain.obj', type:'text' },
+	{ id:'radiance', url:'assets/img/studio_radiance.dds', type: 'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
 	{ id:'irr_posy', url:'assets/img/irr_posy.hdr', type:'binary' },
@@ -29,20 +32,16 @@ const assets = [
 	{ id:'irr_negx', url:'assets/img/irr_negx.hdr', type:'binary' },
 	{ id:'irr_negy', url:'assets/img/irr_negy.hdr', type:'binary' },
 	{ id:'irr_negz', url:'assets/img/irr_negz.hdr', type:'binary' },
-
-	{ id:'rad_posx', url:'assets/img/rad_posx.hdr', type:'binary' },
-	{ id:'rad_posy', url:'assets/img/rad_posy.hdr', type:'binary' },
-	{ id:'rad_posz', url:'assets/img/rad_posz.hdr', type:'binary' },
-	{ id:'rad_negx', url:'assets/img/rad_negx.hdr', type:'binary' },
-	{ id:'rad_negy', url:'assets/img/rad_negy.hdr', type:'binary' },
-	{ id:'rad_negz', url:'assets/img/rad_negz.hdr', type:'binary' }
 ];
 
 
 for (let i=0; i<6; i++) {
 	const id = `brush${i}`;
 	const url = `assets/img/brushes/${id}.png`;
+	const idNormal = `brushNormal${i}`
+	const urlNormal = `assets/img/brushesNormal/${idNormal}.png`;
 	assets.push({id, url});
+	assets.push({id:idNormal, url:urlNormal});
 }
 
 const PATH_DROP = 'assets/img/inkDrops/inkDrops'
@@ -86,9 +85,7 @@ function _init() {
 
 
 function _onImageLoaded(o) {
-
 	//	ASSETS
-	console.log('Image Loaded : ', o);
 	document.body.classList.remove('isLoading');
 	window.assets = o;	
 
@@ -115,4 +112,5 @@ function _init3D() {
 	
 	gui.add(params, 'gamma', 1, 5);
 	gui.add(params, 'exposure', 1, 25);
+	gui.add(params, 'fogDensity', 0, 0.1).step(0.001);
 }

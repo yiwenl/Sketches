@@ -66,13 +66,15 @@ class Drawing extends EventDispatcher {
 		}
 
 		if(hit) {
-			this._points.push(vec3.clone(hit));	
+			const p = vec3.clone(hit);
+			p[1] += Math.random();
+			this._points.push(p);	
 		}
 
 
 
 		if(this._points.length > 3) {
-			const numSeg = Math.min(this._points.length * 2.0, 40);
+			const numSeg = Math.min(this._points.length * 2.0, 60);
 			this._bezierPoints = MathUtils.getBezierPoints(this._points, numSeg);
 		} else {
 			this._bezierPoints = [];

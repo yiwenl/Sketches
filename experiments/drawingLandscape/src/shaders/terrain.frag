@@ -7,6 +7,7 @@
 precision highp float;
 
 uniform sampler2D 	uAoMap;
+uniform sampler2D 	uNoiseMap;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
 
@@ -18,6 +19,7 @@ uniform float		uSpecular;
 uniform float 		uFogOffset;
 uniform float		uExposure;
 uniform float		uGamma;
+uniform float		uFogDensity;
 
 varying vec3        vNormal;
 varying vec3        vPosition;
@@ -80,7 +82,6 @@ float fogFactorExp2(const float dist, const float density) {
 #define FOG_DENSITY 0.05
 const vec3 fogColor = vec3(254.0/255.0, 242.0/255.0, 226.0/255.0);
 
-
 vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, float specular) {
 	vec3 diffuseColor	= baseColor - baseColor * metallic;
 	vec3 specularColor	= mix( vec3( 0.08 * specular ), baseColor, specular );	
@@ -109,24 +110,25 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 }
 
 void main() {
-	// vec3 N 				= normalize( vWsNormal );
-	// vec3 V 				= normalize( vEyePosition );
+	vec3 noise 			= texture2D( uNoiseMap, vTextureCoord * 20.0).rgb - .5;
+	vec3 N 				= normalize( vWsNormal + noise * 0.2 );
+	vec3 V 				= normalize( vEyePosition );
+	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
+
+	// apply the tone-mapping
+	color				= Uncharted2Tonemap( color * uExposure );
+	// white balance
+	color				= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );
 	
-	// vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
-
-
-	// // apply the tone-mapping
-	// color				= Uncharted2Tonemap( color * uExposure );
-	// // white balance
-	// color				= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );
+	// gamma correction
+	color				= pow( color, vec3( 1.0 / uGamma ) );
 	
-	// // gamma correction
-	// color				= pow( color, vec3( 1.0 / uGamma ) );
 
-	vec3 color = uBaseColor;
+	vec3 ao = texture2D(uAoMap, vTextureCoord).rgb;
+	color.rgb *= ao;
 
 	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
-	float fogAmount = fogFactorExp2(fogDistance, FOG_DENSITY);
+	float fogAmount = fogFactorExp2(fogDistance, uFogDensity);
 
 	color.rgb = mix(color.rgb, fogColor, fogAmount+uFogOffset);
 

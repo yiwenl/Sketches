@@ -18,34 +18,51 @@ class ViewTerrain extends alfrid.View {
 		this.mesh = alfrid.ObjLoader.parse(strObj);
 
 		this.roughness = .95;
-		this.specular = 0;
+		this.specular = .5;
 		this.metallic = 0;
-		this.baseColor = [.18, .18, .18];
+
+		const grey = 1.;
+		this.baseColor = [77/255, 76/255, 73/255];
+		console.log(this.baseColor);
+		this.level = -0.125;
+
+		const f = gui.addFolder('Terrain');
+		f.add(this, 'roughness', 0, 1);
+		f.add(this, 'specular', 0, 1);
+		f.add(this, 'metallic', 0, 1);
+		f.addColor(this, 'baseColor');
+		f.add(this, 'level', -0.2, -0.1).onChange(()=> {
+			console.log(this.level);
+		});
+		f.open();
 	}
 
 
-	render(textureRad, textureIrr, textureAO) {
+	render(textureRad, textureIrr, textureAO, textureNoise) {
 		if(!this.mesh) {
 			return;
 		}
 		this.shader.bind();
 
 		this.shader.uniform('uAoMap', 'uniform1i', 0);
-		this.shader.uniform('uRadianceMap', 'uniform1i', 1);
-		this.shader.uniform('uIrradianceMap', 'uniform1i', 2);
+		this.shader.uniform('uNoiseMap', 'uniform1i', 1);
+		this.shader.uniform('uRadianceMap', 'uniform1i', 2);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 3);
 		textureAO.bind(0);
-		textureRad.bind(1);
-		textureIrr.bind(2);
+		textureNoise.bind(1);
+		textureRad.bind(2);
+		textureIrr.bind(3);
 
 		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
 		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
 		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
 		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
 
-		this.shader.uniform("uPosition", "vec3", [0, 0, 0]);
-		const scale = 8;
-		this.shader.uniform("uScale", "vec3", [scale, .01, scale]);
+		this.shader.uniform("uPosition", "vec3", [0, this.level, 0]);
+		const scale = .25;
+		this.shader.uniform("uScale", "vec3", [scale, scale * 0.1, scale]);
 		this.shader.uniform("uFogOffset", "float", params.fogOffset);
+		this.shader.uniform("uFogDensity", "float", params.fogDensity);
 
 		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
 		this.shader.uniform('uGamma', 'uniform1f', params.gamma);

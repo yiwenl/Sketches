@@ -10,6 +10,7 @@ uniform sampler2D textureBg;
 uniform float uFogOffset;
 uniform float uMaxRange;
 uniform float uFadeInRange;
+uniform vec3 uPosition;
 
 const float PI = 3.141592657;
 const float TwoPI = PI * 2.0;
@@ -32,6 +33,7 @@ vec2 envMapEquirect(vec3 wcNormal) {
 
 #define FOG_DENSITY 0.05
 const vec3 fogColor = vec3(254.0/255.0, 242.0/255.0, 226.0/255.0);
+const vec3 groundColor = vec3(0.30196078431372547, 0.2980392156862745, 0.28627450980392155);
 
 void main(void) {
 
@@ -39,7 +41,7 @@ void main(void) {
 	float fogAmount = fogFactorExp2(fogDistance, FOG_DENSITY);
 
 	const float MIN_Y = 0.005;
-	float opacity = smoothstep(0.0, MIN_Y, vPosition.y );
+	float opacity = smoothstep(uPosition[1], MIN_Y + uPosition[1], vPosition.y );
 
 	vec4 color = texture2D(texture, vTextureCoord);
 	color.rgb = mix(color.rgb, fogColor, fogAmount+uFogOffset);
@@ -49,15 +51,12 @@ void main(void) {
 	if(vPosition.z < -uFadeInRange) {
 		distOffset = smoothstep(-uMaxRange+uFadeInRange+rangeOffset, -uMaxRange+rangeOffset, vPosition.z);
 	}
+
+	color.rgb = mix(groundColor, color.rgb, opacity);
 	color.rgb = mix(color.rgb, fogColor, distOffset);
-	color *= opacity;
+	color.a *= opacity;
 
 
-	vec2 uv = envMapEquirect(vNormal);
-	vec3 colorEnv = texture2D(textureBg, uv).rgb;
-	color.rgb *= mix(colorEnv, vec3(1.0), .75);
-
-  
 
 	gl_FragColor = color;
 }

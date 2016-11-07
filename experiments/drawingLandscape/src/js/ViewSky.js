@@ -11,7 +11,7 @@ class ViewSky extends alfrid.View {
 
 
 	_init() {
-		this.mesh = alfrid.Geom.sphere(params.terrainSize, 24, true);
+		this.mesh = alfrid.Geom.sphere(params.terrainSize * 2, 24, true);
 	}
 
 
