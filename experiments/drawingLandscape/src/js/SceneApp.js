@@ -136,7 +136,6 @@ class SceneApp extends alfrid.Scene {
 		}
 
 
-		console.log('Points : ', points.length);
 		let cnt = 0;
 		points.map( (p) => {
 			if(checkDist(p)) {
@@ -147,7 +146,6 @@ class SceneApp extends alfrid.Scene {
 			}
 		});
 
-		console.log('Mountains :', cnt);
 	}
 
 
@@ -159,22 +157,8 @@ class SceneApp extends alfrid.Scene {
 	render() {
 		GL.clear(0, 0, 0, 0);
 
-		// this._fboRender.bind();
-		// GL.clear(0, 0, 0, 0);
 		this._vSky.render(this._textureBg);
-		// this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain);
 		this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain, this._textureNoise);
-
-		// this._fboRender.unbind();
-
-		
-
-		// GL.disable(GL.DEPTH_TEST);
-		// this._vDrawingBg.render(this._fboRender.getTexture(), this._drawingOffset.value);	
-		// GL.enable(GL.DEPTH_TEST);
-
-		
-
 
 		this._vMountains.render(this._textureRad, this._textureIrr, this._textureNoise);
 		this._vStroke.render(this._textureBrush, this._textureBrushNormal, this._textureRad, this._textureIrr);

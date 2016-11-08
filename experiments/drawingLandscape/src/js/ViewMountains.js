@@ -30,7 +30,7 @@ class ViewMountains extends alfrid.View {
 
 
 	addMountain(mPosition) {
-		const NUM = 30;
+		const NUM = 24;
 		const uvGap = 1.0 / NUM;
 		const SEED = Math.random() * 0xFF;
 		const SIZE = random(0.5, .7);

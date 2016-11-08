@@ -8,6 +8,7 @@ varying vec3		vEyePosition;
 varying vec3		vWsNormal;
 varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
+varying vec4 		vViewSpace;
 
 uniform sampler2D 	texture;
 uniform sampler2D 	uNoiseMap;
@@ -129,7 +130,7 @@ void main(void) {
 	vec3 N 				= normalize( vWsNormal + noise * 2.2 );
 	vec3 V 				= normalize( vEyePosition );
 	vec3 baseColor 		= texture2D( texture, vTextureCoord).rgb;
-	baseColor 			= contrast(baseColor, 1.8);
+	baseColor 			= contrast(baseColor, 1.18);
 	vec4 color 			= vec4(getPbr(N, V, baseColor, uRoughness, uMetallic, uSpecular), 1.0);
 
 	// apply the tone-mapping
@@ -140,7 +141,7 @@ void main(void) {
 	// gamma correction
 	color.rgb			= pow( color.rgb, vec3( 1.0 / uGamma ) );
 
-	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
+	float fogDistance = length(vViewSpace);
 	float fogAmount = fogFactorExp2(fogDistance, FOG_DENSITY);
 
 	const float MIN_Y = 0.005;

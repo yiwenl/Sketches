@@ -57,8 +57,8 @@ class ViewTerrain extends alfrid.View {
 		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
 
 		this.shader.uniform("uPosition", "vec3", [0, this.level - 0.2, 0]);
-		const scale = .25;
-		this.shader.uniform("uScale", "vec3", [scale, scale * 0.2, scale]);
+		const scale = .4;
+		this.shader.uniform("uScale", "vec3", [scale, scale * 0.1, scale]);
 		this.shader.uniform("uFogOffset", "float", params.fogOffset);
 		this.shader.uniform("uFogDensity", "float", params.fogDensity);
 

@@ -27,6 +27,7 @@ varying vec3		vEyePosition;
 varying vec3		vWsNormal;
 varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
+varying vec4 		vViewSpace;
 
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.1415926535897932384626433832795
@@ -127,7 +128,7 @@ void main() {
 	vec3 ao = texture2D(uAoMap, vTextureCoord).rgb;
 	color.rgb *= ao;
 
-	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
+	float fogDistance = length(vViewSpace);
 	float fogAmount = fogFactorExp2(fogDistance, uFogDensity);
 
 	color.rgb = mix(color.rgb, fogColor, fogAmount+uFogOffset);

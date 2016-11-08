@@ -4,6 +4,7 @@
 
 precision highp float;
 varying vec2 vTextureCoord;
+varying vec3 vPosition;
 uniform sampler2D texture;
 uniform float uFogOffset;
 
@@ -21,7 +22,8 @@ void main(void) {
 	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
 	float fogAmount = fogFactorExp2(fogDistance, FOG_DENSITY);
 	vec4 color = texture2D(texture, vTextureCoord);
-	color.rgb = mix(color.rgb, fogColor, fogAmount+uFogOffset);
+	float offset = smoothstep(5.0, 1.0, vPosition.y);
+	color.rgb = mix(color.rgb, fogColor, offset);
 
     gl_FragColor = color;
 }

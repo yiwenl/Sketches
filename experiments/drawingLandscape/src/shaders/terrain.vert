@@ -22,6 +22,7 @@ varying vec3 vPosition;
 varying vec3 vWsPosition;
 varying vec3 vEyePosition;
 varying vec3 vWsNormal;
+varying vec4 vViewSpace;
 
 
 void main(void) {
@@ -35,7 +36,8 @@ void main(void) {
     vNormal					= uNormalMatrix * N;
     vPosition				= viewSpacePosition.xyz;
 	vWsPosition				= worldSpacePosition.xyz;
-	
+	vViewSpace				= viewSpacePosition;
+
 	vec4 eyeDirViewSpace	= viewSpacePosition - vec4( 0, 0, 0, 1 );
 	vEyePosition			= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );
 	vWsNormal				= normalize( uModelViewMatrixInverse * vNormal );

@@ -1,12 +1,13 @@
 // ViewSky.js
 
 import alfrid, { GL } from 'alfrid';
+import vs from '../shaders/sky.vert';
 import fs from '../shaders/sky.frag';
 
 class ViewSky extends alfrid.View {
 	
 	constructor() {
-		super(null, fs);
+		super(vs, fs);
 	}
 
 

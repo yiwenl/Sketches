@@ -23,6 +23,7 @@ varying vec3 vOrgPosition;
 varying vec3 vWsPosition;
 varying vec3 vEyePosition;
 varying vec3 vWsNormal;
+varying vec4 vViewSpace;
 
 vec2 rotate(vec2 v, float a) {
 	float s = sin(a);
@@ -43,6 +44,7 @@ void main(void) {
     vec4 eyeDirViewSpace	= viewSpacePosition - vec4( 0, 0, 0, 1 );
 	vEyePosition			= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );
 	gl_Position				= uProjectionMatrix * viewSpacePosition;
+	vViewSpace 				= viewSpacePosition;
 
 	
 	vec3 N        = aNormal;
