@@ -24,15 +24,15 @@ class ViewTerrain extends alfrid.View {
 		this.baseColor = [77/255, 76/255, 73/255];
 		this.level = -0.125;
 
-		const f = gui.addFolder('Terrain');
-		f.add(this, 'roughness', 0, 1);
-		f.add(this, 'specular', 0, 1);
-		f.add(this, 'metallic', 0, 1);
-		f.addColor(this, 'baseColor');
-		f.add(this, 'level', -0.2, -0.1).onChange(()=> {
-			console.log(this.level);
-		});
-		f.open();
+		// const f = gui.addFolder('Terrain');
+		// f.add(this, 'roughness', 0, 1);
+		// f.add(this, 'specular', 0, 1);
+		// f.add(this, 'metallic', 0, 1);
+		// f.addColor(this, 'baseColor');
+		// f.add(this, 'level', -0.2, -0.1).onChange(()=> {
+		// 	console.log(this.level);
+		// });
+		// f.open();
 	}
 
 
@@ -57,7 +57,7 @@ class ViewTerrain extends alfrid.View {
 		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
 
 		this.shader.uniform("uPosition", "vec3", [0, this.level - 0.2, 0]);
-		const scale = .4;
+		const scale = .3;
 		this.shader.uniform("uScale", "vec3", [scale, scale * 0.1, scale]);
 		this.shader.uniform("uFogOffset", "float", params.fogOffset);
 		this.shader.uniform("uFogDensity", "float", params.fogDensity);

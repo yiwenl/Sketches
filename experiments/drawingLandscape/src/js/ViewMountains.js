@@ -21,11 +21,11 @@ class ViewMountains extends alfrid.View {
 		this.specular = .5;
 		this.metallic = 0;
 
-		const f = gui.addFolder('Mountains');
-		f.add(this, 'roughness', 0, 1);
-		f.add(this, 'specular', 0, 1);
-		f.add(this, 'metallic', 0, 1);
-		f.open();
+		// const f = gui.addFolder('Mountains');
+		// f.add(this, 'roughness', 0, 1);
+		// f.add(this, 'specular', 0, 1);
+		// f.add(this, 'metallic', 0, 1);
+		// f.open();
 	}
 
 

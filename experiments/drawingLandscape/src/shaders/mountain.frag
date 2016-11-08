@@ -127,7 +127,7 @@ vec3 contrast(vec3 mValue, float mScale) {
 
 void main(void) {
 	vec3 noise 			= texture2D( uNoiseMap, vTextureCoord * 6.0).rgb - .5;
-	vec3 N 				= normalize( vWsNormal + noise * 2.2 );
+	vec3 N 				= normalize( vWsNormal + noise * 1.2 );
 	vec3 V 				= normalize( vEyePosition );
 	vec3 baseColor 		= texture2D( texture, vTextureCoord).rgb;
 	baseColor 			= contrast(baseColor, 1.18);

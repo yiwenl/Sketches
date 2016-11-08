@@ -28,11 +28,11 @@ class ViewStroke extends alfrid.View {
 		const grey = 1.;
 		this.baseColor = [grey, grey, grey];
 
-		const f = gui.addFolder('Stroke');
-		f.add(this, 'roughness', 0, 1);
-		f.add(this, 'specular', 0, 1);
-		f.add(this, 'metallic', 0, 1);
-		f.open();
+		// const f = gui.addFolder('Stroke');
+		// f.add(this, 'roughness', 0, 1);
+		// f.add(this, 'specular', 0, 1);
+		// f.add(this, 'metallic', 0, 1);
+		// f.open();
 	}
 
 

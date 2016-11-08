@@ -29,7 +29,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.rx.value = 0.05;
 		this.orbitalControl.center[1] = 1;
 		this.orbitalControl.lockZoom(true);
-		// this.orbitalControl.rx.limit(0.05, Math.PI * 0.1);
+		this.orbitalControl.rx.limit(0.05, Math.PI * 0.1);
 		this.camera.setPerspective(60 * RAD, GL.aspectRatio, .1, 100);
 
 		this._inDrawingMode = false;

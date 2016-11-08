@@ -9,7 +9,7 @@ const GL = alfrid.GL;
 window.params = {
 	terrainSize:20,
 	gamma:2.2,
-	exposure:5,
+	exposure:2.5,
 	debugHitPlane: false,
 	minMountDist:2,
 	maxNumMountains:50,
@@ -112,5 +112,5 @@ function _init3D() {
 	
 	gui.add(params, 'gamma', 1, 5);
 	gui.add(params, 'exposure', 1, 25);
-	gui.add(params, 'fogDensity', 0, 0.1).step(0.001);
+	// gui.add(params, 'fogDensity', 0, 0.1).step(0.001);
 }
