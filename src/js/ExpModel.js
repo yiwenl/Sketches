@@ -118,6 +118,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchWolf.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/wolf2/dist/index.html',
 		title:'Wolf'
+	},
+	{
+		cover:'assets/img/coverSketchPainting.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/drawingLandscape/dist/index.html',
+		title:'Painting Landscape'
 	}
 ]
 
