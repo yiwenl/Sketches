@@ -17,6 +17,8 @@ window.params = {
 	fadeInRange:1,
 	fogOffset:0.01,
 	fogDensity:0.05,
+	numParticles:256,
+	skipCount:10,
 };
 
 const assets = [

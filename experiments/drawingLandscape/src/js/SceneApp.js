@@ -8,6 +8,7 @@ import ViewMountains from './ViewMountains';
 import ViewSky from './ViewSky';
 import ViewTerrain from './ViewTerrain';
 import Drawing from './Drawing';
+import SubsceneParticles from './SubsceneParticles';
 
 window.getAsset = function (id) {
 	for(var i = 0; i < assets.length; i++) {
@@ -78,6 +79,9 @@ class SceneApp extends alfrid.Scene {
 		this._vMountains = new ViewMountains();
 		this._vSky = new ViewSky();
 		this._vTerrain = new ViewTerrain();
+
+
+		this._sub = new SubsceneParticles(this);
 	}
 
 	_onKey(e) {
@@ -105,10 +109,18 @@ class SceneApp extends alfrid.Scene {
 			this._textureBrush.updateTexture(getAsset(`brush${this._brushIndex}`));
 			this._textureBrushNormal.updateTexture(getAsset(`brushNormal${this._brushIndex}`));
 		} else {
+			//	get mesh points from stroke
 			this.orbitalControl.lock(false);
 			this.orbitalControl.radius.value = 12;
 			this._drawingOffset.value = 0;
 			this._drawing.lock(true);
+
+
+			
+			if(this._vStroke.mesh) {
+				let vertices = this._vStroke.mesh.vertices;
+				console.table(vertices);
+			}
 		}
 
 	}
@@ -155,13 +167,18 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		this._sub.update();
 		GL.clear(0, 0, 0, 0);
+
+		GL.setMatrices(this.camera);
 
 		this._vSky.render(this._textureBg);
 		this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain, this._textureNoise);
 
 		this._vMountains.render(this._textureRad, this._textureIrr, this._textureNoise);
 		this._vStroke.render(this._textureBrush, this._textureBrushNormal, this._textureRad, this._textureIrr);
+
+		this._sub.render();
 
 		if(params.debugHitPlane) {
 			this._vHitPlane.render();
