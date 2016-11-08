@@ -15,6 +15,8 @@ class ViewStroke extends alfrid.View {
 		mat4.rotateY(this.mtxLeft, this.mtxLeft, -Math.PI/2);
 		this.mtxRight = mat4.create();
 		mat4.rotateY(this.mtxRight, this.mtxRight,  Math.PI/2);
+
+		this._opacity = new alfrid.EaseNumber(1);
 	}
 
 
@@ -148,9 +150,15 @@ class ViewStroke extends alfrid.View {
 		this.mesh.bufferTexCoord(coords, true);
 		this.mesh.bufferNormal(normals, true);
 		this.mesh.bufferIndex(indices, true);
+	}
 
+	show() {
+		this._opacity.value = 1;
+	}
 
-
+	anim() {
+		this._opacity.setTo(1);
+		this._opacity.value = 0;
 	}
 
 
@@ -181,6 +189,7 @@ class ViewStroke extends alfrid.View {
 
 		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
 		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+		this.shader.uniform("uOpacity", "float", this._opacity.value);
 
 		GL.draw(this.mesh);
 	}

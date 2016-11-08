@@ -20,6 +20,7 @@ uniform float 		uFogOffset;
 uniform float		uExposure;
 uniform float		uGamma;
 uniform float		uFogDensity;
+uniform float 		uOffset;
 
 varying vec3        vNormal;
 varying vec3        vPosition;
@@ -132,6 +133,9 @@ void main() {
 	float fogAmount = fogFactorExp2(fogDistance, uFogDensity);
 
 	color.rgb = mix(color.rgb, fogColor, fogAmount+uFogOffset);
+
+	float grey = (color.r + color.g + color.b) / 3.0;
+	color.rgb = mix(color.rgb, vec3(grey), uOffset);
 
 	// output the fragment color
     gl_FragColor		= vec4( color, 1.0 );

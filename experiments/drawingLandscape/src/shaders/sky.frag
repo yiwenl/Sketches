@@ -7,6 +7,7 @@ varying vec2 vTextureCoord;
 varying vec3 vPosition;
 uniform sampler2D texture;
 uniform float uFogOffset;
+uniform float uOffset;
 
 float fogFactorExp2(const float dist, const float density) {
 	const float LOG2 = -1.442695;
@@ -22,8 +23,12 @@ void main(void) {
 	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
 	float fogAmount = fogFactorExp2(fogDistance, FOG_DENSITY);
 	vec4 color = texture2D(texture, vTextureCoord);
+	
 	float offset = smoothstep(5.0, 1.0, vPosition.y);
 	color.rgb = mix(color.rgb, fogColor, offset);
+
+	float grey = (color.r + color.g + color.b) / 3.0;
+	color.rgb = mix(color.rgb, vec3(grey), uOffset);
 
     gl_FragColor = color;
 }

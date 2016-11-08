@@ -56,6 +56,23 @@ class SubsceneParticles {
 			View Save reset fboLife
 			Clear fboVels
 		*/
+
+		this._vSave.reset(points);
+
+		GL.setMatrices(this._scene.cameraOrtho);
+
+
+		this._fboCurrent.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vSave.render();
+		this._fboCurrent.unbind();
+
+		this._fboTarget.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vSave.render();
+		this._fboTarget.unbind();
+
+		GL.setMatrices(this._scene.camera);
 	}
 
 

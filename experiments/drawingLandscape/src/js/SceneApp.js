@@ -81,7 +81,7 @@ class SceneApp extends alfrid.Scene {
 		this._vTerrain = new ViewTerrain();
 
 
-		this._sub = new SubsceneParticles(this);
+		// this._sub = new SubsceneParticles(this);
 	}
 
 	_onKey(e) {
@@ -104,6 +104,7 @@ class SceneApp extends alfrid.Scene {
 			this._drawing.lock(false);
 			this._drawing.clear();
 			this._vStroke.clear();
+			this._vStroke.show();
 
 			this._brushIndex = Math.floor(Math.random() * 6);
 			this._textureBrush.updateTexture(getAsset(`brush${this._brushIndex}`));
@@ -119,7 +120,9 @@ class SceneApp extends alfrid.Scene {
 			
 			if(this._vStroke.mesh) {
 				let vertices = this._vStroke.mesh.vertices;
-				console.table(vertices);
+				// console.table(vertices);
+				// this._sub.reset(vertices);
+				this._vStroke.anim();
 			}
 		}
 
@@ -167,18 +170,18 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
-		this._sub.update();
+		// this._sub.update();
 		GL.clear(0, 0, 0, 0);
 
 		GL.setMatrices(this.camera);
 
-		this._vSky.render(this._textureBg);
-		this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain, this._textureNoise);
+		this._vSky.render(this._textureBg, this._drawingOffset.value);
+		this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain, this._textureNoise, this._drawingOffset.value);
 
-		this._vMountains.render(this._textureRad, this._textureIrr, this._textureNoise);
+		this._vMountains.render(this._textureRad, this._textureIrr, this._textureNoise, this._drawingOffset.value);
 		this._vStroke.render(this._textureBrush, this._textureBrushNormal, this._textureRad, this._textureIrr);
 
-		this._sub.render();
+		// this._sub.render();
 
 		if(params.debugHitPlane) {
 			this._vHitPlane.render();

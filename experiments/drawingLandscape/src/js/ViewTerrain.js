@@ -36,7 +36,7 @@ class ViewTerrain extends alfrid.View {
 	}
 
 
-	render(textureRad, textureIrr, textureAO, textureNoise) {
+	render(textureRad, textureIrr, textureAO, textureNoise, mOffset) {
 		if(!this.mesh) {
 			return;
 		}
@@ -64,6 +64,7 @@ class ViewTerrain extends alfrid.View {
 
 		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
 		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+		this.shader.uniform("uOffset", "float", mOffset);
 
 		GL.draw(this.mesh);
 	}

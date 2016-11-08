@@ -17,6 +17,7 @@ uniform float		uSpecular;
 
 uniform float		uExposure;
 uniform float		uGamma;
+uniform float		uOpacity;
 
 varying vec3        vNormal;
 varying vec3        vPosition;
@@ -115,6 +116,6 @@ void main() {
 	color				= pow( color, vec3( 1.0 / uGamma ) );
 
 	// output the fragment color
-    gl_FragColor		= vec4( color, baseColor.a );
+    gl_FragColor		= vec4( color, baseColor.a * uOpacity );
 
 }

@@ -19,6 +19,7 @@ window.params = {
 	fogDensity:0.05,
 	numParticles:256,
 	skipCount:10,
+	maxRadius: 10,
 };
 
 const assets = [
@@ -105,14 +106,13 @@ function _init3D() {
 	GL.init(canvas);
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
+	// window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
-	gui.add(params, 'debugHitPlane');
-	
-	gui.add(params, 'gamma', 1, 5);
-	gui.add(params, 'exposure', 1, 25);
+	// gui.add(params, 'debugHitPlane');
+	// gui.add(params, 'gamma', 1, 5);
+	// gui.add(params, 'exposure', 1, 25);
 	// gui.add(params, 'fogDensity', 0, 0.1).step(0.001);
 }

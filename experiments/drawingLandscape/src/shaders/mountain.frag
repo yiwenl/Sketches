@@ -20,6 +20,7 @@ uniform float		uMetallic;
 uniform float		uSpecular;
 uniform float		uExposure;
 uniform float		uGamma;
+uniform float 		uOffset;
 
 uniform float uFogOffset;
 uniform float uMaxRange;
@@ -156,6 +157,10 @@ void main(void) {
 
 	color.rgb = mix(groundColor, color.rgb, opacity);
 	color.rgb = mix(color.rgb, fogColor, distOffset);
+
+	float grey = (color.r + color.g + color.b) / 3.0;
+	color.rgb = mix(color.rgb, vec3(grey), uOffset);
+	
 	color.a *= opacity;
 	// color.rgb = vWsNormal * .5 + .5;
 

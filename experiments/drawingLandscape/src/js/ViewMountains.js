@@ -190,7 +190,7 @@ class ViewMountains extends alfrid.View {
 	}
 
 
-	render(textureRad, textureIrr, textureNoise) {
+	render(textureRad, textureIrr, textureNoise, mOffset) {
 		this.shader.bind();
 		this.shader.uniform('uNoiseMap', 'uniform1i', 1);
 		this.shader.uniform('uRadianceMap', 'uniform1i', 2);
@@ -211,6 +211,7 @@ class ViewMountains extends alfrid.View {
 		this.shader.uniform("uFogOffset", "float", params.fogOffset);
 		this.shader.uniform("uMaxRange", "float", params.maxRange);
 		this.shader.uniform("uFadeInRange", "float", params.fadeInRange);
+		this.shader.uniform("uOffset", "float", mOffset);
 
 		this.meshes.map((m)=> {
 			this._textures[m.textureIndex].bind(0);

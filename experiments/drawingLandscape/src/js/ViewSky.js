@@ -16,11 +16,12 @@ class ViewSky extends alfrid.View {
 	}
 
 
-	render(texture) {
+	render(texture, mOffset) {
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
 		this.shader.uniform("uFogOffset", "float", params.fogOffset);
+		this.shader.uniform("uOffset", "float", mOffset);
 		GL.draw(this.mesh);
 	}
 
