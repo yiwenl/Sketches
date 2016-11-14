@@ -21,7 +21,7 @@ class ViewCube extends alfrid.View {
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
-		this.shader.uniform("uNum", "float", 16.0);
+		this.shader.uniform("uNum", "float", 8.0);
 		GL.draw(this.mesh);
 	}
 

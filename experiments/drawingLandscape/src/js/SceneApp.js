@@ -170,6 +170,9 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		if(!this._inDrawingMode) {
+			this.orbitalControl.ry.value += 0.002;
+		}
 		// this._sub.update();
 		GL.clear(0, 0, 0, 0);
 

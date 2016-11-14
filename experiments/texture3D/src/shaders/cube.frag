@@ -38,10 +38,7 @@ vec3 texture3D(vec3 v) {
 	vec4 color1 = texture2D(texture, uv1);
 	vec4 color = mix(color0, color1, p);
 
-
 	return color.rgb;
-
-	return vec3(v.z);
 }
 
 

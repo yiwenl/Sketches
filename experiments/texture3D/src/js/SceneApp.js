@@ -13,6 +13,7 @@ class SceneApp extends Scene {
 		this.orbitalControl.radius.value = 5;
 
 		this._hasRendered = false;
+		this.time = 0;
 	}
 
 	_initTextures() {
@@ -30,13 +31,15 @@ class SceneApp extends Scene {
 
 		this._vSlice = new View3DSlice();
 		this._vCube = new ViewCube();
-		this._noise3D = new Noise3DTexture(16.0, 2.0);
+		this._noise3D = new Noise3DTexture(8.0, 2.0);
 
-		this._noise3D.render();
+		
 	}
 
 
 	render() {
+		this.time += 0.01;
+		this._noise3D.render(this.time);
 		
 		GL.clear(0, 0, 0, 0);
 		this._bAxis.draw();

@@ -1,19 +1,21 @@
-// noise3D.frag
+// noise.frag
+
 #define SHADER_NAME SIMPLE_TEXTURE
 
 precision highp float;
 varying vec2 vTextureCoord;
 uniform float uSeed;
+uniform float uOffset;
 uniform float uNoiseScale;
 
 
-vec3 mod289(vec3 x) {	return x - floor(x * (1.0 / 289.0)) * 289.0;	}
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
-vec4 mod289(vec4 x) {	return x - floor(x * (1.0 / 289.0)) * 289.0;	}
+vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
-vec4 permute(vec4 x) {	return mod289(((x*34.0)+1.0)*x);	}
+vec4 permute(vec4 x) {  return mod289(((x*34.0)+1.0)*x);  }
 
-vec4 taylorInvSqrt(vec4 r) {	return 1.79284291400159 - 0.85373472095314 * r;}
+vec4 taylorInvSqrt(vec4 r) {  return 1.79284291400159 - 0.85373472095314 * r;}
 
 float snoise(vec3 v) { 
   const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
@@ -109,9 +111,9 @@ vec3 curlNoise( vec3 p ){
 
 void main(void) {
 
-	vec3 noise = curlNoise(vec3(vTextureCoord, uSeed) * uNoiseScale);
+  vec3 noise = curlNoise((vec3(vTextureCoord, uSeed) + uOffset) * uNoiseScale);
 
-	noise = noise *.5 + .5;
+  noise = noise *.5 + .5;
 
     gl_FragColor = vec4(noise, 1.0);
 }

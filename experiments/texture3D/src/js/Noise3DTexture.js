@@ -1,7 +1,7 @@
 // Noise3DTexture.js
 
 import alfrid, { GL, GLShader, Geom } from 'alfrid';
-import fs from '../shaders/noise.frag';
+import fs from '../shaders/noise3D.frag';
 
 class Noise3DTexture {
 	constructor(mNum = 8.0, mNoiseScale = 1.0) {
@@ -24,7 +24,7 @@ class Noise3DTexture {
 	}
 
 
-	render() {
+	render(mOffset = 0) {
 		this._fboNoise.bind();
 		GL.clear(0, 0, 0, 0);
 		const size = this._noiseSize;
@@ -37,6 +37,7 @@ class Noise3DTexture {
 				this.shader.bind();
 				this.shader.uniform("uNoiseScale", "float", this.noiseScale);
 				this.shader.uniform("uSeed", "float", index);
+				this.shader.uniform("uOffset", "float", mOffset);
 				GL.draw(this.mesh);
 			}
 		}
