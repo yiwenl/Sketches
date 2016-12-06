@@ -32,8 +32,6 @@ class SceneApp extends Scene {
 		this._vSlice = new View3DSlice();
 		this._vCube = new ViewCube();
 		this._noise3D = new Noise3DTexture(8.0, 2.0);
-
-		
 	}
 
 

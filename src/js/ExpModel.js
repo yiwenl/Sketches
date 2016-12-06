@@ -123,6 +123,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchPainting.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/drawingLandscape/dist/index.html',
 		title:'Painting Landscape'
+	},
+	{
+		cover:'assets/img/coverSketchPaintingParticles.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/strokeToParticles/dist/index.html',
+		title:'Painting Particles'
 	}
 ]
 
