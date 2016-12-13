@@ -45,9 +45,7 @@ class SceneApp extends alfrid.Scene {
 		this._canvasStroke.height = params.numParticles;
 		this._imgDataStroke = new Uint8Array(params.numParticles * params.numParticles * 4);
 		this._ctxStroke = this._canvasStroke.getContext('2d');
-
-		document.body.appendChild(this._canvasStroke);
-		this._canvasStroke.className = 'canvas-stroke';
+		this._offset = new alfrid.TweenNumber(0, 'linear', 0.01);
 
 		window.addEventListener('keydown', (e)=>this._onKey(e));
 		window.addEventListener('touchstart', ()=> {
@@ -132,7 +130,9 @@ class SceneApp extends alfrid.Scene {
 
 		} else {
 			this.orbitalControl.lock(false);
-			this.orbitalControl.radius.value = 6.5;
+			let dir = Math.random() < .5 ? 1 : -1;
+			this.orbitalControl.ry.value += .35 * dir;
+			this.orbitalControl.radius.value = 5;
 			this._drawingOffset.value = 0;
 			this._drawing.lock(true);
 
@@ -145,17 +145,16 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	_resetParticlePositions() {
-		console.debug('reset particles', this.camera);
-
 		mat4.mul(this.matrixInvViewProj, this.camera.projection, this.camera.matrix);
 		mat4.invert(this.matrixInvViewProj, this.matrixInvViewProj);
 		mat4.invert(this.mProjInv, this.camera.projection);
 		mat4.invert(this.mViewInv, this.camera.matrix);
 
+		this._offset.setTo(0);
+		this._offset.value = 2.0;
+
 		this._getStrokeCanvas();
-
-
-		this._vSave.save();
+		this._vSave.save(this._imgDataStroke);
 
 		this._fboCurrent.bind();
 		GL.clear(0, 0, 0, 0);
@@ -193,7 +192,7 @@ class SceneApp extends alfrid.Scene {
 	updateFbo() {
 		this._fboTarget.bind();
 		GL.clear(0, 0, 0, 1);
-		this._vSim.render(this._fboCurrent.getTexture(1), this._fboCurrent.getTexture(0), this._fboCurrent.getTexture(2), this._fboCurrent.getTexture(3));
+		this._vSim.render(this._fboCurrent.getTexture(1), this._fboCurrent.getTexture(0), this._fboCurrent.getTexture(2), this._fboCurrent.getTexture(3), this._offset.value);
 		this._fboTarget.unbind();
 
 
@@ -230,7 +229,7 @@ class SceneApp extends alfrid.Scene {
 				this.updateFbo();
 			}
 			p = this._count / params.skipCount;	
-			this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(3));
+			this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(3), this._fboCurrent.getTexture(2));
 		} 
 
 		
@@ -262,13 +261,13 @@ class SceneApp extends alfrid.Scene {
 		// }
 
 
-		for(let i=0; i<4; i++) {
-			GL.viewport(0, 60 + size * i, size, size);
-			this._bCopy.draw(this._fboCurrent.getTexture(i));
+		// for(let i=0; i<4; i++) {
+		// 	GL.viewport(0, 60 + size * i, size, size);
+		// 	this._bCopy.draw(this._fboCurrent.getTexture(i));
 
-			GL.viewport(size, 60 + size * i, size, size);
-			this._bCopy.draw(this._fboTarget.getTexture(i));
-		}
+		// 	GL.viewport(size, 60 + size * i, size, size);
+		// 	this._bCopy.draw(this._fboTarget.getTexture(i));
+		// }
 	}
 
 

@@ -5,6 +5,7 @@
 precision highp float;
 
 uniform sampler2D 	uAoMap;
+uniform sampler2D 	uTextureNoise;
 uniform sampler2D 	uTextureBrush;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
@@ -101,6 +102,7 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 
 
 void main() {
+	
 	vec3 N 				= normalize( vWsNormal );
 	vec3 V 				= normalize( vEyePosition );
 	
@@ -114,14 +116,18 @@ void main() {
 	if(colorDrawing.a < 0.01) {
 		color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);	
 	} else {
+		vec3 noise     = texture2D(uTextureNoise, vTextureCoord * 8.0).rgb;
+		N              = normalize(N + noise * 0.75);
 		vec3 colorGold = vec3(1.000, 0.766, 0.276);
-		color 			= getPbr(N, V, colorGold, 0.95, 0.85, 0.95);
-		color 			*= colorDrawing.rgb;
+		color          = getPbr(N, V, colorGold, 0.95, 0.85, 0.95);
+		color          *= colorDrawing.rgb;
 	}
 	
 
 	vec3 ao 			= texture2D(uAoMap, vTextureCoord).rgb;
 	color 				*= ao;
+
+
 
 	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );

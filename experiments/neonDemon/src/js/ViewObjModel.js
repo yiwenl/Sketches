@@ -27,33 +27,10 @@ class ViewObjModel extends alfrid.View {
 		this.metallic = 0;
 		const grey = 0.015;
 		this.baseColor = [grey, grey, grey];
+
+		this._textureNoise = new alfrid.GLTexture(getAsset('noise'));
 	}
 
-
-	renderMap(textureRad, textureIrr, textureAO, textureBrush, drawingMatrix) {
-		this.shaderMap.bind();
-
-		this.shaderMap.uniform('uAoMap', 'uniform1i', 0);
-		this.shaderMap.uniform("uTextureBrush", "uniform1i", 1);
-		this.shaderMap.uniform('uRadianceMap', 'uniform1i', 2);
-		this.shaderMap.uniform('uIrradianceMap', 'uniform1i', 3);
-		textureAO.bind(0);
-		textureBrush.bind(1);
-		textureRad.bind(2);
-		textureIrr.bind(3);
-
-		this.shaderMap.uniform("uDrawingMatrix", "uniformMatrix4fv", drawingMatrix);
-		this.shaderMap.uniform('uBaseColor', 'uniform3fv', this.baseColor);
-		this.shaderMap.uniform('uRoughness', 'uniform1f', this.roughness);
-		this.shaderMap.uniform('uMetallic', 'uniform1f', this.metallic);
-		this.shaderMap.uniform('uSpecular', 'uniform1f', this.specular);
-
-		this.shaderMap.uniform('uExposure', 'uniform1f', params.exposure);
-		this.shaderMap.uniform('uGamma', 'uniform1f', params.gamma);
-		this.shaderMap.uniform("uTime", "float", this.time);
-
-		GL.draw(this.mesh);
-	}
 
 	render(textureRad, textureIrr, textureAO, textureBrush, drawingMatrix) {
 		this.time += 0.01;
@@ -61,12 +38,14 @@ class ViewObjModel extends alfrid.View {
 
 		this.shader.uniform('uAoMap', 'uniform1i', 0);
 		this.shader.uniform("uTextureBrush", "uniform1i", 1);
-		this.shader.uniform('uRadianceMap', 'uniform1i', 2);
-		this.shader.uniform('uIrradianceMap', 'uniform1i', 3);
+		this.shader.uniform("uTextureNoise", "uniform1i", 2);
+		this.shader.uniform('uRadianceMap', 'uniform1i', 3);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 4);
 		textureAO.bind(0);
 		textureBrush.bind(1);
-		textureRad.bind(2);
-		textureIrr.bind(3);
+		this._textureNoise.bind(2);
+		textureRad.bind(3);
+		textureIrr.bind(4);
 
 		this.shader.uniform("uDrawingMatrix", "uniformMatrix4fv", drawingMatrix);
 		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);

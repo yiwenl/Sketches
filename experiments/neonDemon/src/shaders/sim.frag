@@ -9,6 +9,7 @@ uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
 uniform sampler2D textureColor;
 uniform float time;
+uniform float uOffset;
 uniform float maxRadius;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
@@ -114,6 +115,20 @@ vec3 curlNoise( vec3 p ){
 
 }
 
+float exponentialIn(float t) {
+  return t == 0.0 ? t : pow(2.0, 10.0 * (t - 1.0));
+}
+
+vec2 rotate(vec2 v, float a) {
+	float s = sin(a);
+	float c = cos(a);
+	mat2 m = mat2(c, -s, s, c);
+	return m * v;
+}
+
+#define PI 3.141592653
+#define center vec2(.5)
+
 void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
@@ -122,15 +137,22 @@ void main(void) {
 	float posOffset = mix(1.0, extra.r, .5) * .25;
 	vec3 acc        = curlNoise(pos * posOffset + time * .3);
 	acc.z = acc.z * .5 + .5;
-	acc.y += 0.075;
-	
-	vel += acc * .01;
+	acc.y += 0.1;
+	acc.y *= 0.5;
 
-	// float dist = length(pos);
-	// if(dist > maxRadius) {
-	// 	float f = (dist - maxRadius) * .005;
-	// 	vel -= normalize(pos) * f;
-	// }
+	vec2 uv = extra.rg;
+	float distToCenter = min(distance(uv, center), .5) / 0.5;
+	distToCenter = 1.0 - distToCenter;
+	float velOffset = smoothstep(0.0, 1.0, -1.0 + distToCenter + uOffset);
+	velOffset = exponentialIn(velOffset);
+	
+	vel += acc * .01 * velOffset;
+
+
+	vec2 vxz = normalize(pos.xz);
+	vxz = rotate(vxz, -PI * 0.65);
+	vel.xz += vxz * 0.01 * velOffset;
+
 
 	const float decrease = .93;
 	vel *= decrease;

@@ -15,6 +15,7 @@ window.params = {
 
 const assets = [
 	{ id:'aomap', url:'assets/img/aomap.jpg' },
+	{ id:'noise', url:'assets/img/noise.png' },
 	{ id:'objHead', url:'assets/obj/model.obj', type:'text' },
 	{ id:'radiance', url:'assets/img/xlight_radiance.dds', type: 'binary' },
 	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },

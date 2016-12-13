@@ -128,6 +128,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchPaintingParticles.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/strokeToParticles/dist/index.html',
 		title:'Painting Particles'
+	},
+	{
+		cover:'assets/img/coverSketchNeonDemon.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/neonDemon/dist/index.html',
+		title:'Painting Particles'
 	}
 ]
 
