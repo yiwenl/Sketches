@@ -10,6 +10,7 @@ const assets = [
 	{ id:'heightmap', url:'assets/img/height.jpg' },
 	{ id:'normalmap', url:'assets/img/normal.jpg' },
 	{ id:'gradient', url:'assets/img/gradient.jpg' },
+	{ id:'bg', url:'assets/img/bg.jpg' },
 ];
 window.params = {
 	numParticles:256*4,

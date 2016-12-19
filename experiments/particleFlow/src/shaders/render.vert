@@ -48,7 +48,8 @@ void main(void) {
 		a = 0.0;
 	}
 
-	float p = (pos.y-1.0) / uMaxHeight;
+	float p = (pos.y-1.0)*1.75 / uMaxHeight;
+	p = clamp(p, 0.0, 1.0);
 	p = mix(p, extra.b, .5);
 	vec4 color = texture2D(textureGradient, vec2(p, .5));
 	vec2 uvMap = texture2D(textureTest, uv).xy;
@@ -59,6 +60,7 @@ void main(void) {
 	// color.rgb += (extra.rgb - 0.5) * 0.1;
 	// color.rgb *= 1.25;
 	vColor = color;
+	vColor.a *= a;
 
 
 	// float g 	 = sin(extra.r + time * mix(extra.b, 1.0, .5));

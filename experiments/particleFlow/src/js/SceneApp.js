@@ -36,6 +36,7 @@ class SceneApp extends alfrid.Scene {
 		this._textureHeight   = new alfrid.GLTexture(getAsset('heightmap'));
 		this._textureNormal   = new alfrid.GLTexture(getAsset('normalmap'));
 		this._textureGradient = new alfrid.GLTexture(getAsset('gradient'));
+		this._textureBg = new alfrid.GLTexture(getAsset('bg'));
 	}
 
 
@@ -103,6 +104,10 @@ class SceneApp extends alfrid.Scene {
 		GL.clear(0, 0, 0, 0);
 		// this._bAxis.draw();
 		// this._bDots.draw();
+
+		// GL.disable(GL.DEPTH_TEST);
+		// this._bCopy.draw(this._textureBg);
+		// GL.enable(GL.DEPTH_TEST);
 
 		if(params.renderTerrain) {
 			this._vTerrain.render(this._textureHeight, this._textureNormal);	
