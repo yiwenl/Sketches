@@ -9,6 +9,7 @@ const GL = alfrid.GL;
 const assets = [
 	{ id:'heightmap', url:'assets/img/height.jpg' },
 	{ id:'normalmap', url:'assets/img/normal.jpg' },
+	{ id:'noise', url:'assets/img/noise.jpg' },
 	{ id:'gradient', url:'assets/img/gradient.jpg' },
 	{ id:'bg', url:'assets/img/bg.jpg' },
 	{ id:'radiance', url:'assets/img/studio_radiance.dds', type: 'binary' },

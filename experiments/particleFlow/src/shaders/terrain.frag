@@ -5,6 +5,7 @@
 precision highp float;
 uniform sampler2D textureNormal;
 uniform sampler2D textureHeight;
+uniform sampler2D textureNoise;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
 
@@ -98,8 +99,10 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 }
 
 void main(void) {
-	vec3 N = texture2D(textureNormal, vTextureCoord).rbg * 2.0 - 1.0;
-	N.rb *= -1.0;
+	vec3 N     = texture2D(textureNormal, vTextureCoord).rbg * 2.0 - 1.0;
+	N.rb       *= -1.0;
+	vec3 noise = texture2D(textureNoise, vTextureCoord * 40.0).rgb * 2.0 - 1.0;
+	N          = normalize( N + noise * 0.2);
 
 	vec3 V 				= normalize( vEyePosition );
 	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);

@@ -55,7 +55,8 @@ class SceneApp extends alfrid.Scene {
 		this._textureHeight   = new alfrid.GLTexture(getAsset('heightmap'));
 		this._textureNormal   = new alfrid.GLTexture(getAsset('normalmap'));
 		this._textureGradient = new alfrid.GLTexture(getAsset('gradient'));
-		this._textureBg = new alfrid.GLTexture(getAsset('bg'));
+		this._textureBg       = new alfrid.GLTexture(getAsset('bg'));
+		this._textureNoise    = new alfrid.GLTexture(getAsset('noise'));
 	}
 
 
@@ -64,9 +65,7 @@ class SceneApp extends alfrid.Scene {
 		
 		//	helpers
 		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
-		this._bBall = new alfrid.BatchBall();
+		this._bSkybox = new alfrid.BatchSkybox(params.terrainSize*.75);
 
 
 		//	views
@@ -136,13 +135,10 @@ class SceneApp extends alfrid.Scene {
 		// let p = this._count / params.skipCount;
 
 		GL.clear(0, 0, 0, 0);
-
-		// GL.disable(GL.DEPTH_TEST);
-		// this._bCopy.draw(this._textureBg);
-		// GL.enable(GL.DEPTH_TEST);
+		this._bSkybox.draw(this._textureIrr);
 
 		if(params.renderTerrain) {
-			this._vTerrain.render(this._textureHeight, this._textureNormal, this._textureRad, this._textureIrr);
+			this._vTerrain.render(this._textureHeight, this._textureNormal, this._textureRad, this._textureIrr, this._textureNoise);
 		}
 		
 		for(let i=0; i<this._particleSets.length; i++) {
@@ -150,7 +146,7 @@ class SceneApp extends alfrid.Scene {
 			let p = oSet.count / params.skipCount;
 			let { fboTarget, fboCurrent } = oSet;
 
-			this._vRender.render(fboTarget.getTexture(0), fboCurrent.getTexture(0), p, fboCurrent.getTexture(2), fboTarget.getTexture(3), this._textureNormal, this._textureGradient);
+			this._vRender.render(fboTarget.getTexture(0), fboCurrent.getTexture(0), p, fboCurrent.getTexture(2), fboTarget.getTexture(3), this._textureNormal, this._textureGradient, this._textureRad, this._textureIrr);
 		}
 		
 

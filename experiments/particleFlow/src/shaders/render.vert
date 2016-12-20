@@ -7,6 +7,8 @@ attribute vec3 aNormal;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
+uniform mat3 uNormalMatrix;
+uniform mat3 uModelViewMatrixInverse;
 uniform sampler2D textureCurr;
 uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
@@ -18,22 +20,15 @@ uniform float time;
 uniform float uMaxHeight;
 uniform vec2 uViewport;
 
-varying vec4 vColor;
 varying vec3 vNormal;
+varying vec3 vPosition;
+varying vec3 vWsPosition;
+varying vec3 vEyePosition;
+varying vec3 vWsNormal;
+varying vec4 vColor;
 
 const float radius = 0.01;
 
-
-float diffuse(vec3 N, vec3 L) {
-	return max(dot(N, normalize(L)), 0.0);
-}
-
-
-vec3 diffuse(vec3 N, vec3 L, vec3 C) {
-	return diffuse(N, L) * C;
-}
-
-#define LIGHT vec3(1.0, 1.0, 1.0)
 
 void main(void) {
 	vec2 uv      = aVertexPosition.xy;
@@ -41,26 +36,39 @@ void main(void) {
 	vec3 posNext = texture2D(textureNext, uv).rgb;
 	vec3 pos     = mix(posCurr, posNext, percent);
 	vec3 extra   = texture2D(textureExtra, uv).rgb;
-	gl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
+
+	vec4 worldSpacePosition	= uModelMatrix * vec4(pos, 1.0);
+    vec4 viewSpacePosition	= uViewMatrix * worldSpacePosition;
+	
+    
+    vPosition				= viewSpacePosition.xyz;
+	vWsPosition				= worldSpacePosition.xyz;
+	
+	vec4 eyeDirViewSpace	= viewSpacePosition - vec4( 0, 0, 0, 1 );
+	vEyePosition			= -vec3( uModelViewMatrixInverse * eyeDirViewSpace.xyz );
+	
+    gl_Position				= uProjectionMatrix * viewSpacePosition;
+
 	
 	float a      = 1.0;
 	if(posNext.x < posCurr.x) {
 		a = 0.0;
 	}
 
-	float p = (pos.y-1.0)*1.75 / uMaxHeight;
+	float p = (pos.y-1.0)*1.25 / uMaxHeight;
 	p = clamp(p, 0.0, 1.0);
 	p = mix(p, extra.b, .5);
-	vec4 color = texture2D(textureGradient, vec2(p, .5));
+	vec4 color = texture2D(textureGradient, vec2(p, extra.r));
 	vec2 uvMap = texture2D(textureTest, uv).xy;
 	vec3 N = texture2D(textureNormal, uvMap).rbg * 2.0 - 1.0;
 	N.rb *= -1.0;
-	float d = diffuse(N, LIGHT);
-	color.rgb *= mix(d, 1.0, .5);
-	// color.rgb += (extra.rgb - 0.5) * 0.1;
-	// color.rgb *= 1.25;
 	vColor = color;
 	vColor.a *= a;
+
+
+	vNormal					= uNormalMatrix * aNormal;
+	vNormal 				= N;
+	vWsNormal				= normalize( uModelViewMatrixInverse * vNormal );
 
 
 	// float g 	 = sin(extra.r + time * mix(extra.b, 1.0, .5));
@@ -72,6 +80,4 @@ void main(void) {
 
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
     gl_PointSize = distOffset * (1.0 + extra.x * 1.0);
-
-	vNormal 	 = aNormal;
 }
