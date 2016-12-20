@@ -11,15 +11,27 @@ const assets = [
 	{ id:'normalmap', url:'assets/img/normal.jpg' },
 	{ id:'gradient', url:'assets/img/gradient.jpg' },
 	{ id:'bg', url:'assets/img/bg.jpg' },
+	{ id:'radiance', url:'assets/img/studio_radiance.dds', type: 'binary' },
+	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
+	{ id:'irr_posx', url:'assets/img/irr_posx.hdr', type:'binary' },
+	{ id:'irr_posy', url:'assets/img/irr_posy.hdr', type:'binary' },
+	{ id:'irr_posz', url:'assets/img/irr_posz.hdr', type:'binary' },
+	{ id:'irr_negx', url:'assets/img/irr_negx.hdr', type:'binary' },
+	{ id:'irr_negy', url:'assets/img/irr_negy.hdr', type:'binary' },
+	{ id:'irr_negz', url:'assets/img/irr_negz.hdr', type:'binary' },
 ];
+
 window.params = {
-	numParticles:256*4,
+	numSets:2,
+	numParticles:256*2,
 	skipCount:3,
 	maxRadius: 2.5,
 	terrainSize: 100,
 	maxHeight: 15,
 	offset: 0.995,
-	renderTerrain:false
+	renderTerrain:true,
+	gamma:2.2,
+	exposure:5
 };
 
 if(document.body) {
@@ -81,6 +93,9 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas);
 
+	//	INIT DAT-GUI
+	window.gui = new dat.GUI({ width:300 });
+
 	//	CREATE SCENE
 	let scene = new SceneApp();
 
@@ -89,8 +104,7 @@ function _init3D() {
 	document.body.appendChild(stats.domElement);
 	alfrid.Scheduler.addEF(()=>stats.update());
 
-	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
+	
 	gui.add(params, 'maxRadius', 0.0, 10.0);
 	gui.add(params, 'offset', 0.9, 1.0).listen();
 	gui.add(params, 'renderTerrain');

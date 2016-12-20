@@ -56,6 +56,22 @@ class ViewSave extends alfrid.View {
 		// this.meshExtra.bufferIndex(indices);
 	}
 
+	reset() {
+		let positions = [];
+		let extras = [];
+		let {numParticles, terrainSize} = params;
+
+		for(let j = 0; j < numParticles; j++) {
+			for(let i = 0; i < numParticles; i++) {
+				positions.push( [ (i/numParticles - .5) * terrainSize, 0,  (j/numParticles - .5) * terrainSize * 0.75]);
+				extras.push([Math.random(), Math.random(), Math.random()]);
+			}
+		}
+
+		this.mesh.bufferVertex(positions);
+		this.mesh.bufferData(extras, 'aExtra', 3);
+	}
+
 
 	render(state = 0) {
 		this.shader.bind();

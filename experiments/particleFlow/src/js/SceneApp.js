@@ -31,8 +31,27 @@ class SceneApp extends alfrid.Scene {
 			magFilter:GL.NEAREST
 		};
 
-		this._fboCurrent      = new alfrid.FrameBuffer(numParticles, numParticles, o, true);
-		this._fboTarget       = new alfrid.FrameBuffer(numParticles, numParticles, o, true);
+		this._particleSets = [];
+		for(let i=0; i<params.numSets; i++) {
+			const fboCurrent      = new alfrid.FrameBuffer(numParticles, numParticles, o, true);
+			const fboTarget       = new alfrid.FrameBuffer(numParticles, numParticles, o, true);
+			const oSet = {fboCurrent, fboTarget, count:i};			
+			console.log(oSet);
+			this._particleSets.push(oSet);
+		}
+
+		let irr_posx = alfrid.HDRLoader.parse(getAsset('irr_posx'));
+		let irr_negx = alfrid.HDRLoader.parse(getAsset('irr_negx'));
+		let irr_posy = alfrid.HDRLoader.parse(getAsset('irr_posy'));
+		let irr_negy = alfrid.HDRLoader.parse(getAsset('irr_negy'));
+		let irr_posz = alfrid.HDRLoader.parse(getAsset('irr_posz'));
+		let irr_negz = alfrid.HDRLoader.parse(getAsset('irr_negz'));
+
+		this._textureIrr = new alfrid.GLCubeTexture([irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz]);
+		this._textureRad = alfrid.GLCubeTexture.parseDDS(getAsset('radiance'));
+
+		// this._fboCurrent      = new alfrid.FrameBuffer(numParticles, numParticles, o, true);
+		// this._fboTarget       = new alfrid.FrameBuffer(numParticles, numParticles, o, true);
 		this._textureHeight   = new alfrid.GLTexture(getAsset('heightmap'));
 		this._textureNormal   = new alfrid.GLTexture(getAsset('normalmap'));
 		this._textureGradient = new alfrid.GLTexture(getAsset('gradient'));
@@ -58,69 +77,88 @@ class SceneApp extends alfrid.Scene {
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
 
+		for(let i=0; i<params.numSets; i++) {
+			this._vSave.reset();
+			let { fboTarget, fboCurrent } = this._particleSets[i];
+			fboCurrent.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vSave.render();
+			fboCurrent.unbind();
 
-		this._fboCurrent.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vSave.render();
-		this._fboCurrent.unbind();
-
-		this._fboTarget.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vSave.render();
-		this._fboTarget.unbind();
+			fboTarget.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vSave.render();
+			fboTarget.unbind();	
+		}
+		
 
 		GL.setMatrices(this.camera);
 	}
 
 
-	updateFbo() {
-		this._fboTarget.bind();
+	updateFbo(o) {
+
+		let { fboTarget, fboCurrent } = o;
+		fboTarget.bind();
 		GL.clear(0, 0, 0, 1);
 		this._vSim.render(
-			this._fboCurrent.getTexture(1), 
-			this._fboCurrent.getTexture(0), 
-			this._fboCurrent.getTexture(2), 
+			fboCurrent.getTexture(1), 
+			fboCurrent.getTexture(0), 
+			fboCurrent.getTexture(2), 
 			this._textureHeight);
-		this._fboTarget.unbind();
+		fboTarget.unbind();
 
 
-		let tmp          = this._fboCurrent;
-		this._fboCurrent = this._fboTarget;
-		this._fboTarget  = tmp;
-
+		let tmp     = o.fboCurrent;
+		o.fboCurrent = o.fboTarget;
+		o.fboTarget  = tmp;
 	}
 
 
 	render() {
 
-		this._count ++;
-		if(this._count % params.skipCount == 0) {
-			this._count = 0;
-			this.updateFbo();
+		for(let i=0; i<this._particleSets.length; i++) {
+			let oSet = this._particleSets[i];
+			oSet.count ++;
+
+			if(oSet.count % params.skipCount == 0) {
+				oSet.count = 0;
+				this.updateFbo(oSet);
+			}
 		}
 
-		let p = this._count / params.skipCount;
+		// this._count ++;
+		// if(this._count % params.skipCount == 0) {
+		// 	this._count = 0;
+		// 	this.updateFbo();
+		// }
+
+		// let p = this._count / params.skipCount;
 
 		GL.clear(0, 0, 0, 0);
-		// this._bAxis.draw();
-		// this._bDots.draw();
 
 		// GL.disable(GL.DEPTH_TEST);
 		// this._bCopy.draw(this._textureBg);
 		// GL.enable(GL.DEPTH_TEST);
 
 		if(params.renderTerrain) {
-			this._vTerrain.render(this._textureHeight, this._textureNormal);	
+			this._vTerrain.render(this._textureHeight, this._textureNormal, this._textureRad, this._textureIrr);
+		}
+		
+		for(let i=0; i<this._particleSets.length; i++) {
+			let oSet = this._particleSets[i];
+			let p = oSet.count / params.skipCount;
+			let { fboTarget, fboCurrent } = oSet;
+
+			this._vRender.render(fboTarget.getTexture(0), fboCurrent.getTexture(0), p, fboCurrent.getTexture(2), fboTarget.getTexture(3), this._textureNormal, this._textureGradient);
 		}
 		
 
-		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2), this._fboTarget.getTexture(3), this._textureNormal, this._textureGradient);
-
-		const size = Math.min(params.numParticles, GL.height/4);
+		// const size = Math.min(params.numParticles, GL.height/4);
 
 		// for(let i=0; i<4; i++) {
 		// 	GL.viewport(0, size * i, size, size);
-		// 	this._bCopy.draw(this._fboCurrent.getTexture(i));
+		// 	this._bCopy.draw(this._particleSets[0].fboCurrent.getTexture(i));
 		// }
 
 	}
