@@ -63,6 +63,7 @@ void main(void) {
 	vec3 N = texture2D(textureNormal, uvMap).rbg * 2.0 - 1.0;
 	N.rb *= -1.0;
 	vColor = color;
+	vColor.rgb *= 0.25;
 	vColor.a *= a;
 
 

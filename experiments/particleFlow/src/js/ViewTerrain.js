@@ -19,7 +19,7 @@ class ViewTerrain extends alfrid.View {
 		this.roughness = .9;
 		this.specular = 0;
 		this.metallic = 0;
-		const br = 0.1;
+		const br = 1.2;
 		this.baseColor = [37/255 * br, 40/255 * br, 75/255 * br];
 		
 		gui.add(this, 'roughness', 0, 1);

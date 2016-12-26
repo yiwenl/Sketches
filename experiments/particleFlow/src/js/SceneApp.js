@@ -14,7 +14,7 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 
 		this._count = 0;
-		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
+		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 200);
 		this.orbitalControl.radius.value = 30;
 		this.orbitalControl.rx.value = 0.9;
 		this.orbitalControl.ry.value = 0.3;
@@ -65,7 +65,7 @@ class SceneApp extends alfrid.Scene {
 		
 		//	helpers
 		this._bCopy = new alfrid.BatchCopy();
-		this._bSkybox = new alfrid.BatchSkybox(params.terrainSize*.75);
+		this._bSkybox = new alfrid.BatchSkybox(params.terrainSize);
 
 
 		//	views
