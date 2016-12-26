@@ -1,18 +1,16 @@
 // shadow.frag
 
+
 precision highp float;
 varying vec2 vTextureCoord;
-varying vec4 vPosition;
 varying vec4 vShadowCoord;
-
-uniform vec3 color;
+varying vec4 vColor;
 uniform sampler2D textureDepth;
 
 
 float pcfSoftShadow(sampler2D shadowMap) {
 	const float shadowMapSize  = 1024.0;
 	const float shadowBias     = .00005;
-	const float shadowDarkness = .2;
 	float shadow = 0.0;
 	float texelSizeX =  1.0 / shadowMapSize;
 	float texelSizeY =  1.0 / shadowMapSize;
@@ -70,55 +68,26 @@ float pcfSoftShadow(sampler2D shadowMap) {
 		shadowValues.z = mix( shadowKernel[ 1 ][ 1 ], shadowKernel[ 1 ][ 0 ], fractionalCoord.y );
 		shadowValues.w = mix( shadowKernel[ 1 ][ 2 ], shadowKernel[ 1 ][ 1 ], fractionalCoord.y );
 
-		shadow = dot( shadowValues, vec4( 1.0 ) ) * shadowDarkness;
+		const float uShadowStrength = 0.3;
+		shadow = dot( shadowValues, vec4( 1.0 ) ) * uShadowStrength;
 
 	}
 
 	return shadow;
 }
 
-vec4 textureProjOffset(sampler2D uShadowMap, vec4 sc, vec2 offset) {
-	const float shadowBias     = .00005;
-	vec4 scCopy = sc;
-	scCopy.xy += offset;
-	return texture2DProj(uShadowMap, scCopy, shadowBias);
-}
-
-vec4 pcfShadow(sampler2D uShadowMap) {
-	vec4 sc                   = vShadowCoord / vShadowCoord.w;
-	const float shadowMapSize = 1024.0;
-	const float s             = 1.0/shadowMapSize;
-	vec4 shadow              = vec4(0.0);
-	shadow += textureProjOffset( uShadowMap, sc, vec2(-s,-s) );
-	shadow += textureProjOffset( uShadowMap, sc, vec2(-s, 0) );
-	shadow += textureProjOffset( uShadowMap, sc, vec2(-s, s) );
-	shadow += textureProjOffset( uShadowMap, sc, vec2( 0,-s) );
-	shadow += textureProjOffset( uShadowMap, sc, vec2( 0, 0) );
-	shadow += textureProjOffset( uShadowMap, sc, vec2( 0, s) );
-	shadow += textureProjOffset( uShadowMap, sc, vec2( s,-s) );
-	shadow += textureProjOffset( uShadowMap, sc, vec2( s, 0) );
-	shadow += textureProjOffset( uShadowMap, sc, vec2( s, s) );
-	return shadow/9.0;
-}
-
 void main(void) {
-	float pcf = pcfSoftShadow(textureDepth);
-	pcf = 1.0 - smoothstep(0.0, .55, pcf);
-	gl_FragColor = vec4( color*pcf, 1.0);
+	if(distance(gl_PointCoord, vec2(.5)) > .5) discard;
+	// vec4 shadow = pcfShadow(textureDepth);
+	// gl_FragColor = shadow * vColor;
+	const float uShadowThreshold = 0.55;
+	float pcf    = pcfSoftShadow(textureDepth);
+	pcf = 1.0 - smoothstep(0.0, uShadowThreshold, pcf);
 
-
+	vec4 color   = vColor;
+	color.rgb *= pcf;
+	gl_FragColor = color;
 
 	// gl_FragColor = texture2D(textureDepth, vShadowCoord.xy/vShadowCoord.w);
-	// vec4 ShadowCoord	= vShadowCoord / vShadowCoord.w;
-	// vec4 Shadow		= vec4(1.0);
-
-	// if ( ShadowCoord.z > -1.0 && ShadowCoord.z < 1.0 ) {
-	// 	Shadow = texture2DProj( textureDepth, ShadowCoord, -0.00005 );		
-	// }
-
-	// gl_FragColor = vec4( color, 1.0) * Shadow;
-
-
-	// vec4 shadow = pcfShadow(textureDepth);
-	// gl_FragColor = vec4( color, 1.0)*shadow;
 }
+

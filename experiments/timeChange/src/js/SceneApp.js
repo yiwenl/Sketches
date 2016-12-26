@@ -25,13 +25,15 @@ class SceneApp extends Scene {
 		console.log('init textures');
 		this._indexTime = 2;
 		this._getTexture();
+
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 	}
 
 
 	_initViews() {
 		console.log('init views');
 
-		// this._bCopy = new alfrid.BatchCopy();
+		this._bCopy = new alfrid.BatchCopy();
 		// this._bAxis = new alfrid.BatchAxis();
 		// this._bDots = new alfrid.BatchDotsPlane();
 		this._bSky = new alfrid.BatchSkybox();
@@ -70,9 +72,19 @@ class SceneApp extends Scene {
 		this.orbitalControl.ry.value += 0.01;
 		GL.clear(0, 0, 0, 0);
 
-		this._vSky.render(this._texIrrCurr, this._texIrrNext, this._offset.value);
+		// this._vSky.render(this._texIrrCurr, this._texIrrNext, this._offset.value);
 		// this._vSky.render(this._texRadCurr, this._texRadNext, this._offset.value);
+
+		this._fboRender.bind();
+		GL.clear(0, 0, 0, 0);
 		this._vModel.render(this._texRadCurr, this._texIrrCurr, this._texRadNext, this._texIrrNext, Assets.get('aomap'), this._offset.value);
+		this._fboRender.unbind();
+
+		const size = window.innerWidth/2;
+		GL.viewport(0, 0, size, size/GL.aspectRatio);
+		this._bCopy.draw(this._fboRender.getTexture());
+		GL.viewport(size, 0, size, size/GL.aspectRatio);
+		this._bCopy.draw(this._fboRender.getDepthTexture());
 	}
 
 
