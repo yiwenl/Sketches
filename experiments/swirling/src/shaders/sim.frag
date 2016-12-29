@@ -11,6 +11,9 @@ uniform sampler2D textureLife;
 uniform float time;
 uniform float uLife;
 uniform float maxRadius;
+uniform float uLifeDecrease;
+uniform float uRespwanRadius;
+uniform float uRotationSpeed;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -127,11 +130,19 @@ float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
+float exponentialIn(float t) {
+  return t == 0.0 ? t : pow(2.0, 10.0 * (t - 1.0));
+}
+
+float exponentialOut(float t) {
+  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);
+}
+
 #define PI 3.141592653
 
 vec2 randomPos(vec2 xz, vec2 uv, float offset) {
 	float a = rand(uv) * PI * 2.0;
-	float r = (uLife * 2.0 + offset) * 1.5 * rand(xz);
+	float r = (exponentialIn(uLife) * 2.0 + offset) * uRespwanRadius * rand(xz);
 	return vec2(cos(a), sin(a)) * r;
 }
 
@@ -140,17 +151,21 @@ void main(void) {
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
 	vec3 life       = texture2D(textureLife, vTextureCoord).rgb;
-	float posOffset = mix(extra.r, 1.0, .5) * .25;
-	vec3 acc        = curlNoise(pos * posOffset + time * .3);
-	acc.y = acc.y + 1.0;
+	float posOffset = mix(extra.r, 1.0, .985) * .25;
+	vec3 acc        = curlNoise(pos * posOffset + time * .2);
+	acc.y = acc.y * 0.7 + 1.2;
 	
-	vel += acc * .005 * (0.2 + uLife + 0.1);
+
+	float lifeOffset = life.x;
+	lifeOffset = mix(lifeOffset, 1.0, 0.85);
+
+	vel += acc * .005 * (0.2 + uLife + 0.1) * lifeOffset;
 
 	vec2 vxz = normalize(pos.xz);
-	vxz = rotate(vxz, -PI * 0.75);
-	vel.xz += vxz * 0.001 * mix(extra.b, 1.0, .5);
+	vxz = rotate(vxz, -PI * mix(0.5, 0.75, extra.g));
+	vel.xz += vxz * uRotationSpeed * mix(extra.b, 1.0, .985) * lifeOffset;
 
-	const float decrease = .93;
+	const float decrease = .97;
 	vel *= decrease;
 
 	pos += vel;
@@ -158,11 +173,11 @@ void main(void) {
 		pos.y = -maxRadius;
 		// pos.xz = normalize(pos.xz) * (uLife * 2.0 + extra.g) * 2.0 * rand(pos.xz);
 		pos.xz = randomPos(pos.xz, vTextureCoord, extra.g);
-		vel *= 0.0;
+		vel *= extra.g * extra.b * extra.r;
 		life.x = uLife;
 	}
 
-	life.x -= 0.015 * mix(extra.g, 1.0, .5);
+	life.x -= uLifeDecrease * mix(extra.g, 1.0, .5);
 
 	gl_FragData[0] = vec4(pos, 1.0);
 	gl_FragData[1] = vec4(vel, 1.0);

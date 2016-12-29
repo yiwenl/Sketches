@@ -13,8 +13,15 @@ import SoundManager from './SoundManager';
 window.params = {
 	numParticles:256*2,
 	skipCount:1,
-	maxRadius: 5,
-	minBeatDiff:3
+	maxRadius: 10,
+	minBeatDiff:2.0,
+	maxSum:150,
+	lifeDecrease:0.0065,
+	rotationSpeed:0.0015,
+	respwanRadius:2.5,
+	centery:2.5,
+	zoom:0,
+	showAxis:false
 };
 
 if(document.body) {
@@ -84,8 +91,15 @@ function _init3D() {
 
 	//	INIT DAT-GUI
 	window.gui = new dat.GUI({ width:300 });
-	gui.add(params, 'maxRadius', 0.0, 10.0);
-	gui.add(params, 'minBeatDiff', 0.0, 5.0);
+	gui.add(params, 'maxRadius', 0.0, 15.0);
+	gui.add(params, 'minBeatDiff', 0.0, 5.0).listen();
+	gui.add(params, 'maxSum', 50.0, 200.0);
+	gui.add(params, 'lifeDecrease', 0.0, 0.02).step(0.001).listen();
+	gui.add(params, 'rotationSpeed', 0.0, 0.01).step(0.001);
+	gui.add(params, 'respwanRadius', 0.0, 4.0);
+	gui.add(params, 'centery', 0.0, 7.0);
+	gui.add(params, 'zoom', 5.2, 20.5).step(0.01).listen();
+	gui.add(params, 'showAxis');
 
 	//	CREATE SCENE
 	const scene = new SceneApp();

@@ -30,8 +30,15 @@ class ViewSim extends alfrid.View {
 		const data = SoundManager.getData();
 		// console.log(data);
 
-		let life = data.sum/100;
-		if(!data.hasBeat) {
+		let life = data.sum/params.maxSum;
+		if(life > 1) {
+			life = 1;
+		}
+
+		if(data.hasBeat) {
+			const minLife = 0.3;
+			if(life < minLife) life = minLife;	
+		} else {
 			life *= 0.1;
 		}
 
@@ -41,6 +48,9 @@ class ViewSim extends alfrid.View {
 		this.shader.uniform('time', 'float', this.time);
 		this.shader.uniform('maxRadius', 'float', params.maxRadius);
 		this.shader.uniform("uLife", "float", life);
+		this.shader.uniform("uLifeDecrease", "float", params.lifeDecrease);
+		this.shader.uniform("uRotationSpeed", "float", params.rotationSpeed);
+		this.shader.uniform("uRespwanRadius", "float", params.respwanRadius);
 		// console.log(data.sum / 200);
 		textureVel.bind(0);
 		texturePos.bind(1);

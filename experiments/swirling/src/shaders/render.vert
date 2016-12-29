@@ -36,10 +36,7 @@ void main(void) {
 	}
 	
 	
-
-	float g 	 = sin(extra.r + time * mix(extra.b, 1.0, .5));
-	g 			 = smoothstep(0.0, 1.0, g);
-	g 			 = mix(g, 1.0, .5);
+	float g 	 = mix(extra.r, 1.0, .7);
 	vColor       = vec4(vec3(g), a);
 
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
