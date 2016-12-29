@@ -6,6 +6,7 @@ precision highp float;
 varying vec2 vTextureCoord;
 varying vec4 vShadowCoord;
 uniform sampler2D textureDepth;
+uniform sampler2D textureShadow;
 
 uniform float uSum;
 uniform float uLightOffset;
@@ -46,6 +47,8 @@ float pcfSoftShadow(sampler2D shadowMap) {
 		mat3 shadowKernel;
 		mat3 depthKernel;
 
+		// float alphaOffset = texture2D( textureShadow, shadowCoord.xy ).r ;
+
 		depthKernel[ 0 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy0 ) ).r ;
 		depthKernel[ 0 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, 0.0 ) ).r ;
 		depthKernel[ 0 ][ 2 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy1 ) ).r ;
@@ -80,6 +83,7 @@ float pcfSoftShadow(sampler2D shadowMap) {
 		const float uShadowStrength = 0.3;
 		shadow = dot( shadowValues, vec4( 1.0 ) ) * uShadowStrength;
 
+		// shadow = mix(0.0, shadow, alphaOffset);
 	}
 
 	return shadow;

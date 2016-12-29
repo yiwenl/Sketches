@@ -19,7 +19,7 @@ class ViewFloor extends alfrid.View {
 	}
 
 
-	render(shadowMatrix, textureDepth) {
+	render(shadowMatrix, textureDepth, textureShadow) {
 		const pos = [0, -params.maxRadius, 0];
 		const data = SoundManager.getData();
 		if(data.hasBeat) {
@@ -36,6 +36,9 @@ class ViewFloor extends alfrid.View {
 		this.shader.uniform("uShadowMatrix", "uniformMatrix4fv", shadowMatrix);
 		this.shader.uniform("textureDepth", "uniform1i", 0);
 		textureDepth.bind(0);	
+
+		this.shader.uniform("textureShadow", "uniform1i", 1);
+		textureShadow.bind(1);
 		
 		GL.draw(this.mesh);
 	}

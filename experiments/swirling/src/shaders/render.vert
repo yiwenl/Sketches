@@ -18,8 +18,10 @@ uniform float time;
 uniform vec2 uViewport;
 
 varying vec4 vColor;
+varying vec3 vExtra;
 varying vec3 vNormal;
 varying vec4 vShadowCoord;
+varying vec4 vWsPosition;
 
 const float radius = 0.01;
 
@@ -43,7 +45,8 @@ void main(void) {
 	vec3 pos     = mix(posCurr, posNext, percent);
 	vec3 extra   = texture2D(textureExtra, uv).rgb;
 	vec3 life   = texture2D(textureLife, uv).rgb;
-	gl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
+	vWsPosition = uModelMatrix * vec4(pos, 1.0);
+	gl_Position  = uProjectionMatrix * uViewMatrix * vWsPosition;
 	
 	float a = smoothstep(0.0, 0.2, life.x);
 	// float a = life.x;
@@ -58,7 +61,9 @@ void main(void) {
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
     gl_PointSize = distOffset * (1.0 + extra.x * 1.0);
 
+
     vShadowCoord  = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);;
 
 	vNormal 	 = aNormal;
+	vExtra 		 = extra;
 }

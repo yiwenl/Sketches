@@ -1,7 +1,10 @@
 precision highp float;
 
+varying vec3 vExtra;
 varying vec4 vColor;
 varying vec4 vShadowCoord;
+varying vec4 vWsPosition;
+uniform sampler2D textureShadow;
 uniform sampler2D textureDepth;
 
 
@@ -33,6 +36,8 @@ float pcfSoftShadow(sampler2D shadowMap) {
 
 		mat3 shadowKernel;
 		mat3 depthKernel;
+
+		float alphaOffset = texture2D( textureShadow, shadowCoord.xy ).r ;
 
 		depthKernel[ 0 ][ 0 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, dy0 ) ).r ;
 		depthKernel[ 0 ][ 1 ] = texture2D( shadowMap, shadowCoord.xy + vec2( dx0, 0.0 ) ).r ;
@@ -68,12 +73,15 @@ float pcfSoftShadow(sampler2D shadowMap) {
 		const float uShadowStrength = 0.3;
 		shadow = dot( shadowValues, vec4( 1.0 ) ) * uShadowStrength;
 
+		shadow = mix(0.0, shadow, alphaOffset);
 	}
 
 	return shadow;
 }
 
 void main(void) {
+
+	vec3 N = normalize(vWsPosition.xyz + vExtra * 0.05);
 	if(vColor.a <= 0.0) discard;
 	if(distance(gl_PointCoord, vec2(.5)) > .5) discard;
 	
@@ -82,6 +90,6 @@ void main(void) {
 	pcf = 1.0 - smoothstep(0.0, uShadowThreshold, pcf);
 
 	vec4 color   = vColor;
-	color.rgb *= pcf;
+	color.rgb *= vec3(pcf);
 	gl_FragColor = color;
 }

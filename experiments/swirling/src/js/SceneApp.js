@@ -26,7 +26,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.radius.easing = 0.015;
 		this.orbitalControl.center[1] = 2;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
-		// this.orbitalControl.lock(true);
+		this.orbitalControl.lock(true);
 
 		this.mtxModel = mat4.create();
 
@@ -147,7 +147,7 @@ class SceneApp extends alfrid.Scene {
 
 		const data = SoundManager.getData();
 		if(data) {
-			this.ry.value = Math.pow(data.sum / 2500, 3.0);
+			this.ry.value = Math.pow(data.sum / 500, 3.0);
 			// console.log(data.sum);
 			this.orbitalControl.ry.value += this.ry.value;	
 			this.orbitalControl.radius.value = params.maxRadius + data.sum/200 * 7;
@@ -211,7 +211,7 @@ class SceneApp extends alfrid.Scene {
 		GL.rotate(this.mtxModel);
 
 		this._bSky.draw(Assets.get('bg'));
-		this._vFloor.render(this.shadowMatrix, this._fboShadow.getDepthTexture());
+		this._vFloor.render(this.shadowMatrix, this._fboShadow.getDepthTexture(), this._fboShadow.getTexture());
 
 		for(let i=0; i<this._particleSets.length; i++) {
 			let oSet = this._particleSets[i];
@@ -225,15 +225,16 @@ class SceneApp extends alfrid.Scene {
 				fboCurrent.getTexture(2),
 				fboCurrent.getTexture(3), 
 				this.shadowMatrix, 
-				this._fboShadow.getDepthTexture()
+				this._fboShadow.getDepthTexture(),
+				this._fboShadow.getTexture()
 			);
 		}
 
-		const size = GL.height/2;
-		GL.viewport(0, 0, size, size);
-		this._bCopy.draw(this._fboShadow.getTexture());
-		GL.viewport(0, size, size, size);
-		this._bCopy.draw(this._fboShadow.getDepthTexture());
+		// const size = GL.height/2;
+		// GL.viewport(0, 0, size, size);
+		// this._bCopy.draw(this._fboShadow.getTexture());
+		// GL.viewport(0, size, size, size);
+		// this._bCopy.draw(this._fboShadow.getDepthTexture());
 	}
 
 

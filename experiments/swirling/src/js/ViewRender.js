@@ -42,7 +42,7 @@ class ViewRender extends alfrid.View {
 	}
 
 
-	render(textureCurr, textureNext, p, textureExtra, textureLife, shadowMatrix, textureDepth) {
+	render(textureCurr, textureNext, p, textureExtra, textureLife, shadowMatrix, textureDepth, textureShadow) {
 
 		const isShadowMap = shadowMatrix === undefined;
 		const shader = isShadowMap ? this.shaderShadowMap : this.shader;
@@ -66,6 +66,9 @@ class ViewRender extends alfrid.View {
 			shader.uniform("uShadowMatrix", "uniformMatrix4fv", shadowMatrix);
 			shader.uniform("textureDepth", "uniform1i", 4);
 			textureDepth.bind(4);
+
+			this.shader.uniform("textureShadow", "uniform1i", 5);
+			textureShadow.bind(5);
 		}
 
 		shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
