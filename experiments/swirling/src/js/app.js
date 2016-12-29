@@ -12,7 +12,7 @@ import SoundManager from './SoundManager';
 
 window.params = {
 	numSets:3,
-	numParticles:256*2,
+	numParticles:256*1.5,
 	skipCount:3,
 	maxRadius: 12,
 	minBeatDiff:2.0,
