@@ -11,15 +11,16 @@ import Sono from 'sono';
 import SoundManager from './SoundManager';
 
 window.params = {
+	numSets:3,
 	numParticles:256*2,
-	skipCount:1,
-	maxRadius: 10,
+	skipCount:3,
+	maxRadius: 12,
 	minBeatDiff:2.0,
 	maxSum:150,
 	lifeDecrease:0.0065,
 	rotationSpeed:0.0015,
 	respwanRadius:2.5,
-	centery:2.5,
+	centery:1.5,
 	zoom:0,
 	showAxis:false
 };

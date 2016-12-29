@@ -20,6 +20,17 @@ varying vec3 vNormal;
 
 const float radius = 0.01;
 
+const vec3 color1 = vec3(85.0, 133.0, 54.0) / 255.0;
+const vec3 color0 = vec3(255.0, 252.0, 202.0) / 255.0;
+
+float exponentialIn(float t) {
+  return t == 0.0 ? t : pow(2.0, 10.0 * (t - 1.0));
+}
+
+float exponentialOut(float t) {
+  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);
+}
+
 void main(void) {
 	vec2 uv      = aVertexPosition.xy;
 	vec3 posCurr = texture2D(textureCurr, uv).rgb;
@@ -37,7 +48,7 @@ void main(void) {
 	
 	
 	float g 	 = mix(extra.r, 1.0, .7);
-	vColor       = vec4(vec3(g), a);
+	vColor       = vec4(g, a);
 
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
     gl_PointSize = distOffset * (1.0 + extra.x * 1.0);

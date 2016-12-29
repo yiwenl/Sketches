@@ -39,12 +39,29 @@ class SoundManager extends EventDispatcher {
 		// let song = 'https://soundcloud.com/richarddjames/piano-un10-it-happened';
 		// let song = 'https://soundcloud.com/mysterylandmusic/unsubscribe_penultimate';
 		// let song = 'https://soundcloud.com/dee-san/oscillate-01';
-		let song = 'https://soundcloud.com/dee-san/oscillate-00';
 
-		SoundCloudBadge({
-			client_id: 'e8b7a335a5321247b38da4ccc07b07a2',
-			song: song
-		}, (err, src, json) => this._onSound(err, src, json));
+		const useLocal = true;
+
+		if(useLocal) {
+			let src = './assets/audio/Oscillate.mp3';
+			this.sound = Sono.load({
+				url: [src],
+				volume: 1.01,
+				loop: true,
+				onComplete: (sound) => {
+					this._onSoundLoaded(sound);
+				}
+			});
+		} else {
+			let song = 'https://soundcloud.com/dee-san/oscillate-00';
+
+			SoundCloudBadge({
+				client_id: 'e8b7a335a5321247b38da4ccc07b07a2',
+				song: song
+			}, (err, src, json) => this._onSound(err, src, json));
+		}
+
+		
 
 
 		this.canvas = document.createElement("canvas");
@@ -74,7 +91,10 @@ class SoundManager extends EventDispatcher {
 
 
 	_onSound(err, src, json) {
-		// console.log('On Sound :', src);
+		if(err) {
+			console.warn(err);
+		}
+		console.log('On Sound :', src);
 
 		this.sound = Sono.load({
 			url: [src],

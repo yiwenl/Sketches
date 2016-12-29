@@ -26,7 +26,7 @@ class ViewSim extends alfrid.View {
 	}
 
 
-	render(textureVel, texturePos, textureExtra, textureLife) {
+	render(textureVel, texturePos, textureExtra, textureLife, randomSpwan) {
 		const data = SoundManager.getData();
 		// console.log(data);
 
@@ -51,6 +51,9 @@ class ViewSim extends alfrid.View {
 		this.shader.uniform("uLifeDecrease", "float", params.lifeDecrease);
 		this.shader.uniform("uRotationSpeed", "float", params.rotationSpeed);
 		this.shader.uniform("uRespwanRadius", "float", params.respwanRadius);
+		this.shader.uniform("uSkipCount", "float", params.skipCount);
+		this.shader.uniform("uRandomSpwan", "float", randomSpwan ? 1.0 : 0.0);
+		// this.shader.uniform("uRandomSpwan", "float", 1);
 		// console.log(data.sum / 200);
 		textureVel.bind(0);
 		texturePos.bind(1);

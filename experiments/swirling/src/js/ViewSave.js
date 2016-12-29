@@ -23,7 +23,7 @@ class ViewSave extends alfrid.View {
 
 		let numParticles = params.numParticles;
 		let totalParticles = numParticles * numParticles;
-		console.debug('Total Particles : ', totalParticles);
+		console.debug('Total Particles : ', totalParticles * params.numSets);
 		let ux, uy;
 		let range = 3;
 
@@ -53,6 +53,24 @@ class ViewSave extends alfrid.View {
 		// this.meshExtra.bufferVertex(extras);
 		// this.meshExtra.bufferTexCoord(coords);
 		// this.meshExtra.bufferIndex(indices);
+	}
+
+
+	reset() {
+		let numParticles = params.numParticles;
+		let positions = [];
+		let extras = [];
+		let range = params.maxRadius;
+
+		for(let j = 0; j < numParticles; j++) {
+			for(let i = 0; i < numParticles; i++) {
+				positions.push([random(-range, range), random(-range, range), random(-range, range)]);
+				extras.push([Math.random(), Math.random(), Math.random()]);
+			}
+		}
+
+		this.mesh.bufferVertex(positions);
+		this.mesh.bufferData(extras, 'aExtra', 3);
 	}
 
 

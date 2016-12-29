@@ -11,9 +11,11 @@ uniform sampler2D textureLife;
 uniform float time;
 uniform float uLife;
 uniform float maxRadius;
+uniform float uSkipCount;
 uniform float uLifeDecrease;
 uniform float uRespwanRadius;
 uniform float uRotationSpeed;
+uniform float uRandomSpwan;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -140,30 +142,38 @@ float exponentialOut(float t) {
 
 #define PI 3.141592653
 
-vec2 randomPos(vec2 xz, vec2 uv, float offset) {
+vec2 randomPos(vec2 xz, vec2 uv, float offset, float randomP) {
 	float a = rand(uv) * PI * 2.0;
-	float r = (exponentialIn(uLife) * 2.0 + offset) * uRespwanRadius * rand(xz);
+	float off = mix(offset, 1.0, randomP);
+
+	float r = (exponentialIn(uLife) * 2.0 + off) * uRespwanRadius * mix(rand(xz), 1.0, randomP);
 	return vec2(cos(a), sin(a)) * r;
 }
+
+const float particlePosOffset = 1.0;
 
 void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
 	vec3 life       = texture2D(textureLife, vTextureCoord).rgb;
-	float posOffset = mix(extra.r, 1.0, .985) * .25;
+	float posOffset = 0.25;
 	vec3 acc        = curlNoise(pos * posOffset + time * .2);
 	acc.y = acc.y * 0.7 + 1.2;
 	
-
+	float heightOffset = (pos.y + maxRadius) / maxRadius / 2.0;
 	float lifeOffset = life.x;
-	lifeOffset = mix(lifeOffset, 1.0, 0.85);
+	lifeOffset = mix(lifeOffset, 1.0, 0.85) * uSkipCount;
 
 	vel += acc * .005 * (0.2 + uLife + 0.1) * lifeOffset;
 
 	vec2 vxz = normalize(pos.xz);
-	vxz = rotate(vxz, -PI * mix(0.5, 0.75, extra.g));
-	vel.xz += vxz * uRotationSpeed * mix(extra.b, 1.0, .985) * lifeOffset;
+	// float angle = -PI * mix(0.5, 0.75, extra.g * .5 +);
+	float angle = -PI * 0.7;
+	
+	angle -= exponentialOut(heightOffset) * PI * 0.5;
+	vxz = rotate(vxz, angle);
+	vel.xz += vxz * uRotationSpeed * lifeOffset;
 
 	const float decrease = .97;
 	vel *= decrease;
@@ -172,12 +182,12 @@ void main(void) {
 	if(pos.y > maxRadius) {
 		pos.y = -maxRadius;
 		// pos.xz = normalize(pos.xz) * (uLife * 2.0 + extra.g) * 2.0 * rand(pos.xz);
-		pos.xz = randomPos(pos.xz, vTextureCoord, extra.g);
-		vel *= extra.g * extra.b * extra.r;
+		pos.xz = randomPos(pos.xz, vTextureCoord, extra.g, life.b);
+		vel *= mix(extra.g * extra.b * extra.r, 0.1, 0.5) * 0.3;
 		life.x = uLife;
 	}
 
-	life.x -= uLifeDecrease * mix(extra.g, 1.0, .5);
+	life.x -= uLifeDecrease * mix(extra.g, 1.0, .5) * uSkipCount;
 
 	gl_FragData[0] = vec4(pos, 1.0);
 	gl_FragData[1] = vec4(vel, 1.0);

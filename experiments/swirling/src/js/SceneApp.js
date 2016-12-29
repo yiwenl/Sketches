@@ -6,6 +6,7 @@ import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 import ViewFloor from './ViewFloor';
 import SoundManager from './SoundManager';
+import Assets from './Assets';
 
 window.getAsset = function(id) {
 	return assets.find( (a) => a.id === id).file;
@@ -25,6 +26,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.radius.easing = 0.015;
 		this.orbitalControl.center[1] = 2;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
+		this.orbitalControl.lock(true);
 
 		this.mtxModel = mat4.create();
 	}
@@ -39,8 +41,16 @@ class SceneApp extends alfrid.Scene {
 			magFilter:GL.NEAREST
 		};
 
-		this._fboCurrent  	= new alfrid.FrameBuffer(numParticles, numParticles, o, true);
-		this._fboTarget  	= new alfrid.FrameBuffer(numParticles, numParticles, o, true);
+
+		this._particleSets = [];
+		for(let i=0; i<params.numSets; i++) {
+			const fboCurrent      = new alfrid.FrameBuffer(numParticles, numParticles, o, true);
+			const fboTarget       = new alfrid.FrameBuffer(numParticles, numParticles, o, true);
+			const oSet = {fboCurrent, fboTarget, count:i, randomSpwanPos:i%2 !== 0};			
+			this._particleSets.push(oSet);
+		}
+
+		console.table(this._particleSets);
 	}
 
 
@@ -52,6 +62,7 @@ class SceneApp extends alfrid.Scene {
 		this._bAxis = new alfrid.BatchAxis();
 		this._bDots = new alfrid.BatchDotsPlane();
 		this._bBall = new alfrid.BatchBall();
+		this._bSky = new alfrid.BatchSky();
 
 
 		//	views
@@ -63,35 +74,43 @@ class SceneApp extends alfrid.Scene {
 		GL.setMatrices(this.cameraOrtho);
 
 
-		this._fboCurrent.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vSave.render();
-		this._fboCurrent.unbind();
+		for(let i=0; i<params.numSets; i++) {
+			this._vSave.reset();
+			let { fboTarget, fboCurrent } = this._particleSets[i];
+			fboCurrent.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vSave.render();
+			fboCurrent.unbind();
 
-		this._fboTarget.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vSave.render();
-		this._fboTarget.unbind();
+			fboTarget.bind();
+			GL.clear(0, 0, 0, 0);
+			this._vSave.render();
+			fboTarget.unbind();	
+		}
 
 		GL.setMatrices(this.camera);
 	}
 
 
-	updateFbo() {
-		this._fboTarget.bind();
+	updateFbo(o) {
+
+		let { fboTarget, fboCurrent } = o;
+
+		fboTarget.bind();
 		GL.clear(0, 0, 0, 1);
 		this._vSim.render(
-			this._fboCurrent.getTexture(1), 
-			this._fboCurrent.getTexture(0), 
-			this._fboCurrent.getTexture(2),
-			this._fboCurrent.getTexture(3)
+			fboCurrent.getTexture(1), 
+			fboCurrent.getTexture(0), 
+			fboCurrent.getTexture(2),
+			fboCurrent.getTexture(3),
+			o.randomSpwanPos
 			);
-		this._fboTarget.unbind();
+		fboTarget.unbind();
 
 
-		let tmp          = this._fboCurrent;
-		this._fboCurrent = this._fboTarget;
-		this._fboTarget  = tmp;
+		let tmp     = o.fboCurrent;
+		o.fboCurrent = o.fboTarget;
+		o.fboTarget  = tmp;
 
 	}
 
@@ -116,11 +135,11 @@ class SceneApp extends alfrid.Scene {
 			this.ry.value = data.sum / 1500;
 			// console.log(data.sum);
 			this.orbitalControl.ry.value += this.ry.value;	
-			this.orbitalControl.radius.value = 10 + data.sum/200 * 7;
+			this.orbitalControl.radius.value = params.maxRadius + data.sum/200 * 7;
 			params.zoom = this.orbitalControl.radius.value;
 
 			if(data.hasBeat) {
-				this.rx.setTo(data.sum / 500);
+				this.rx.setTo(data.sum / 200);
 				this.rx.value = 0;
 			}
 		}
@@ -135,13 +154,15 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.center[1] = params.centery;
 
 
-		this._count ++;
-		if(this._count % params.skipCount == 0) {
-			this._count = 0;
-			this.updateFbo();
-		}
+		for(let i=0; i<this._particleSets.length; i++) {
+			let oSet = this._particleSets[i];
+			oSet.count ++;
 
-		let p = this._count / params.skipCount;
+			if(oSet.count % params.skipCount == 0) {
+				oSet.count = 0;
+				this.updateFbo(oSet);
+			}
+		}
 
 		GL.clear(0, 0, 0, 0);
 		if(params.showAxis) {
@@ -150,22 +171,23 @@ class SceneApp extends alfrid.Scene {
 		
 		GL.rotate(this.mtxModel);
 
+		this._bSky.draw(Assets.get('bg'));
 		this._vFloor.render();
 
-		this._vRender.render(
-			this._fboTarget.getTexture(0), 
-			this._fboCurrent.getTexture(0), 
-			p, 
-			this._fboCurrent.getTexture(2),
-			this._fboCurrent.getTexture(3)
+		for(let i=0; i<this._particleSets.length; i++) {
+			let oSet = this._particleSets[i];
+			let p = oSet.count / params.skipCount;
+			let { fboTarget, fboCurrent } = oSet;
+
+			this._vRender.render(
+				fboTarget.getTexture(0), 
+				fboCurrent.getTexture(0), 
+				p, 
+				fboCurrent.getTexture(2),
+				fboCurrent.getTexture(3)
 			);
+		}
 
-		const size = Math.min(params.numParticles, GL.height/4);
-
-		// for(let i=0; i<4; i++) {
-		// 	GL.viewport(0, size * i, size, size);
-		// 	this._bCopy.draw(this._fboCurrent.getTexture(i));
-		// }
 
 	}
 
