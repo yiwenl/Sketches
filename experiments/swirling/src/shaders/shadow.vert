@@ -7,8 +7,6 @@ attribute vec3 aNormal;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
-uniform mat4 uShadowMatrix;
-
 uniform sampler2D textureCurr;
 uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
@@ -19,14 +17,11 @@ uniform vec2 uViewport;
 
 varying vec4 vColor;
 varying vec3 vNormal;
-varying vec4 vShadowCoord;
 
 const float radius = 0.01;
 
-const mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,
-							  0.0, 0.5, 0.0, 0.0,
-							  0.0, 0.0, 0.5, 0.0,
-							  0.5, 0.5, 0.5, 1.0 );
+const vec3 color1 = vec3(85.0, 133.0, 54.0) / 255.0;
+const vec3 color0 = vec3(255.0, 252.0, 202.0) / 255.0;
 
 float exponentialIn(float t) {
   return t == 0.0 ? t : pow(2.0, 10.0 * (t - 1.0));
@@ -45,20 +40,21 @@ void main(void) {
 	vec3 life   = texture2D(textureLife, uv).rgb;
 	gl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 	
-	float a = smoothstep(0.0, 0.2, life.x);
-	// float a = life.x;
+	// float a = 1.0;
+	// if(life.x <= 0.1) {
+	// 	a = 0.0;
+	// }
+	float a = life.x;
 	if(posNext.y < posCurr.y - 2.0) {
 		a = 0.0;
 	}
 	
 	
-	float g 	 = mix(extra.r, 1.0, .8);
-	vColor       = vec4(vec3(g), a);
+	// float g 	 = mix(extra.r, 1.0, .7);
+	vColor       = vec4(vec3(1.0), a);
 
-	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
-    gl_PointSize = distOffset * (1.0 + extra.x * 1.0);
-
-    vShadowCoord  = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);;
+	// float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
+    gl_PointSize = 3.0;
 
 	vNormal 	 = aNormal;
 }

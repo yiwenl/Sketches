@@ -16,8 +16,8 @@ class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
-		this.rx = new alfrid.EaseNumber(0, 0.025);
-		this.camMovement = new alfrid.EaseNumber(0, 0.025);
+		this.rx = new alfrid.EaseNumber(0, 0.05);
+		this.camMovement = new alfrid.EaseNumber(0, 0.05);
 		this.ry = new alfrid.EaseNumber(0);
 
 		this._count = 0;
@@ -26,9 +26,21 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.radius.easing = 0.015;
 		this.orbitalControl.center[1] = 2;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
-		this.orbitalControl.lock(true);
+		// this.orbitalControl.lock(true);
 
 		this.mtxModel = mat4.create();
+
+
+		//	light
+		const lightOffset = 2.0;
+		this.lightPosition = [-4 * lightOffset, params.maxRadius * 2.0, 10 * lightOffset];
+		// this.lightPosition = [-0.2, params.maxRadius * 2.0, .5];
+		this.cameraLight = new alfrid.CameraOrtho();
+		const size = 15;
+		this.cameraLight.ortho(-size, size, size, -size, 1, 30);
+		this.cameraLight.lookAt(this.lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+		this.shadowMatrix = mat4.create();
+		mat4.multiply(this.shadowMatrix, this.cameraLight.projection, this.cameraLight.viewMatrix);
 	}
 
 	_initTextures() {
@@ -49,6 +61,9 @@ class SceneApp extends alfrid.Scene {
 			const oSet = {fboCurrent, fboTarget, count:i, randomSpwanPos:i%2 !== 0};			
 			this._particleSets.push(oSet);
 		}
+
+		const shadowSize = params.shadowMapSize;
+		this._fboShadow = new alfrid.FrameBuffer(shadowSize, shadowSize);
 
 		console.table(this._particleSets);
 	}
@@ -132,25 +147,24 @@ class SceneApp extends alfrid.Scene {
 
 		const data = SoundManager.getData();
 		if(data) {
-			this.ry.value = data.sum / 1500;
+			this.ry.value = Math.pow(data.sum / 2500, 3.0);
 			// console.log(data.sum);
 			this.orbitalControl.ry.value += this.ry.value;	
 			this.orbitalControl.radius.value = params.maxRadius + data.sum/200 * 7;
 			params.zoom = this.orbitalControl.radius.value;
 
 			if(data.hasBeat) {
-				this.rx.setTo(data.sum / 200);
+				this.rx.setTo(data.sum / 500);
 				this.rx.value = 0;
 			}
 		}
 
 		this.camMovement.value += this.rx.value;
-		// console.log(this.camMovement.value, this.rx.value);
 		
 		mat4.identity(this.mtxModel, this.mtxModel);
 		mat4.translate(this.mtxModel, this.mtxModel, [0, params.maxRadius*0.5, 0]);
 
-		this.orbitalControl.rx.value = Math.sin(this.camMovement.value) * 0.1 + 0.1;
+		this.orbitalControl.rx.value = Math.sin(this.camMovement.value) * 0.2 + 0.1;
 		this.orbitalControl.center[1] = params.centery;
 
 
@@ -164,16 +178,13 @@ class SceneApp extends alfrid.Scene {
 			}
 		}
 
+
+		this._fboShadow.bind();
+		// GL.clear(1, 1, 1, 1);
 		GL.clear(0, 0, 0, 0);
-		if(params.showAxis) {
-			this._bAxis.draw();	
-		}
-		
-		GL.rotate(this.mtxModel);
-
-		this._bSky.draw(Assets.get('bg'));
-		this._vFloor.render();
-
+		GL.gl.depthFunc(GL.gl.LEQUAL);
+		GL.setMatrices(this.cameraLight);
+			
 		for(let i=0; i<this._particleSets.length; i++) {
 			let oSet = this._particleSets[i];
 			let p = oSet.count / params.skipCount;
@@ -188,7 +199,41 @@ class SceneApp extends alfrid.Scene {
 			);
 		}
 
+		this._fboShadow.unbind();
 
+		GL.setMatrices(this.camera);
+
+		GL.clear(0, 0, 0, 0);
+		if(params.showAxis) {
+			this._bAxis.draw();	
+		}
+		
+		GL.rotate(this.mtxModel);
+
+		this._bSky.draw(Assets.get('bg'));
+		this._vFloor.render(this.shadowMatrix, this._fboShadow.getDepthTexture());
+
+		for(let i=0; i<this._particleSets.length; i++) {
+			let oSet = this._particleSets[i];
+			let p = oSet.count / params.skipCount;
+			let { fboTarget, fboCurrent } = oSet;
+
+			this._vRender.render(
+				fboTarget.getTexture(0), 
+				fboCurrent.getTexture(0), 
+				p, 
+				fboCurrent.getTexture(2),
+				fboCurrent.getTexture(3), 
+				this.shadowMatrix, 
+				this._fboShadow.getDepthTexture()
+			);
+		}
+
+		const size = GL.height/2;
+		GL.viewport(0, 0, size, size);
+		this._bCopy.draw(this._fboShadow.getTexture());
+		GL.viewport(0, size, size, size);
+		this._bCopy.draw(this._fboShadow.getDepthTexture());
 	}
 
 

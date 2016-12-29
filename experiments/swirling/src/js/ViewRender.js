@@ -1,6 +1,9 @@
 // ViewRender.js
 
 import alfrid from 'alfrid';
+const vsShadowMap = require('../shaders/shadow.vert');
+const fsShadowMap = require('../shaders/shadow.frag');
+
 const vsRender = require('../shaders/render.vert');
 const fsRender = require('../shaders/render.frag');
 let GL = alfrid.GL;
@@ -9,6 +12,7 @@ class ViewRender extends alfrid.View {
 	
 	constructor() {
 		super(vsRender, fsRender);
+		this.shaderShadowMap = new alfrid.GLShader(vsShadowMap, fsShadowMap);
 		this.time = Math.random() * 0xFFF;
 	}
 
@@ -38,25 +42,36 @@ class ViewRender extends alfrid.View {
 	}
 
 
-	render(textureCurr, textureNext, p, textureExtra, textureLife) {
-		this.time += 0.1;
-		this.shader.bind();
+	render(textureCurr, textureNext, p, textureExtra, textureLife, shadowMatrix, textureDepth) {
 
-		this.shader.uniform('textureCurr', 'uniform1i', 0);
+		const isShadowMap = shadowMatrix === undefined;
+		const shader = isShadowMap ? this.shaderShadowMap : this.shader;
+
+		this.time += 0.1;
+		shader.bind();
+
+		shader.uniform('textureCurr', 'uniform1i', 0);
 		textureCurr.bind(0);
 
-		this.shader.uniform('textureNext', 'uniform1i', 1);
+		shader.uniform('textureNext', 'uniform1i', 1);
 		textureNext.bind(1);
 
-		this.shader.uniform('textureExtra', 'uniform1i', 2);
+		shader.uniform('textureExtra', 'uniform1i', 2);
 		textureExtra.bind(2);
 
-		this.shader.uniform("textureLife", "uniform1i", 3);
+		shader.uniform("textureLife", "uniform1i", 3);
 		textureLife.bind(3);
 
-		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
-		this.shader.uniform('percent', 'float', p);
-		this.shader.uniform('time', 'float', this.time);
+		if(textureDepth) {
+			shader.uniform("uShadowMatrix", "uniformMatrix4fv", shadowMatrix);
+			shader.uniform("textureDepth", "uniform1i", 4);
+			textureDepth.bind(4);
+		}
+
+		shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
+		shader.uniform('percent', 'float', p);
+		shader.uniform('time', 'float', this.time);
+		shader.uniform("isShadowMap", "float", isShadowMap ? 1.0 : 0.0);
 		GL.draw(this.mesh);
 	}
 

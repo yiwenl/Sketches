@@ -19,7 +19,7 @@ class ViewFloor extends alfrid.View {
 	}
 
 
-	render() {
+	render(shadowMatrix, textureDepth) {
 		const pos = [0, -params.maxRadius, 0];
 		const data = SoundManager.getData();
 		if(data.hasBeat) {
@@ -32,6 +32,11 @@ class ViewFloor extends alfrid.View {
 		this.shader.uniform("uPosition", "vec3", pos);
 		this.shader.uniform("uSum", "float", SoundManager.getData().sumPerc);
 		this.shader.uniform("uLightOffset", "float", this.lightOffset.value);
+
+		this.shader.uniform("uShadowMatrix", "uniformMatrix4fv", shadowMatrix);
+		this.shader.uniform("textureDepth", "uniform1i", 0);
+		textureDepth.bind(0);	
+		
 		GL.draw(this.mesh);
 	}
 
