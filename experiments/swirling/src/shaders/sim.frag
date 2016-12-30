@@ -157,6 +157,7 @@ void main(void) {
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
 	vec3 life       = texture2D(textureLife, vTextureCoord).rgb;
+
 	float posOffset = 0.25;
 	vec3 acc        = curlNoise(pos * posOffset + time * .2);
 	acc.y = acc.y * 0.7 + 1.2;

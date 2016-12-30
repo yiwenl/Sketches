@@ -26,7 +26,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.radius.easing = 0.015;
 		this.orbitalControl.center[1] = 2;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
-		this.orbitalControl.lock(true);
+		this.orbitalControl.lockZoom(true);
 
 		this.mtxModel = mat4.create();
 
