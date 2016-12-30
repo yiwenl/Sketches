@@ -40,7 +40,7 @@ class SoundManager extends EventDispatcher {
 		// let song = 'https://soundcloud.com/mysterylandmusic/unsubscribe_penultimate';
 		// let song = 'https://soundcloud.com/dee-san/oscillate-01';
 
-		const useLocal = true;
+		const useLocal = false;
 
 		if(useLocal) {
 			let src = './assets/audio/Oscillate.mp3';
@@ -53,7 +53,7 @@ class SoundManager extends EventDispatcher {
 				}
 			});
 		} else {
-			let song = 'https://soundcloud.com/dee-san/oscillate-00';
+			let song = 'https://soundcloud.com/trentemusic/miss-you-radio-edit-1?in=trentemusic/sets/miss-you-10';
 
 			SoundCloudBadge({
 				client_id: 'e8b7a335a5321247b38da4ccc07b07a2',
