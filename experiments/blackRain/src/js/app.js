@@ -11,9 +11,9 @@ import Sono from 'sono';
 import SoundManager from './SoundManager';
 
 window.params = {
-	numSets:3,
+	numSets:5,
 	terrainSize:40,
-	numParticles:256*1.5,
+	numParticles:256 * 1.5,
 	skipCount:3,
 	maxRadius: 12,
 	minBeatDiff:2.0,
@@ -93,7 +93,7 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	/*/
+	//*/
 	window.gui = new dat.GUI({ width:300 });
 	gui.add(params, 'maxRadius', 0.0, 15.0);
 	gui.add(params, 'minBeatDiff', 0.0, 5.0).listen();
@@ -111,7 +111,7 @@ function _init3D() {
 
 	//	STATS
 
-	/*/
+	//*/
 	const stats = new Stats();
 	document.body.appendChild(stats.domElement);
 	alfrid.Scheduler.addEF(()=>stats.update());

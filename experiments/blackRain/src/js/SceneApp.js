@@ -132,17 +132,17 @@ class SceneApp extends alfrid.Scene {
 
 	render() {
 		if(SoundManager.sound) {
-			if(SoundManager.currentTime > 180 && SoundManager.currentTime < 240) {
-				params.minBeatDiff = 0.5;
-			} else {
-				params.minBeatDiff = 2.0;
-			}
+			// if(SoundManager.currentTime > 180 && SoundManager.currentTime < 240) {
+			// 	params.minBeatDiff = 0.5;
+			// } else {
+			// 	params.minBeatDiff = 2.0;
+			// }
 
-			if(SoundManager.currentTime > 195 && SoundManager.currentTime < 240) {
-				params.lifeDecrease = 0.003;
-			} else {
-				params.lifeDecrease = 0.005;
-			}
+			// if(SoundManager.currentTime > 195 && SoundManager.currentTime < 240) {
+			// 	params.lifeDecrease = 0.003;
+			// } else {
+			// 	params.lifeDecrease = 0.005;
+			// }
 		}
 
 		const data = SoundManager.getData();

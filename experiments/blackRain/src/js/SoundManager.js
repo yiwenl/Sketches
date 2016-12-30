@@ -40,7 +40,7 @@ class SoundManager extends EventDispatcher {
 		// let song = 'https://soundcloud.com/mysterylandmusic/unsubscribe_penultimate';
 		// let song = 'https://soundcloud.com/dee-san/oscillate-01';
 
-		const useLocal = true;
+		const useLocal = false;
 
 		if(useLocal) {
 			let src = './assets/audio/Oscillate.mp3';
@@ -53,7 +53,7 @@ class SoundManager extends EventDispatcher {
 				}
 			});
 		} else {
-			let song = 'https://soundcloud.com/trentemusic/miss-you-radio-edit-1?in=trentemusic/sets/miss-you-10';
+			let song = 'https://soundcloud.com/qrvaelet/blockhead-insomniac-olympics';
 
 			SoundCloudBadge({
 				client_id: 'e8b7a335a5321247b38da4ccc07b07a2',
@@ -98,7 +98,7 @@ class SoundManager extends EventDispatcher {
 
 		this.sound = Sono.load({
 			url: [src],
-			volume: 0,
+			volume: 1,
 			loop: true,
 			onComplete: (sound) => {
 				this._onSoundLoaded(sound);
@@ -108,7 +108,7 @@ class SoundManager extends EventDispatcher {
 
 	_onSoundLoaded(sound) {
 		console.debug("Sound Loaded", this);
-		this.sound.volume = 0;
+		// this.sound.volume = 0;
 		this.analyser = sound.effect.analyser(128);
 		sound.play();
 		this._hasSoundLoaded = true;

@@ -38,7 +38,7 @@ class ViewSim extends alfrid.View {
 		}
 
 		let spwanPos = [-999, -999];
-		const r = params.terrainSize/2;
+		const r = params.terrainSize * .25;
 
 		if(data.hasBeat) {
 			const minLife = 0.3;

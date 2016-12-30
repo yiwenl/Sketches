@@ -143,11 +143,11 @@ float exponentialOut(float t) {
 
 #define PI 3.141592653
 
-vec2 randomPos(vec2 xz, vec2 uv, float offset, float randomP) {
+vec2 randomPos(vec2 xz, vec2 uv, float offset, float randomP, float scale) {
 	float a = rand(uv) * PI * 2.0;
 	float off = mix(offset, 1.0, randomP);
 
-	float r = (exponentialIn(uLife) * 2.0 + off) * uRespwanRadius * mix(rand(xz), 1.0, randomP);
+	float r = (exponentialIn(uLife) * scale + off) * uRespwanRadius * mix(rand(xz), 1.0, randomP);
 	return vec2(cos(a), sin(a)) * r;
 }
 
@@ -160,7 +160,7 @@ void main(void) {
 	vec4 life       = texture2D(textureLife, vTextureCoord);
 
 	float posOffset = 0.25;
-	vec3 acc        = curlNoise(pos * posOffset + time * .2);
+	vec3 acc        = curlNoise((pos + vec3(life.y, 0.0, life.z)) * posOffset + time * .2);
 	acc.y = acc.y * 0.7 + 1.2;
 	
 	float heightOffset = (pos.y + maxRadius) / maxRadius / 2.0;
@@ -184,7 +184,8 @@ void main(void) {
 	if(pos.y > maxRadius) {
 		pos.y = -maxRadius;
 		// pos.xz = normalize(pos.xz) * (uLife * 2.0 + extra.g) * 2.0 * rand(pos.xz);
-		pos.xz = randomPos(pos.xz, vTextureCoord, extra.g, 0.0);
+		// pos.xz = randomPos(pos.xz, vTextureCoord, extra.g, 0.0);
+		pos.xz = randomPos(pos.xz, vTextureCoord, extra.g, step(.7, vTextureCoord.x), rand(uSwpanPos) * .5 + .5);
 		vel *= mix(extra.g * extra.b * extra.r, 0.1, 0.5) * 0.3;
 		life.x = uLife;
 		life.yz = uSwpanPos;
