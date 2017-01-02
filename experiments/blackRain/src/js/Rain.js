@@ -27,6 +27,9 @@ class Rain extends alfrid.EventDispatcher {
 
 
 	addRainDrop() {
+		if(params.hasPaused) {
+			return;
+		}
 		const drop = this._drops.pop();
 		drop.reset();
 		drop.activated = true;
@@ -51,12 +54,6 @@ class Rain extends alfrid.EventDispatcher {
 			this._positions = this._positions.concat(drop.positions);
 			this._extras = this._extras.concat(drop.extras);
 		}
-
-		if(Math.random() > .99) {
-			console.log(this._positions.length, this._extras.length);	
-		}
-
-		// console.log('Activated count :', count);
 
 	}
 

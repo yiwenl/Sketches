@@ -47,6 +47,21 @@ class SceneApp extends alfrid.Scene {
 		this.cameraLight.lookAt(this.lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 		this.shadowMatrix = mat4.create();
 		mat4.multiply(this.shadowMatrix, this.cameraLight.projection, this.cameraLight.viewMatrix);
+
+		window.addEventListener('keydown', (e)=> {
+			// console.log(e.keyCode);
+			if(e.keyCode === 32) {
+				this.toggle();
+			}
+		});
+	}
+
+
+	toggle() {
+		params.hasPaused = !params.hasPaused;
+		const ease = 'cubic';
+		params.speedOffset.easing = params.hasPaused ? `${ease}Out` : `${ease}In`;
+		params.speedOffset.value = params.hasPaused ? 0 : 1;
 	}
 
 	_initTextures() {

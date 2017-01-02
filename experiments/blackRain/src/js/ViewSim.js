@@ -60,6 +60,7 @@ class ViewSim extends alfrid.View {
 		this.shader.uniform("uSkipCount", "float", params.skipCount);
 		this.shader.uniform("uRandomSpwan", "float", 0.0);
 		this.shader.uniform("uSwpanPos", "vec2", spwanPos);
+		this.shader.uniform("uSpeedOffset", "float", params.speedOffset.value);
 		// this.shader.uniform("uRandomSpwan", "float", 1);
 		// console.log(data.sum / 200);
 		textureVel.bind(0);

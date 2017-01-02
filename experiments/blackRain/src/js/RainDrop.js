@@ -40,6 +40,9 @@ class RainDrop extends alfrid.EventDispatcher {
 	}
 
 	update() {
+		if(params.speedOffset.value <= 0.1) {
+			return;
+		}
 		const pos = this._positions.pop();
 		let extra = this._extras.pop();
 
@@ -52,7 +55,11 @@ class RainDrop extends alfrid.EventDispatcher {
 		this._positions.unshift(pos);
 		this._extras.unshift(extra);
 
-		vec3.add(this._position, this._position, this._velocity);
+		let v = vec3.clone(this._velocity);
+		vec3.scale(v, v, params.speedOffset.value);
+
+
+		vec3.add(this._position, this._position, v);
 
 		if(this.hasHitGroud && !this._hasTriggered) {
 			this._hasTriggered = true;

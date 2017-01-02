@@ -26,7 +26,9 @@ window.params = {
 	centery:1.5,
 	zoom:0,
 	showAxis:false,
-	shadowMapSize:1024*1
+	shadowMapSize:1024*1,
+	speedOffset:new alfrid.TweenNumber(1, 'expInOut'),
+	hasPaused:false
 };
 
 if(document.body) {
@@ -95,7 +97,7 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	/*/
+	//*/
 	window.gui = new dat.GUI({ width:300 });
 	gui.add(params, 'maxRadius', 0.0, 15.0);
 	gui.add(params, 'minBeatDiff', 0.0, 5.0).listen();
@@ -105,6 +107,7 @@ function _init3D() {
 	gui.add(params, 'respwanRadius', 0.0, 4.0);
 	gui.add(params, 'centery', 0.0, 7.0);
 	gui.add(params, 'zoom', 5.2, 20.5).step(0.01).listen();
+	gui.add(params.speedOffset, 'value', 0, 1).listen();
 	gui.add(params, 'showAxis');
 	//*/
 
@@ -113,7 +116,7 @@ function _init3D() {
 
 	//	STATS
 
-	/*/
+	//*/
 	const stats = new Stats();
 	document.body.appendChild(stats.domElement);
 	alfrid.Scheduler.addEF(()=>stats.update());

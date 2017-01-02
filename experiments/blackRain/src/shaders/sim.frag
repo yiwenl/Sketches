@@ -16,6 +16,7 @@ uniform float uLifeDecrease;
 uniform float uRespwanRadius;
 uniform float uRotationSpeed;
 uniform float uRandomSpwan;
+uniform float uSpeedOffset;
 uniform vec2 uSwpanPos;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
@@ -180,7 +181,7 @@ void main(void) {
 	const float decrease = .97;
 	vel *= decrease;
 
-	pos += vel;
+	pos += vel * uSpeedOffset;
 	if(pos.y > maxRadius) {
 		pos.y = -maxRadius;
 		// pos.xz = normalize(pos.xz) * (uLife * 2.0 + extra.g) * 2.0 * rand(pos.xz);
@@ -193,7 +194,7 @@ void main(void) {
 		life.yz = uSwpanPos;
 	}
 
-	life.x -= uLifeDecrease * mix(extra.g, 1.0, .5) * uSkipCount;
+	life.x -= uLifeDecrease * mix(extra.g, 1.0, .5) * uSkipCount * uSpeedOffset;
 
 	gl_FragData[0] = vec4(pos, 1.0);
 	gl_FragData[1] = vec4(vel, 1.0);

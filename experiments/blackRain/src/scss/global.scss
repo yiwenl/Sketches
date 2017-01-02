@@ -49,18 +49,29 @@ h1,h2,h3,h4,text,p {
 	display: none;
 }
 
-.music-link {
+p {
 	position: fixed;
 	color: white;
 	bottom: 50px;
-	left: 50px;
+
 	z-index: 9;
 	font-size: 12px;
 	letter-spacing: 1px;
 }
 
+.music-link {
+	
+	left: 50px;
+	
+}
+
 a {
 	color:inherit;
+}
+
+.instruction {
+	width:100%;
+	text-align: center;
 }
 
 
