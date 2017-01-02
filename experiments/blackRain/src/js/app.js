@@ -9,14 +9,13 @@ import Assets from './Assets';
 import SoundCloudBadge from './SoundCloudBadge';
 import Sono from 'sono';
 import SoundManager from './SoundManager';
-import VIVEUtils from './VIVEUtils';
 
 window.params = {
 	numRainDrops:100,
-	numCubes:2000,
+	numCubes:3000,
 	numSets:5,
 	terrainSize:40,
-	numParticles:256 * 1.5,
+	numParticles:256,
 	skipCount:3,
 	maxRadius: 12,
 	minBeatDiff:3.0,
@@ -27,9 +26,10 @@ window.params = {
 	centery:1.5,
 	zoom:0,
 	showAxis:false,
-	shadowMapSize:1024*1,
+	shadowMapSize:1024*2,
 	speedOffset:new alfrid.TweenNumber(1, 'expInOut'),
-	hasPaused:false
+	hasPaused:false,
+	postEffect:false
 };
 
 window.hasVR = false;
@@ -72,41 +72,11 @@ function _onImageLoaded(o) {
 	const loader = document.body.querySelector('.Loading-Bar');
 	loader.style.width = '100%';
 
-	_initVR();
+	_init3D();
 
 	setTimeout(()=> {
 		document.body.classList.remove('isLoading');
 	}, 250);
-}
-
-
-function _initVR() {
-	VIVEUtils.init( (vrDisplay) => _onVR(vrDisplay));
-}
-
-function _onVR(vrDisplay) {
-	// console.debug('on VR :', vrDisplay);
-
-	if(vrDisplay != null) {
-		hasVR = true;
-		document.body.classList.add('hasVR');
-		let btnVR = document.body.querySelector('#enterVr');
-		btnVR.addEventListener('click', ()=> {
-			VIVEUtils.present(GL.canvas, ()=> {
-				window.vrPresenting = true;
-				document.body.classList.add('present-vr')
-				scene.resize();
-				// scene.setVR();
-			});
-		});
-	} else {
-
-	}
-
-	// Params.numParticles = hasVR ? 256 * 2.5 : 256 * 1.5;
-
-	_init3D();
-	// SoundManager;
 }
 
 

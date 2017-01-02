@@ -6,17 +6,12 @@ import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 import ViewFloor from './ViewFloor';
 import ViewCubes from './ViewCubes';
+import ViewPost from './ViewPost';
 import SoundManager from './SoundManager';
 import Assets from './Assets';
 import Rain from './Rain';
-import VIVEUtils from './VIVEUtils';
-import CameraVive from './CameraVive';
-
-let renderVR = false;
-const scissor = function(x, y, w, h) {
-	GL.scissor(x, y, w, h);
-	GL.viewport(x, y, w, h);
-}
+import EffectComposer from './effectComposer/EffectComposer';
+import PassBlur from './effectComposer/passes/PassVBlur';
 
 class SceneApp extends alfrid.Scene {
 	constructor() {
@@ -27,15 +22,13 @@ class SceneApp extends alfrid.Scene {
 		this.ry = new alfrid.EaseNumber(0);
 
 		this._count = 0;
-		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
+		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 150);
 		this.orbitalControl.radius.value = 10.1;
 		this.orbitalControl.radius.easing = 0.015;
 		this.orbitalControl.center[1] = 2;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
 		this.orbitalControl.rx.limit(-.3, Math.PI/2);
 		// this.orbitalControl.lockZoom(true);
-
-		this.cameraVive = new CameraVive();
 
 		this.mtxModel = mat4.create();
 		mat4.identity(this.mtxModel, this.mtxModel);
@@ -58,25 +51,30 @@ class SceneApp extends alfrid.Scene {
 		mat4.multiply(this.shadowMatrix, this.cameraLight.projection, this.cameraLight.viewMatrix);
 
 		window.addEventListener('keydown', (e)=> {
-			// console.log(e.keyCode);
+			console.log(e.keyCode);
 			if(e.keyCode === 32) {
 				this.toggle();
+			} else if(e.keyCode === 88) {
+				params.postEffect = !params.postEffect;
 			}
 		});
 
 		this.resize();
 
-		if(hasVR) {
-			this.toRender();
-		}
 	}
-
 
 	toggle() {
 		params.hasPaused = !params.hasPaused;
 		const ease = 'cubic';
 		params.speedOffset.easing = params.hasPaused ? `${ease}Out` : `${ease}In`;
 		params.speedOffset.value = params.hasPaused ? 0 : 1;
+		SoundManager.toggle();
+
+		console.log(params.hasPaused, document.body.classList.contains('hasToggled'));
+		if(!params.hasPaused && !document.body.classList.contains('hasToggled')) {
+			document.body.classList.add('hasToggled');	
+		}
+		
 	}
 
 	_initTextures() {
@@ -100,8 +98,7 @@ class SceneApp extends alfrid.Scene {
 
 		const shadowSize = params.shadowMapSize;
 		this._fboShadow = new alfrid.FrameBuffer(shadowSize, shadowSize);
-
-		console.table(this._particleSets);
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 	}
 
 
@@ -110,17 +107,14 @@ class SceneApp extends alfrid.Scene {
 		
 		//	helpers
 		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
-		this._bBall = new alfrid.BatchBall();
-		this._bSky = new alfrid.BatchSky();
-
+		this._bSky = new alfrid.BatchSky(100);
 
 		//	views
 		this._vRender = new ViewRender();
 		this._vSim 	  = new ViewSim();
 		this._vFloor  = new ViewFloor();
 		this._vCubes  = new ViewCubes();
+		this._vPost   = new ViewPost();
 
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
@@ -141,8 +135,14 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		GL.setMatrices(this.camera);
-	}
 
+
+		//	post
+		const blurSize = 256 * 4;
+		this._composerBlur = new EffectComposer(blurSize, blurSize);
+		this._passBlur = new PassBlur(9);
+		this._composerBlur.addPass(this._passBlur);
+	}
 
 	updateFbo(o) {
 		let { fboTarget, fboCurrent } = o;
@@ -195,15 +195,6 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
-		if(!window.hasVR) {
-			this.toRender();
-		}
-	}
-
-
-	toRender() {
-		renderVR = hasVR && vrPresenting;
-
 		this._rain.update();
 		this.updateCamera();
 
@@ -217,42 +208,27 @@ class SceneApp extends alfrid.Scene {
 			}
 		}
 
-
+		//	UPDATE SHADOW MAP
 		this.renderShadowMap();
 
-		if(!renderVR) {
-			GL.setMatrices(this.camera);
-			GL.clear(0, 0, 0, 0);
-			GL.rotate(this.mtxModel);
-			this.renderScene();
-		} else {
-			const frameData = VIVEUtils.getFrameData();
-			this.cameraVive.updateCamera(frameData);
-
-			GL.enable(GL.SCISSOR_TEST);
-			const w2 = GL.width/2;
-
-			//	left eye
-			this.cameraVive.setEye('left');
-			scissor(0, 0, w2, GL.height);
-			GL.setMatrices(this.cameraVive);
-			GL.rotate(this.mtxModel);
-			this._renderScene();
-
-
-			//	right eye
-			this.cameraVive.setEye('right');
-			scissor(0, 0, w2, GL.height);
-			GL.setMatrices(this.cameraVive);
-			GL.rotate(this.mtxModel);
-			this._renderScene();
-
-			GL.disable(GL.SCISSOR_TEST);
-			VIVEUtils.submitFrame();
+		//	RENDER SCENE TO FBO
+		if(params.postEffect) {
+			this._fboRender.bind();
 		}
 		
+		GL.setMatrices(this.camera);
+		GL.clear(0, 0, 0, 0);
+		GL.rotate(this.mtxModel);
+		this.renderScene();
 
-		if(hasVR) {	VIVEUtils.vrDisplay.requestAnimationFrame(()=>this.toRender());	}
+		if(params.postEffect) {
+			this._fboRender.unbind();
+
+			//	RENDER WITH POST EFFECT
+			GL.clear(0, 0, 0, 0);
+			this._composerBlur.render(this._fboRender.getTexture());
+			this._vPost.render(this._fboRender.getTexture(), this._composerBlur.getTexture());
+		}
 	}
 
 	renderScene() {
@@ -305,13 +281,7 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	resize() {
-		renderVR = hasVR && vrPresenting;
-		const scale = renderVR ? 2 : 1;
-		GL.setSize(window.innerWidth*scale, window.innerHeight*scale);
-		if(!renderVR) {
-			this.camera.setAspectRatio(GL.aspectRatio);
-		}
-
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 		GL.setSize(window.innerWidth, window.innerHeight);
 		this.camera.setAspectRatio(GL.aspectRatio);
 	}

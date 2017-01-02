@@ -16,6 +16,8 @@ const prec = function(mValue, mPrec = 2) {
 // 190 0.5
 // 240
 
+const defaultFreq = 1700;
+
 class SoundManager extends EventDispatcher {
 	constructor() {
 		super();
@@ -112,6 +114,12 @@ class SoundManager extends EventDispatcher {
 		this.analyser = sound.effect.analyser(128);
 		sound.play();
 		this._hasSoundLoaded = true;
+		this._inLowPass = false;
+
+		this._lowpass = sound.effect.lowpass();
+
+		// this._lowpass.Q.value = 1;
+		this._lowpass.frequency.value = defaultFreq;
 
 		Scheduler.addEF(()=>this._update());
 	}
@@ -166,6 +174,12 @@ class SoundManager extends EventDispatcher {
 			sumPerc: this._preSum/params.maxSum,
 			hasBeat: this._hasBeat
 		}
+	}
+
+	toggle() {
+		this._inLowPass = !this._inLowPass;
+		this._lowpass.frequency.value = this._inLowPass ? 300 : defaultFreq;
+		this._lowpass.Q.value = this._inLowPass ? 0.2 : 1;
 	}
 
 	get hasSoundLoaded() {	return this._hasSoundLoaded;	}

@@ -57,6 +57,7 @@ h1,h2,h3,h4,text,p {
 	z-index: 9;
 	font-size: 12px;
 	letter-spacing: 1px;
+	user-select: none;
 
 	.hasVR & {
 		display: none;
@@ -74,6 +75,11 @@ a {
 .instruction {
 	width:100%;
 	text-align: center;
+	transition: opacity .5s ease-out;
+
+	.hasToggled & {
+		opacity: 0;
+	}
 }
 
 
