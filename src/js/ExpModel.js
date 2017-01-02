@@ -138,6 +138,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchSwirl.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/swirling/dist/index.html',
 		title:'Swirling Particles'
+	},
+	{
+		cover:'assets/img/coverSketchBlackRain.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/blackRain/dist/index.html',
+		title:'Black Rain'
 	}
 ]
 

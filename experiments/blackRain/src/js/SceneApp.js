@@ -185,6 +185,7 @@ class SceneApp extends alfrid.Scene {
 
 		this.camMovement.value += this.rx.value;
 		this.orbitalControl.center[1] = params.centery;
+		// this.orbitalControl.rx.value = Math.sin(this.camMovement.value) * 1.0 + 0.7;
 	}
 
 	_onHitGround(pos) {
