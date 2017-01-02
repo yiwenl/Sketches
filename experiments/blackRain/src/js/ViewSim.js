@@ -28,7 +28,7 @@ class ViewSim extends alfrid.View {
 	}
 
 
-	render(textureVel, texturePos, textureExtra, textureLife, randomSpwan) {
+	render(textureVel, texturePos, textureExtra, textureLife, hasHitGround, hitPos) {
 		const data = SoundManager.getData();
 		// console.log(data);
 
@@ -40,10 +40,10 @@ class ViewSim extends alfrid.View {
 		let spwanPos = [-999, -999];
 		const r = params.terrainSize * .25;
 
-		if(data.hasBeat) {
+		if(hasHitGround) {
 			const minLife = 0.3;
 			if(life < minLife) life = minLife;	
-			spwanPos = [random(-r, r), random(-r, r)];
+			spwanPos = hitPos;
 		} else {
 			life *= 0.1;
 		}
@@ -58,7 +58,7 @@ class ViewSim extends alfrid.View {
 		this.shader.uniform("uRotationSpeed", "float", params.rotationSpeed);
 		this.shader.uniform("uRespwanRadius", "float", params.respwanRadius);
 		this.shader.uniform("uSkipCount", "float", params.skipCount);
-		this.shader.uniform("uRandomSpwan", "float", randomSpwan ? 1.0 : 0.0);
+		this.shader.uniform("uRandomSpwan", "float", 0.0);
 		this.shader.uniform("uSwpanPos", "vec2", spwanPos);
 		// this.shader.uniform("uRandomSpwan", "float", 1);
 		// console.log(data.sum / 200);

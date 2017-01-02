@@ -10,7 +10,7 @@ uniform sampler2D textureDepth;
 
 float pcfSoftShadow(sampler2D shadowMap) {
 	const float shadowMapSize  = 1024.0;
-	const float shadowBias     = .00005;
+	const float shadowBias     = -.00005;
 	float shadow = 0.0;
 	float texelSizeX =  1.0 / shadowMapSize;
 	float texelSizeY =  1.0 / shadowMapSize;

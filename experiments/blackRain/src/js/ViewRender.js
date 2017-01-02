@@ -1,6 +1,7 @@
 // ViewRender.js
 
 import alfrid from 'alfrid';
+import Assets from './Assets';
 const vsShadowMap = require('../shaders/shadow.vert');
 const fsShadowMap = require('../shaders/shadow.frag');
 
@@ -69,6 +70,9 @@ class ViewRender extends alfrid.View {
 
 			this.shader.uniform("textureShadow", "uniform1i", 5);
 			textureShadow.bind(5);
+
+			this.shader.uniform("textureFlame", "uniform1i", 6);
+			Assets.get('flame').bind(6);
 		}
 
 		shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);

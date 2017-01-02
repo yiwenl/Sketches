@@ -147,7 +147,7 @@ vec2 randomPos(vec2 xz, vec2 uv, float offset, float randomP, float scale) {
 	float a = rand(uv) * PI * 2.0;
 	float off = mix(offset, 1.0, randomP);
 
-	float r = (exponentialIn(uLife) * scale + off) * uRespwanRadius * mix(rand(xz), 1.0, randomP);
+	float r = (exponentialIn(uLife) + off) * uRespwanRadius * mix(rand(xz), 1.0, randomP) * scale;
 	return vec2(cos(a), sin(a)) * r;
 }
 
@@ -185,8 +185,10 @@ void main(void) {
 		pos.y = -maxRadius;
 		// pos.xz = normalize(pos.xz) * (uLife * 2.0 + extra.g) * 2.0 * rand(pos.xz);
 		// pos.xz = randomPos(pos.xz, vTextureCoord, extra.g, 0.0);
-		pos.xz = randomPos(pos.xz, vTextureCoord, extra.g, step(.7, vTextureCoord.x), rand(uSwpanPos) * .5 + .5);
-		vel *= mix(extra.g * extra.b * extra.r, 0.1, 0.5) * 0.3;
+		pos.xz = randomPos(pos.xz, vTextureCoord, extra.g, step(.5, vTextureCoord.x), rand(uSwpanPos) * .5 + .5);
+		// pos.xz = randomPos(pos.xz, vTextureCoord, extra.g, 1.0, rand(uSwpanPos) * .5);
+		// pos.xz = randomPos(pos.xz, vTextureCoord, extra.g, 0.0, rand(uSwpanPos) * .5);
+		vel *= (extra.g * extra.r * extra.b) * 0.3 * (5.0 + uLife * 3.0);
 		life.x = uLife;
 		life.yz = uSwpanPos;
 	}

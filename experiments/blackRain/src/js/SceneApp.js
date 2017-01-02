@@ -5,8 +5,10 @@ import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 import ViewFloor from './ViewFloor';
+import ViewCubes from './ViewCubes';
 import SoundManager from './SoundManager';
 import Assets from './Assets';
+import Rain from './Rain';
 
 window.getAsset = function(id) {
 	return assets.find( (a) => a.id === id).file;
@@ -26,10 +28,14 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.radius.easing = 0.015;
 		this.orbitalControl.center[1] = 2;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
+		this.orbitalControl.rx.limit(-.3, Math.PI/2);
 		// this.orbitalControl.lockZoom(true);
 
 		this.mtxModel = mat4.create();
-
+		this._rain = new Rain();
+		this._rain.on('onHitGround', (o)=>this._onHitGround(o.detail));
+		this._hasHitGround = false;
+		this._hitPos = [-999, -999];
 
 		//	light
 		const lightOffset = 2.0;
@@ -84,6 +90,7 @@ class SceneApp extends alfrid.Scene {
 		this._vRender = new ViewRender();
 		this._vSim 	  = new ViewSim();
 		this._vFloor  = new ViewFloor();
+		this._vCubes  = new ViewCubes();
 
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
@@ -108,7 +115,6 @@ class SceneApp extends alfrid.Scene {
 
 
 	updateFbo(o) {
-
 		let { fboTarget, fboCurrent } = o;
 
 		fboTarget.bind();
@@ -118,7 +124,8 @@ class SceneApp extends alfrid.Scene {
 			fboCurrent.getTexture(0), 
 			fboCurrent.getTexture(2),
 			fboCurrent.getTexture(3),
-			o.randomSpwanPos
+			this._hasHitGround,
+			this._hitPos
 			);
 		fboTarget.unbind();
 
@@ -127,24 +134,10 @@ class SceneApp extends alfrid.Scene {
 		o.fboCurrent = o.fboTarget;
 		o.fboTarget  = tmp;
 
+		this._hasHitGround = false;
 	}
 
-
-	render() {
-		if(SoundManager.sound) {
-			// if(SoundManager.currentTime > 180 && SoundManager.currentTime < 240) {
-			// 	params.minBeatDiff = 0.5;
-			// } else {
-			// 	params.minBeatDiff = 2.0;
-			// }
-
-			// if(SoundManager.currentTime > 195 && SoundManager.currentTime < 240) {
-			// 	params.lifeDecrease = 0.003;
-			// } else {
-			// 	params.lifeDecrease = 0.005;
-			// }
-		}
-
+	updateCamera() {
 		const data = SoundManager.getData();
 		if(data) {
 			this.ry.value = Math.pow(data.sum / 500, 3.0);
@@ -154,17 +147,29 @@ class SceneApp extends alfrid.Scene {
 			params.zoom = this.orbitalControl.radius.value;
 
 			if(data.hasBeat) {
-				this.rx.setTo(data.sum / 500);
+				this.rx.setTo(data.sum / 1500);
 				this.rx.value = 0;
+				this._rain.addRainDrop();
 			}
 		}
 
 		this.camMovement.value += this.rx.value;
+	}
+
+	_onHitGround(pos) {
+		this._hasHitGround = true;
+		this._hitPos = [pos[0], pos[2]];
+	}
+
+
+	render() {
+		this._rain.update();
+		this.updateCamera();
 		
 		mat4.identity(this.mtxModel, this.mtxModel);
 		mat4.translate(this.mtxModel, this.mtxModel, [0, params.maxRadius*0.5, 0]);
 
-		// this.orbitalControl.rx.value = Math.sin(this.camMovement.value) * 0.2 + 0.1;
+		// this.orbitalControl.rx.value = Math.sin(this.camMovement.value) * 1.0 + 0.7;
 		this.orbitalControl.center[1] = params.centery;
 
 
@@ -179,27 +184,7 @@ class SceneApp extends alfrid.Scene {
 		}
 
 
-		this._fboShadow.bind();
-		// GL.clear(1, 1, 1, 1);
-		GL.clear(0, 0, 0, 0);
-		GL.gl.depthFunc(GL.gl.LEQUAL);
-		GL.setMatrices(this.cameraLight);
-			
-		for(let i=0; i<this._particleSets.length; i++) {
-			let oSet = this._particleSets[i];
-			let p = oSet.count / params.skipCount;
-			let { fboTarget, fboCurrent } = oSet;
-
-			this._vRender.render(
-				fboTarget.getTexture(0), 
-				fboCurrent.getTexture(0), 
-				p, 
-				fboCurrent.getTexture(2),
-				fboCurrent.getTexture(3)
-			);
-		}
-
-		this._fboShadow.unbind();
+		this.renderShadowMap();
 
 		GL.setMatrices(this.camera);
 
@@ -212,6 +197,8 @@ class SceneApp extends alfrid.Scene {
 
 		this._bSky.draw(Assets.get('bg'));
 		this._vFloor.render(this.shadowMatrix, this._fboShadow.getDepthTexture(), this._fboShadow.getTexture());
+
+		this._vCubes.render(this._rain.positions, this._rain.extras);
 
 		for(let i=0; i<this._particleSets.length; i++) {
 			let oSet = this._particleSets[i];
@@ -235,6 +222,32 @@ class SceneApp extends alfrid.Scene {
 		// this._bCopy.draw(this._fboShadow.getTexture());
 		// GL.viewport(0, size, size, size);
 		// this._bCopy.draw(this._fboShadow.getDepthTexture());
+	}
+
+	renderShadowMap() {
+		this._fboShadow.bind();
+		// GL.clear(1, 1, 1, 1);
+		GL.clear(0, 0, 0, 0);
+		GL.gl.depthFunc(GL.gl.LEQUAL);
+		GL.setMatrices(this.cameraLight);
+
+		this._vCubes.render(this._rain.positions, this._rain.extras, 2.5);
+			
+		for(let i=0; i<this._particleSets.length; i++) {
+			let oSet = this._particleSets[i];
+			let p = oSet.count / params.skipCount;
+			let { fboTarget, fboCurrent } = oSet;
+
+			this._vRender.render(
+				fboTarget.getTexture(0), 
+				fboCurrent.getTexture(0), 
+				p, 
+				fboCurrent.getTexture(2),
+				fboCurrent.getTexture(3)
+			);
+		}
+
+		this._fboShadow.unbind();
 	}
 
 

@@ -40,10 +40,10 @@ class SoundManager extends EventDispatcher {
 		// let song = 'https://soundcloud.com/mysterylandmusic/unsubscribe_penultimate';
 		// let song = 'https://soundcloud.com/dee-san/oscillate-01';
 
-		const useLocal = false;
+		const useLocal = true;
 
 		if(useLocal) {
-			let src = './assets/audio/Oscillate.mp3';
+			let src = './assets/audio/InsomniacOlympics.mp3';
 			this.sound = Sono.load({
 				url: [src],
 				volume: 1.01,

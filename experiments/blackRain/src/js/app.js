@@ -11,16 +11,18 @@ import Sono from 'sono';
 import SoundManager from './SoundManager';
 
 window.params = {
+	numRainDrops:100,
+	numCubes:2000,
 	numSets:5,
 	terrainSize:40,
 	numParticles:256 * 1.5,
 	skipCount:3,
 	maxRadius: 12,
-	minBeatDiff:2.0,
+	minBeatDiff:3.0,
 	maxSum:150,
-	lifeDecrease:0.0065,
+	lifeDecrease:0.0075,
 	rotationSpeed:0.0015,
-	respwanRadius:2.5,
+	respwanRadius:1.5,
 	centery:1.5,
 	zoom:0,
 	showAxis:false,
@@ -65,7 +67,7 @@ function _onImageLoaded(o) {
 	const loader = document.body.querySelector('.Loading-Bar');
 	loader.style.width = '100%';
 
-	_initSound();
+	
 	_init3D();
 
 	setTimeout(()=> {
@@ -93,7 +95,7 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	//*/
+	/*/
 	window.gui = new dat.GUI({ width:300 });
 	gui.add(params, 'maxRadius', 0.0, 15.0);
 	gui.add(params, 'minBeatDiff', 0.0, 5.0).listen();
@@ -111,7 +113,7 @@ function _init3D() {
 
 	//	STATS
 
-	//*/
+	/*/
 	const stats = new Stats();
 	document.body.appendChild(stats.domElement);
 	alfrid.Scheduler.addEF(()=>stats.update());

@@ -13,6 +13,7 @@ uniform sampler2D textureCurr;
 uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
 uniform sampler2D textureLife;
+uniform sampler2D textureFlame;
 uniform float percent;
 uniform float time;
 uniform vec2 uViewport;
@@ -57,15 +58,15 @@ void main(void) {
 	}
 	
 	
-	float g 	 = mix(extra.r, 1.0, .8);
-	vColor       = vec4(vec3(g), a);
-
+	float g          = mix(extra.r, 1.0, .8);
+	// vec2 uvFlame     = vec2(0.5, pow(1.0 - life.x, 1.0));
+	// vec3 colorFlame  = texture2D(textureFlame, uvFlame).rrr;
+	vColor           = vec4(vec3(g), a);
+	
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
-    gl_PointSize = distOffset * (1.0 + extra.x * 1.0);
-
-
-    vShadowCoord  = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);;
-
-	vNormal 	 = aNormal;
-	vExtra 		 = extra;
+	gl_PointSize     = distOffset * (1.0 + extra.x * 1.0);
+	
+	vShadowCoord     = ( biasMatrix * uShadowMatrix ) * vec4(pos, 1.0);;
+	vNormal          = aNormal;
+	vExtra           = extra;
 }
