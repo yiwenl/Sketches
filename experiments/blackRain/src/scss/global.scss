@@ -49,7 +49,7 @@ h1,h2,h3,h4,text,p {
 	display: none;
 }
 
-p {
+.desc {
 	position: fixed;
 	color: white;
 	bottom: 50px;
@@ -57,12 +57,14 @@ p {
 	z-index: 9;
 	font-size: 12px;
 	letter-spacing: 1px;
+
+	.hasVR & {
+		display: none;
+	}
 }
 
 .music-link {
-	
 	left: 50px;
-	
 }
 
 a {
@@ -74,6 +76,42 @@ a {
 	text-align: center;
 }
 
+
+#enterVr {
+	position: absolute;
+	margin-bottom:40px;
+	width: 80px;
+	bottom:0px;
+	left: 50%;
+	margin-left:-40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+    transition: opacity .5s ease-out;
+    display:none;
+    opacity: 0;
+    z-index: 999;
+
+    .hasVR & {
+    	display:block;
+    	opacity: .5;
+
+    	&:hover {
+    		opacity:1;
+    	}
+    }
+
+    p {
+    	margin:0;
+    	padding-top:5px;
+    	font-size:14px;
+    	letter-spacing: 2px;
+    	width: 100%;
+    	text-align: center;
+    	color:white;
+    }
+}
 
 .Main-Canvas {
 	width:100%;

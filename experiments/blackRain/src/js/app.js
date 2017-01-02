@@ -9,6 +9,7 @@ import Assets from './Assets';
 import SoundCloudBadge from './SoundCloudBadge';
 import Sono from 'sono';
 import SoundManager from './SoundManager';
+import VIVEUtils from './VIVEUtils';
 
 window.params = {
 	numRainDrops:100,
@@ -31,6 +32,9 @@ window.params = {
 	hasPaused:false
 };
 
+window.hasVR = false;
+window.vrPresenting = false;
+
 if(document.body) {
 	_init();
 } else {
@@ -39,7 +43,7 @@ if(document.body) {
 
 
 function _init() {
-
+	SoundManager;
 	//	LOADING ASSETS
 	if(assets.length > 0) {
 		document.body.classList.add('isLoading');
@@ -55,7 +59,6 @@ function _init() {
 		}).on('complete', _onImageLoaded)
 		.start();	
 	} else {
-		_initSound();
 		_init3D();
 	}
 
@@ -69,8 +72,7 @@ function _onImageLoaded(o) {
 	const loader = document.body.querySelector('.Loading-Bar');
 	loader.style.width = '100%';
 
-	
-	_init3D();
+	_initVR();
 
 	setTimeout(()=> {
 		document.body.classList.remove('isLoading');
@@ -78,8 +80,33 @@ function _onImageLoaded(o) {
 }
 
 
-function _initSound() {
-	SoundManager;
+function _initVR() {
+	VIVEUtils.init( (vrDisplay) => _onVR(vrDisplay));
+}
+
+function _onVR(vrDisplay) {
+	// console.debug('on VR :', vrDisplay);
+
+	if(vrDisplay != null) {
+		hasVR = true;
+		document.body.classList.add('hasVR');
+		let btnVR = document.body.querySelector('#enterVr');
+		btnVR.addEventListener('click', ()=> {
+			VIVEUtils.present(GL.canvas, ()=> {
+				window.vrPresenting = true;
+				document.body.classList.add('present-vr')
+				scene.resize();
+				// scene.setVR();
+			});
+		});
+	} else {
+
+	}
+
+	// Params.numParticles = hasVR ? 256 * 2.5 : 256 * 1.5;
+
+	_init3D();
+	// SoundManager;
 }
 
 
@@ -97,7 +124,7 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	//*/
+	/*/
 	window.gui = new dat.GUI({ width:300 });
 	gui.add(params, 'maxRadius', 0.0, 15.0);
 	gui.add(params, 'minBeatDiff', 0.0, 5.0).listen();
@@ -116,7 +143,7 @@ function _init3D() {
 
 	//	STATS
 
-	//*/
+	/*/
 	const stats = new Stats();
 	document.body.appendChild(stats.domElement);
 	alfrid.Scheduler.addEF(()=>stats.update());

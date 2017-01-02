@@ -9,9 +9,13 @@ import ViewCubes from './ViewCubes';
 import SoundManager from './SoundManager';
 import Assets from './Assets';
 import Rain from './Rain';
+import VIVEUtils from './VIVEUtils';
+import CameraVive from './CameraVive';
 
-window.getAsset = function(id) {
-	return assets.find( (a) => a.id === id).file;
+let renderVR = false;
+const scissor = function(x, y, w, h) {
+	GL.scissor(x, y, w, h);
+	GL.viewport(x, y, w, h);
 }
 
 class SceneApp extends alfrid.Scene {
@@ -31,7 +35,12 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.rx.limit(-.3, Math.PI/2);
 		// this.orbitalControl.lockZoom(true);
 
+		this.cameraVive = new CameraVive();
+
 		this.mtxModel = mat4.create();
+		mat4.identity(this.mtxModel, this.mtxModel);
+		mat4.translate(this.mtxModel, this.mtxModel, [0, params.maxRadius*0.5, 0]);
+
 		this._rain = new Rain();
 		this._rain.on('onHitGround', (o)=>this._onHitGround(o.detail));
 		this._hasHitGround = false;
@@ -54,6 +63,12 @@ class SceneApp extends alfrid.Scene {
 				this.toggle();
 			}
 		});
+
+		this.resize();
+
+		if(hasVR) {
+			this.toRender();
+		}
 	}
 
 
@@ -169,6 +184,7 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		this.camMovement.value += this.rx.value;
+		this.orbitalControl.center[1] = params.centery;
 	}
 
 	_onHitGround(pos) {
@@ -178,15 +194,17 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		if(!window.hasVR) {
+			this.toRender();
+		}
+	}
+
+
+	toRender() {
+		renderVR = hasVR && vrPresenting;
+
 		this._rain.update();
 		this.updateCamera();
-		
-		mat4.identity(this.mtxModel, this.mtxModel);
-		mat4.translate(this.mtxModel, this.mtxModel, [0, params.maxRadius*0.5, 0]);
-
-		// this.orbitalControl.rx.value = Math.sin(this.camMovement.value) * 1.0 + 0.7;
-		this.orbitalControl.center[1] = params.centery;
-
 
 		for(let i=0; i<this._particleSets.length; i++) {
 			let oSet = this._particleSets[i];
@@ -201,15 +219,42 @@ class SceneApp extends alfrid.Scene {
 
 		this.renderShadowMap();
 
-		GL.setMatrices(this.camera);
+		if(!renderVR) {
+			GL.setMatrices(this.camera);
+			GL.clear(0, 0, 0, 0);
+			GL.rotate(this.mtxModel);
+			this.renderScene();
+		} else {
+			const frameData = VIVEUtils.getFrameData();
+			this.cameraVive.updateCamera(frameData);
 
-		GL.clear(0, 0, 0, 0);
-		if(params.showAxis) {
-			this._bAxis.draw();	
+			GL.enable(GL.SCISSOR_TEST);
+			const w2 = GL.width/2;
+
+			//	left eye
+			this.cameraVive.setEye('left');
+			scissor(0, 0, w2, GL.height);
+			GL.setMatrices(this.cameraVive);
+			GL.rotate(this.mtxModel);
+			this._renderScene();
+
+
+			//	right eye
+			this.cameraVive.setEye('right');
+			scissor(0, 0, w2, GL.height);
+			GL.setMatrices(this.cameraVive);
+			GL.rotate(this.mtxModel);
+			this._renderScene();
+
+			GL.disable(GL.SCISSOR_TEST);
+			VIVEUtils.submitFrame();
 		}
 		
-		GL.rotate(this.mtxModel);
 
+		if(hasVR) {	VIVEUtils.vrDisplay.requestAnimationFrame(()=>this.toRender());	}
+	}
+
+	renderScene() {
 		this._bSky.draw(Assets.get('bg'));
 		this._vFloor.render(this.shadowMatrix, this._fboShadow.getDepthTexture(), this._fboShadow.getTexture());
 
@@ -231,17 +276,10 @@ class SceneApp extends alfrid.Scene {
 				this._fboShadow.getTexture()
 			);
 		}
-
-		// const size = GL.height/2;
-		// GL.viewport(0, 0, size, size);
-		// this._bCopy.draw(this._fboShadow.getTexture());
-		// GL.viewport(0, size, size, size);
-		// this._bCopy.draw(this._fboShadow.getDepthTexture());
 	}
 
 	renderShadowMap() {
 		this._fboShadow.bind();
-		// GL.clear(1, 1, 1, 1);
 		GL.clear(0, 0, 0, 0);
 		GL.gl.depthFunc(GL.gl.LEQUAL);
 		GL.setMatrices(this.cameraLight);
@@ -265,8 +303,14 @@ class SceneApp extends alfrid.Scene {
 		this._fboShadow.unbind();
 	}
 
-
 	resize() {
+		renderVR = hasVR && vrPresenting;
+		const scale = renderVR ? 2 : 1;
+		GL.setSize(window.innerWidth*scale, window.innerHeight*scale);
+		if(!renderVR) {
+			this.camera.setAspectRatio(GL.aspectRatio);
+		}
+
 		GL.setSize(window.innerWidth, window.innerHeight);
 		this.camera.setAspectRatio(GL.aspectRatio);
 	}
