@@ -118,6 +118,31 @@ const ExpModel = [
 		cover:'assets/img/coverSketchWolf.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/wolf2/dist/index.html',
 		title:'Wolf'
+	},
+	{
+		cover:'assets/img/coverSketchPainting.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/drawingLandscape/dist/index.html',
+		title:'Painting Landscape'
+	},
+	{
+		cover:'assets/img/coverSketchPaintingParticles.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/strokeToParticles/dist/index.html',
+		title:'Painting Particles'
+	},
+	{
+		cover:'assets/img/coverSketchNeonDemon.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/neonDemon/dist/index.html',
+		title:'Painting Particles'
+	},
+	{
+		cover:'assets/img/coverSketchSwirl.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/swirling/dist/index.html',
+		title:'Swirling Particles'
+	},
+	{
+		cover:'assets/img/coverSketchBlackRain.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/blackRain/dist/index.html',
+		title:'Black Rain'
 	}
 ]
 

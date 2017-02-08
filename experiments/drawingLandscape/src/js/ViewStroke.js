@@ -2,21 +2,39 @@
 
 import alfrid, { GL } from 'alfrid';
 
+import vs from '../shaders/pbr.vert';
+import fs from '../shaders/stroke.frag';
+
 class ViewStroke extends alfrid.View {
 	
 	constructor() {
-		super(null, alfrid.ShaderLibs.copyFrag);
+		super(vs, fs);
 		this._points = [];
 
 		this.mtxLeft = mat4.create();
 		mat4.rotateY(this.mtxLeft, this.mtxLeft, -Math.PI/2);
 		this.mtxRight = mat4.create();
 		mat4.rotateY(this.mtxRight, this.mtxRight,  Math.PI/2);
+
+		this._opacity = new alfrid.EaseNumber(1);
 	}
 
 
 	_init() {
 		this.mesh;
+
+		this.roughness = 1;
+		this.specular = 1;
+		this.metallic = 0;
+
+		const grey = 1.;
+		this.baseColor = [grey, grey, grey];
+
+		// const f = gui.addFolder('Stroke');
+		// f.add(this, 'roughness', 0, 1);
+		// f.add(this, 'specular', 0, 1);
+		// f.add(this, 'metallic', 0, 1);
+		// f.open();
 	}
 
 
@@ -134,14 +152,45 @@ class ViewStroke extends alfrid.View {
 		this.mesh.bufferIndex(indices, true);
 	}
 
+	show() {
+		this._opacity.value = 1;
+	}
 
-	render(texture) {
+	anim() {
+		this._opacity.setTo(1);
+		this._opacity.value = 0;
+	}
+
+
+	render(texture, textureNormal, textureRad, textureIrr) {
 		if(!this.mesh) {
 			return;
 		}
 		this.shader.bind();
-		this.shader.uniform("texture", "uniform1i", 0);
+		this.shader.uniform("uColorMap", "uniform1i", 0);
+		this.shader.uniform("uNormalMap", "uniform1i", 1);
+		textureNormal.bind(1);
 		texture.bind(0);
+
+		this.shader.uniform('uRadianceMap', 'uniform1i', 2);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 3);
+		textureRad.bind(2);
+		textureIrr.bind(3);
+
+		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
+		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
+		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
+		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
+
+		this.shader.uniform("uScale", "vec3", [1, 1, 1]);
+		this.shader.uniform("uPosition", "vec3", [0, 0, 0]);
+		this.shader.uniform("uRotation", "float", 0);
+
+
+		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
+		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
+		this.shader.uniform("uOpacity", "float", this._opacity.value);
+
 		GL.draw(this.mesh);
 	}
 

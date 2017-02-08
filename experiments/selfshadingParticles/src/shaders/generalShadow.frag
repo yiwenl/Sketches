@@ -108,6 +108,7 @@ void main(void) {
 
 
 
+	// gl_FragColor = texture2D(textureDepth, vShadowCoord.xy/vShadowCoord.w);
 	// vec4 ShadowCoord	= vShadowCoord / vShadowCoord.w;
 	// vec4 Shadow		= vec4(1.0);
 

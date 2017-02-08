@@ -16,11 +16,21 @@ class ViewMountains extends alfrid.View {
 	_init() {
 		this.meshes = [];
 		this._textures = [];
+
+		this.roughness = .95;
+		this.specular = .5;
+		this.metallic = 0;
+
+		// const f = gui.addFolder('Mountains');
+		// f.add(this, 'roughness', 0, 1);
+		// f.add(this, 'specular', 0, 1);
+		// f.add(this, 'metallic', 0, 1);
+		// f.open();
 	}
 
 
 	addMountain(mPosition) {
-		const NUM = 30;
+		const NUM = 24;
 		const uvGap = 1.0 / NUM;
 		const SEED = Math.random() * 0xFF;
 		const SIZE = random(0.5, .7);
@@ -35,19 +45,21 @@ class ViewMountains extends alfrid.View {
 		let count = 0;
 		let normals = [];
 
-
 		function getPosition(i, j) {
 			let px = i/NUM;
 			let py = j/NUM;
 			let hx = Math.sin(px*Math.PI);
 			let hy = Math.sin(py*Math.PI);
-			let h = hx * hy;
+			let h = Math.max(hx * hy, 0.0);
 			h = Math.pow(h, power);
 			const x = -SIZE + px * 2.0 * SIZE;
 			const z = SIZE - py * 2.0 * SIZE;
 			
 			const y = h * HEIGHT + Perlin.noise(x*posOffset, z*posOffset, SEED) * NOISE_HEIGHT * h;
 
+			if(isNaN(y)) {
+				console.log(x, z, hx * hy);
+			}
 			return [x, y, z];
 		}
 
@@ -69,6 +81,40 @@ class ViewMountains extends alfrid.View {
 			return n;
 		}
 
+		function getVertexNormal(i, j) {
+			const p = getPosition(i, j);
+			const pRight = getPosition(i+1, j);
+			const pBottom = getPosition(i, j+1);
+
+			const vRight = vec3.create();
+			const vBottom = vec3.create();
+			vec3.sub(vRight, pRight, p);
+			vec3.sub(vBottom, pBottom, p);
+			vec3.normalize(vRight, vRight);
+			vec3.normalize(vBottom, vBottom);
+
+			const n = vec3.create();
+			vec3.cross(n, vRight, vBottom);
+			n[1] *= HEIGHT/SIZE;
+			vec3.normalize(n, n);
+			return n;
+		}
+
+		function getNormalGrid(i, j) {
+			const pHL = getPosition(i-1, j);
+			const pHR = getPosition(i+1, j);
+			const pHD = getPosition(i, j-1);
+			const pHU = getPosition(i, j+1);
+
+			const n = vec3.create();
+			n[0] = pHL[1] - pHR[1];
+			n[1] = pHD[1] - pHU[1];
+			n[2] = 2.0;
+
+			vec3.normalize(n, n);
+			return n;
+		}
+
 		
 		for(let j=0; j<NUM; j++) {
 			for(let i=0; i<NUM; i++) {
@@ -82,11 +128,12 @@ class ViewMountains extends alfrid.View {
 				positions.push(v2);
 				positions.push(v3);
 
-				let n = getNormal(v0, v1, v2);
-				normals.push(n);
-				normals.push(n);
-				normals.push(n);
-				normals.push(n);
+				// let n = getNormal(v0, v1, v2);
+				// let n = getNormalGrid(i, j);
+				normals.push(getVertexNormal(i, j));
+				normals.push(getVertexNormal(i+1, j));
+				normals.push(getVertexNormal(i+1, j+1));
+				normals.push(getVertexNormal(i, j+1));
 
 				let u = i/NUM;
 				let v = j/NUM;
@@ -113,7 +160,7 @@ class ViewMountains extends alfrid.View {
 		mountain.bufferIndex(indices);
 		mountain.bufferNormal(normals);
 
-		mountain.position = [mPosition[0], mPosition[1], mPosition[2]];
+		mountain.position = [mPosition[0], mPosition[1] , mPosition[2]];
 		mountain.scale = random(2.0, 4);
 		mountain.rotation = Math.random() * Math.PI * 2.0;
 		mountain.textureIndex = Math.floor(Math.random() * 35);
@@ -143,15 +190,28 @@ class ViewMountains extends alfrid.View {
 	}
 
 
-	render(textureBg) {
+	render(textureRad, textureIrr, textureNoise, mOffset) {
 		this.shader.bind();
+		this.shader.uniform('uNoiseMap', 'uniform1i', 1);
+		this.shader.uniform('uRadianceMap', 'uniform1i', 2);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 3);
+
+		textureNoise.bind(1);
+		textureRad.bind(2);
+		textureIrr.bind(3);
+
+		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
+		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
+		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
+
+		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
+		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
 
 		this.shader.uniform('texture', 'uniform1i', 0);
-		this.shader.uniform('textureBg', 'uniform1i', 1);
 		this.shader.uniform("uFogOffset", "float", params.fogOffset);
 		this.shader.uniform("uMaxRange", "float", params.maxRange);
 		this.shader.uniform("uFadeInRange", "float", params.fadeInRange);
-		textureBg.bind(1);
+		this.shader.uniform("uOffset", "float", mOffset);
 
 		this.meshes.map((m)=> {
 			this._textures[m.textureIndex].bind(0);

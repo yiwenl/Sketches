@@ -8,6 +8,7 @@ import ViewMountains from './ViewMountains';
 import ViewSky from './ViewSky';
 import ViewTerrain from './ViewTerrain';
 import Drawing from './Drawing';
+import SubsceneParticles from './SubsceneParticles';
 
 window.getAsset = function (id) {
 	for(var i = 0; i < assets.length; i++) {
@@ -30,7 +31,7 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.center[1] = 1;
 		this.orbitalControl.lockZoom(true);
 		this.orbitalControl.rx.limit(0.05, Math.PI * 0.1);
-		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 100);
+		this.camera.setPerspective(60 * RAD, GL.aspectRatio, .1, 100);
 
 		this._inDrawingMode = false;
 		this._drawingOffset = new alfrid.TweenNumber(0);
@@ -53,29 +54,21 @@ class SceneApp extends alfrid.Scene {
 		let irr_negy = alfrid.HDRLoader.parse(getAsset('irr_negy'));
 		let irr_posz = alfrid.HDRLoader.parse(getAsset('irr_posz'));
 		let irr_negz = alfrid.HDRLoader.parse(getAsset('irr_negz'));
-
 		this._textureIrr = new alfrid.GLCubeTexture([irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz]);
+		this._textureRad = alfrid.GLCubeTexture.parseDDS(getAsset('radiance'));
 
-		let rad_posx = alfrid.HDRLoader.parse(getAsset('rad_posx'));
-		let rad_negx = alfrid.HDRLoader.parse(getAsset('rad_negx'));
-		let rad_posy = alfrid.HDRLoader.parse(getAsset('rad_posy'));
-		let rad_negy = alfrid.HDRLoader.parse(getAsset('rad_negy'));
-		let rad_posz = alfrid.HDRLoader.parse(getAsset('rad_posz'));
-		let rad_negz = alfrid.HDRLoader.parse(getAsset('rad_negz'));
-
-		this._textureRad = new alfrid.GLCubeTexture([rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz]);
 		this._textureAOTerrain = new alfrid.GLTexture(getAsset('aoTerrain'));
 		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 
 		this._brushIndex = 0;
 		this._textureBrush = new alfrid.GLTexture(getAsset(`brush${this._brushIndex}`));
+		this._textureBrushNormal = new alfrid.GLTexture(getAsset(`brushNormal${this._brushIndex}`));
 		this._textureBg = new alfrid.GLTexture(getAsset('bg'));
+		this._textureNoise = new alfrid.GLTexture(getAsset('noise'));
 	}
 
 	_initViews() {
 		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
 		this._bBall = new alfrid.BatchBall();
 		this._bSkybox = new alfrid.BatchSkybox();
 		// this._vModel = new ViewObjModel();
@@ -86,10 +79,13 @@ class SceneApp extends alfrid.Scene {
 		this._vMountains = new ViewMountains();
 		this._vSky = new ViewSky();
 		this._vTerrain = new ViewTerrain();
+
+
+		// this._sub = new SubsceneParticles(this);
 	}
 
 	_onKey(e) {
-		// console.log(e.keyCode);
+		console.log(e.keyCode);
 
 		if(e.keyCode === 32) {	//	spacebar
 			this.setInDrawingMode(!this._inDrawingMode);
@@ -108,14 +104,26 @@ class SceneApp extends alfrid.Scene {
 			this._drawing.lock(false);
 			this._drawing.clear();
 			this._vStroke.clear();
+			this._vStroke.show();
 
 			this._brushIndex = Math.floor(Math.random() * 6);
 			this._textureBrush.updateTexture(getAsset(`brush${this._brushIndex}`));
+			this._textureBrushNormal.updateTexture(getAsset(`brushNormal${this._brushIndex}`));
 		} else {
+			//	get mesh points from stroke
 			this.orbitalControl.lock(false);
 			this.orbitalControl.radius.value = 12;
 			this._drawingOffset.value = 0;
 			this._drawing.lock(true);
+
+
+			
+			if(this._vStroke.mesh) {
+				let vertices = this._vStroke.mesh.vertices;
+				// console.table(vertices);
+				// this._sub.reset(vertices);
+				this._vStroke.anim();
+			}
 		}
 
 	}
@@ -143,7 +151,6 @@ class SceneApp extends alfrid.Scene {
 		}
 
 
-		console.log('Points : ', points.length);
 		let cnt = 0;
 		points.map( (p) => {
 			if(checkDist(p)) {
@@ -154,7 +161,6 @@ class SceneApp extends alfrid.Scene {
 			}
 		});
 
-		console.log('Mountains :', cnt);
 	}
 
 
@@ -164,24 +170,21 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+		if(!this._inDrawingMode) {
+			this.orbitalControl.ry.value += 0.002;
+		}
+		// this._sub.update();
 		GL.clear(0, 0, 0, 0);
 
-		this._fboRender.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vSky.render(this._textureBg);
-		this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain);
+		GL.setMatrices(this.camera);
 
-		this._fboRender.unbind();
+		this._vSky.render(this._textureBg, this._drawingOffset.value);
+		this._vTerrain.render(this._textureRad, this._textureIrr, this._textureAOTerrain, this._textureNoise, this._drawingOffset.value);
 
-		
+		this._vMountains.render(this._textureRad, this._textureIrr, this._textureNoise, this._drawingOffset.value);
+		this._vStroke.render(this._textureBrush, this._textureBrushNormal, this._textureRad, this._textureIrr);
 
-		GL.disable(GL.DEPTH_TEST);
-		this._vDrawingBg.render(this._fboRender.getTexture(), this._drawingOffset.value);	
-		GL.enable(GL.DEPTH_TEST);
-
-
-		this._vMountains.render(this._textureBg);
-		this._vStroke.render(this._textureBrush);
+		// this._sub.render();
 
 		if(params.debugHitPlane) {
 			this._vHitPlane.render();

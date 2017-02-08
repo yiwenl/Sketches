@@ -7,6 +7,7 @@
 precision highp float;
 
 uniform sampler2D 	uAoMap;
+uniform sampler2D 	uNoiseMap;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
 
@@ -18,6 +19,8 @@ uniform float		uSpecular;
 uniform float 		uFogOffset;
 uniform float		uExposure;
 uniform float		uGamma;
+uniform float		uFogDensity;
+uniform float 		uOffset;
 
 varying vec3        vNormal;
 varying vec3        vPosition;
@@ -25,6 +28,7 @@ varying vec3		vEyePosition;
 varying vec3		vWsNormal;
 varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
+varying vec4 		vViewSpace;
 
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.1415926535897932384626433832795
@@ -80,7 +84,6 @@ float fogFactorExp2(const float dist, const float density) {
 #define FOG_DENSITY 0.05
 const vec3 fogColor = vec3(254.0/255.0, 242.0/255.0, 226.0/255.0);
 
-
 vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, float specular) {
 	vec3 diffuseColor	= baseColor - baseColor * metallic;
 	vec3 specularColor	= mix( vec3( 0.08 * specular ), baseColor, specular );	
@@ -109,26 +112,30 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 }
 
 void main() {
-	// vec3 N 				= normalize( vWsNormal );
-	// vec3 V 				= normalize( vEyePosition );
+	vec3 noise 			= texture2D( uNoiseMap, vTextureCoord * 20.0).rgb - .5;
+	vec3 N 				= normalize( vWsNormal + noise * 0.2 );
+	vec3 V 				= normalize( vEyePosition );
+	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
+
+	// apply the tone-mapping
+	color				= Uncharted2Tonemap( color * uExposure );
+	// white balance
+	color				= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );
 	
-	// vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
-
-
-	// // apply the tone-mapping
-	// color				= Uncharted2Tonemap( color * uExposure );
-	// // white balance
-	// color				= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );
+	// gamma correction
+	color				= pow( color, vec3( 1.0 / uGamma ) );
 	
-	// // gamma correction
-	// color				= pow( color, vec3( 1.0 / uGamma ) );
 
-	vec3 color = uBaseColor;
+	vec3 ao = texture2D(uAoMap, vTextureCoord).rgb;
+	color.rgb *= ao;
 
-	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
-	float fogAmount = fogFactorExp2(fogDistance, FOG_DENSITY);
+	float fogDistance = length(vViewSpace);
+	float fogAmount = fogFactorExp2(fogDistance, uFogDensity);
 
 	color.rgb = mix(color.rgb, fogColor, fogAmount+uFogOffset);
+
+	float grey = (color.r + color.g + color.b) / 3.0;
+	color.rgb = mix(color.rgb, vec3(grey), uOffset);
 
 	// output the fragment color
     gl_FragColor		= vec4( color, 1.0 );

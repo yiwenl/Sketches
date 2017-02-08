@@ -110,11 +110,17 @@ class SceneApp extends alfrid.Scene {
 		this._fboRender.unbind();
 
 
+<<<<<<< HEAD
 		this._bCopy.draw(this._fboRender.getTexture(0));
 
 
 
 		GL.disable(GL.DEPTH_TEST);
+=======
+		GL.disable(GL.DEPTH_TEST);
+		this._bCopy.draw(this._fboRender.getTexture(0));
+
+>>>>>>> 53e87258425dbe5a9018f61994cf4a5cc2739abb
 		const size = GL.width / 3;
 		GL.viewport(0, 0, size, size/GL.aspectRatio);
 		this._bCopy.draw(this._fboRender.getTexture(0));

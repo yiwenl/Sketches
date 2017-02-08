@@ -5,6 +5,7 @@
 precision highp float;
 
 uniform sampler2D 	uColorMap;
+uniform sampler2D 	uNormalMap;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
 
@@ -16,6 +17,7 @@ uniform float		uSpecular;
 
 uniform float		uExposure;
 uniform float		uGamma;
+uniform float		uOpacity;
 
 varying vec3        vNormal;
 varying vec3        vPosition;
@@ -97,10 +99,12 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 }
 
 void main() {
-	vec3 N 				= normalize( vWsNormal );
+	vec3 normal 		= texture2D( uNormalMap, vTextureCoord).rgb;
+	vec3 N 				= normalize( vWsNormal + normal );
 	vec3 V 				= normalize( vEyePosition );
 	vec4 baseColor 		= texture2D( uColorMap, vTextureCoord);
-	
+	if(baseColor.a < 0.1) discard;
+
 	vec3 color 			= getPbr(N, V, baseColor.rgb, uRoughness, uMetallic, uSpecular);
 
 	// apply the tone-mapping
@@ -112,6 +116,6 @@ void main() {
 	color				= pow( color, vec3( 1.0 / uGamma ) );
 
 	// output the fragment color
-    gl_FragColor		= vec4( color, baseColor.a );
+    gl_FragColor		= vec4( color, baseColor.a * uOpacity );
 
 }
