@@ -202,10 +202,10 @@ class SceneApp extends alfrid.Scene {
 
 		
 		GL.disable(GL.CULL_FACE);
-		// this._vClouds.render();
+		this._vClouds.render();
 		this._vGrass.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value, textureNoise);
 		GL.enable(GL.CULL_FACE);
-		// this._vFloor.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
+		this._vFloor.render(textureHeight, textureNormal, wolfUV, this._lightIntensity.value);
 
 		this._vWolf.render(this._textureRad, this._textureIrr, -.5, textureHeight, this._lightIntensity.value);
 	}

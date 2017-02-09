@@ -10,6 +10,8 @@ attribute vec3 aExtra;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
+uniform mat4 uVRViewMatrix;
+uniform mat4 uVRProjectionMatrix;
 uniform float uTime;
 
 varying vec2 vTextureCoord;
@@ -33,7 +35,7 @@ void main(void) {
 	position.xz 	= rotate(position.xz, aPosOffset.y + uTime * aExtra.z);
 
 
-    gl_Position 	= uProjectionMatrix * uViewMatrix * vec4(position, 1.0);
+    gl_Position 	= uVRProjectionMatrix * uVRViewMatrix * vec4(position, 1.0);
     vTextureCoord 	= aTextureCoord;
     vNormal 		= aNormal;
     vPosition 		= position;

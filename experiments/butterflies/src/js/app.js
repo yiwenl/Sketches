@@ -6,7 +6,7 @@ import dat from 'dat-gui';
 
 const GL = alfrid.GL;
 window.params = {
-	numParticles:128,
+	numParticles:128*2,
 	skipCount: 3,
 	maxRadius: 5.5,
 	lightPosition:[0.1, 20.0, 0.0],
