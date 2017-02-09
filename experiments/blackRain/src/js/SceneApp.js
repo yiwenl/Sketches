@@ -229,6 +229,15 @@ class SceneApp extends alfrid.Scene {
 			this._composerBlur.render(this._fboRender.getTexture());
 			this._vPost.render(this._fboRender.getTexture(), this._composerBlur.getTexture());
 		}
+
+
+		// const size = 256;
+		// const o = this._particleSets[0];
+		// let { fboTarget, fboCurrent } = o;
+		// GL.viewport(0, 0, size, size);
+		// this._bCopy.draw(fboCurrent.getTexture(0));
+		// GL.viewport(0, size, size, size);
+		// this._bCopy.draw(fboCurrent.getTexture(1));
 	}
 
 	renderScene() {

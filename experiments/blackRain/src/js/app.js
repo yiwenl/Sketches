@@ -15,7 +15,7 @@ window.params = {
 	numCubes:3000,
 	numSets:5,
 	terrainSize:40,
-	numParticles:256,
+	numParticles:256 * 1.5,
 	skipCount:3,
 	maxRadius: 12,
 	minBeatDiff:3.0,
@@ -113,7 +113,7 @@ function _init3D() {
 
 	//	STATS
 
-	/*/
+	//*/
 	const stats = new Stats();
 	document.body.appendChild(stats.domElement);
 	alfrid.Scheduler.addEF(()=>stats.update());

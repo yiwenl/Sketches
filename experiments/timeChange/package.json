@@ -16,12 +16,12 @@
   "author": "Yi-Wen Lin",
   "license": "ISC",
   "devDependencies": {
-    "alfrid": "0.1.23",
+    "alfrid": "0.1.24",
     "assets-loader": "^0.4.0",
     "autoprefixer-loader": "^3.2.0",
     "babel": "^6.5.2",
     "babel-cli": "^6.6.5",
-    "babel-core": "6.6.5",
+    "babel-core": "6.10.4",
     "babel-eslint": "6.0.0-beta.6",
     "babel-loader": "6.2.4",
     "babel-plugin-add-module-exports": "0.1.2",
@@ -44,7 +44,7 @@
     "raw-loader": "^0.5.1",
     "sass-loader": "^3.2.0",
     "stats.js": "^0.16.0",
-    "style-loader": "^0.13.0",
+    "style-loader": "0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "1.12.14",
     "webpack-dev-server": "1.14.1"

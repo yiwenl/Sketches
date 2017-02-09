@@ -57,7 +57,6 @@ void main(void) {
 		a = 0.0;
 	}
 	
-	
 	float g          = mix(extra.r, 1.0, .8);
 	// vec2 uvFlame     = vec2(0.5, pow(1.0 - life.x, 1.0));
 	// vec3 colorFlame  = texture2D(textureFlame, uvFlame).rrr;
