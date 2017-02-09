@@ -12,7 +12,9 @@ class SceneApp extends Scene {
 		super();
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+		this.orbitalControl.rx.limit(0, Math.PI/2 - 0.1);
 		this.orbitalControl.radius.value = 15;
+		this.orbitalControl.radius.limit(5, 20);
 
 		this._ray = new Ray([0, 0, 0], [0, 0, -1]);
 		this._hit = vec3.fromValues(-999, -999, -999);
