@@ -59,6 +59,10 @@
 	line-height: 24px;
 	margin-bottom:24px;
 	letter-spacing: 1px;
+
+	&.with-link {
+		margin-bottom: 0px;
+	}
 }
 
 .About-RightPanel {
