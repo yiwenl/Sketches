@@ -24,7 +24,7 @@ const Params = {
 	lifeDecrease:0.0075,
 	rotationSpeed:0.0015,
 	respwanRadius:1.5,
-	outlineWidth:0.02,
+	outlineWidth:0.04,
 	outlineNoise:1.0,
 	outlineNoiseStrength:0.5,
 	speedOffset:new alfrid.TweenNumber(1, 'expInOut'),
