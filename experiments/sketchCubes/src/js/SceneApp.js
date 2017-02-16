@@ -11,6 +11,7 @@ class SceneApp extends Scene {
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
 		this.orbitalControl.radius.value = 5;
+		this.orbitalControl.radius.limit(3, 10);
 		this.orbitalControl.rx.limit(0, Math.PI/2 - .2);
 
 		this._modelMatrix = mat4.create();

@@ -18,8 +18,8 @@ window.params = {
 	gamma:2.2,
 	exposure:5,
 	outlineWidth:0.02,
-	outlineNoise:1.0,
-	outlineNoiseStrength:0.2,
+	outlineNoise:0.5,
+	outlineNoiseStrength:0.4,
 	numCubes:100,
 	time:0
 };
