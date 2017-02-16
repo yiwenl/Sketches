@@ -48,7 +48,6 @@ class ViewHouse extends alfrid.View {
 		this.shader.uniform('uAoMap', 'uniform1i', 0);
 
 		for(let i=0; i<5; i++) {
-			console.log('uniform :', `splatter${i}` , Assets.get(`splatter${i+1}`));
 			this.shader.uniform(`splatter${i}`, "uniform1i", i+1);
 			Assets.get(`splatter${i+1}`).bind(i+1);
 		}
@@ -111,13 +110,12 @@ class ViewHouse extends alfrid.View {
 
 		let dropUVs = [];
 		this._splashes.map((s, i)=> {
-			dropUVs = dropUVs.concat(s.uv);
 			dropUVs = dropUVs.concat(s.opacity.value);
 			dropUVs = dropUVs.concat(s.textureIndex);
 			return null;
 		});
 
-		this.shader.uniform("uDropUV", "vec4", dropUVs);
+		this.shader.uniform("uDropUV", "vec2", dropUVs);
 		this.shader.uniform("numPaints", "float", params.numPaints);
 		this.shader.uniform('uRadianceMap', 'uniform1i', 6);
 		this.shader.uniform('uIrradianceMap', 'uniform1i', 7);

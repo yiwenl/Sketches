@@ -14,7 +14,7 @@ uniform mat4 uProjectionMatrix;
 uniform mat3 uNormalMatrix;
 uniform mat3 uModelViewMatrixInverse;
 uniform mat4 uDropMatrices[NUM_DROPS];
-uniform vec4 uDropUV[NUM_DROPS];
+uniform vec2 uDropUV[NUM_DROPS];
 
 varying vec2 vTextureCoord;
 
@@ -24,7 +24,6 @@ varying vec3 vWsPosition;
 varying vec3 vEyePosition;
 varying vec3 vWsNormal;
 varying vec4 vDropCoords[NUM_DROPS];
-varying vec4 vDropUV[NUM_DROPS];
 
 
 const mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,
@@ -52,6 +51,5 @@ void main(void) {
 
 	for(int i=0; i<NUM_DROPS; i++) {
 		vDropCoords[i] = ( biasMatrix * uDropMatrices[i] * uModelMatrix ) * vec4(position, 1.0);
-		vDropUV[i] = uDropUV[i];
 	}
 }

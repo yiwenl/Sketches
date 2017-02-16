@@ -15,6 +15,7 @@ uniform sampler2D 	splatter4;
 uniform sampler2D 	textureSplash;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
+uniform vec2 uDropUV[NUM_DROPS];
 
 uniform vec3		uBaseColor;
 uniform float		uRoughness;
@@ -33,7 +34,6 @@ varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
 
 varying vec4        vDropCoords[NUM_DROPS];
-varying vec4        vDropUV[NUM_DROPS];
 
 
 #define saturate(x) clamp(x, 0.0, 1.0)
@@ -90,9 +90,8 @@ vec4 getColor() {
 
 	for(int i=0; i<NUM_DROPS; i++) {
 		vec4 coord    = vDropCoords[i]/vDropCoords[i].w;
-		vec2 uv       = vDropUV[i].xy;
-		float opacity = vDropUV[i].z;
-		float index   = vDropUV[i].w;
+		float opacity = uDropUV[i].r;
+		float index   = uDropUV[i].g;
 		// vec4 colorSplash = texture2DProj(splatter0, coord, dropBias);
 		vec4 colorSplash;
 		if(index < .5) {
@@ -150,9 +149,9 @@ void main() {
 	vec3 V 				= normalize( vEyePosition );
 
 	vec4 colorSplash    = getColor();
-	float roughness 	= clamp(colorSplash.a, 0.0, 1.0);
-	float specular      = roughness;
-	vec3 color 			= getPbr(N, V, uBaseColor, roughness, uMetallic, specular);
+	// float roughness 	= clamp(colorSplash.a, 0.0, 1.0);
+	// float specular      = roughness;
+	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
 
 	vec3 ao 			= texture2D(uAoMap, vTextureCoord).rgb;
 	color 				*= ao;
@@ -167,6 +166,7 @@ void main() {
 
 	// output the fragment color
     gl_FragColor		= mix(white, vec4( color, 1.0 ), colorSplash.a);
+    // gl_FragColor		= vec4( color, 1.0 );
     // gl_FragColor		= vec4(colorSplash.rgb, 1.0);
 
 }

@@ -106,11 +106,9 @@ class SceneApp extends Scene {
 
 	render() {
 		GL.clear(1, 1, 1, 1);
-		// this._vModel.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('aomap'));
 		this._vHouse.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('aoHouse'));
 
 		const s = this._ballScale.value;
-		// this._bBall.draw(this._hit, [s, s, s], [1, .74, .5], 1);
 		this._bBall.draw(this._ball.position, [s, s, s], [.1, .1, .1], 1);
 	}
 
