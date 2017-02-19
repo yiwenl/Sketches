@@ -150,9 +150,9 @@ const ExpModel = [
 		title:'Splashes'
 	},
 	{
-		cover:'assets/img/coverSketchOutline.jpg',
-		url:'http://yiwenl.github.io/Sketches/experiments/sketchCubes/dist/index.html',
-		title:'Sketch outline'
+		cover:'assets/img/coverSketchComic.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/comic/dist/index.html',
+		title:'Comic style'
 	}
 ]
 
