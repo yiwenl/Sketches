@@ -6,6 +6,7 @@ import Assets from './Assets';
 import VIVEUtils from './utils/VIVEUtils';
 import ViewSky from './ViewSky';
 import ViewStars from './ViewStars';
+import ViewPlanets from './ViewPlanets';
 
 const scissor = function(x, y, w, h) {
 	GL.scissor(x, y, w, h);
@@ -48,9 +49,10 @@ class SceneApp extends Scene {
 	_initViews() {
 		console.log('init views');
 		this._bCopy = new alfrid.BatchCopy();
-		this._vModel = new ViewObjModel();
+		// this._vModel = new ViewObjModel();
 		this._vSky = new ViewSky();
 		this._vStars = new ViewStars();
+		this._vPlanets = new ViewPlanets();
 	}
 
 
@@ -105,8 +107,9 @@ class SceneApp extends Scene {
 		// this._bSky.draw(Assets.get('bg'));
 		this._vSky.render();
 		this._vStars.render();
-
-		this._vModel.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('aomap'));
+		this._vPlanets.render(Assets.get('studio_radiance'), Assets.get('irr'));
+		
+		// this._vModel.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('aomap'));
 	}
 
 
