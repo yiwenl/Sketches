@@ -46,7 +46,7 @@ class About extends Component {
 				>
 					<div className="About-RightPanel">
 						<div className="About-TextWrapper">	
-							<p className="About-Desc">A place for my sketches, most of them are not optimised so it take a bit of time to load, please be patient. Also some of them aren't working in Firefox because Firefox doesn't support textureCubeLod.</p>
+							<p className="About-Desc">A place for my sketches, most of them are not optimised so it take a bit of time to load, please be patient. And apologies for some of the sketches might not work across different devices and platforms. This is more a playground for me to tryout ideas.</p>
 							<p className="About-Desc with-link">Source code could be found here: <a href="https://github.com/yiwenl/Sketches" target="_blank"><p className="About-Link">https://github.com/yiwenl/Sketches</p></a></p>
 							<p className="About-Desc with-link">Built with my WebGL Tools : <a href="https://github.com/yiwenl/Alfrid" target="_blank"><p className="About-Link">https://github.com/yiwenl/Alfrid</p></a></p>
 							<br/>
