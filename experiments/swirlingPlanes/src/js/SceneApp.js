@@ -1,6 +1,6 @@
 // SceneApp.js
 
-import alfrid, { Scene, GL } from 'alfrid';
+import alfrid, { Scene, GL, Ray } from 'alfrid';
 import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
@@ -8,7 +8,9 @@ import ViewAO from './ViewAO';
 import ViewPost from './ViewPost';
 import ViewFXAA from './ViewFXAA';
 import ViewFloor from './ViewFloor';
+import ViewBall from './ViewBall';
 import ViewBackground from './ViewBackground';
+import TouchDetect from './TouchDetect';
 
 window.getAsset = function(id) {
 	return assets.find( (a) => a.id === id).file;
@@ -20,12 +22,13 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 
 		this._count = 0;
-		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, 1, 30);
+		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, 1, 50);
 		this.orbitalControl.radius.value = 10;
-		this.orbitalControl.radius.limit(5, 20);
+		this.orbitalControl.radius.limit(7, 20);
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
 
 		this.lightPos = [0.1, 1, 1];
+		this._touchDetect = new TouchDetect(this._vBall.mesh, this.camera, GL.canvas);
 
 		this.resize();
 	}
@@ -69,8 +72,9 @@ class SceneApp extends alfrid.Scene {
 		console.log('init views');
 		
 		//	helpers
-		// this._bCopy = new alfrid.BatchCopy();
-		this._bDots = new alfrid.BatchDotsPlane();
+		this._bCopy = new alfrid.BatchCopy();
+		// this._bDots = new alfrid.BatchDotsPlane();
+		// this._ball = new alfrid.BatchBall();
 
 
 		//	views
@@ -80,6 +84,7 @@ class SceneApp extends alfrid.Scene {
 		this._vPost   = new ViewPost();
 		this._vFXAA   = new ViewFXAA();
 		this._vFloor  = new ViewFloor();
+		this._vBall   = new ViewBall();
 		this._vBg 	  = new ViewBackground();
 
 		this._vSave = new ViewSave();
@@ -101,9 +106,11 @@ class SceneApp extends alfrid.Scene {
 
 
 	updateFbo() {
+		const { hit, isMouseDown } = this._touchDetect;
+		
 		this._fboTarget.bind();
 		GL.clear(0, 0, 0, 1);
-		this._vSim.render(this._fboCurrent.getTexture(1), this._fboCurrent.getTexture(0), this._fboCurrent.getTexture(2));
+		this._vSim.render(this._fboCurrent.getTexture(1), this._fboCurrent.getTexture(0), this._fboCurrent.getTexture(2), hit, isMouseDown);
 		this._fboTarget.unbind();
 
 
@@ -127,39 +134,24 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		let p = this._count / params.skipCount;
+		const s = 3;
+		const { hit, isMouseDown } = this._touchDetect;
 
 		//	RENDER
 		this._fboRender.bind();
 		GL.clear(0, 0, 0, 0);
 		this._vFloor.render();
 		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2), this.lightPos);
+		this._vBall.render(this.lightPos);
+		let ss = 0.1
+		// this._ball.draw(hit, [ss, ss, ss], [.85, 0, 0]);
 		this._fboRender.unbind();
-
-		//	RENDER TO POST ( HALF SIZE )
-		// this._fboTmp.bind();
-		// GL.clear(0, 0, 0, 0);
-		// this._bCopy.draw(this._fboRender.getDepthTexture());
-		// this._fboTmp.unbind();
-
-		// console.log(this._fboAO.width, this._fboAO.height);
 
 		//	RENDER SSAO
 		this._fboAO.bind();
 		GL.clear(0, 0, 0, 0);
 		this._vAO.render(this._fboRender.getDepthTexture(), this._fboAO.width, this._fboAO.height);
 		this._fboAO.unbind();
-
-		// //	BLUR V
-		// this._fboTmp.bind();
-		// GL.clear(0, 0, 0, 0);
-		// this._vBlur.render(this._fboAO.getTexture(), true);
-		// this._fboTmp.unbind();
-
-		// //	BLUR H
-		// this._fboAO.bind();
-		// GL.clear(0, 0, 0, 0);
-		// this._vBlur.render(this._fboTmp.getTexture(), false);
-		// this._fboAO.unbind();
 
 
 		//	FXAA
@@ -176,9 +168,8 @@ class SceneApp extends alfrid.Scene {
 		GL.clear(0, 0, 0, 0);
 
 		this._vFXAA.render(this._fboFXAA.getTexture());
-		// this._bCopy.draw(this._fboAO.getTexture());
-
 		GL.enable(GL.DEPTH_TEST);
+
 
 	}
 

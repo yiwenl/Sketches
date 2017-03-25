@@ -58,8 +58,8 @@ void main(void) {
 	float scale   = sin(aExtra.z + uTime * aExtra.r) * .4 + .6;
 	
 	vec3 position = aVertexPosition;
-	position.yz   *= scale;
-	position 	  = rotate(position * aExtra, axis, theta) + pos;
+	position      *= scale;
+	position 	  = rotate(position, axis, theta) + pos;
 	gl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
 	
 	vNormal       = rotate(aNormal, axis, theta);

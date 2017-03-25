@@ -9,7 +9,7 @@ class ViewSim extends alfrid.View {
 	
 	constructor() {
 		super(alfrid.ShaderLibs.bigTriangleVert, fsSim);
-		this.time = Math.random() * 0xFF;
+		this.time = 0.0;
 	}
 
 
@@ -24,7 +24,7 @@ class ViewSim extends alfrid.View {
 	}
 
 
-	render(textureVel, texturePos, textureExtra) {
+	render(textureVel, texturePos, textureExtra, hit, isMouseDown) {
 		this.time += .01;
 		this.shader.bind();
 		this.shader.uniform('time', 'float', this.time);
@@ -32,6 +32,12 @@ class ViewSim extends alfrid.View {
 		textureVel.bind(0);
 		texturePos.bind(1);
 		textureExtra.bind(2);
+
+		let f = isMouseDown ? 10.0 : 0.0;
+		const r = isMouseDown ? 3.0 : 2.0;
+		this.shader.uniform("uHit", "vec3", hit);
+		this.shader.uniform("float", "uIsMouseDown", f);
+		this.shader.uniform("uMinRadius", "float", r);
 
 
 		GL.draw(this.mesh);

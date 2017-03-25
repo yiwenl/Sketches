@@ -90,8 +90,8 @@ function _init3D() {
 	const scene = new SceneApp();
 
 	//	STATS
-	const stats = new Stats();
-	document.body.appendChild(stats.domElement);
-	alfrid.Scheduler.addEF(()=>stats.update());
+	// const stats = new Stats();
+	// document.body.appendChild(stats.domElement);
+	// alfrid.Scheduler.addEF(()=>stats.update());
 
 }

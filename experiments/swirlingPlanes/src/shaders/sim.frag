@@ -7,8 +7,14 @@ varying vec2 vTextureCoord;
 uniform sampler2D textureVel;
 uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
+
+uniform vec3 uHit;
+uniform float uIsMouseDown;
 uniform float time;
 uniform float maxRadius;
+uniform float uMinRadius;
+
+
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -143,6 +149,15 @@ void main(void) {
 	vel.xz += xz * rotationSpeed;
 	vel.xy += xy * rotationSpeed;
 
+
+	float distToHit = distance(pos, uHit);
+	float minHitRadius = uMinRadius;
+	float fHit = smoothstep(minHitRadius, 0.0, distToHit);
+	float t = uMinRadius > 2.0 ? 0.1 : -0.2;
+	vec3 dirToHit = normalize(uHit - pos);
+	vel -= fHit * dirToHit * t;
+
+
 	float dist = length(pos);
 	if(dist > maxRadius) {
 		float f = (dist - maxRadius) * .0015;
@@ -155,5 +170,5 @@ void main(void) {
 	gl_FragData[0] = vec4(pos + vel, 1.0);
 	gl_FragData[1] = vec4(vel, 1.0);
 	gl_FragData[2] = vec4(extra, 1.0);
-	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+	gl_FragData[3] = vec4(vec3(uMinRadius/2.0), 1.0);
 }

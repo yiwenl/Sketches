@@ -8,7 +8,7 @@ class ViewAO extends alfrid.View {
 	
 	constructor() {
 		let samples = params.highSetting ? 12 : 6;
-		let rings = params.highSetting ? 8 : 4;
+		let rings = params.highSetting ? 8 : 3;
 		let _fs = fs.replace('${SAMPLES}', samples);
 		_fs = _fs.replace('${RINGS}', rings);
 		super(alfrid.ShaderLibs.bigTriangleVert, _fs);
