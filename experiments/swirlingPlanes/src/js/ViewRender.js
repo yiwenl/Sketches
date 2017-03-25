@@ -16,7 +16,9 @@ class ViewRender extends alfrid.View {
 
 	_init() {
 		const scale = 0.30;
-		this.mesh = new alfrid.Geom.cube(0.025 * scale, 0.5 * scale, 1 * scale);
+		const size = 0.5;
+		// this.mesh = new alfrid.Geom.cube(0.025 * scale, 0.5 * scale, 1 * scale);
+		this.mesh = new alfrid.Geom.cube(size * scale, size * scale, size * scale);
 
 		const uv = [];
 		const extra = [];
@@ -37,7 +39,7 @@ class ViewRender extends alfrid.View {
 	}
 
 
-	render(textureCurr, textureNext, p, textureExtra) {
+	render(textureCurr, textureNext, p, textureExtra, lightPos) {
 		this.time += 0.1;
 		this.shader.bind();
 
@@ -46,6 +48,8 @@ class ViewRender extends alfrid.View {
 
 		this.shader.uniform('textureNext', 'uniform1i', 1);
 		textureNext.bind(1);
+
+		this.shader.uniform("uLightPos", "vec3", lightPos);
 
 		// this.shader.uniform('textureExtra', 'uniform1i', 2);
 		// textureExtra.bind(2);

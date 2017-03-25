@@ -25,6 +25,8 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.radius.limit(5, 20);
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
 
+		this.lightPos = [0.1, 1, 1];
+
 		this.resize();
 	}
 
@@ -49,7 +51,7 @@ class SceneApp extends alfrid.Scene {
 		};
 
 		//*/
-		const fboScale = params.highSetting ? 1 : 0.75;
+		const fboScale = params.highSetting ? 1 : 0.5;
 		this._fboTmp 	= new alfrid.FrameBuffer(GL.width * fboScale, GL.height * fboScale, oPost);
 		this._fboAO 	= new alfrid.FrameBuffer(GL.width * fboScale, GL.height * fboScale, oPost);
 		/*/
@@ -130,7 +132,7 @@ class SceneApp extends alfrid.Scene {
 		this._fboRender.bind();
 		GL.clear(0, 0, 0, 0);
 		this._vFloor.render();
-		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2));
+		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2), this.lightPos);
 		this._fboRender.unbind();
 
 		//	RENDER TO POST ( HALF SIZE )

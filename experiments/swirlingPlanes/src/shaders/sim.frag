@@ -137,7 +137,7 @@ void main(void) {
 	xz = rotate(xz, PI * 0.6);
 
 	vec2 xy = normalize(pos.xy);
-	xy = rotate(xy, PI * 0.6);
+	xy = rotate(xy, PI * 0.7);
 
 	const float rotationSpeed = 0.0075;
 	vel.xz += xz * rotationSpeed;

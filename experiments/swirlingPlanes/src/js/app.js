@@ -27,6 +27,7 @@ function _init() {
 	const isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
 	if(!isMac) {
 		params.highSetting = true;
+		params.numParticles = 256 * 2;
 	}
 
 	console.log('high Setting : ', params.highSetting);
@@ -89,8 +90,8 @@ function _init3D() {
 	const scene = new SceneApp();
 
 	//	STATS
-	// const stats = new Stats();
-	// document.body.appendChild(stats.domElement);
-	// alfrid.Scheduler.addEF(()=>stats.update());
+	const stats = new Stats();
+	document.body.appendChild(stats.domElement);
+	alfrid.Scheduler.addEF(()=>stats.update());
 
 }
