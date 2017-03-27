@@ -26,8 +26,8 @@ function _init() {
 
 	const isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
 	if(!isMac) {
-		params.highSetting = true;
-		params.numParticles = 256 * 2;
+		// params.highSetting = true;
+		// params.numParticles = 256 * 2;
 	}
 
 	console.log('high Setting : ', params.highSetting);
@@ -77,6 +77,11 @@ function _init3D() {
 
 	//	INIT 3D TOOL
 	GL.init(canvas, {ignoreWebgl2:true});
+
+	for (var s in GL.extensions) {
+		console.log(s, GL.extensions[s]);
+	}
+
 
 	//	INIT ASSETS
 	Assets.init();

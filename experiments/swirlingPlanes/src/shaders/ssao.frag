@@ -1,7 +1,5 @@
 // copy.frag
 
-#define SHADER_NAME SIMPLE_TEXTURE
-
 precision highp float;
 varying vec2 vTextureCoord;
 
@@ -53,11 +51,11 @@ float ssao() {
 	float w = (1.0 / textureWidth)/clamp(depth,0.05,1.0)+(noise.x*(1.0-noise.x));
     float h = (1.0 / textureHeight)/clamp(depth,0.05,1.0)+(noise.y*(1.0-noise.y));
    
-    float pw;
-    float ph;
+    float pw = 0.0;
+    float ph = 0.0;
 
-    float ao;       
-    float s;
+    float ao = 0.0;       
+    float s = 0.0;
     float fade = 4.0;
     float t = 1.0;
 
@@ -88,4 +86,6 @@ void main(void) {
     float ao = ssao();
 	// ao = smoothstep(0.5, 1.0, ao);
     gl_FragColor = vec4(vec3(ao), 1.0);
+    // float d = readDepth(vTextureCoord);
+    // gl_FragColor = vec4(vec3(d), 1.0);
 }

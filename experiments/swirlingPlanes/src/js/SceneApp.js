@@ -50,7 +50,7 @@ class SceneApp extends alfrid.Scene {
 		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height);
 		const oPost = {
 			minFilter:GL.LINEAR,
-			magFilter:GL.LINEAR
+			magFilter:GL.LINEAR,
 		};
 
 		//*/
@@ -170,7 +170,12 @@ class SceneApp extends alfrid.Scene {
 		this._vFXAA.render(this._fboFXAA.getTexture());
 		GL.enable(GL.DEPTH_TEST);
 
+		// const size = 200;
+		// GL.viewport(0, 0, size, size);
+		// this._bCopy.draw(this._fboRender.getDepthTexture());
 
+		// GL.viewport(0, size, size, size);
+		// this._bCopy.draw(this._fboAO.getTexture());
 	}
 
 
