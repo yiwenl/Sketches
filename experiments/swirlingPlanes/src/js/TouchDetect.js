@@ -30,11 +30,13 @@ class TouchDetect extends EventDispatcher {
 
 	_onDown(e) {
 		this._isMouseDown = true;
+		this.trigger('down');
 	}
 
 
 	_onUp(e) {
 		this._isMouseDown = false;
+		this.trigger('up');
 	}
 
 

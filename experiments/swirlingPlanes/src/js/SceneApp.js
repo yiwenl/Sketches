@@ -30,6 +30,9 @@ class SceneApp extends alfrid.Scene {
 		this.lightPos = [0.1, 1, 1];
 		this._touchDetect = new TouchDetect(this._vBall.mesh, this.camera, GL.canvas);
 
+		this._touchDetect.on('down', ()=>this._onDown());
+		this._touchDetect.on('up', ()=>this._onUp());
+
 		this.resize();
 	}
 
@@ -102,6 +105,16 @@ class SceneApp extends alfrid.Scene {
 		this._fboTarget.unbind();
 
 		GL.setMatrices(this.camera);
+	}
+
+
+	_onDown() {
+		this._vPost.invert.value = 1;
+	}
+
+
+	_onUp() {
+		this._vPost.invert.value = 0;
 	}
 
 
