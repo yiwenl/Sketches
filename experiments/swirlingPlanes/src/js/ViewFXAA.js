@@ -5,19 +5,21 @@ import fs from '../shaders/fxaa.frag';
 
 class ViewFXAA extends alfrid.View {
 	
-	constructor() {
+	constructor(mesh) {
 		super(alfrid.ShaderLibs.bigTriangleVert, fs);
+
+		this.mesh = mesh;
 	}
 
 
 	_init() {
-		this.mesh = alfrid.Geom.bigTriangle();
+		this.shader.bind();
+		this.shader.uniform("texture", "uniform1i", 0);
 	}
 
 
 	render(texture) {
 		this.shader.bind();
-		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
 		this.shader.uniform("rtWidth", "float", GL.width);
 		this.shader.uniform("rtHeight", "float", GL.height);

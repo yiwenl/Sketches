@@ -5,23 +5,24 @@ import fs from '../shaders/post.frag';
 
 class ViewPost extends alfrid.View {
 	
-	constructor() {
+	constructor(mesh) {
 		super(alfrid.ShaderLibs.bigTriangleVert, fs);
 
 		this.invert = new alfrid.TweenNumber(0, 'expInOut', 0.04);
+		this.mesh = mesh;
 	}
 
 
 	_init() {
-		this.mesh = alfrid.Geom.bigTriangle();
+		this.shader.bind();
+		this.shader.uniform("texture", "uniform1i", 0);
+		this.shader.uniform("textureAO", "uniform1i", 1);
 	}
 
 
 	render(texture, textureAO) {
 		this.shader.bind();
-		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
-		this.shader.uniform("textureAO", "uniform1i", 1);
 		textureAO.bind(1);
 
 		this.shader.uniform("uInvert", "float", this.invert.value);

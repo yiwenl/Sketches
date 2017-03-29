@@ -2,6 +2,8 @@
 
 import alfrid, { EventDispatcher, Ray, GL } from 'alfrid';
 
+let v0, v1, v2;
+
 class TouchDetect extends EventDispatcher {
 	constructor(mesh, camera, listenerTarget=window) {
 		super();
@@ -13,6 +15,7 @@ class TouchDetect extends EventDispatcher {
 		this._listenerTarget = listenerTarget;
 		this._ray = new Ray([0, 0, 0], [0, 0, -1]);
 		this._hit = vec3.fromValues(-999, -999, -999);
+		this._count = 0;
 
 		mesh.generateFaces();
 		this._faceVertices = mesh.faces.map((face)=>(face.vertices));
@@ -41,6 +44,9 @@ class TouchDetect extends EventDispatcher {
 
 
 	_onMove(e) {
+		if(this._count ++ % 5 !== 0) {
+			return;
+		}
 		const mx = (e.clientX / window.innerWidth) * 2.0 - 1.0;
 		const my = - (e.clientY / window.innerHeight) * 2.0 + 1.0;
 
@@ -48,7 +54,7 @@ class TouchDetect extends EventDispatcher {
 
 		let hit;
 		const offset = 0;
-		let v0, v1, v2;
+		
 		const faceVertices = this._faceVertices;
 
 		for(let i = 0; i < faceVertices.length; i++) {

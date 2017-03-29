@@ -75,17 +75,19 @@ class SceneApp extends alfrid.Scene {
 		console.log('init views');
 		
 		//	helpers
-		this._bCopy = new alfrid.BatchCopy();
+		// this._bCopy = new alfrid.BatchCopy();
 		// this._bDots = new alfrid.BatchDotsPlane();
 		// this._ball = new alfrid.BatchBall();
 
 
+		const meshTri = alfrid.Geom.bigTriangle();
+
 		//	views
 		this._vRender = new ViewRender();
-		this._vSim 	  = new ViewSim();
-		this._vAO 	  = new ViewAO();
-		this._vPost   = new ViewPost();
-		this._vFXAA   = new ViewFXAA();
+		this._vSim 	  = new ViewSim(meshTri);
+		this._vAO 	  = new ViewAO(meshTri);
+		this._vPost   = new ViewPost(meshTri);
+		this._vFXAA   = new ViewFXAA(meshTri);
 		this._vFloor  = new ViewFloor();
 		this._vBall   = new ViewBall();
 		this._vBg 	  = new ViewBackground();
@@ -135,11 +137,6 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
-
-		if(!params.toRender) {
-			return;
-		}
-
 		this._count ++;
 		if(this._count % params.skipCount == 0) {
 			this._count = 0;

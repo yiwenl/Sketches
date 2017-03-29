@@ -78,11 +78,6 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas, {ignoreWebgl2:true});
 
-	for (var s in GL.extensions) {
-		console.log(s, GL.extensions[s]);
-	}
-
-
 	//	INIT ASSETS
 	Assets.init();
 
