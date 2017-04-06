@@ -17,14 +17,19 @@ uniform float time;
 uniform float maxRadius;
 uniform vec2 uResolution;
 uniform vec3 uMouse;
+uniform float uPulling;
+uniform float uGravity;
 
 const float scale = 1.0;
-const float gravity = 0.05 * scale;
+// const float gravity = 0.05 * scale;
 
 void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
+
+
+	vel.y += uGravity;
 
 	// vel.y += extra.r * 0.1;
 	vec2 uv;
@@ -50,8 +55,12 @@ void main(void) {
 		}
 	}
 
+	vec2 center = uResolution * 0.5;
+	vec2 dirToCenter = normalize(pos.xy - center);
+	vel.xy -= dirToCenter * 0.1 * uPulling;
 
-	const float minRadiusMouse = 100.0;
+	//	MOUSE
+	const float minRadiusMouse = 150.0;
 	dist = distance(pos, uMouse);
 	if(dist > 0.0) {
 		if(dist < minRadiusMouse) {
@@ -63,8 +72,7 @@ void main(void) {
 	}
 	
 
-
-	vel.y += gravity;
+	
 	vel *= 0.96;
 
 	vec3 finalPos = pos + vel;
@@ -72,6 +80,9 @@ void main(void) {
 
 	if(finalPos.y > uResolution.y) {
 		finalPos.y = uResolution.y;
+		vel.y *= bounceForce;
+	} else if(finalPos.y < 0.0) {
+		finalPos.y = 0.0;
 		vel.y *= bounceForce;
 	}
 

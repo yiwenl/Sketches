@@ -36,6 +36,9 @@ class ViewSim extends alfrid.View {
 
 		this.shader.uniform("uResolution", "vec2", [GL.width, GL.height]);
 		this.shader.uniform("uMouse", "vec3", mouse);
+		this.shader.uniform("uGravity", "float", params.gravity ? 0.05 : 0.0);
+		this.shader.uniform("uPulling", "float", params.gravity ? 0 : 1.0);
+
 
 		GL.draw(this.mesh);
 	}

@@ -8,9 +8,10 @@ import assets from './asset-list';
 import Assets from './Assets';
 
 window.params = {
-	numParticles:64 * 1.5,
+	numParticles:64,
 	skipCount:1,
-	maxRadius: 2.5
+	maxRadius: 2.5,
+	gravity:false
 };
 
 if(document.body) {
@@ -73,6 +74,7 @@ function _init3D() {
 
 	//	INIT DAT-GUI
 	window.gui = new dat.GUI({ width:300 });
+	gui.add(params, 'gravity');
 	// gui.add(params, 'maxRadius', 0.0, 10.0);
 
 	//	CREATE SCENE
