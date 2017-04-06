@@ -153,6 +153,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchComic.jpg',
 		url:'http://yiwenl.github.io/Sketches/experiments/comic/dist/index.html',
 		title:'Comic style'
+	},
+	{
+		cover:'assets/img/coverSketchIsland.jpg',
+		url:'http://yiwenl.github.io/Sketches/experiments/island/dist/index.html',
+		title:'Island'
 	}
 ]
 
