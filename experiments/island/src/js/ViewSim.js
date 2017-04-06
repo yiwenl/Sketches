@@ -20,19 +20,22 @@ class ViewSim extends alfrid.View {
 		this.shader.uniform('textureVel', 'uniform1i', 0);
 		this.shader.uniform('texturePos', 'uniform1i', 1);
 		this.shader.uniform('textureExtra', 'uniform1i', 2);
-
+		this.shader.uniform('textureOrgPos', 'uniform1i', 3);
+		this.shader.uniform(params.lineLife);
+		this.shader.uniform("uNumSeg", "float", params.numSeg);
+		this.shader.uniform('uSphereSize', 'float', params.sphereSize);
 	}
 
 
-	render(textureVel, texturePos, textureExtra) {
+	render(textureVel, texturePos, textureExtra, textureOrgPos) {
 		this.time += .01;
 		this.shader.bind();
 		this.shader.uniform('time', 'float', this.time);
-		this.shader.uniform('maxRadius', 'float', params.maxRadius);
-		this.shader.uniform('uSphereSize', 'float', params.sphereSize);
+		
 		textureVel.bind(0);
 		texturePos.bind(1);
 		textureExtra.bind(2);
+		textureOrgPos.bind(3);
 
 
 		GL.draw(this.mesh);

@@ -2,11 +2,12 @@
 
 import alfrid, { GL } from 'alfrid';
 import vs from '../shaders/lines.vert';
+import fs from '../shaders/lines.frag';
 
 class ViewLines extends alfrid.View {
 	
 	constructor() {
-		super(vs, alfrid.ShaderLibs.simpleColorFrag);
+		super(vs, fs);
 	}
 
 
@@ -33,17 +34,24 @@ class ViewLines extends alfrid.View {
 		this.mesh = new alfrid.Mesh(GL.LINES);
 		this.mesh.bufferVertex(positions);
 		this.mesh.bufferIndex(indices);
+
+		this.shader.bind();
+		const s = 0.2;
+		this.shader.uniform("color", "vec3", [s, s, s]);
+		this.shader.uniform("opacity", "float", 1);
+		this.shader.uniform("textureCurr", "uniform1i", 0);
+		this.shader.uniform("textureNext", "uniform1i", 1);
+		this.shader.uniform("textureExtra", "uniform1i", 2);
+		this.shader.uniform("uNumSeg", "float", params.numSeg);
+		this.shader.uniform(params.lineLife);
 	}
 
 
-	render(textureCurr, textureNext) {
+	render(textureCurr, textureNext, textureExtra) {
 		this.shader.bind();
-		this.shader.uniform("color", "vec3", [1, 0, 0]);
-		this.shader.uniform("opacity", "float", 1);
-		this.shader.uniform("textureCurr", "uniform1i", 0);
 		textureCurr.bind(0);
-		this.shader.uniform("textureNext", "uniform1i", 1);
 		textureNext.bind(1);
+		textureExtra.bind(2);
 		GL.draw(this.mesh);
 	}
 

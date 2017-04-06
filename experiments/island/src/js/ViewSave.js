@@ -47,7 +47,7 @@ class ViewSave extends alfrid.View {
 				ux = i / numParticles * 2.0 - 1.0 + .5 / numParticles;
 				uy = j / numParticles * 2.0 - 1.0 + .5 / numParticles;
 
-				extras.push([Math.random(), Math.random(), Math.random()]);
+				extras.push([Math.random(), Math.random(), random(1, params.lineLife.uEnd)]);
 				coords.push([ux, uy]);
 				indices.push(count);
 				count ++;

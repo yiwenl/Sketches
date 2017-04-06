@@ -20,6 +20,8 @@ class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
+		GL.gl.lineWidth(4);
+		console.log('GL.gl.lineWidth', GL.gl.lineWidth);
 
 		this._count = 0;
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
@@ -94,7 +96,12 @@ class SceneApp extends alfrid.Scene {
 	updateFbo() {
 		this._fboTarget.bind();
 		GL.clear(0, 0, 0, 1);
-		this._vSim.render(this._fboCurrent.getTexture(1), this._fboCurrent.getTexture(0), this._fboCurrent.getTexture(2));
+		this._vSim.render(
+			this._fboCurrent.getTexture(1), 
+			this._fboCurrent.getTexture(0), 
+			this._fboCurrent.getTexture(2),
+			this._fboCurrent.getTexture(3)
+			);
 		this._fboTarget.unbind();
 
 
@@ -128,7 +135,7 @@ class SceneApp extends alfrid.Scene {
 
 		this._vBall.render();
 		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2));
-		this._lineRenderer.render(this._linesMap.maps);
+		this._lineRenderer.render(this._linesMap.maps, this._fboCurrent.getTexture(2));
 
 		this._fboRender.unbind();
 
@@ -141,15 +148,6 @@ class SceneApp extends alfrid.Scene {
 		//	OUTPUT WITH FXAA
 		// GL.clear(0, 0, 0, 0);
 		// this._vFxaa.render(this._fboFXAA.getTexture());
-
-		GL.disable(GL.DEPTH_TEST);
-		const size = 200;
-		GL.viewport(0, 0, size, size/GL.aspectRatio);
-		this._bCopy.draw(this._sphereMap.getTexture());
-
-		GL.viewport(0, size/GL.aspectRatio, size, size/GL.aspectRatio);
-		this._bCopy.draw(this._fboRender.getTexture());
-		GL.enable(GL.DEPTH_TEST);
 	}
 
 

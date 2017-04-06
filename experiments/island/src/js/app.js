@@ -8,13 +8,17 @@ import assets from './asset-list';
 import Assets from './Assets';
 
 window.params = {
-	numParticles:64,
+	numParticles:64 * 1,
 	skipCount: 4,
 	maxRadius: 2.5,
 	sphereSize: 2,
-	numSeg:30,
+	numSeg:40,
 	light: {
 		lightPos:[0, 0, 1]
+	},
+	lineLife: {
+		uEnd:100,
+		uLength:30
 	}
 };
 

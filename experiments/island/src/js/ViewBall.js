@@ -11,6 +11,16 @@ class ViewBall extends alfrid.View {
 		super(null, fs);
 
 		this.shaderOutline = new alfrid.GLShader(vs, alfrid.ShaderLibs.simpleColorFrag);
+
+		this.shaderOutline.bind();
+		this.shaderOutline.uniform("uLineWidth", "float", 1.025);
+		this.shaderOutline.uniform("color", "vec3", [1, 1, 1]);
+		this.shaderOutline.uniform("opacity", "float", 1.0);
+
+
+		this.shader.bind();
+		this.shader.uniform(params.light);
+		this.shader.uniform("texture", "uniform1i", 0);
 	}
 
 
@@ -22,15 +32,10 @@ class ViewBall extends alfrid.View {
 
 	render() {
 		this.shader.bind();
-		this.shader.uniform("texture", "uniform1i", 0);
 		this.texture.bind(0);
-		this.shader.uniform(params.light);
 		GL.draw(this.mesh);
 
 		this.shaderOutline.bind();
-		this.shaderOutline.uniform("uLineWidth", "float", 1.025);
-		this.shaderOutline.uniform("color", "vec3", [1, 1, 1]);
-		this.shaderOutline.uniform("opacity", "float", 1.0);
 		GL.gl.cullFace(GL.gl.FRONT);
 		GL.draw(this.mesh);
 		GL.gl.cullFace(GL.gl.BACK);

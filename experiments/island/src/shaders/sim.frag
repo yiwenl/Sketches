@@ -7,9 +7,12 @@ varying vec2 vTextureCoord;
 uniform sampler2D textureVel;
 uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
+uniform sampler2D textureOrgPos;
 uniform float time;
-uniform float maxRadius;
 uniform float uSphereSize;
+uniform float uEnd;
+uniform float uNumSeg;
+uniform float uLength;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -114,34 +117,59 @@ vec3 curlNoise( vec3 p ){
 
 }
 
+
+mat4 rotationMatrix(vec3 axis, float angle) {
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+    
+    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                0.0,                                0.0,                                0.0,                                1.0);
+}
+
+vec3 rotate(vec3 v, vec3 axis, float angle) {
+	mat4 m = rotationMatrix(axis, angle);
+	return (m * vec4(v, 1.0)).xyz;
+}
+
 void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
-	float posOffset = mix(extra.r, 1.0, .25) * .2;
+	vec3 orgPos     = texture2D(textureOrgPos, vTextureCoord).rgb;
+	float posOffset = mix(extra.r, 1.0, .925) * .4;
 	vec3 acc        = curlNoise(pos * posOffset + time * .15);
+
+	float speed = mix(extra.g, 1.0, .1);
+	speed = pow(speed, 2.0) * 2.0;
+
+	if(extra.b < uNumSeg) {
+		speed *= 0.001;
+	}
 	
-	vel += acc * .003;
+	vel += acc * .001 * speed;
 	vec3 dir = normalize(pos);
-	vel += dir * 0.002;
+	vel += dir * 0.002 * speed;
 
-	float dist = length(pos);
-	if(dist > maxRadius) {
-		float f = (dist - maxRadius) * .001;
-		vel -= dir * f;
-	}
-
-	const float range = .15;
-	if(dist < uSphereSize + range) {
-		float f = uSphereSize + range - dist;
-		vel += dir * f * 0.05;
-	}
 
 	const float decrease = .93;
 	vel *= decrease;
 
-	gl_FragData[0] = vec4(pos + vel, 1.0);
+	extra.b += 1.0;
+	pos += vel;
+
+	if(extra.b > uEnd + uLength) {
+		vec3 axis = normalize(extra);
+		orgPos = rotate(orgPos, axis, time * extra.r * extra.g);
+		pos = orgPos;
+		extra.b = 0.0;
+	}
+
+	gl_FragData[0] = vec4(pos, 1.0);
 	gl_FragData[1] = vec4(vel, 1.0);
 	gl_FragData[2] = vec4(extra, 1.0);
-	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+	gl_FragData[3] = vec4(orgPos, 1.0);
 }
