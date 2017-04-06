@@ -4,8 +4,9 @@ import alfrid, { GL } from 'alfrid';
 
 class SphereMap {
 	constructor() {
-		const fboMapSize = 256;
+		const fboMapSize = 256 * 2;
 		this._fboSphere = new alfrid.FrameBuffer(fboMapSize, fboMapSize);
+		// this._fboSphere = new alfrid.FrameBuffer(GL.width, GL.height);
 
 		this._bBall = new alfrid.BatchBall();
 	}

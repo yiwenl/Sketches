@@ -154,7 +154,7 @@ class SceneApp extends alfrid.Scene {
 
 
 	resize() {
-		const scale = 2.0;
+		const scale = 1.5;
 		GL.setSize(window.innerWidth * scale, window.innerHeight * scale);
 		this.camera.setAspectRatio(GL.aspectRatio);
 

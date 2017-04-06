@@ -9,10 +9,10 @@ import Assets from './Assets';
 
 window.params = {
 	numParticles:64,
-	skipCount: 3,
+	skipCount: 4,
 	maxRadius: 2.5,
 	sphereSize: 2,
-	numSeg:20,
+	numSeg:30,
 	light: {
 		lightPos:[0, 0, 1]
 	}
