@@ -8,8 +8,10 @@ import ViewBg from './ViewBg';
 import ViewBall from './ViewBall';
 import ViewPost from './ViewPost';
 import ViewFxaa from './ViewFxaa';
+import ViewNoise from './ViewNoise';
 import SphereMap from './SphereMap';
 import LinesMap from './LinesMap';
+import TouchDetect from './TouchDetect';
 import LineRenderer from './LineRenderer';
 
 window.getAsset = function(id) {
@@ -20,13 +22,14 @@ class SceneApp extends alfrid.Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
-		GL.gl.lineWidth(4);
-		console.log('GL.gl.lineWidth', GL.gl.lineWidth);
 
 		this._count = 0;
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
 		this.orbitalControl.radius.value = 10;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+
+
+		this.orbitalControl.radius.limit(9, 15);
 
 		this.resize();
 	}
@@ -54,15 +57,17 @@ class SceneApp extends alfrid.Scene {
 		console.log('init views');
 		
 		//	helpers
-		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
+		// this._bCopy = new alfrid.BatchCopy();
+		// this._bAxis = new alfrid.BatchAxis();
+		// this._bDots = new alfrid.BatchDotsPlane();
 		this._bBall = new alfrid.BatchBall();
 
 		this._vBg = new ViewBg();
 		this._vBall = new ViewBall();
 		this._vPost = new ViewPost();
-		this._vFxaa = new ViewFxaa();
+		this._vNoise = new ViewNoise();
+
+		this._touchDetect = new TouchDetect(this._vBall.mesh, this.camera, GL.canvas);
 
 
 		//	views
@@ -94,13 +99,16 @@ class SceneApp extends alfrid.Scene {
 
 
 	updateFbo() {
+		const {hit} = this._touchDetect;
+
 		this._fboTarget.bind();
 		GL.clear(0, 0, 0, 1);
 		this._vSim.render(
 			this._fboCurrent.getTexture(1), 
 			this._fboCurrent.getTexture(0), 
 			this._fboCurrent.getTexture(2),
-			this._fboCurrent.getTexture(3)
+			this._fboCurrent.getTexture(3),
+			hit
 			);
 		this._fboTarget.unbind();
 
@@ -131,6 +139,7 @@ class SceneApp extends alfrid.Scene {
 		GL.clear(0, 0, 0, 0);
 		GL.disable(GL.DEPTH_TEST);
 		this._vBg.render();
+		this._vNoise.render();
 		GL.enable(GL.DEPTH_TEST);
 
 		this._vBall.render();
@@ -152,7 +161,8 @@ class SceneApp extends alfrid.Scene {
 
 
 	resize() {
-		const scale = 1.5;
+		// const scale = 1.25;
+		const scale = 1.;
 		GL.setSize(window.innerWidth * scale, window.innerHeight * scale);
 		this.camera.setAspectRatio(GL.aspectRatio);
 

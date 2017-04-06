@@ -27,7 +27,7 @@ class ViewSim extends alfrid.View {
 	}
 
 
-	render(textureVel, texturePos, textureExtra, textureOrgPos) {
+	render(textureVel, texturePos, textureExtra, textureOrgPos, hit) {
 		this.time += .01;
 		this.shader.bind();
 		this.shader.uniform('time', 'float', this.time);
@@ -36,6 +36,8 @@ class ViewSim extends alfrid.View {
 		texturePos.bind(1);
 		textureExtra.bind(2);
 		textureOrgPos.bind(3);
+
+		this.shader.uniform("uHit", "vec3", hit);
 
 
 		GL.draw(this.mesh);

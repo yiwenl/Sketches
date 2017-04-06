@@ -20,7 +20,7 @@ uniform float uNumSeg;
 varying vec4 vColor;
 varying vec3 vNormal;
 
-const float radius = 0.01;
+const float radius = 0.015;
 
 void main(void) {
 	vec2 uv      = aVertexPosition.xy;

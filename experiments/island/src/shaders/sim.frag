@@ -13,6 +13,7 @@ uniform float uSphereSize;
 uniform float uEnd;
 uniform float uNumSeg;
 uniform float uLength;
+uniform vec3 uHit;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -135,16 +136,26 @@ vec3 rotate(vec3 v, vec3 axis, float angle) {
 	return (m * vec4(v, 1.0)).xyz;
 }
 
+vec3 power(vec3 v, float t) {
+	return vec3(
+			pow(v.x, t),
+			pow(v.y, t),
+			pow(v.z, t)
+		);
+}
+
 void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
 	vec3 orgPos     = texture2D(textureOrgPos, vTextureCoord).rgb;
-	float posOffset = mix(extra.r, 1.0, .925) * .4;
-	vec3 acc        = curlNoise(pos * posOffset + time * .15);
+	float posOffset = mix(extra.r, 1.0, .925) * 0.2;
+	vec3 acc        = curlNoise(pos * posOffset + time * .35);
+	// acc 			= power(acc, 5.0);
 
-	float speed = mix(extra.g, 1.0, .1);
-	speed = pow(speed, 2.0) * 2.0;
+	// float speed = mix(extra.g, 1.0, .95);
+	float speed = 1.0 + extra.g * 0.5;
+	speed = pow(speed, 2.0) * (1.5 + acc.r);
 
 	if(extra.b < uNumSeg) {
 		speed *= 0.001;
@@ -153,6 +164,15 @@ void main(void) {
 	vel += acc * .001 * speed;
 	vec3 dir = normalize(pos);
 	vel += dir * 0.002 * speed;
+
+
+	float distToHit = distance(pos, uHit);
+	const float minDist = 1.5;
+	if(distToHit < minDist) {
+		vec3 dirToHit = normalize(uHit - pos);
+		float f = (minDist - distToHit) * 0.02;
+		vel += dirToHit * f;
+	}
 
 
 	const float decrease = .93;

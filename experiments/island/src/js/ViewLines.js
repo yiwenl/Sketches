@@ -36,9 +36,9 @@ class ViewLines extends alfrid.View {
 		this.mesh.bufferIndex(indices);
 
 		this.shader.bind();
-		const s = 0.2;
+		const s = 0.4;
 		this.shader.uniform("color", "vec3", [s, s, s]);
-		this.shader.uniform("opacity", "float", 1);
+		this.shader.uniform("opacity", "float", .25);
 		this.shader.uniform("textureCurr", "uniform1i", 0);
 		this.shader.uniform("textureNext", "uniform1i", 1);
 		this.shader.uniform("textureExtra", "uniform1i", 2);

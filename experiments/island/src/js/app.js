@@ -81,15 +81,15 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
-	gui.add(params, 'maxRadius', 0.0, 10.0);
+	// window.gui = new dat.GUI({ width:300 });
+	// gui.add(params, 'maxRadius', 0.0, 10.0);
 
 	//	CREATE SCENE
 	const scene = new SceneApp();
 
 	//	STATS
-	const stats = new Stats();
-	document.body.appendChild(stats.domElement);
-	alfrid.Scheduler.addEF(()=>stats.update());
+	// const stats = new Stats();
+	// document.body.appendChild(stats.domElement);
+	// alfrid.Scheduler.addEF(()=>stats.update());
 
 }

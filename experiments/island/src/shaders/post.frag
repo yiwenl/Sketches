@@ -9,6 +9,7 @@ uniform sampler2D textureMap;
 
 const vec3 color0 = vec3(19.0, 18.0, 11.0)/255.0;
 const vec3 color1 = vec3(239.0, 240.0, 235.0)/255.0;
+uniform float offset;
 
 void main(void) {
 	vec4 color = texture2D(texture, vTextureCoord);
@@ -31,6 +32,10 @@ void main(void) {
 
 	float br = length(color.rgb) / length(vec3(1.0));
 	color.rgb = mix(color0, color1, br);
+
+	vec3 invert = vec3(1.0) - color.rgb;
+
+	color.rgb = mix(color.rgb, invert, offset);
 
     gl_FragColor = color;
 }
