@@ -14,6 +14,7 @@ uniform sampler2D 	uRoughnessMap;
 uniform sampler2D 	uMetalMap;
 uniform sampler2D 	uColorMap;
 uniform sampler2D 	uNormalMap;
+uniform sampler2D 	uCombinedMap;
 
 uniform vec3		uBaseColor;
 uniform float		uRoughness;
@@ -109,16 +110,17 @@ void main() {
 	vec3 V 				= normalize( vEyePosition );
 	
 	vec3 baseColor 		= texture2D( uColorMap, vTextureCoord ).rgb;
-	float metallic 	    = texture2D( uMetalMap, vTextureCoord ).r;
-	float roughness 	= texture2D( uRoughnessMap, vTextureCoord ).r;
+	float metallic 	    = texture2D( uCombinedMap, vTextureCoord ).g;
+	float roughness 	= texture2D( uCombinedMap, vTextureCoord ).r;
 	vec3 color 			= getPbr(N, V, baseColor, roughness, metallic, uSpecular);
 
 	vec3 reflectedEyeWorldSpace = reflect( vEyePosition, N );
 	reflectedEyeWorldSpace *= -1.0;
 	vec4 colorEnv = textureCube(uReflectionMap, reflectedEyeWorldSpace);
-	color.rgb += colorEnv.rgb;
+	// color.rgb += colorEnv.rgb;
+	// color.rgb 			= mix(color.rgb, colorEnv.rgb, .5);
 
-	vec3 ao 			= texture2D(uAoMap, vTextureCoord).rgb;
+	float ao 			= texture2D(uCombinedMap, vTextureCoord).b;
 	color 				*= ao;
 
 	// apply the tone-mapping

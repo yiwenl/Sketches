@@ -24,23 +24,19 @@ class ViewMask extends alfrid.View {
 		gui.add(this, 'specular', 0, 1);
 
 
-		this._textureAO = Assets.get('mask_ao');
 		this._textureColor = Assets.get('mask_albedo');
-		this._textureRoughness = Assets.get('mask_roughness');
-		this._textureMetalness = Assets.get('mask_metalness');
 		this._textureNormal = Assets.get('mask_normal');
+		this._textureMaps = Assets.get('maps');
 
 		this.shader.bind();
 
 		this.shader.uniform('uColorMap', 'uniform1i', 0);
-		this.shader.uniform('uAoMap', 'uniform1i', 1);
-		this.shader.uniform('uRoughnessMap', 'uniform1i', 2);
-		this.shader.uniform('uMetalMap', 'uniform1i', 3);
 		this.shader.uniform('uNormalMap', 'uniform1i', 4);
+		this.shader.uniform('uCombinedMap', 'uniform1i', 5);
 
-		this.shader.uniform('uRadianceMap', 'uniform1i', 5);
-		this.shader.uniform('uIrradianceMap', 'uniform1i', 6);
-		this.shader.uniform('uReflectionMap', 'uniform1i', 7);
+		this.shader.uniform('uRadianceMap', 'uniform1i', 6);
+		this.shader.uniform('uIrradianceMap', 'uniform1i', 7);
+		this.shader.uniform('uReflectionMap', 'uniform1i', 8);
 	}
 
 
@@ -49,14 +45,12 @@ class ViewMask extends alfrid.View {
 		this.shader.bind();
 
 		this._textureColor.bind(0);
-		this._textureAO.bind(1);
-		this._textureRoughness.bind(2);
-		this._textureMetalness.bind(3);
 		this._textureNormal.bind(4);
+		this._textureMaps.bind(5);
 		
-		textureRad.bind(5);
-		textureIrr.bind(6);
-		textureReflection.bind(7);
+		textureRad.bind(6);
+		textureIrr.bind(7);
+		textureReflection.bind(8);
 
 		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
 		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
