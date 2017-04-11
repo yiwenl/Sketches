@@ -102,6 +102,12 @@ void main() {
 	
 	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, uMetallic, uSpecular);
 
+
+	vec3 reflectedEyeWorldSpace = reflect( vEyePosition, N );
+	vec4 colorEnv = textureCube(textureEnv, reflectedEyeWorldSpace);
+	color.rgb += colorEnv.rgb;
+	// reflectedEyeWorldSpace.y *= -1.0;
+
 	vec3 ao 			= texture2D(uAoMap, vTextureCoord).rgb;
 	color 				*= ao;
 

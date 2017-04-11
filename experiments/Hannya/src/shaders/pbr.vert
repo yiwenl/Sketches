@@ -26,7 +26,7 @@ void main(void) {
 	vec3 position 			= aVertexPosition;
 	vec4 worldSpacePosition	= uModelMatrix * vec4(position, 1.0);
     vec4 viewSpacePosition	= uViewMatrix * worldSpacePosition;
-	
+
     vNormal					= uNormalMatrix * aNormal;
     vPosition				= viewSpacePosition.xyz;
 	vWsPosition				= worldSpacePosition.xyz;

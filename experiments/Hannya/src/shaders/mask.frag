@@ -7,6 +7,7 @@ precision highp float;
 
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
+uniform samplerCube uReflectionMap;
 
 uniform sampler2D 	uAoMap;
 uniform sampler2D 	uRoughnessMap;
@@ -111,6 +112,11 @@ void main() {
 	float metallic 	    = texture2D( uMetalMap, vTextureCoord ).r;
 	float roughness 	= texture2D( uRoughnessMap, vTextureCoord ).r;
 	vec3 color 			= getPbr(N, V, baseColor, roughness, metallic, uSpecular);
+
+	vec3 reflectedEyeWorldSpace = reflect( vEyePosition, N );
+	reflectedEyeWorldSpace *= -1.0;
+	vec4 colorEnv = textureCube(uReflectionMap, reflectedEyeWorldSpace);
+	color.rgb += colorEnv.rgb;
 
 	vec3 ao 			= texture2D(uAoMap, vTextureCoord).rgb;
 	color 				*= ao;

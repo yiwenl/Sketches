@@ -40,10 +40,11 @@ class ViewMask extends alfrid.View {
 
 		this.shader.uniform('uRadianceMap', 'uniform1i', 5);
 		this.shader.uniform('uIrradianceMap', 'uniform1i', 6);
+		this.shader.uniform('uReflectionMap', 'uniform1i', 7);
 	}
 
 
-	render(textureRad, textureIrr) {
+	render(textureRad, textureIrr, textureReflection) {
 
 		this.shader.bind();
 
@@ -55,6 +56,7 @@ class ViewMask extends alfrid.View {
 		
 		textureRad.bind(5);
 		textureIrr.bind(6);
+		textureReflection.bind(7);
 
 		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
 		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
