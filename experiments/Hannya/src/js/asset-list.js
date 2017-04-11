@@ -2,6 +2,7 @@
 const assetsToLoad = [
 	{"id":"mask","url":"assets/obj/mask.obj","type":"text"},
 	{"id":"model","url":"assets/obj/model.obj","type":"text"},
+	{"id":"petal","url":"assets/obj/petal.obj","type":"text"},
 	{"id":"aomap","url":"assets/img/aomap.jpg","type":"jpg"},
 	{"id":"irr_negx","url":"assets/img/irr_negx.hdr","type":"binary"},
 	{"id":"irr_negy","url":"assets/img/irr_negy.hdr","type":"binary"},
@@ -10,6 +11,7 @@ const assetsToLoad = [
 	{"id":"irr_posy","url":"assets/img/irr_posy.hdr","type":"binary"},
 	{"id":"irr_posz","url":"assets/img/irr_posz.hdr","type":"binary"},
 	{"id":"maps","url":"assets/img/maps.jpg","type":"jpg"},
+	{"id":"mask_albedo copy","url":"assets/img/mask_albedo copy.jpg","type":"jpg"},
 	{"id":"mask_albedo","url":"assets/img/mask_albedo.jpg","type":"jpg"},
 	{"id":"mask_normal","url":"assets/img/mask_normal.jpg","type":"jpg"},
 	{"id":"noise","url":"assets/img/noise.png","type":"png"},

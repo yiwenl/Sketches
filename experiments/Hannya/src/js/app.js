@@ -15,8 +15,11 @@ if(document.body) {
 
 
 window.params = {
-	gamma:2.2,
-	exposure:5
+	gamma:1.2,
+	exposure:15,
+	numParticles:8,
+	skipCount: 2,
+	maxRadius: 4.5
 };
 
 function _init() {
@@ -68,13 +71,15 @@ function _init3D() {
 	document.body.appendChild(canvas);
 
 	//	INIT 3D TOOL
-	GL.init(canvas);
+	GL.init(canvas, {ignoreWebgl2:true});
 
 	//	INIT ASSETS
 	Assets.init();
 
 	//	INIT DAT-GUI
 	window.gui = new dat.GUI({ width:300 });
+	gui.add(params, 'gamma', 1, 10);
+	gui.add(params, 'exposure', 1, 20);
 
 	//	CREATE SCENE
 	const scene = new SceneApp();

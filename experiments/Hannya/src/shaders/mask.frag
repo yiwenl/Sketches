@@ -118,17 +118,13 @@ void main() {
 	reflectedEyeWorldSpace *= -1.0;
 	vec4 colorEnv = textureCube(uReflectionMap, reflectedEyeWorldSpace);
 	// color.rgb += colorEnv.rgb;
-	// color.rgb 			= mix(color.rgb, colorEnv.rgb, .5);
+	color.rgb 			= mix(color.rgb, colorEnv.rgb, .5);
 
 	float ao 			= texture2D(uCombinedMap, vTextureCoord).b;
 	color 				*= ao;
 
-	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );
-	// white balance
 	color				= color * ( 1.0 / Uncharted2Tonemap( vec3( 20.0 ) ) );
-	
-	// gamma correction
 	color				= pow( color, vec3( 1.0 / uGamma ) );
 
 	// output the fragment color
