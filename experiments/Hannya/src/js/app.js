@@ -17,9 +17,10 @@ if(document.body) {
 window.params = {
 	gamma:1.2,
 	exposure:15,
-	numParticles:8,
+	numParticles:10,
 	skipCount: 2,
-	maxRadius: 4.5
+	maxRadius: 4.5,
+	numMip:5,
 };
 
 function _init() {
@@ -77,15 +78,13 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
-	gui.add(params, 'gamma', 1, 10);
-	gui.add(params, 'exposure', 1, 20);
+	// window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
 	const scene = new SceneApp();
 
 	//	STATS
-	const stats = new Stats();
-	document.body.appendChild(stats.domElement);
-	alfrid.Scheduler.addEF(()=>stats.update());
+	// const stats = new Stats();
+	// document.body.appendChild(stats.domElement);
+	// alfrid.Scheduler.addEF(()=>stats.update());
 }

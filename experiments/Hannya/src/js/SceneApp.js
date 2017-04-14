@@ -8,6 +8,7 @@ import ViewSave from './ViewSave';
 import ViewSim from './ViewSim';
 import ViewChar from './ViewChar';
 import ViewFXAA from './ViewFXAA';
+import PassBloom from './PassBloom';
 import Assets from './Assets';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
@@ -18,13 +19,12 @@ class SceneApp extends Scene {
 		GL.enableAlphaBlending();
 		// this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
 		this.orbitalControl.radius.value = 8;
+		this.orbitalControl.radius.limit(6, 10);
 
 		//	CAMERA CUBE
 		this.cameraCube = new alfrid.CameraCube();
 
 		this._count = 0;
-
-		this._initBalls();
 
 		this.resize();
 	}
@@ -32,7 +32,7 @@ class SceneApp extends Scene {
 	_initTextures() {
 		console.log('init textures');
 
-		let fboSize        = 64 * 4;
+		let fboSize        = 64 * 2;
 		this._cubeFbo      = new alfrid.CubeFrameBuffer(fboSize);
 
 		const numParticles = params.numParticles;
@@ -52,10 +52,7 @@ class SceneApp extends Scene {
 		this._fboTarget  	= new alfrid.FrameBuffer(numParticles, numParticles, o, true);
 
 		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height, oRender);
-		const numMips = 5;
-		for(let i=0; i<numMips; i++) {
-
-		}
+		this._fboFXAA = new alfrid.FrameBuffer(GL.width, GL.height, oRender);
 	}
 
 
@@ -71,6 +68,7 @@ class SceneApp extends Scene {
 		this._vSim 	  = new ViewSim();
 		this._vChar = new ViewChar();
 		this._vFxaa = new ViewFXAA();
+		this._passBloom = new PassBloom();
 
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
@@ -89,37 +87,8 @@ class SceneApp extends Scene {
 		GL.setMatrices(this.camera);
 	}
 
-
-	_initBalls() {
-		const numBalls = 6;
-		const m = mat4.create();
-
-		function getPos() {
-			let v = vec3.fromValues(0, 0, -random(5, 10));
-			mat4.identity(m, m);
-			mat4.rotateX(m, m, Math.random() * Math.PI * 2);
-			mat4.rotateY(m, m, Math.random() * Math.PI * 2);
-			mat4.rotateZ(m, m, Math.random() * Math.PI * 2);
-			vec3.transformMat4(v, v, m);
-
-			return v;
-		}
-
-		this._balls = [];
-		for(let i=0; i<numBalls; i++) {
-			const pos = getPos();
-			const scale = random(1, 5) * 0.5;
-			this._balls.push({
-				pos,
-				scale
-			});
-		}
-
-	}
-
-
 	_getCubeMap() {
-		if(this._count % 2 == 0) {
+		if(this._count % 6 == 0) {
 			GL.setMatrices(this.cameraCube);
 			for(var i=0; i<6; i++) {
 				this._cubeFbo.bind(i);
@@ -155,29 +124,58 @@ class SceneApp extends Scene {
 
 		this._getCubeMap();
 
-
+		//	RENDER SCENE
 		this._fboRender.bind();
-
 		GL.clear(0, 0, 0, 1);
 		GL.setMatrices(this.camera);
 		GL.disable(GL.DEPTH_TEST);
 		this._vChar.render();
 		GL.enable(GL.DEPTH_TEST);
-
 		this._renderPetals();
 		this._vMask.render(Assets.get('studio_radiance'), Assets.get('irr'), this._cubeFbo.getTexture());
-
 		this._fboRender.unbind();
 
+		//	FXAA
+		// this._fboFXAA.bind();
+		// GL.clear(0, 0, 0, 0);
+		// this._vFxaa.render(this._fboRender.getTexture());
+		// this._fboFXAA.unbind();
 
+		//	BLOOM
+		// this._passBloom.render(this._fboFXAA.getTexture());
+		this._passBloom.render(this._fboRender.getTexture());
+
+
+		//	FINAL OUTPUT
 		GL.clear(0, 0, 0, 0);
-		// this._bCopy.draw(this._fboRender.getTexture());
-		this._vFxaa.render(this._fboRender.getTexture());
+		GL.disable(GL.DEPTH_TEST);
+		GL.viewport(0, 0, GL.width, GL.height);
+		GL.enableAdditiveBlending();
+		this._bCopy.draw(this._fboRender.getTexture());
+		this._bCopy.draw(this._passBloom.getTexture());
+
+		GL.enableAlphaBlending();
+
+
+		//	DEBUG
+
+		const { fbos } = this._passBloom;
+		const size = 200;
+
+		// fbos.forEach((o, i)=> {
+		// 	GL.viewport(size * i, 0, size, size / GL.aspectRatio);
+		// 	this._bCopy.draw(o.fboH.getTexture());
+		// });
+
+
+
+		GL.enable(GL.DEPTH_TEST);
 	}
 
 	_renderPetals() {
 		let p = this._count / params.skipCount;
 		this._vPetals.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2));
+
 	}
 
 

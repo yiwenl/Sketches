@@ -21,9 +21,6 @@ class ViewMask extends alfrid.View {
 		this.metallic = 0;
 		this.baseColor = [1, 1, 1];
 
-		gui.add(this, 'specular', 0, 1);
-
-
 		this._textureColor = Assets.get('mask_albedo');
 		this._textureNormal = Assets.get('mask_normal');
 		this._textureMaps = Assets.get('maps');
