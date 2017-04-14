@@ -1,9 +1,7 @@
 
 const assetsToLoad = [
-	{"id":"mask","url":"assets/obj/mask.obj","type":"text"},
-	{"id":"model","url":"assets/obj/model.obj","type":"text"},
-	{"id":"petal","url":"assets/obj/petal.obj","type":"text"},
 	{"id":"aomap","url":"assets/img/aomap.jpg","type":"jpg"},
+	{"id":"hannya","url":"assets/img/hannya.png","type":"png"},
 	{"id":"irr_negx","url":"assets/img/irr_negx.hdr","type":"binary"},
 	{"id":"irr_negy","url":"assets/img/irr_negy.hdr","type":"binary"},
 	{"id":"irr_negz","url":"assets/img/irr_negz.hdr","type":"binary"},
@@ -15,7 +13,10 @@ const assetsToLoad = [
 	{"id":"mask_albedo","url":"assets/img/mask_albedo.jpg","type":"jpg"},
 	{"id":"mask_normal","url":"assets/img/mask_normal.jpg","type":"jpg"},
 	{"id":"noise","url":"assets/img/noise.png","type":"png"},
-	{"id":"studio_radiance","url":"assets/img/studio_radiance.dds","type":"binary"}
+	{"id":"studio_radiance","url":"assets/img/studio_radiance.dds","type":"binary"},
+	{"id":"mask","url":"assets/obj/mask.obj","type":"text"},
+	{"id":"model","url":"assets/obj/model.obj","type":"text"},
+	{"id":"petal","url":"assets/obj/petal.obj","type":"text"}
 ];
 
 

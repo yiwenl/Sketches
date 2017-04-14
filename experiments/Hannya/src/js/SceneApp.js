@@ -6,6 +6,8 @@ import ViewMask from './ViewMask';
 import ViewPetals from './ViewPetals';
 import ViewSave from './ViewSave';
 import ViewSim from './ViewSim';
+import ViewChar from './ViewChar';
+import ViewFXAA from './ViewFXAA';
 import Assets from './Assets';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
@@ -14,7 +16,7 @@ class SceneApp extends Scene {
 	constructor() {
 		super();
 		GL.enableAlphaBlending();
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
+		// this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
 		this.orbitalControl.radius.value = 8;
 
 		//	CAMERA CUBE
@@ -67,6 +69,8 @@ class SceneApp extends Scene {
 		this._vMask = new ViewMask();
 		this._vPetals = new ViewPetals();
 		this._vSim 	  = new ViewSim();
+		this._vChar = new ViewChar();
+		this._vFxaa = new ViewFXAA();
 
 		this._vSave = new ViewSave();
 		GL.setMatrices(this.cameraOrtho);
@@ -154,8 +158,12 @@ class SceneApp extends Scene {
 
 		this._fboRender.bind();
 
-		GL.clear(0, 0, 0, 0);
+		GL.clear(0, 0, 0, 1);
 		GL.setMatrices(this.camera);
+		GL.disable(GL.DEPTH_TEST);
+		this._vChar.render();
+		GL.enable(GL.DEPTH_TEST);
+
 		this._renderPetals();
 		this._vMask.render(Assets.get('studio_radiance'), Assets.get('irr'), this._cubeFbo.getTexture());
 
@@ -163,7 +171,8 @@ class SceneApp extends Scene {
 
 
 		GL.clear(0, 0, 0, 0);
-		this._bCopy.draw(this._fboRender.getTexture());
+		// this._bCopy.draw(this._fboRender.getTexture());
+		this._vFxaa.render(this._fboRender.getTexture());
 	}
 
 	_renderPetals() {
