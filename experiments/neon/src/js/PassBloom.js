@@ -74,8 +74,8 @@ class PassBloom {
 		//	shader - compose
 
 		this.uniformsCompose = {
-			bloomStrength:1.5,
-			bloomRadius:0.4
+			bloomStrength:.5,
+			bloomRadius:0.8
 		}
 
 		let fs = fsCompose.replace(/\${NUM_MIPS}/g, this._numMips);
@@ -157,8 +157,28 @@ class PassBloom {
 		return this._fboCompose.getTexture();
 	}
 
-	resize() {
-		
+	get threshold() {
+		return this.uniformsThreshold.luminosityThreshold;
+	}
+
+	set threshold(mValue) {
+		this.uniformsThreshold.luminosityThreshold = mValue;
+	}
+
+	get radius() {
+		return this.uniformsCompose.bloomRadius;
+	}
+
+	set radius(mValue) {
+		this.uniformsCompose.bloomRadius = mValue;
+	}
+
+	get strength() {
+		return this.uniformsCompose.bloomStrength;
+	}
+
+	set strength(mValue) {
+		this.uniformsCompose.bloomStrength = mValue;
 	}
 }
 

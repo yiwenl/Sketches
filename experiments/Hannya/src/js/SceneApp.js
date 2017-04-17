@@ -183,6 +183,15 @@ class SceneApp extends Scene {
 		let scale = 1;
 		GL.setSize(window.innerWidth * scale, window.innerHeight * scale);
 		this.camera.setAspectRatio(GL.aspectRatio);
+
+		const oRender = {
+			minFilter:GL.LINEAR,
+			magFilter:GL.LINEAR,
+			type:GL.FLOAT
+		};
+
+		this._fboRender = new alfrid.FrameBuffer(GL.width, GL.height, oRender);
+		this._fboFXAA = new alfrid.FrameBuffer(GL.width, GL.height, oRender);
 	}
 }
 
