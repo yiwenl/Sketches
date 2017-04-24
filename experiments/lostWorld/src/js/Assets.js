@@ -64,6 +64,13 @@ Assets.init = function() {
 					file:mesh
 				}
 				break;
+			case 'dae':
+				// const mesh = ObjLoader.parse(file);
+				return {
+					id:o.id,
+					file:file
+				}
+				break;
 		}
 
 	});

@@ -122,6 +122,7 @@ function getAssetType(mExt) {
 		case 'png' :
 			return 'png';
 		case 'obj' :
+		case 'dae' :
 			return 'text';
 		case 'dds' :
 			return 'binary';

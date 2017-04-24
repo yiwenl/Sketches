@@ -2,10 +2,11 @@
 
 import alfrid, { Scene, GL } from 'alfrid';
 import ViewObjModel from './ViewObjModel';
-import ViewBoat from './ViewBoat';
+// import ViewBoat from './ViewBoat';
 import ViewWater from './ViewWater';
 import ViewStars from './ViewStars';
 import ViewMountains from './ViewMountains';
+import ViewDae from './ViewDae';
 import Assets from './Assets';
 import VIVEUtils from './utils/VIVEUtils';
 import getReflectionMatrix from './utils/getReflectionMatrix';
@@ -77,7 +78,8 @@ class SceneApp extends Scene {
 		this._bDots = new alfrid.BatchDotsPlane();
 		this._bSky = new alfrid.BatchSkybox();
 
-		this._vBoat = new ViewBoat();
+		// this._vBoat = new ViewBoat();
+		this._vDae = new ViewDae();
 		this._vStars = new ViewStars();
 		this._vWater = new ViewWater();
 		this._vMountains = new ViewMountains();
@@ -151,7 +153,7 @@ class SceneApp extends Scene {
 		if(withWater) {
 			this._vWater.render(this._fboReflection.getTexture());	
 		}
-		this._vBoat.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('ao-boat'));
+		this._vDae.render(Assets.get('studio_radiance'), Assets.get('irr'));
 	}
 
 	_renderReflection() {
