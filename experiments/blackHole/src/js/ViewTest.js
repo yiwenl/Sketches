@@ -16,9 +16,8 @@ class ViewTest extends alfrid.View {
 
 
 	_initMesh() {
-		const s = 1.5;
-		const w = s;
-		const h = s * 0.15;
+		const w = 2;
+		const h = 0.2;
 		// this.mesh = alfrid.Geom.plane(s, s * .15, 20);
 
 		this.mesh = new alfrid.Mesh();

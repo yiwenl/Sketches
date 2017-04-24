@@ -72,6 +72,10 @@ class SceneApp extends alfrid.Scene {
 
 		GL.clear(0, 0, 0, 0);
 
+		this._bDots.draw();
+		const s = 2;
+		this._bBall.draw([0, 0, 0], [s, s, s], [1, 1, 1]);
+
 		let p = this._count / params.skipCount;
 		this._vTest.render(this._innerSphere.current, this._innerSphere.next, p, this._innerSphere.extras, true);
 

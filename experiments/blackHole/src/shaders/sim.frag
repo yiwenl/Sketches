@@ -127,16 +127,10 @@ void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
-	float posOffset = extra.r * .25;
+	float posOffset = mix(extra.r, 1.0, .75) * 0.2;
 	vec3 acc        = curlNoise(pos * posOffset + time * .3);
 	
 	vel += acc * .005;
-
-	float dist = length(pos);
-	if(dist > maxRadius) {
-		float f = (dist - maxRadius) * .005;
-		vel -= normalize(pos) * f;
-	}
 
 	vec2 vRot = normalize(pos.xz);
 	vRot = rotate(vRot, PI * 0.65);
@@ -149,6 +143,12 @@ void main(void) {
 	t = 1.0 - clamp(t, 0.0, 1.0);
 	float offset = sin(time * (1.0+extra.g) + extra.r) + t * 0.5;
 	vel.yz += vRot * 0.005 * offset;
+
+	float dist = length(pos);
+	if(dist > maxRadius) {
+		float f = (dist - maxRadius) * .005;
+		vel -= normalize(pos) * f;
+	}
 
 	const float decrease = .93;
 	vel *= decrease;

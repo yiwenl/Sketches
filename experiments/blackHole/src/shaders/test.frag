@@ -22,7 +22,7 @@ void main(void) {
 	float d = diffuse(N, vec3(1.0));
 	if(isBlack > 0.0) {
 		// d = 0.3 - d * 0.1;
-		d *= 0.2;
+		d *= 0.12;
 	} else {
 		d = mix(d, 0.0, mix(vTextureCoord.x, 0.0, .825));
 		// d *= vTextureCoord.x;

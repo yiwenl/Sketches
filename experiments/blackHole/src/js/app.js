@@ -11,7 +11,7 @@ window.params = {
 	skipCount: 2,
 	maxRadius: 2.5,
 	inner:{
-		numParticles:32,
+		numParticles:50,
 		numSeg:10
 	},
 	outer:{

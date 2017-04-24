@@ -58,7 +58,6 @@ void main(void) {
 	position 	 *= mix(extra.r, 1.0, .5);
 	
 	position      = rotate(position, axis, theta);
-	
 	position      += pos;
 
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
