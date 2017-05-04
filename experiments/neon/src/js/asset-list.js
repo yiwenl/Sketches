@@ -1,6 +1,5 @@
 
 const assetsToLoad = [
-	{"id":"statue","url":"assets/obj/statue.obj","type":"text"},
 	{"id":"aoStatue","url":"assets/img/aoStatue.jpg","type":"jpg"},
 	{"id":"bg","url":"assets/img/bg.png","type":"png"},
 	{"id":"brush0Normal","url":"assets/img/brush0Normal.png","type":"png"},
@@ -13,7 +12,8 @@ const assetsToLoad = [
 	{"id":"irr_posy","url":"assets/img/irr_posy.hdr","type":"binary"},
 	{"id":"irr_posz","url":"assets/img/irr_posz.hdr","type":"binary"},
 	{"id":"noise","url":"assets/img/noise.png","type":"png"},
-	{"id":"studio_radiance","url":"assets/img/studio_radiance.dds","type":"binary"}
+	{"id":"studio_radiance","url":"assets/img/studio_radiance.dds","type":"binary"},
+	{"id":"statue","url":"assets/obj/statue.obj","type":"text"}
 ];
 
 
