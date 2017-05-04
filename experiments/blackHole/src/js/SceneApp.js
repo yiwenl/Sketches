@@ -6,6 +6,7 @@ import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 // import ViewPlanes from './ViewPlanes';
 import ViewTest from './ViewTest';
+import ViewBall from './ViewBall';
 import Simulation from './Simulation';
 
 import fsInner from 'shaders/sim.frag';
@@ -23,9 +24,10 @@ class SceneApp extends alfrid.Scene {
 		this._count = 0;
 		this._countOuter = 1;
 		const RAD = Math.PI/180;
-		this.camera.setPerspective(75 * RAD, GL.aspectRatio, .1, 100);
+		this.camera.setPerspective(60 * RAD, GL.aspectRatio, .1, 100);
 		this.orbitalControl.radius.value = 14;
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.5;
+		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.35;
+		this.orbitalControl.rx.limit(0.2, 1.5);
 	}
 
 	_initTextures() {
@@ -40,8 +42,8 @@ class SceneApp extends alfrid.Scene {
 		//	helpers
 		this._bCopy = new alfrid.BatchCopy();
 		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
-		this._bBall = new alfrid.BatchBall();
+		
+		this._vBall = new ViewBall();
 
 
 		//	views
@@ -49,6 +51,7 @@ class SceneApp extends alfrid.Scene {
 		this._vSim 	  = new ViewSim();
 		this._vTest = new ViewTest(params.inner.numParticles);
 		this._vTestOuter = new ViewTest(params.outer.numParticles);
+		this._bDots = new alfrid.BatchDotsPlane();
 
 		this._innerSphere = new Simulation(this, fsInner, params.inner.numParticles, false);
 		this._outerSphere = new Simulation(this, fsOuter, params.outer.numParticles, true);
@@ -72,15 +75,16 @@ class SceneApp extends alfrid.Scene {
 
 		GL.clear(0, 0, 0, 0);
 
-		this._bDots.draw();
-		const s = 2;
-		this._bBall.draw([0, 0, 0], [s, s, s], [1, 1, 1]);
+		// this._bDots.draw();
+		// this._vBall.render();
+		// const s = 2;
+		// this._bBall.draw([0, 0, 0], [s, s, s], [1, 1, 1]);
 
 		let p = this._count / params.skipCount;
 		this._vTest.render(this._innerSphere.current, this._innerSphere.next, p, this._innerSphere.extras, true);
 
 		p = this._countOuter / params.skipCount;
-		this._vTestOuter.render(this._outerSphere.current, this._outerSphere.next, p, this._outerSphere.extras);
+		this._vTestOuter.render(this._outerSphere.current, this._outerSphere.next, p, this._outerSphere.extras, false, 1.5);
 	}
 
 

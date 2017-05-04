@@ -125,10 +125,10 @@ vec2 rotate(vec2 v, float a) {
 const float PI = 3.141592653;
 
 void main(void) {
-    vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
+  vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
-	float posOffset = mix(extra.r, 1.0, .75) * 0.15;
+	float posOffset = mix(extra.r, 1.0, .5) * 0.15;
 	vec3 acc        = curlNoise(pos * posOffset + vec3(0.0, time * 1.1, 0.0));
   acc.y *= 0.25;
 	// acc.xz *= 2.0;
@@ -136,7 +136,7 @@ void main(void) {
 	vel += acc * .0075;
 
 	float dist = length(pos);
-	float radius = 0.5 + maxRadius * extra.r * 7.0;
+	float radius = 0.5 + maxRadius * extra.r * 17.0;
 
 	if(dist > radius) {
 		float f = (dist - radius) * .002;
@@ -147,19 +147,33 @@ void main(void) {
 	vRot = rotate(vRot, PI * 0.65);
 	vel.xz -= vRot * 0.007;
 
+  const float minRange = 10.0;
+  float yOffset = length(pos.xz);
+  yOffset = max(yOffset, 0.0);
+  yOffset *= 0.075;
+  yOffset = pow(yOffset, 3.0);
+
 	const float maxY = 0.1;
 	const float f = 0.01;
-	if(pos.y > maxY) {
-		vel.y -= (pos.y - maxY) * f;
-	}
-	if(pos.y < -maxY) {
-		vel.y -= (pos.y + maxY) * f;
-	}
+
+  float distToY = distance(pos.y, yOffset);
+  float dir = pos.y > yOffset ? -1.0 : 1.0;
+
+  vel.y += dir * distToY * 0.01;
+
+	// if(distToY > maxY) {
+	// 	vel.y -= (distToY - maxY) * f;
+	// }
+	// if(distToY < -maxY) {
+	// 	vel.y -= (distToY + maxY) * f;
+	// }
 
 	const float decrease = .97;
 	vel *= decrease;
 
-	gl_FragData[0] = vec4(pos + vel, 1.0);
+  pos += vel;
+
+	gl_FragData[0] = vec4(pos, 1.0);
 	gl_FragData[1] = vec4(vel, 1.0);
 	gl_FragData[2] = vec4(extra, 1.0);
 	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
