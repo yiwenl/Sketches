@@ -46,6 +46,11 @@ class GLCubeTexture {
 		numLevels = mSource.length / 6;
 		this.numLevels = numLevels;
 
+		console.log('mipmps');
+		console.log('mipmps');
+		console.log('mipmps');
+		console.log('mipmps', isCubeTexture);
+
 		if (hasMipmaps) {
 			for (let j = 0; j < 6; j++) {
 				for (let i = 0; i < numLevels; i++) {
@@ -83,6 +88,13 @@ class GLCubeTexture {
 			gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
 		}
 
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+	}
+
+
+	generateMipmap() {
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+		gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
 	}
 
