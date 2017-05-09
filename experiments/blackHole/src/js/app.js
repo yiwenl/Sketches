@@ -9,7 +9,7 @@ import Assets from './Assets';
 
 window.params = {
 	skipCount: 2,
-	maxRadius: 2.5,
+	maxRadius: 2,
 	inner:{
 		numParticles:50,
 		numSeg:10

@@ -9,7 +9,6 @@ class ViewTest extends alfrid.View {
 	
 	constructor(numParticles = 32) {
 		super(vs, fs);
-
 		this._numParticles = numParticles;
 		this._initMesh();
 	}
@@ -31,8 +30,6 @@ class ViewTest extends alfrid.View {
 		function getPos(i, j) {
 			let x = -w/2 + i/num * w;
 			let y = -h/2 + j * h;
-
-			console.log(i, x, y);
 			return [x, y, 0];
 		}
 
@@ -80,7 +77,7 @@ class ViewTest extends alfrid.View {
 	}
 
 
-	render(textureCurr, textureNext, p, textureExtra, isBlack = false) {
+	render(textureCurr, textureNext, p, textureExtra, isBlack = false, mWidth = 1) {
 		GL.disable(GL.CULL_FACE);
 		this.time += 0.1;
 		this.shader.bind();
@@ -96,6 +93,7 @@ class ViewTest extends alfrid.View {
 
 		this.shader.uniform('percent', 'float', p);
 		this.shader.uniform("isBlack", "float", isBlack ? 1.0 : 0.0);
+		this.shader.uniform("uWidth", "float", mWidth);
 		// this.shader.uniform('time', 'float', this.time);
 		GL.draw(this.mesh);
 		GL.enable(GL.CULL_FACE);

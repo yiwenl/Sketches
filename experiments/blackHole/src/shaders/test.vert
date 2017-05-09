@@ -14,6 +14,7 @@ uniform sampler2D textureCurr;
 uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
 uniform float percent;
+uniform float uWidth;
 
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
@@ -46,7 +47,7 @@ void main(void) {
 	vec3 posNext  = texture2D(textureNext, aUV).rgb;
 	vec3 pos      = mix(posCurr, posNext, percent);
 	vec3 extra    = texture2D(textureExtra, aUV).rgb;
-	
+
 	vec3 dir      = normalize(posNext - pos);
 	vec3 axis     = normalize(cross(dir, FRONT));
 	float theta   = acos(dot(dir, FRONT));
@@ -56,8 +57,17 @@ void main(void) {
 	t = cos(t * PI);
 	position.y *= t;
 	position 	 *= mix(extra.r, 1.0, .5);
+	position.x   *= uWidth;
 	
 	position      = rotate(position, axis, theta);
+
+	// const float minRange = 10.0;
+	// float yOffset = length(pos.xz) - minRange;
+	// yOffset = max(yOffset * 0.075, 0.0);
+	// yOffset = pow(yOffset, 3.0);
+	// pos.y += yOffset;
+
+
 	position      += pos;
 
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
