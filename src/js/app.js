@@ -36,22 +36,23 @@ window.baseUrl = '/';
 window.baseUrl = "/Sketches/";
 //*/
 
-console.log('Location : ', window.location.href);
+// console.log('Location : ', window.location.href);
+const protocol = window.location.href.split('://')[0];
 if(window.location.href.indexOf('localhost') > -1) {
 	window.baseUrl = '/';
 	ExpModel.map((exp) => {
-		exp.cover = 'http://yiwenl.github.io/Sketches/' + exp.cover;
+		exp.cover = `${protocol}://yiwenl.github.io/Sketches/${exp.cover}`;
 	});
 } else {
 	ExpModel.map((exp) => {
-		exp.cover = 'http://yiwenl.github.io/Sketches/' + exp.cover;
+		exp.cover = `${protocol}://yiwenl.github.io/Sketches/${exp.cover}`;
 	});
 }
 
 //	MAKE SOME REDUCERS
 let reducer = combineReducers({
-  experiments: experimentsReducer,
-  routing: routerReducer
+	experiments: experimentsReducer,
+	routing: routerReducer
 })
 
 const store = createStore(reducer, applyMiddleware(middleware));
