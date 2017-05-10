@@ -23,7 +23,7 @@ class Experiment extends Component {
 		let url = this.props.experiments[index].url;
 		const protocol = window.location.href.split('://')[0];
 		// url.replace('http', protocol);
-		// console.log('URL : ', url, this.props);
+		console.log('URL : ', url, this.props);
 		return (
 			<div>
 				<div 
