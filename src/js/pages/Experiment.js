@@ -21,6 +21,8 @@ class Experiment extends Component {
 	render() {
 		let index = this.props.experiments.length - parseInt(this.props.params.exp)-1;
 		let url = this.props.experiments[index].url;
+		const protocol = window.location.href.split('://')[0];
+		// url.replace('http', protocol);
 		console.log('URL : ', url, this.props);
 		return (
 			<div>

@@ -11,10 +11,18 @@ let gl;
 class CubeFrameBuffer {
 
 	constructor(size, mParameters = {}) {
+		console.log('Create cube framebuffer:', size);
 		gl = GL.gl;
 		this._size = size;
+
+		//*/
 		this.magFilter = mParameters.magFilter || gl.LINEAR;
-		this.minFilter = mParameters.minFilter || gl.LINEAR;
+		this.minFilter = mParameters.minFilter || gl.LINEAR_MIPMAP_LINEAR;
+		/*/
+		this.magFilter = mParameters.magFilter || gl.NEAREST;
+		this.minFilter = mParameters.minFilter || gl.NEAREST;
+		//*/
+
 		this.wrapS     = mParameters.wrapS || gl.CLAMP_TO_EDGE;
 		this.wrapT     = mParameters.wrapT || gl.CLAMP_TO_EDGE;
 
@@ -23,14 +31,19 @@ class CubeFrameBuffer {
 
 
 	_init() {
+		console.log('here');
+		console.log('here');
+		console.log('here');
 		this.texture   = gl.createTexture();
 		this.glTexture = new GLCubeTexture(this.texture, {}, true);
+		window.gl = gl;
+
+		for( const s in gl) {
+			// console.log(s);
+		}
 
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, this.magFilter);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, this.minFilter);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, this.wrapS);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this.wrapT);
+		
 
 		const targets = [
 			gl.TEXTURE_CUBE_MAP_POSITIVE_X, gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 
@@ -38,13 +51,15 @@ class CubeFrameBuffer {
 			gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z 
 		];
 
+		this._frameBuffers = [];
+
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+
 		for(let i = 0; i < targets.length; i++) {
-			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
 			gl.texImage2D(targets[i], 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.FLOAT, null);
 		}
 
 
-		this._frameBuffers = [];
 		for(let i = 0; i < targets.length; i++) {
 			const frameBuffer = gl.createFramebuffer();
 			gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
@@ -58,12 +73,24 @@ class CubeFrameBuffer {
 			this._frameBuffers.push(frameBuffer);
 		}
 
-		// gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+		console.log(this.minFilter, gl.NEAREST_MIPMAP_LINEAR);
+		console.log(this.minFilter, gl.LINEAR_MIPMAP_LINEAR);
+
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, this.magFilter);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, this.minFilter);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, this.wrapS);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this.wrapT);
+
+		gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+		// gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		// gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+		// gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
 	}
 
+
+	generateMipmap() {
+		this.glTexture.generateMipmap();
+	}
 
 	bind(mTargetIndex) {
 
