@@ -9,8 +9,8 @@ import Assets from './Assets';
 
 window.params = {
 	numParticles:32,
-	skipCount:10,
-	maxRadius: 2.5
+	skipCount:1,
+	maxRadius: 5
 };
 
 if(document.body) {

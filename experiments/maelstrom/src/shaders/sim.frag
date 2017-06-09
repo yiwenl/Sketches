@@ -113,6 +113,16 @@ vec3 curlNoise( vec3 p ){
 
 }
 
+
+const float PI = 3.141592653;
+
+vec2 rotate(vec2 v, float a) {
+	float s = sin(a);
+	float c = cos(a);
+	mat2 m = mat2(c, -s, s, c);
+	return m * v;
+}
+
 void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
@@ -120,13 +130,17 @@ void main(void) {
 	float posOffset = (0.5 + extra.r * 0.2) * .25;
 	vec3 acc        = curlNoise(pos * posOffset + time * .3);
 	
-	vel += acc * .02;
+	vel += acc * .002;
 
 	float dist = length(pos);
 	if(dist > maxRadius) {
 		float f = (dist - maxRadius) * .005;
 		vel -= normalize(pos) * f;
 	}
+
+	vec2 vxz = normalize(pos.xz);
+	vxz = rotate(vxz, PI * 0.6);
+	vel.xz += vxz * .01;
 
 	const float decrease = .93;
 	vel *= decrease;
