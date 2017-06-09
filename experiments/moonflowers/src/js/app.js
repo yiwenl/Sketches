@@ -17,7 +17,10 @@ if(document.body) {
 
 window.params = {
 	gamma:2.2,
-	exposure:5
+	exposure:5,
+	numParticles:128,
+	maxRadius:20,
+	skipCount:10,
 };
 
 function _init() {
@@ -64,7 +67,26 @@ function _onImageLoaded(o) {
 
 
 function _initVR() {
-	VIVEUtils.init( (vrDisplay) => _onVR(vrDisplay));
+	// VIVEUtils.init( (vrDisplay) => _onVR(vrDisplay));
+	VIVEUtils.init().then(
+		(vrDisplay) => {
+			if(VIVEUtils.canPresent) {
+				document.body.classList.add('hasVR');
+				let btnVR = document.body.querySelector('#enterVr');
+				btnVR.addEventListener('click', ()=> {
+					VIVEUtils.present(GL.canvas, ()=> {
+						document.body.classList.add('present-vr')
+						scene.resize();
+					});
+				});	
+			}
+			_init3D();
+		},
+		() => {
+			console.log('No VR display');
+			_init3D();
+		}
+	);
 }
 
 function _onVR(vrDisplay) {

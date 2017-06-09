@@ -18,7 +18,7 @@ vec3 diffuse(vec3 N, vec3 L, vec3 C) {
 void main(void) {
 	vec3 N = texture2D(textureNormal, vTextureCoord).rgb;
 	float d = diffuse(N, vec3(1.0));
-	d = mix(d, 1.0, .5);
+	d = mix(d, 1.0, .25);
 	
 	gl_FragColor = vec4(vec3(d), 1.0);
     // gl_FragColor = texture2D(texture, vTextureCoord);

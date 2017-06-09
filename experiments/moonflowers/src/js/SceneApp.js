@@ -1,12 +1,15 @@
 // SceneApp.js
 
-import alfrid, { Scene, GL } from 'alfrid';
-import ViewObjModel from './ViewObjModel';
+import alfrid, { Scene, GL, CameraPerspective, CameraOrtho } from 'alfrid';
 import Assets from './Assets';
 import VIVEUtils from './utils/VIVEUtils';
 import NoiseMap from './NoiseMap';
-
 import ViewTerrain from './ViewTerrain';
+import ViewSave from './ViewSave';
+import ViewRender from './ViewRender';
+import ViewSim from './ViewSim';
+import CameraControl from './CameraControl';
+import TouchOrientationControl from './cameraControls/TouchOrientationControl';
 
 const RAD = Math.PI / 180;
 
@@ -20,9 +23,9 @@ class SceneApp extends Scene {
 		super();
 		
 		//	ORBITAL CONTROL
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
-		this.orbitalControl.radius.value = 5;
+		this._cameraControl = CameraControl(this.camera, window);
 		this.camera.setPerspective(60 * RAD, GL.aspectRatio, .2, 100);
+		alfrid.Scheduler.addEF(()=>this._cameraControl.update());
 
 
 		//	VR CAMERA
@@ -30,24 +33,41 @@ class SceneApp extends Scene {
 
 		//	MODEL MATRIX
 		this._modelMatrix = mat4.create();
-		console.log('Has VR :', VIVEUtils.hasVR);
+		console.log('Has VR :', VIVEUtils.hasVR, ' can present :', VIVEUtils.canPresent);
 
-		if(VIVEUtils.hasVR) {
+		if(VIVEUtils.canPresent) {
 			mat4.translate(this._modelMatrix, this._modelMatrix, vec3.fromValues(0, 0, -2));
 			GL.enable(GL.SCISSOR_TEST);
 			this.toRender();
 
 			this.resize();
 		} else {
-			mat4.translate(this._modelMatrix, this._modelMatrix, vec3.fromValues(0, -2, 0));
+			mat4.translate(this._modelMatrix, this._modelMatrix, vec3.fromValues(0, -4, 0));
 		}
+
+		this._count = 0;
+	}
+
+	_init() {
+		this.camera                 = new CameraPerspective();
+		this.camera.setPerspective(45 * Math.PI / 180, GL.aspectRatio, 0.1, 100);
+
+		this.cameraOrtho            = new CameraOrtho();
 	}
 
 	_initTextures() {
-		console.log('init textures');
+		// console.log('init textures');
 
 		this._noiseMap = new NoiseMap();
-		console.log(this._noiseMap.height);
+		const numParticles = params.numParticles;
+		const o = {
+			minFilter:GL.NEAREST,
+			magFilter:GL.NEAREST,
+			type:GL.FLOAT
+		};
+
+		this._fboCurrent  	= new alfrid.FrameBuffer(numParticles, numParticles, o, true);
+		this._fboTarget  	= new alfrid.FrameBuffer(numParticles, numParticles, o, true);
 	}
 
 
@@ -55,25 +75,78 @@ class SceneApp extends Scene {
 		console.log('init views');
 
 		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
-		this._bSky = new alfrid.BatchSkybox(50);
 		this._bBall = new alfrid.BatchBall();
 
 		this._vTerrain = new ViewTerrain();
+
+		//	views
+		this._vRender = new ViewRender();
+		this._vSim 	  = new ViewSim();
+
+		this._vSave = new ViewSave();
+		GL.setMatrices(this.cameraOrtho);
+
+
+		this._fboCurrent.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vSave.render();
+		this._fboCurrent.unbind();
+
+		this._fboTarget.bind();
+		GL.clear(0, 0, 0, 0);
+		this._vSave.render();
+		this._fboTarget.unbind();
+
+		GL.setMatrices(this.camera);
+	}
+
+
+	updateFbo() {
+		this._fboTarget.bind();
+		GL.clear(0, 0, 0, 1);
+		this._vSim.render(this._fboCurrent.getTexture(1), this._fboCurrent.getTexture(0), this._fboCurrent.getTexture(2));
+		this._fboTarget.unbind();
+
+
+		let tmp          = this._fboCurrent;
+		this._fboCurrent = this._fboTarget;
+		this._fboTarget  = tmp;
 	}
 
 
 	render() {
-		if(!VIVEUtils.hasVR) { this.toRender(); }
+		this._count ++;
+		if(this._count % params.skipCount == 0) {
+			this._count = 0;
+			this.updateFbo();
+		}
+
+		if(!VIVEUtils.canPresent) { this.toRender(); }
 	}
 
 
 	toRender() {
-		if(VIVEUtils.hasVR) {	VIVEUtils.vrDisplay.requestAnimationFrame(()=>this.toRender());	}		
+		if(VIVEUtils.canPresent) {	VIVEUtils.vrDisplay.requestAnimationFrame(()=>this.toRender());	}		
 
 
-		if(VIVEUtils.hasVR) {
+		/*
+	
+			if(VR.canPresent) {
+				if(VR.isPresenting) {
+					//	use left eye camera
+					//	use right eye camera
+				} else {
+					//	use left eye view matrix
+					//	use custom projection matrix
+				}
+			} else {
+				use normal camera + orbital camera control
+			}
+
+		*/
+
+
+		if(VIVEUtils.canPresent) {
 			VIVEUtils.getFrameData();
 			const w2 = GL.width/2;
 			VIVEUtils.setCamera(this.cameraVR, 'left');
@@ -107,41 +180,34 @@ class SceneApp extends Scene {
 			GL.rotate(this._modelMatrix);
 			this.renderScene();
 
-			GL.disable(GL.DEPTH_TEST);
-			const s = 200;
-			GL.viewport(0, 0, s, s);
-			this._bCopy.draw(this._noiseMap.height);
+			// GL.disable(GL.DEPTH_TEST);
+			// const s = 200;
+			// GL.viewport(0, 0, s, s);
+			// this._bCopy.draw(this._noiseMap.height);
 
 
-			GL.viewport(s, 0, s, s);
-			this._bCopy.draw(this._noiseMap.normal);
+			// GL.viewport(s, 0, s, s);
+			// this._bCopy.draw(this._noiseMap.normal);
 
-			GL.enable(GL.DEPTH_TEST);
+			// GL.enable(GL.DEPTH_TEST);
 		}
+
+		
 	}
 
 
 	renderScene() {
 		GL.clear(0, 0, 0, 0);
-		this._bSky.draw(Assets.get('irr'));
-
-		this._bAxis.draw();
-		this._bDots.draw();
-
-		const r = 30;
-		this._bBall.draw([r, 0, 0]);
-		this._bBall.draw([-r, 0, 0]);
-		this._bBall.draw([0, 0, r]);
-		this._bBall.draw([0, 0, -r]);
-
-		// this._vModel.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('aomap'));
-
 		this._vTerrain.render(this._noiseMap.height, this._noiseMap.normal);
+
+		let p = this._count / params.skipCount;
+		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2));
 	}
 
 
 	resize() {
-		const scale = VIVEUtils.hasVR ? 2 : 1;
+		let scale = VIVEUtils.canPresent ? 2 : 1;
+		if(GL.isMobile) scale = 1;
 		GL.setSize(window.innerWidth * scale, window.innerHeight * scale);
 		this.camera.setAspectRatio(GL.aspectRatio);
 	}

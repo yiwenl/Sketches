@@ -9,45 +9,31 @@ class VIVEUtils {
 		this.id = 'ID' + count ++;
 		this._gamePads = [];
 		this.hasVR = false;
-		this.vrPresenting = false;
+		this.isPresenting = false;
 
 		// console.log(this.id);
 	}
 
-
-	init(mCallback) {
-		if(!navigator.getVRDisplays) {
-			mCallback(null);
-			return;
-		}
-
-
-		navigator.getVRDisplays().then((displays) => {
-			if (displays.length > 0) {
-				const vrDisplay = displays[0];
-				this._vrDisplay = vrDisplay;
-				this._frameData = new VRFrameData();
-
-				this.hasVR = true;
-
-				// console.log('VR display : ', vrDisplay, vrDisplay.capabilities.canPresent);
-				if (vrDisplay.capabilities.canPresent) {
-					// let btnVR = document.body.querySelector('.button_vr');
-					// btnVR.style.display = 'block';
-					// btnVR.addEventListener('click', onVRRequestPresent);
-
-					// window.addEventListener('vrdisplaypresentchange', onVRPresentChange, false);
-					// window.addEventListener('vrdisplayactivate', onVRRequestPresent, false);
-					// window.addEventListener('vrdisplaydeactivate', onVRExitPresent, false);
-				}
-
-				mCallback(vrDisplay);
-			} else {
-				mCallback(null);
+	init() {
+		return new Promise((resolve, reject) => {
+			if(!navigator.getVRDisplays) {
+				reject();
 			}
+
+			navigator.getVRDisplays().then((displays) => {
+				if (displays.length > 0) {
+					const vrDisplay = displays[0];
+					this._vrDisplay = vrDisplay;
+					this._frameData = new VRFrameData();
+
+					this.hasVR = true;
+					resolve(vrDisplay);
+				} else {
+					reject(null);
+				}
+			});
 		});
 	}
-
 
 	present(mCanvas, callback) {
 		if(!this._vrDisplay) {
@@ -62,7 +48,7 @@ class VIVEUtils {
 
 		this._vrDisplay.requestPresent([{ source: mCanvas }]).then( () => {
 			console.log(' on request VR ', window.innerWidth, window.innerHeight);
-			this.vrPresenting = true;
+			this.isPresenting = true;
 
 			if(callback) {
 				callback();
@@ -132,6 +118,11 @@ class VIVEUtils {
 
 	get vrDisplay() {
 		return this._vrDisplay;
+	}
+
+
+	get canPresent() {
+		return this._vrDisplay.capabilities.canPresent;
 	}
 
 }

@@ -27,7 +27,8 @@ html {
 h1,h2,h3,h4,text,p {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-webkit-font-smoothing: antialiased;
-	font-family: 'Open Sans', sans-serif;
+	font-family: 'Lato', sans-serif;
+	font-weight: 300;
 }
 
 .Main-Canvas {
@@ -55,6 +56,8 @@ h1,h2,h3,h4,text,p {
 	text-align: center;
 	letter-spacing: 11px;
 	color:white;
+	font-size: 16px;
+	pointer-events: none;
 
 	opacity: 0;
 	transition:opacity .5s ease-out, letter-spacing .5s ease-out;
