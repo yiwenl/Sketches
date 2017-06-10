@@ -41,6 +41,8 @@ vec3 rotate(vec3 v, vec3 axis, float angle) {
 }
 
 const float PI = 3.141592653;
+const vec3 FRONT = vec3(0.0, 0.0, -1.0);
+const vec3 UP = vec3(0.0, 1.0, 0.0);
 
 void main(void) {
 	// vec2 uv      = aVertexPosition.xy;
@@ -50,12 +52,14 @@ void main(void) {
 	vec3 extra   = texture2D(textureExtra, aUV).rgb;
 
 
-	vec3 dir = normalize(posNext - pos);
-	vec3 FRONT = vec3(1.0, 0.0, 0.0);
-	vec3 axis = cross(FRONT, dir);
-	float theta = acos(dot(FRONT, dir));
+	vec3 dir      = normalize(posNext - pos);
+	vec3 axis     = cross(dir, FRONT);
+	float theta   = acos(dot(dir, FRONT));
 
-	vec3 position = rotate(aVertexPosition, axis, theta) + pos;
+	vec3 position = aVertexPosition;
+	position.z *= 1.0 + extra.b * 0.5;
+	position.y *= 1.0 + extra.g;
+	position = rotate(position, axis, theta) + pos;
 
 	gl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
 	
@@ -64,9 +68,9 @@ void main(void) {
 
 	float g 	 = sin(extra.r + time * mix(extra.b, 1.0, .5));
 	g 			 = smoothstep(0.0, 1.0, g);
-	g 			 = mix(g, 1.0, .5);
+	g 			 = mix(g, 1.0, .75);
 	vColor       = vec4(vec3(g), 1.0);
 
-	vNormal 	 = aNormal;
+	vNormal 	 = rotate(aNormal, axis, theta);
 	vTextureCoord = aTextureCoord;
 }

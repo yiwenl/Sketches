@@ -8,9 +8,8 @@ import assets from './asset-list';
 import Assets from './Assets';
 
 window.params = {
-	numParticles:32,
-	skipCount:1,
-	maxRadius: 5
+	numParticles:64,
+	skipCount:1
 };
 
 if(document.body) {
@@ -66,14 +65,14 @@ function _init3D() {
 	document.body.appendChild(canvas);
 
 	//	INIT 3D TOOL
-	GL.init(canvas);
+	GL.init(canvas, {ignoreWebgl2:true});
 
 	//	INIT ASSETS
 	Assets.init();
 
 	//	INIT DAT-GUI
 	window.gui = new dat.GUI({ width:300 });
-	gui.add(params, 'maxRadius', 0.0, 10.0);
+	
 
 	//	CREATE SCENE
 	const scene = new SceneApp();

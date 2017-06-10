@@ -16,8 +16,9 @@ class SceneApp extends alfrid.Scene {
 
 		this._count = 0;
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
-		this.orbitalControl.radius.value = 10;
+		this.orbitalControl.radius.value = 20;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+		// this.orbitalControl.center[1] = 5;
 	}
 
 	_initTextures() {
@@ -27,7 +28,8 @@ class SceneApp extends alfrid.Scene {
 		const numParticles = params.numParticles;
 		const o = {
 			minFilter:GL.NEAREST,
-			magFilter:GL.NEAREST
+			magFilter:GL.NEAREST,
+			type:GL.FLOAT
 		};
 
 		this._fboCurrent  	= new alfrid.FrameBuffer(numParticles, numParticles, o, true);
@@ -92,18 +94,10 @@ class SceneApp extends alfrid.Scene {
 		let p = this._count / params.skipCount;
 
 		GL.clear(0, 0, 0, 0);
-		this._bAxis.draw();
+		// this._bAxis.draw();
 		this._bDots.draw();
 
 		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2));
-
-		const size = Math.min(params.numParticles, GL.height/4);
-
-		for(let i=0; i<4; i++) {
-			GL.viewport(0, size * i, size, size);
-			this._bCopy.draw(this._fboCurrent.getTexture(i));
-		}
-
 	}
 
 
