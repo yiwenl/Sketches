@@ -14,7 +14,7 @@ const {vec3, mat4} = glm;
 
 //	OSC EMITTER
 
-const PORT_EMIT_OSC = 8917;
+const PORT_EMIT_OSC = 8919;
 const OscEmitter = require("osc-emitter");
 
 let emitter = new OscEmitter();
@@ -66,6 +66,24 @@ function _onParticlePositions(positions, frame) {
 
 setInterval(loop, 1000);
 
+
+const getMatrixString = function(m, index=0) {
+	const off = [m[12], m[13], m[14]];
+	const v1 = [m[0], m[1], m[2]];
+	const v2 = [m[4], m[5], m[6]];
+	const v3 = [m[8], m[9], m[10]];
+
+	let mtx = off.concat(v1).concat(v2).concat(v3);
+	mtx.push(index);
+
+	let str = mtx.toString();
+	str = str.replace('[', '')
+	str = str.replace(']', '')
+	str = str.replace(/\,/g, ' ')
+
+	return str;
+}
+
 function loop() {
 	
 
@@ -80,22 +98,12 @@ function loop() {
 	mat4.translate(m, m, vec3.fromValues(x, y, z));
 	mat4.rotateY(m, m, Math.random() * Math.PI * 2.0);
 
-	const off = [m[12], m[13], m[14]];
-	const v1 = [m[0], m[1], m[2]];
-	const v2 = [m[4], m[5], m[6]];
-	const v3 = [m[8], m[9], m[10]];
-
-	let mtx = off.concat(v1).concat(v2).concat(v3);
-	mtx.push(0);
-
-	let str = mtx.toString();
-	str = str.replace('[', '')
-	str = str.replace(']', '')
-	str = str.replace(/\,/g, ' ')
+	const str = getMatrixString(m);
 
 	// emitter.emit('/positions', mtx[0], mtx[1], mtx[2], mtx[3], mtx[4], mtx[5], mtx[6], mtx[7], mtx[8], mtx[9], mtx[10], mtx[11], mtx[12]);
 	emitter.emit('/positions', str);
 }
+
 
 
 
