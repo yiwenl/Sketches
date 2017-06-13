@@ -57,8 +57,8 @@ void main(void) {
 	float theta   = acos(dot(dir, FRONT));
 
 	vec3 position = aVertexPosition;
-	position.z *= 1.0 + extra.b * 0.5;
-	position.y *= 1.0 + extra.g;
+	// position.z *= 1.0 + extra.b * 0.5;
+	// position.y *= 1.0 + extra.g;
 	position = rotate(position, axis, theta) + pos;
 
 	gl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);

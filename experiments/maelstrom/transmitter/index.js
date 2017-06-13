@@ -47,21 +47,6 @@ function _onTest(o) {
 let _frame = 0;
 
 
-function _onParticlePositions(positionsCurr, positionsNext) {
-	
-	let num = positionsCurr.length /3;
-
-	console.log('Num :', num);
-	// for(let i=0; i<num; i++) {
-	// 	emitter.emit('/positions', positions[i*3], positions[i*3+1], positions[i*3+2], i);
-	// }
-
-}
-
-
-setInterval(loop, 1000);
-
-
 const getMatrixString = function(m, index=0) {
 	const off = [m[12], m[13], m[14]];
 	const v1 = [m[0], m[1], m[2]];
@@ -78,6 +63,43 @@ const getMatrixString = function(m, index=0) {
 
 	return str;
 }
+
+
+function _onParticlePositions(positionsCurr, positionsNext) {
+	
+	let num = positionsCurr.length /3;
+
+	console.log('Num :', num);
+
+	const FRONT = vec3.fromValues(0, 0, -1);
+	const scale = 100;
+
+	for(let i=0; i<num; i++) {
+		let posCurr = vec3.fromValues(positionsCurr[i*3+0] * scale, positionsCurr[i*3+0] * scale, positionsCurr[i*3+0] * scale);
+		let posNext = vec3.fromValues(positionsNext[i*3+0] * scale, positionsNext[i*3+0] * scale, positionsNext[i*3+0] * scale);
+
+		let dir = vec3.create();
+		vec3.sub(dir, posNext, posCurr);
+
+		let axis = vec3.create();
+		vec3.cross(axis, dir, FRONT);
+		let theta = vec3.dot(dir, FRONT);
+		theta = Math.acos(theta);
+
+		const mtx = mat4.create();
+		mat4.fromRotation(mtx, theta, axis);
+
+		// emitter.emit('/positions', positions[i*3], positions[i*3+1], positions[i*3+2], i);
+
+		const str = getMatrixString(mtx, i);
+		emitter.emit('/positions', str);
+	}
+
+}
+
+
+// setInterval(loop, 1000);
+
 
 function loop() {
 	
