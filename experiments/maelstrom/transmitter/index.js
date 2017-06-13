@@ -14,7 +14,7 @@ const {vec3, mat4} = glm;
 
 //	OSC EMITTER
 
-const PORT_EMIT_OSC = 8919;
+const PORT_EMIT_OSC = 8905;
 const OscEmitter = require("osc-emitter");
 
 let emitter = new OscEmitter();
@@ -48,7 +48,9 @@ let _frame = 0;
 
 
 const getMatrixString = function(m, index=0) {
-	const off = [m[12], m[13], m[14]];
+	const off = [-m[12], m[13], m[14]];
+
+	console.log(index, off, m);
 	const v1 = [m[0], m[1], m[2]];
 	const v2 = [m[4], m[5], m[6]];
 	const v3 = [m[8], m[9], m[10]];
@@ -69,25 +71,38 @@ function _onParticlePositions(positionsCurr, positionsNext) {
 	
 	let num = positionsCurr.length /3;
 
-	console.log('Num :', num);
-
 	const FRONT = vec3.fromValues(0, 0, -1);
 	const scale = 100;
 
 	for(let i=0; i<num; i++) {
-		let posCurr = vec3.fromValues(positionsCurr[i*3+0] * scale, positionsCurr[i*3+0] * scale, positionsCurr[i*3+0] * scale);
-		let posNext = vec3.fromValues(positionsNext[i*3+0] * scale, positionsNext[i*3+0] * scale, positionsNext[i*3+0] * scale);
+		let posCurr = vec3.fromValues(positionsCurr[i*3+0] * scale, positionsCurr[i*3+1] * scale, positionsCurr[i*3+2] * scale);
+		let posNext = vec3.fromValues(positionsNext[i*3+0] * scale, positionsNext[i*3+1] * scale, positionsNext[i*3+2] * scale);
+
+		console.log(i, posNext);
 
 		let dir = vec3.create();
 		vec3.sub(dir, posNext, posCurr);
+		vec3.normalize(dir, dir);
 
 		let axis = vec3.create();
 		vec3.cross(axis, dir, FRONT);
-		let theta = vec3.dot(dir, FRONT);
-		theta = Math.acos(theta);
+		let alpha = vec3.dot(dir, FRONT);
+		let theta = Math.acos(alpha);
+
+		// console.log(i, posCurr, posNext);
+		// console.log(axis, dir);
+
 
 		const mtx = mat4.create();
-		mat4.fromRotation(mtx, theta, axis);
+		
+		mat4.translate(mtx, mtx, posNext);
+
+		const mtxRotation = mat4.create();
+		mat4.fromRotation(mtxRotation, theta, axis);
+
+		mat4.mul(mtx, mtx, mtxRotation);
+		// mat4.mul(mtx, mtxRotation, mtx);
+		
 
 		// emitter.emit('/positions', positions[i*3], positions[i*3+1], positions[i*3+2], i);
 

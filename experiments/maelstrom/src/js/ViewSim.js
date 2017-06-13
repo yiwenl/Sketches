@@ -18,9 +18,9 @@ class ViewSim extends alfrid.View {
 		}
 
 
-		gui.add(this.settings, 'uSpeed', .0, 10);
-		gui.add(this.settings, 'uNoiseScale', .0, .5);
-		gui.add(this.settings, 'maxRadius', 0.0, 20.0);
+		// gui.add(this.settings, 'uSpeed', .0, 10);
+		// gui.add(this.settings, 'uNoiseScale', .0, .5);
+		// gui.add(this.settings, 'maxRadius', 0.0, 20.0);
 	}
 
 

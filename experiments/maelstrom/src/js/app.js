@@ -8,13 +8,13 @@ import assets from './asset-list';
 import Assets from './Assets';
 
 
-const PORT_SOCKET = 9876;
-const TARGET_SERVER_IP = 'localhost:'+PORT_SOCKET;
-const socket = require('./libs/socket.io-client')(TARGET_SERVER_IP);
-window.socket = socket;
+// const PORT_SOCKET = 9876;
+// const TARGET_SERVER_IP = 'localhost:'+PORT_SOCKET;
+// const socket = require('./libs/socket.io-client')(TARGET_SERVER_IP);
+// window.socket = socket;
 
 window.params = {
-	numParticles:4,
+	numParticles:64,
 	skipCount:1
 };
 
@@ -77,15 +77,15 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
+	// window.gui = new dat.GUI({ width:300 });
 	
 
 	//	CREATE SCENE
 	const scene = new SceneApp();
 
 	//	STATS
-	const stats = new Stats();
-	document.body.appendChild(stats.domElement);
-	alfrid.Scheduler.addEF(()=>stats.update());
+	// const stats = new Stats();
+	// document.body.appendChild(stats.domElement);
+	// alfrid.Scheduler.addEF(()=>stats.update());
 
 }

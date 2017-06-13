@@ -20,14 +20,14 @@ class SceneApp extends alfrid.Scene {
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
 
 		this._isPaused = false;
-
+		
 		const numParticles = params.numParticles;
 		const arraysize = numParticles * numParticles * 4;
 		this._pixelsCurr = new Float32Array(arraysize);
 		this._pixelsNext = new Float32Array(arraysize);
 
 		// this.orbitalControl.center[1] = 5;
-		window.addEventListener('keydown', (e)=>this._onKey(e));
+		// window.addEventListener('keydown', (e)=>this._onKey(e));
 	}
 
 	_initTextures() {
@@ -139,6 +139,8 @@ class SceneApp extends alfrid.Scene {
 			if(this._count % params.skipCount == 0) {
 				this._count = 0;
 				this.updateFbo();
+
+				// this._readPositions();
 			}	
 		}
 		
