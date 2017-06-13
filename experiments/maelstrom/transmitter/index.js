@@ -47,20 +47,15 @@ function _onTest(o) {
 let _frame = 0;
 
 
-function _onParticlePositions(positions, frame) {
+function _onParticlePositions(positionsCurr, positionsNext) {
 	
-	let time = new Date().getTime();
-	// emitter.emit('/positions', positions[0], positions[1], positions[2], positions[3]);
-	let num = positions.length /3;
-	// console.log('On Position:', num);
-	for(let i=0; i<num; i++) {
-		emitter.emit('/positions', positions[i*3], positions[i*3+1], positions[i*3+2], i);
-	}
+	let num = positionsCurr.length /3;
 
-	let elapsed = new Date().getTime() - time;
-	console.log('Elapsed : ', elapsed, ", Frame : ", frame, "/", _frame);
-	emitter.emit('/update', 'update');
-	_frame ++;
+	console.log('Num :', num);
+	// for(let i=0; i<num; i++) {
+	// 	emitter.emit('/positions', positions[i*3], positions[i*3+1], positions[i*3+2], i);
+	// }
+
 }
 
 

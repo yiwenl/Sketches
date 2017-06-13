@@ -18,7 +18,16 @@ class SceneApp extends alfrid.Scene {
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
 		this.orbitalControl.radius.value = 20;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+
+		this._isPaused = false;
+
+		const numParticles = params.numParticles;
+		const arraysize = numParticles * numParticles * 4;
+		this._pixelsCurr = new Float32Array(arraysize);
+		this._pixelsNext = new Float32Array(arraysize);
+
 		// this.orbitalControl.center[1] = 5;
+		window.addEventListener('keydown', (e)=>this._onKey(e));
 	}
 
 	_initTextures() {
@@ -69,6 +78,46 @@ class SceneApp extends alfrid.Scene {
 	}
 
 
+	_onKey(e) {
+		console.log('Key :', e.keyCode);
+
+		if(e.keyCode === 32) {	//	space
+			this._isPaused = !this._isPaused;
+		} else if(e.keyCode === 83) {	//	S
+			this._isPaused = true;
+			console.log('Saving position');
+			this._readPositions();
+		}
+		
+	}
+
+	_readPositions() {
+		this._fboTarget.bind();
+		GL.gl.readPixels(0, 0, params.numParticles, params.numParticles, GL.gl.RGBA, GL.gl.FLOAT, this._pixelsCurr);
+		this._fboTarget.unbind();
+
+		this._fboCurrent.bind();
+		GL.gl.readPixels(0, 0, params.numParticles, params.numParticles, GL.gl.RGBA, GL.gl.FLOAT, this._pixelsNext);
+		this._fboCurrent.unbind();
+
+
+		const posCurr = [], posNext = [];
+
+		for(let i=0; i<this._pixelsCurr.length; i+=4) {
+			posCurr.push(this._pixelsCurr[i]);
+			posCurr.push(this._pixelsCurr[i+1]);
+			posCurr.push(this._pixelsCurr[i+2]);
+
+			posNext.push(this._pixelsNext[i]);
+			posNext.push(this._pixelsNext[i+1]);
+			posNext.push(this._pixelsNext[i+2]);
+		}
+
+
+		socket.emit('particlePosition', posCurr, posNext);
+	}
+
+
 	updateFbo() {
 		this._fboTarget.bind();
 		GL.clear(0, 0, 0, 1);
@@ -85,11 +134,14 @@ class SceneApp extends alfrid.Scene {
 
 	render() {
 
-		this._count ++;
-		if(this._count % params.skipCount == 0) {
-			this._count = 0;
-			this.updateFbo();
+		if(!this._isPaused) {
+			this._count ++;
+			if(this._count % params.skipCount == 0) {
+				this._count = 0;
+				this.updateFbo();
+			}	
 		}
+		
 
 		let p = this._count / params.skipCount;
 
