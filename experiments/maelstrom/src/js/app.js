@@ -8,10 +8,10 @@ import assets from './asset-list';
 import Assets from './Assets';
 
 
-// const PORT_SOCKET = 9876;
-// const TARGET_SERVER_IP = 'localhost:'+PORT_SOCKET;
-// const socket = require('./libs/socket.io-client')(TARGET_SERVER_IP);
-// window.socket = socket;
+const PORT_SOCKET = 9876;
+const TARGET_SERVER_IP = 'localhost:'+PORT_SOCKET;
+const socket = require('./libs/socket.io-client')(TARGET_SERVER_IP);
+window.socket = socket;
 
 window.params = {
 	numParticles:64,

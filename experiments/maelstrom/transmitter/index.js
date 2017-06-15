@@ -14,7 +14,7 @@ const {vec3, mat4} = glm;
 
 //	OSC EMITTER
 
-const PORT_EMIT_OSC = 8905;
+const PORT_EMIT_OSC = 8906;
 const OscEmitter = require("osc-emitter");
 
 let emitter = new OscEmitter();
@@ -77,8 +77,6 @@ function _onParticlePositions(positionsCurr, positionsNext) {
 	for(let i=0; i<num; i++) {
 		let posCurr = vec3.fromValues(positionsCurr[i*3+0] * scale, positionsCurr[i*3+1] * scale, positionsCurr[i*3+2] * scale);
 		let posNext = vec3.fromValues(positionsNext[i*3+0] * scale, positionsNext[i*3+1] * scale, positionsNext[i*3+2] * scale);
-
-		console.log(i, posNext);
 
 		let dir = vec3.create();
 		vec3.sub(dir, posNext, posCurr);
