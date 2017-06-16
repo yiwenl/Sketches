@@ -147,7 +147,7 @@ void main(void) {
 	vec2 vxz = normalize(pos.xz);
 	float f = mix(extra.b, 1.0, .25);
 	vxz = rotate(vxz, PI * 0.6);
-	acc.xz += vxz * f * (3.0+yOffset);
+	acc.xz += vxz * f * (3.0);
 
 	vel += acc * .002 * uSpeed;
 

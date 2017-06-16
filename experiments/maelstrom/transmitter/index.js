@@ -14,7 +14,7 @@ const {vec3, mat4} = glm;
 
 //	OSC EMITTER
 
-const PORT_EMIT_OSC = 8906;
+const PORT_EMIT_OSC = 8911;
 const OscEmitter = require("osc-emitter");
 
 let emitter = new OscEmitter();
@@ -108,6 +108,9 @@ function _onParticlePositions(positionsCurr, positionsNext) {
 		emitter.emit('/positions', str);
 	}
 
+
+	emitter.emit('/finish');
+
 }
 
 
@@ -118,7 +121,7 @@ function loop() {
 	
 
 	let m = mat4.create();
-	const scale = 100;
+	const scale = 120;
 	const r = 2;
 
 	let x = Math.round(random(-r, r) * scale);

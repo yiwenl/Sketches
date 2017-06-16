@@ -77,7 +77,7 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	// window.gui = new dat.GUI({ width:300 });
+	window.gui = new dat.GUI({ width:300 });
 	
 
 	//	CREATE SCENE
