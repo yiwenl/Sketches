@@ -22,7 +22,13 @@ class SceneApp extends alfrid.Scene {
 
 		this.currFrame = 0;
 
+
+		const numParticles = params.numParticles;
+		const arraysize = numParticles * numParticles * 4;
+		this._pixels = new Float32Array(arraysize);
+
 		gui.add(this, '_sendFrame');
+		gui.add(this, '_readPositions');
 	}
 
 	_initTextures() {
@@ -84,6 +90,24 @@ class SceneApp extends alfrid.Scene {
 		let tmp          = this._fboCurrent;
 		this._fboCurrent = this._fboTarget;
 		this._fboTarget  = tmp;
+	}
+
+
+	_readPositions() {
+		console.log('Read positions');
+
+		this._fboTarget.bind();
+		GL.gl.readPixels(0, 0, params.numParticles, params.numParticles, GL.gl.RGBA, GL.gl.FLOAT, this._pixels);
+		this._fboTarget.unbind();
+
+		const positions = [];
+		for(let i=0; i<this._pixels.length; i+=4) {
+			positions.push(this._pixels[i]);
+			positions.push(this._pixels[i+1]);
+			positions.push(this._pixels[i+2]);
+		}
+
+		socket.emit('position', positions);
 	}
 
 

@@ -13,7 +13,7 @@ const socket = require('./libs/socket.io-client')(TARGET_SERVER_IP);
 window.socket = socket;
 
 window.params = {
-	numParticles:32,
+	numParticles:10,
 	skipCount:1,
 	maxRadius: 2.5
 };

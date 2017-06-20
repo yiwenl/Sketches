@@ -14,7 +14,7 @@ const {vec3, mat4} = glm;
 
 //	OSC EMITTER
 
-const PORT_EMIT_OSC = 8903;
+const PORT_EMIT_OSC = 8909;
 const OscEmitter = require("osc-emitter");
 
 let emitter = new OscEmitter();
@@ -71,7 +71,9 @@ function _onFrame(frame) {
 
 
 function _onPosition(positions) {
-	console.log('on Position :', positions.length);
+	const scale = 100;
+	const newPos = positions.map(a => a*scale);
+	console.log('on Position :', positions.length/3);
 }
 
 
@@ -146,6 +148,44 @@ function loop() {
 }
 
 
+
+const getPrec = (num) => {
+	const prec = 100;
+	const _num = Math.floor(num * prec) / prec;
+	return _num;
+}
+
+
+const getArrayString = (ary) => {
+	let str = ary.toString();
+	str = str.replace('[', '')
+	str = str.replace(']', '')
+	str = str.replace(/\,/g, ' ')
+
+	return str;
+}
+
+function testPosition() {
+	let positions = [];
+
+	const num = Math.pow(10, 2);
+
+	const r = 200;
+
+	for(let i=0; i<num; i++) {
+		positions.push(random(-r, r));
+		positions.push(random(-r, r));
+		positions.push(random(-r, r));
+	}
+
+	positions = positions.map( n => getPrec(n) );
+	const strPosition = getArrayString(positions);
+
+	emitter.emit('/positions', strPosition);
+}
+
+
+testPosition();
 
 
 /*
