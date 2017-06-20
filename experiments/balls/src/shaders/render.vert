@@ -27,7 +27,7 @@ void main(void) {
 	vec3 posNext = texture2D(textureNext, aUV).rgb;
 	vec3 pos     = mix(posCurr, posNext, percent);
 	vec3 extra   = texture2D(textureExtra, aUV).rgb;
-	pos += aVertexPosition;
+	pos += aVertexPosition * (1.0 + extra.r);
 	gl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 	
 

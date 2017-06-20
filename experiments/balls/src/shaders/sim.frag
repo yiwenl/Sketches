@@ -125,7 +125,7 @@ void main(void) {
 	vec3 posParticle, dir;
 	float dist, f;
 
-	const float minRadius = 0.35;
+	float minRadius = 0.35 * (1.0 + extra.r);
 	float _num = float(NUM);
 	for(int i=0; i<NUM; i++) {
 		for(int j=0; j<NUM; j++) {
@@ -134,8 +134,10 @@ void main(void) {
 			dist = distance(pos, posParticle);
 			if(dist < minRadius) {
 				dir = normalize(pos - posParticle);
-				f = (minRadius - dist) * mix(extra.r, 1.0, .5) * 20.0;
-				acc += f * dir;
+				if(length(dir) > 0.0) {
+					f = (minRadius - dist) * mix(extra.r, 1.0, .5) * 20.0;
+					acc += f * dir;
+				}
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 
 'use strict';
 
-const fs           = require('fs');
+const fs           = require('fs-extra');
 const watcher      = require('./watch');
 const getExtension = require('./getExtension');
 const getFileName = require('./getFileName');
@@ -171,11 +171,28 @@ function loop() {
 	}
 }
 
-setInterval(loop, 500);
-const watcherAssets = watcher([ ASSETS_PATH ]);
 
-watcherAssets.on('all',(event, file) => {
-	console.log('Event:',event);
-	if(file.indexOf('.DS_Store') > -1) return;
-	needUpdate = true;
-});
+
+const dirPaths = ASSETS_PATH.concat();
+dirPaths.reduce((sequence, dirPath)=> {
+	return sequence.then(()=>{
+		console.log('dirPath', dirPath);
+		return fs.ensureDir(dirPath);
+	}).then(()=> {
+		startWatch();
+	}).catch((err)=> {
+		console.log('Error :', err);
+	})
+}, Promise.resolve());
+
+
+const startWatch = () => {
+	setInterval(loop, 500);
+	const watcherAssets = watcher([ ASSETS_PATH ]);
+
+	watcherAssets.on('all',(event, file) => {
+		console.log('Event:',event);
+		if(file.indexOf('.DS_Store') > -1) return;
+		needUpdate = true;
+	});
+}

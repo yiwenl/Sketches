@@ -19,6 +19,10 @@ class SceneApp extends alfrid.Scene {
 		this.camera.setPerspective(Math.PI/4, GL.aspectRatio, .1, 100);
 		this.orbitalControl.radius.value = 30;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+
+		this.currFrame = 0;
+
+		gui.add(this, '_sendFrame');
 	}
 
 	_initTextures() {
@@ -80,9 +84,13 @@ class SceneApp extends alfrid.Scene {
 		let tmp          = this._fboCurrent;
 		this._fboCurrent = this._fboTarget;
 		this._fboTarget  = tmp;
-
 	}
 
+
+	_sendFrame() {
+		socket.emit('frame', this.currFrame);
+		this.currFrame ++;
+	}
 
 	render() {
 
