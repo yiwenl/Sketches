@@ -14,7 +14,7 @@ const {vec3, mat4} = glm;
 
 //	OSC EMITTER
 
-const PORT_EMIT_OSC = 8909;
+const PORT_EMIT_OSC = 8922;
 const OscEmitter = require("osc-emitter");
 
 let emitter = new OscEmitter();
