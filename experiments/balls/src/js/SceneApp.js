@@ -18,7 +18,6 @@ class SceneApp extends alfrid.Scene {
 		this._count = 0;
 		this.camera.setPerspective(Math.PI/4, GL.aspectRatio, .1, 100);
 		this.orbitalControl.radius.value = 30;
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
 
 		this.currFrame = 0;
 
@@ -27,8 +26,14 @@ class SceneApp extends alfrid.Scene {
 		const arraysize = numParticles * numParticles * 4;
 		this._pixels = new Float32Array(arraysize);
 
-		gui.add(this, '_sendFrame');
-		gui.add(this, '_readPositions');
+		this._isSending = false;
+		this._frameCount = 0;
+
+		// gui.add(this, '_sendFrame');
+		// gui.add(this, '_readPositions');
+		// gui.add(this, 'startTransmit');
+
+		window.addEventListener('resize', ()=>this.resize());
 	}
 
 	_initTextures() {
@@ -94,8 +99,6 @@ class SceneApp extends alfrid.Scene {
 
 
 	_readPositions() {
-		console.log('Read positions');
-
 		this._fboTarget.bind();
 		GL.gl.readPixels(0, 0, params.numParticles, params.numParticles, GL.gl.RGBA, GL.gl.FLOAT, this._pixels);
 		this._fboTarget.unbind();
@@ -116,8 +119,24 @@ class SceneApp extends alfrid.Scene {
 		this.currFrame ++;
 	}
 
-	render() {
 
+	startTransmit() {
+		this._isSending = true;
+		this._frameCount = 0;
+		this.currFrame = 0;
+		const fps = 15;
+		this._interval = setInterval(()=>this.toRender(), 1000/fps);
+	}
+
+
+	render() {
+		if(!this._isSending) {
+			this.toRender();
+		}
+	}
+
+
+	toRender() {
 		this._count ++;
 		if(this._count % params.skipCount == 0) {
 			this._count = 0;
@@ -137,13 +156,18 @@ class SceneApp extends alfrid.Scene {
 
 		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2));
 
-		const size = Math.min(params.numParticles, GL.height/4);
-
-		for(let i=0; i<4; i++) {
-			GL.viewport(0, size * i, size, size);
-			this._bCopy.draw(this._fboCurrent.getTexture(i));
+		this._frameCount ++;
+		const totalFrame = 300;
+		if(this._frameCount == totalFrame) {
+			clearInterval(this._interval);
 		}
 
+		if(this._isSending) {
+			this._sendFrame();
+			alfrid.Scheduler.next(()=> {
+				this._readPositions();	
+			});
+		}
 	}
 
 

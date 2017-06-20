@@ -7,13 +7,13 @@ import Stats from 'stats.js';
 import assets from './asset-list';
 import Assets from './Assets';
 
-const PORT_SOCKET = 9876;
-const TARGET_SERVER_IP = 'localhost:'+PORT_SOCKET;
-const socket = require('./libs/socket.io-client')(TARGET_SERVER_IP);
-window.socket = socket;
+// const PORT_SOCKET = 9876;
+// const TARGET_SERVER_IP = 'localhost:'+PORT_SOCKET;
+// const socket = require('./libs/socket.io-client')(TARGET_SERVER_IP);
+// window.socket = socket;
 
 window.params = {
-	numParticles:10,
+	numParticles:20,
 	skipCount:1,
 	maxRadius: 2.5
 };
@@ -77,15 +77,15 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
-	gui.add(params, 'maxRadius', 0.0, 10.0);
+	// window.gui = new dat.GUI({ width:300 });
+	// gui.add(params, 'maxRadius', 0.0, 10.0);
 
 	//	CREATE SCENE
 	const scene = new SceneApp();
 
 	//	STATS
-	const stats = new Stats();
-	document.body.appendChild(stats.domElement);
-	alfrid.Scheduler.addEF(()=>stats.update());
+	// const stats = new Stats();
+	// document.body.appendChild(stats.domElement);
+	// alfrid.Scheduler.addEF(()=>stats.update());
 
 }
