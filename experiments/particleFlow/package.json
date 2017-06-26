@@ -20,7 +20,7 @@
     "autoprefixer-loader": "^3.2.0",
     "babel": "^6.5.2",
     "babel-cli": "^6.6.5",
-    "babel-core": "6.6.5",
+    "babel-core": "^6.25.0",
     "babel-eslint": "6.0.0-beta.6",
     "babel-loader": "6.2.4",
     "babel-plugin-add-module-exports": "0.1.2",
