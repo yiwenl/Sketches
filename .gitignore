@@ -3,3 +3,4 @@ node_modules
 .sass-cache
 build
 experiments/TextureProj/npm-debug.log
+illum
