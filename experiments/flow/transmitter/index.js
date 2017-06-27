@@ -7,6 +7,8 @@ let io     = require('socket.io')(server);
 
 const glm = require('gl-matrix');
 
+const scale = 100;
+
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 
 const {vec3, mat4} = glm;
@@ -14,7 +16,7 @@ const {vec3, mat4} = glm;
 
 //	OSC EMITTER
 
-const PORT_EMIT_OSC = 8934;
+const PORT_EMIT_OSC = 8927;
 const OscEmitter = require("osc-emitter");
 
 let emitter = new OscEmitter();
@@ -31,6 +33,7 @@ function _onConnected(socket) {
 	socket.on('disconnect', ()=>_onDisconnected() );
 	socket.on('frame', (frame)=>_onFrame(frame));
 	socket.on('position', (positions)=>_onPosition(positions));
+	socket.on('sphere', (position)=>_onSphere(position));
 }
 
 
@@ -50,14 +53,18 @@ function _onFrame(frame) {
 }
 
 
+function _onSphere(position) {
+	// console.log('Sphere : ', getPrec(position[0] * scale), getPrec(position[1] * scale), getPrec(position[2] * scale));
+	emitter.emit('/sphere', getPrec(position[0] * scale), getPrec(position[1] * scale), getPrec(position[2] * scale));
+}
+
 function _onPosition(positions) {
-	const scale = 100;
+	
 	const newPos = positions.map( a => getPrec(a*scale));
 	const strPosition = getArrayString(newPos);
 
-	console.log('/update position');
-
 	emitter.emit('/positions', strPosition);
+	console.log('position Sent');
 }
 
 

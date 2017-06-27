@@ -14,7 +14,7 @@ objNull = 0
 numParticles = 400
 
 
-def initOSCServer(ip='localhost', port=8934) :
+def initOSCServer(ip='localhost', port=8928) :
     print "---server"
     print server;
     global server, st
@@ -40,6 +40,17 @@ def printing_handler(addr, tags, data, source):
 def setOSCHandler(address="/print", hd=printing_handler) :
     server.addMsgHandler(address, hd) # adding our function
     
+def updateSphere(addr, tags, data, source) :
+    center = doc.SearchObject('Center')
+    cx = data[0]
+    cy = data[1]
+    cz = data[2]
+    vv = c4d.Vector(-cx, cy, cz)
+    center.SetRelPos(vv)
+    helpers.addKey(center, c4d.ID_BASEOBJECT_REL_POSITION)
+    
+    print "Sphere:", sphere, v
+   
     
 def updateParticlePosition(addr, tags, data, source) :
     
@@ -47,16 +58,17 @@ def updateParticlePosition(addr, tags, data, source) :
     s = data[0]
     
     positions = [float(x) for x in s.split()]
+    ss = 0
     
     for i in range(0, numParticles) :
         x = positions[i*3 + 0]
         y = positions[i*3 + 1]
         z = positions[i*3 + 2]
         
-        sphere = spheres[i]
+        ss = spheres[i]
         v = c4d.Vector(-x, y, z)
-        sphere.SetRelPos(v)
-        helpers.addKey(sphere, c4d.ID_BASEOBJECT_REL_POSITION)
+        ss.SetRelPos(v)
+        helpers.addKey(ss, c4d.ID_BASEOBJECT_REL_POSITION)
     
     c4d.EventAdd()
     
@@ -87,11 +99,9 @@ def main():
     
     if needToAdd :
         doc.InsertObject(objNull)
-        
-        
-    initOSCServer()
-    
-    setOSCHandler('/positions', updateParticlePosition)
-    setOSCHandler('/update', onUpdate)
-    setOSCHandler('/frame', setFrame)
-    startOSCServer()
+        initOSCServer()
+        setOSCHandler('/positions', updateParticlePosition)
+        setOSCHandler('/update', onUpdate)
+        setOSCHandler('/frame', setFrame)
+        setOSCHandler('/sphere', updateSphere)
+        startOSCServer() 

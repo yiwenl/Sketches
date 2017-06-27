@@ -94,7 +94,27 @@ class SceneApp extends alfrid.Scene {
 		GL.setMatrices(this.camera);
 	}
 
+	_sendFrame() {
+		console.log('Send Frame', this.currFrame);
+		socket.emit('frame', this.currFrame);
+		this.currFrame ++;
+
+		// alfrid.Scheduler.next(()=> this._sendCenter());
+		alfrid.Scheduler.delay(()=> this._sendCenter(), null, 100);
+	}
+
+
+	_sendCenter() {
+		console.log('Send Center');
+		socket.emit('sphere', [this._hit[0], this._hit[1], this._hit[2]]);
+
+		// alfrid.Scheduler.next(()=> this._readPositions());
+		alfrid.Scheduler.delay(()=> this._readPositions(), null, 100);
+	}
+
+
 	_readPositions() {
+		console.log('Send Position');
 		this._fboTarget.bind();
 		GL.gl.readPixels(0, 0, params.numParticles, params.numParticles, GL.gl.RGBA, GL.gl.FLOAT, this._pixels);
 		this._fboTarget.unbind();
@@ -107,12 +127,9 @@ class SceneApp extends alfrid.Scene {
 		}
 
 		socket.emit('position', positions);
-	}
 
-
-	_sendFrame() {
-		socket.emit('frame', this.currFrame);
-		this.currFrame ++;
+		// alfrid.Scheduler.next(() => this._sendCenter());
+		alfrid.Scheduler.delay(()=>this.toRender(), null, 1000);
 	}
 
 
@@ -120,8 +137,10 @@ class SceneApp extends alfrid.Scene {
 		this._isSending = true;
 		this._frameCount = 0;
 		this.currFrame = 0;
-		const fps = 5;
-		this._interval = setInterval(()=>this.toRender(), 1000/fps);
+		const fps = 2;
+		// this._interval = setInterval(()=>this.toRender(), 1000/fps);
+
+		this.toRender();
 	}
 
 	_onMove(e) {
@@ -225,15 +244,12 @@ class SceneApp extends alfrid.Scene {
 
 		this._frameCount ++;
 		const totalFrame = 300;
-		if(this._frameCount == totalFrame) {
-			clearInterval(this._interval);
-		}
+		
 
 		if(this._isSending) {
-			this._sendFrame();
-			alfrid.Scheduler.next(()=> {
-				this._readPositions();	
-			});
+			if(this._frameCount <= totalFrame) {
+				this._sendFrame();
+			}
 		}
 	}
 
