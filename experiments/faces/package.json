@@ -11,7 +11,7 @@
     "shader": "node ./tasks/shader-watcher.js",
     "shader:test": "node ./tasks/test-shader.js",
     "uniforms": "node ./tasks/uniforms-checker.js",
-    "dev": "NODE_ENV=development webpack-dev-server --hot --inline --host 0.0.0.0 --colors --error-details --content-base dist --port 8081 & node ./tasks/watch-asset.js & node ./tasks/shader-watcher.js",
+    "dev": "NODE_ENV=development webpack-dev-server --hot --inline --https --host 0.0.0.0 --colors --error-details --content-base dist --port 8081 & node ./tasks/watch-asset.js & node ./tasks/shader-watcher.js",
     "build": "NODE_ENV=production webpack --progress --colors --error-details"
   },
   "repository": {},
