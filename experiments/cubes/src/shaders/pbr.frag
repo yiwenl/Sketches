@@ -23,6 +23,7 @@ varying vec3		vWsNormal;
 varying vec3		vWsPosition;
 varying vec2 		vTextureCoord;
 varying float 		vDist;
+varying float 		vNoise;
 
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.1415926535897932384626433832795
@@ -81,7 +82,7 @@ vec3 getPbr(vec3 N, vec3 V, vec3 baseColor, float roughness, float metallic, flo
 	float mip			= numMips - 1.0 + log2(roughness);
 	vec3 lookup			= -reflect( V, N );
 	lookup				= fix_cube_lookup( lookup, 512.0, mip );
-	vec3 radiance		= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( 2.2 ) );
+	vec3 radiance		= pow( textureCubeLodEXT( uRadianceMap, lookup, mip ).rgb, vec3( uGamma ) );
 	vec3 irradiance		= pow( textureCube( uIrradianceMap, N ).rgb, vec3( 1 ) );
 	
 	// get the approximate reflectance
@@ -101,7 +102,8 @@ void main() {
 	vec3 V 				= normalize( vEyePosition );
 	
 	float metallic 		= min(uMetallic+vDist*2.0, 1.0);
-	vec3 color 			= getPbr(N, V, uBaseColor, uRoughness, metallic, uSpecular);
+
+	vec3 color 			= getPbr(N, V, uBaseColor, 1.0 - vNoise, vNoise, uSpecular);
 
 	// apply the tone-mapping
 	color				= Uncharted2Tonemap( color * uExposure );

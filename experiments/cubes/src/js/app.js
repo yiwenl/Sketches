@@ -9,7 +9,7 @@ const GL = alfrid.GL;
 window.params = {
 	gamma:2.2,
 	exposure:5,
-	numCubes:30,
+	numCubes:20,
 	cubeSize:0.15,
 };
 
@@ -78,15 +78,17 @@ function _init3D() {
 	canvas.className = 'Main-Canvas';
 	document.body.appendChild(canvas);
 
+	console.log('here');
+
 	//	INIT 3D TOOL
-	GL.init(canvas);
+	GL.init(canvas, {ignoreWebgl2:true});
 
 	//	INIT DAT-GUI
-	// window.gui = new dat.GUI({ width:300 });
+	window.gui = new dat.GUI({ width:300 });
 
 	//	CREATE SCENE
 	let scene = new SceneApp();
 	
-	// gui.add(params, 'gamma', 1, 5);
-	// gui.add(params, 'exposure', 1, 25);
+	gui.add(params, 'gamma', 1, 5);
+	gui.add(params, 'exposure', 1, 25);
 }

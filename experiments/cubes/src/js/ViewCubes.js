@@ -58,8 +58,7 @@ class ViewCubes extends alfrid.View {
 		this.roughness = .5;
 		this.specular = 0;
 		this.metallic = 0.5;
-		this.baseColor = [1, 1, 1];
-
+		this.baseColor = [1, 0, 0];
 	}
 
 
@@ -88,7 +87,7 @@ class ViewCubes extends alfrid.View {
 		this.shader.uniform("uTime", "float", this.time);
 		this.shader.uniform("uHit", "vec3", hit);
 
-		GL.drawInstance(this.mesh);
+		GL.draw(this.mesh);
 	}
 
 

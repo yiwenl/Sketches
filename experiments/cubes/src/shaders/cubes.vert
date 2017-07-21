@@ -24,6 +24,7 @@ varying vec3 vWsPosition;
 varying vec3 vEyePosition;
 varying vec3 vWsNormal;
 varying float vDist;
+varying float vNoise;
 
 
 vec4 permute(vec4 x) {  return mod(((x*34.0)+1.0)*x, 289.0);    }
@@ -105,6 +106,7 @@ void main(void) {
     vDist                   = tmp;
     noise                   -= tmp * 2.0;
     noise                   = max(noise, 0.0);
+    vNoise                  = noise;
 
 
 	vec3 position 			= aVertexPosition * noise + aOffset;
