@@ -12,6 +12,7 @@ uniform mat4 uShadowMatrix;
 uniform vec3 uPosition;
 
 varying vec2 vTextureCoord;
+varying vec2 vScreenCoord;
 varying vec3 vNormal;
 varying vec4 vShadowCoord;
 
@@ -27,4 +28,5 @@ void main(void) {
 
     vShadowCoord  = ( biasMatrix * uShadowMatrix ) * vec4(position, 1.0);;
     vNormal = aNormal;
+    vScreenCoord = gl_Position.xy;
 }

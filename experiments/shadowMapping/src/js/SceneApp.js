@@ -7,7 +7,7 @@ import vs from 'shaders/basic.vert';
 import vsShadow from 'shaders/shadow.vert';
 import fs from 'shaders/shadow.frag';
 
-const POINT_SOURCE = [0, 0, 5];
+const POINT_SOURCE = [0, 0, 4];
 const RAD = Math.PI / 180;
 
 class SceneApp extends Scene {
@@ -19,7 +19,7 @@ class SceneApp extends Scene {
 
 
 		this._cameraSource = new alfrid.CameraPerspective();
-		this._cameraSource.setPerspective(45 * RAD, 1, .5, 100);
+		this._cameraSource.setPerspective(45 * RAD, 1, 1, 100);
 		this._cameraSource.lookAt(POINT_SOURCE, [0, 0, 0]);
 
 		this.shadowMatrix = mat4.create();

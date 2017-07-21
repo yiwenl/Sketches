@@ -4,6 +4,7 @@
 
 precision highp float;
 varying vec2 vTextureCoord;
+varying vec2 vScreenCoord;
 varying vec3 vNormal;
 varying vec4 vShadowCoord;
 uniform sampler2D textureDepth;
@@ -27,6 +28,11 @@ float pcfSoftShadow(sampler2D shadowMap) {
 void main(void) {
 	float pcf    = pcfSoftShadow(textureDepth);
 
+	float d = texture2D( textureDepth, vShadowCoord.xy ).r;
+
     gl_FragColor = vec4(vec3(pcf), 1.0);
-    gl_FragColor = vec4(vShadowCoord.rgb, 1.0);
+    gl_FragColor = vec4(vShadowCoord.rg/vShadowCoord.w, 0.0, 1.0);
+    // gl_FragColor = vec4(vec3(d), 1.0);
+
+    // gl_FragColor = texture2D(textureDepth, vScreenCoord);
 }
