@@ -4,6 +4,7 @@ import alfrid, { Scene, GL } from 'alfrid';
 // import ViewObjModel from './ViewObjModel';
 import Assets from './Assets';
 import vs from 'shaders/basic.vert';
+import vsShadow from 'shaders/shadow.vert';
 import fs from 'shaders/shadow.frag';
 
 const POINT_SOURCE = [0, 0, 5];
@@ -21,11 +22,14 @@ class SceneApp extends Scene {
 		this._cameraSource.setPerspective(45 * RAD, 1, .5, 100);
 		this._cameraSource.lookAt(POINT_SOURCE, [0, 0, 0]);
 
+		this.shadowMatrix = mat4.create();
+		mat4.multiply(this.shadowMatrix, this._cameraSource.projection, this._cameraSource.viewMatrix);
+
 	}
 
 	_initTextures() {
 		console.log('init textures');
-		this.fboDepth = new alfrid.FrameBuffer(GL.width, GL.height);
+		this.fboDepth = new alfrid.FrameBuffer(1024, 1024);
 	}
 
 
@@ -41,7 +45,7 @@ class SceneApp extends Scene {
 
 
 		this._shaderDepth = new alfrid.GLShader(vs);
-		this._shaderShadow = new alfrid.GLShader(vs, fs);
+		this._shaderShadow = new alfrid.GLShader(vsShadow, fs);
 		this._meshCube = alfrid.Geom.cube(1, 1, 1);
 		this._meshSphere = alfrid.Geom.sphere(.5, 24);
 	}
@@ -78,6 +82,13 @@ class SceneApp extends Scene {
 		const shader = isShadow ? this._shaderShadow : this._shaderDepth;
 
 		shader.bind();
+
+		if(isShadow) {
+			shader.uniform("uShadowMatrix", "uniformMatrix4fv", this.shadowMatrix);
+			shader.uniform("textureDepth", "uniform1i", 0);
+			texture.bind(0);
+		}
+
 		shader.uniform("uPosition", "vec3", [-0.25, 0, -1]);
 		GL.draw(this._meshCube);
 		shader.uniform("uPosition", "vec3", [0.25, 0.25, 0.5]);
