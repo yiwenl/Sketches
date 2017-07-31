@@ -11,11 +11,11 @@ window.params = {
 	skipCount: 2,
 	maxRadius: 2,
 	inner:{
-		numParticles:50,
+		numParticles:32,
 		numSeg:10
 	},
 	outer:{
-		numParticles:100,
+		numParticles:64,
 		numSeg:10
 	}
 };
@@ -84,8 +84,8 @@ function _init3D() {
 	const scene = new SceneApp();
 
 	//	STATS
-	const stats = new Stats();
-	document.body.appendChild(stats.domElement);
-	alfrid.Scheduler.addEF(()=>stats.update());
+	// const stats = new Stats();
+	// document.body.appendChild(stats.domElement);
+	// alfrid.Scheduler.addEF(()=>stats.update());
 
 }

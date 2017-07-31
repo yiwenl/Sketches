@@ -173,8 +173,15 @@ const ExpModel = [
 		cover:'assets/img/coverSketchPlates.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/maelstrom/dist/index.html',
 		title:'Maelstrom'
+	},
+	{
+		cover:'assets/img/coverSketchMaelstrom.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/blackHole/dist/index.html',
+		title:'Maelstrom'
 	}
 ]
+
+
 
 module.exports = ExpModel;
 // export default ExpModel;

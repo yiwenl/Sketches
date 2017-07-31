@@ -5,6 +5,7 @@
 precision highp float;
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
+varying vec3 vFaceNoraml;
 uniform float isBlack;
 // uniform sampler2D texture;
 
@@ -23,18 +24,18 @@ void main(void) {
 	vec3 N = normalize(vec3(vTextureCoord, .5));
 
 	float d = diffuse(N, LIGHT);
-	float dFace = diffuse(vNormal, LIGHT);
+	float dFace = diffuse(vFaceNoraml, LIGHT);
 	if(isBlack > 0.0) {
-		// d = 0.3 - d * 0.1;
-		d *= 0.22;
-		d += dFace * 0.1;
-		// d = dFace;
+		d *= 0.05;
+		d += dFace * 0.05;
 	} else {
 		d = mix(d, 0.0, mix(vTextureCoord.x, 0.0, .825));
-		// d *= vTextureCoord.x;
 	}
 	vec3 color = vec3(d);
 	gl_FragColor = vec4(color, 1.0);
 
+	// if(isBlack > 0.0) {
+	// 	gl_FragColor.rgb = vFaceNoraml * .5 + .5;
+	// }
 	// gl_FragColor = vec4(1.0);
 }

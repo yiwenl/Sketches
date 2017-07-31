@@ -18,6 +18,7 @@ uniform float uWidth;
 
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
+varying vec3 vFaceNoraml;
 
 mat4 rotationMatrix(vec3 axis, float angle) {
     axis = normalize(axis);
@@ -72,5 +73,6 @@ void main(void) {
 
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
     vTextureCoord = aTextureCoord;
+    vFaceNoraml = rotate(vec3(1.0, 0.0, 0.0), axis, theta);
     vNormal = rotate(aNormal, axis, theta);
 }
