@@ -4,6 +4,7 @@
 
 precision highp float;
 varying vec2 vTextureCoord;
+varying vec3 vNormal;
 uniform float isBlack;
 // uniform sampler2D texture;
 
@@ -16,13 +17,18 @@ vec3 diffuse(vec3 N, vec3 L, vec3 C) {
 	return diffuse(N, L) * C;
 }
 
+const vec3 LIGHT = vec3(1.0);
+
 void main(void) {
 	vec3 N = normalize(vec3(vTextureCoord, .5));
 
-	float d = diffuse(N, vec3(1.0));
+	float d = diffuse(N, LIGHT);
+	float dFace = diffuse(vNormal, LIGHT);
 	if(isBlack > 0.0) {
 		// d = 0.3 - d * 0.1;
-		d *= 0.12;
+		d *= 0.22;
+		d += dFace * 0.1;
+		// d = dFace;
 	} else {
 		d = mix(d, 0.0, mix(vTextureCoord.x, 0.0, .825));
 		// d *= vTextureCoord.x;

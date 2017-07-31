@@ -72,5 +72,5 @@ void main(void) {
 
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
     vTextureCoord = aTextureCoord;
-    vNormal = aNormal;
+    vNormal = rotate(aNormal, axis, theta);
 }

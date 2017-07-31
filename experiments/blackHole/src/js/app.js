@@ -15,7 +15,7 @@ window.params = {
 		numSeg:10
 	},
 	outer:{
-		numParticles:128,
+		numParticles:100,
 		numSeg:10
 	}
 };

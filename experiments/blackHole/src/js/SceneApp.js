@@ -24,10 +24,12 @@ class SceneApp extends alfrid.Scene {
 		this._count = 0;
 		this._countOuter = 1;
 		const RAD = Math.PI/180;
-		this.camera.setPerspective(60 * RAD, GL.aspectRatio, .1, 100);
+		this.camera.setPerspective(55 * RAD, GL.aspectRatio, .1, 100);
 		this.orbitalControl.radius.value = 14;
+		this.orbitalControl.radius.limit(10, 20);
+		this.orbitalControl.center[1] = 1;
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.35;
-		this.orbitalControl.rx.limit(0.2, 1.5);
+		this.orbitalControl.rx.limit(0.2, 1.0);
 	}
 
 	_initTextures() {
@@ -53,7 +55,7 @@ class SceneApp extends alfrid.Scene {
 		this._vTestOuter = new ViewTest(params.outer.numParticles);
 		this._bDots = new alfrid.BatchDotsPlane();
 
-		this._innerSphere = new Simulation(this, fsInner, params.inner.numParticles, false);
+		this._innerSphere = new Simulation(this, fsInner, params.inner.numParticles/2, false);
 		this._outerSphere = new Simulation(this, fsOuter, params.outer.numParticles, true);
 
 	}
