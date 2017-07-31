@@ -4,35 +4,28 @@
 
 precision highp float;
 varying vec2 vTextureCoord;
-varying vec2 vScreenCoord;
 varying vec3 vNormal;
 varying vec4 vShadowCoord;
 uniform sampler2D textureDepth;
-
-float pcfSoftShadow(sampler2D shadowMap) {
-	const float shadowMapSize  = 1024.0;
-	const float shadowBias     = .0001;
-	float shadow = 0.0;
-	float texelSizeX =  1.0 / shadowMapSize;
-	float texelSizeY =  1.0 / shadowMapSize;
-	vec4 shadowCoord	= vShadowCoord / vShadowCoord.w;
-
-	float visibility = 1.0;
-	if ( texture2D( textureDepth, vShadowCoord.xy ).r  <  vShadowCoord.z - shadowBias){
-	    visibility = 0.5;
-	}
-
-	return visibility;
-}
+uniform sampler2D textureMap;
+uniform float uBias;
 
 void main(void) {
-	float pcf    = pcfSoftShadow(textureDepth);
+	vec4 shadowCoord = vShadowCoord / vShadowCoord.w;
+	
+	vec2 uv = shadowCoord.xy;
+    float d = texture2D(textureDepth, uv).r;
 
-	float d = texture2D( textureDepth, vShadowCoord.xy ).r;
+    float visibility = 1.0;
+    if(d < shadowCoord.z - uBias) {
+    	visibility = 0.0;
+    }
 
-    gl_FragColor = vec4(vec3(pcf), 1.0);
-    gl_FragColor = vec4(vShadowCoord.rg/vShadowCoord.w, 0.0, 1.0);
-    // gl_FragColor = vec4(vec3(d), 1.0);
+    vec3 baseColor = vec3(.5);
+    vec3 colorMap = texture2D(textureMap, uv).rgb;
 
-    // gl_FragColor = texture2D(textureDepth, vScreenCoord);
+    vec3 color = mix(baseColor, colorMap, visibility);
+
+    gl_FragColor = vec4(vec3(visibility), 1.0);
+    gl_FragColor = vec4(color, 1.0);
 }
