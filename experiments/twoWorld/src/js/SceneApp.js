@@ -149,7 +149,7 @@ class SceneApp extends Scene {
 		// this._worldGrey.render();
 
 		this.fbo0.bind();
-		GL.clear(0, 0, 0, 0);
+		GL.clear(1, 1, 1, 1);
 		this._worldGrey.render();
 		this.fbo0.unbind();
 
