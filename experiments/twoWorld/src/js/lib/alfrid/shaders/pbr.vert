@@ -1,6 +1,6 @@
 // reflection.vert
 
-#define SHADER_NAME REFLECTION_VERTEX
+#define SHADER_NAME PBR_VERTEX
 
 precision highp float;
 attribute vec3 aVertexPosition;
@@ -14,8 +14,7 @@ uniform mat3 uNormalMatrix;
 uniform mat3 uModelViewMatrixInverse;
 
 uniform vec3 uPosition;
-uniform float uScale;
-uniform float uRotation;
+uniform vec3 uScale;
 
 varying vec2 vTextureCoord;
 
@@ -25,24 +24,13 @@ varying vec3 vWsPosition;
 varying vec3 vEyePosition;
 varying vec3 vWsNormal;
 
-vec2 rotate(vec2 v, float a) {
-	float s = sin(a);
-	float c = cos(a);
-	mat2 m = mat2(c, -s, s, c);
-	return m * v;
-}
-
 
 void main(void) {
-	vec3 position 			= aVertexPosition * uScale;
-	position.xz 			= rotate(position.xz, uRotation);
-	position 				+= uPosition;
+	vec3 position 			= aVertexPosition * uScale + uPosition;
 	vec4 worldSpacePosition	= uModelMatrix * vec4(position, 1.0);
     vec4 viewSpacePosition	= uViewMatrix * worldSpacePosition;
 	
-	vec3 normal  			= aNormal;
-	normal.xz 				= rotate(normal.xz, uRotation);
-    vNormal					= uNormalMatrix * normal;
+    vNormal					= uNormalMatrix * aNormal;
     vPosition				= viewSpacePosition.xyz;
 	vWsPosition				= worldSpacePosition.xyz;
 	

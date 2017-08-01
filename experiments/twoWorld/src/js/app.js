@@ -97,6 +97,9 @@ function _init3D() {
 	//	INIT 3D TOOL
 	GL.init(canvas, {ignoreWebgl2:true});
 	GL.enableAlphaBlending();
+	if(GL.isMobile) {
+		params.numParticles /= 2;
+	}
 
 	//	INIT ASSETS
 	Assets.init();

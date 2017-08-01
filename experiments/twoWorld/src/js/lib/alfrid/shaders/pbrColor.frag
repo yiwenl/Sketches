@@ -1,4 +1,6 @@
-// pbr.frag
+// pbrColor.frag
+
+#define SHADER_NAME PBR_COLOR_FRAG
 
 #extension GL_EXT_shader_texture_lod : enable
 
@@ -10,7 +12,6 @@ uniform samplerCube uIrradianceMap;
 
 uniform vec3		uBaseColor;
 uniform float		uRoughness;
-uniform float		uRoughness4;
 uniform float		uMetallic;
 uniform float		uSpecular;
 
@@ -117,3 +118,4 @@ void main() {
     gl_FragColor		= vec4( color, 1.0 );
 
 }
+

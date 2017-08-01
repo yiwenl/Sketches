@@ -74,6 +74,7 @@ module.exports = {
 		fallback: path.join(__dirname, "node_modules"),
 		alias: {
 			'shaders' : __dirname + "/src/shaders",
+			'alfrid'  : __dirname + "/src/js/lib/alfrid.js",
 			'sono'    : __dirname + "/src/js/lib/sono.js"
 		}
 	},
