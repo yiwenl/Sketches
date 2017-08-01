@@ -17,7 +17,10 @@ if(document.body) {
 
 window.params = {
 	gamma:2.2,
-	exposure:5
+	exposure:5,
+	numParticles:256,
+	skipCount:10,
+	maxRadius:2.5
 };
 
 function _init() {

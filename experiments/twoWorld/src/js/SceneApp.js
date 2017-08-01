@@ -1,13 +1,8 @@
 // SceneApp.js
 
 import alfrid, { Scene, GL } from 'alfrid';
-import ViewObjModel from './ViewObjModel';
 import Assets from './Assets';
 import VRUtils from './utils/VRUtils';
-import ViewBalls from './ViewBalls';
-import ViewBox from './ViewBox';
-import ViewBoxMap from './ViewBoxMap';
-import ViewSphere from './ViewSphere';
 import ViewCompose from './ViewCompose';
 import ViewTerrain from './ViewTerrain';
 import ViewTree from './ViewTree';
@@ -61,26 +56,13 @@ class SceneApp extends Scene {
 		this._bCopy = new alfrid.BatchCopy();
 		this._bAxis = new alfrid.BatchAxis();
 
-		this._vModel0 = new ViewObjModel();
-		this._vModel1 = new ViewObjModel();
-
-		this._vModel0.scale = this._vModel1.scale = 0.5;
-		const r = 2;
-		this._vModel0.position = [0, 0, -r];
-		this._vModel1.position = [0, 0,  r];
-		this._vModel1.roughness = .5;
-		this._vModel1.metallic = 1;
-		this._vModel1.rotation = Math.PI;
-
-		this._vBalls = new ViewBalls();
-		this._vBox = new ViewBox();
-		this._vBoxMap = new ViewBoxMap();
 		this._vTree = new ViewTree();
-		this._vSphere = new ViewSphere();
 		this._vTerrain = new ViewTerrain();
 		this._vCompose = new ViewCompose();
 
 		this._worldGrey = new WorldGrey();
+		this._worldMap = new WorldMap();
+		this._worldColor = new WorldColor(this);
 	}
 
 
@@ -144,9 +126,13 @@ class SceneApp extends Scene {
 
 	renderScene() {
 		GL.clear(0, 0, 0, 0);
-		this.renderMap();
 
-		// this._worldGrey.render();
+		this._worldColor.update();
+
+		this.fboMap.bind();
+		GL.clear(0, 0, 0, 0);
+		this._worldMap.render();
+		this.fboMap.unbind();
 
 		this.fbo0.bind();
 		GL.clear(1, 1, 1, 1);
@@ -155,18 +141,14 @@ class SceneApp extends Scene {
 
 		this.fbo1.bind();
 		GL.clear(0, 0, 0, 0);
-		this._vModel0.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('aomap'));
 		this._vTerrain.render();
 		this._vTree.render();
+		this._worldColor.render();
 
 		this.fbo1.unbind();
 
-
-
 		this._vCompose.render(this.fbo0.getTexture(), this.fbo1.getTexture(), this.fboMap.getTexture());
 		
-		// this._vModel1.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('aomap'));
-
 		GL.disable(GL.DEPTH_TEST);
 		const s = 200;
 		GL.viewport(0, 0, s, s/GL.aspectRatio);
@@ -177,45 +159,6 @@ class SceneApp extends Scene {
 		this._bCopy.draw(this.fboMap.getTexture());
 		GL.enable(GL.DEPTH_TEST);
 	}
-
-
-	renderMap() {
-		this.fboMap.bind();
-		GL.clear(0, 0, 0, 0);
-		this._vSphere.render();
-		this._vBalls.renderColor();
-
-		GL.gl.cullFace(GL.gl.FRONT);
-		this._vBoxMap.color = [1, 0, 0];
-		this._vBoxMap.render();
-		GL.gl.cullFace(GL.gl.BACK);
-		this._vBoxMap.color = [0, 0, 1];
-		this._vBoxMap.render();
-		
-		this.fboMap.unbind();
-	}
-
-
-
-// sudo code
-
-/*
-
-	render map : 
-
-	render sphere in red
-	render box invert in blue
-	render box normal in red
-	render all other meshes in red
-
-
-	render normal scene
-
-	render invert scene
-
-
-
-*/
 
 
 	resize() {

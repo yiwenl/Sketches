@@ -6,9 +6,6 @@ import Assets from './Assets';
 import vs from 'shaders/outline.vert';
 
 class WorldGrey extends World {
-	constructor() {
-		super();
-	}
 
 	_init() {
 		this.shaderNormal = new GLShader(null, alfrid.ShaderLibs.simpleColorFrag);
