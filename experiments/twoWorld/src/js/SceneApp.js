@@ -9,6 +9,12 @@ import ViewBox from './ViewBox';
 import ViewBoxMap from './ViewBoxMap';
 import ViewSphere from './ViewSphere';
 import ViewCompose from './ViewCompose';
+import ViewTerrain from './ViewTerrain';
+import ViewTree from './ViewTree';
+
+import WorldGrey from './WorldGrey';
+import WorldColor from './WorldColor';
+import WorldMap from './WorldMap';
 
 const scissor = function(x, y, w, h) {
 	GL.scissor(x, y, w, h);
@@ -32,11 +38,13 @@ class SceneApp extends Scene {
 		console.log('Has VR :', VRUtils.hasVR);
 
 		if(VRUtils.canPresent) {
-			mat4.translate(this._modelMatrix, this._modelMatrix, vec3.fromValues(0, 0, -3));
+			// mat4.translate(this._modelMatrix, this._modelMatrix, vec3.fromValues(0, 0, -3));
 			GL.enable(GL.SCISSOR_TEST);
 			this.toRender();
 
 			this.resize();
+		} else {
+			mat4.translate(this._modelMatrix, this._modelMatrix, vec3.fromValues(0, -1.83, 0));
 		}
 	}
 
@@ -67,8 +75,12 @@ class SceneApp extends Scene {
 		this._vBalls = new ViewBalls();
 		this._vBox = new ViewBox();
 		this._vBoxMap = new ViewBoxMap();
+		this._vTree = new ViewTree();
 		this._vSphere = new ViewSphere();
+		this._vTerrain = new ViewTerrain();
 		this._vCompose = new ViewCompose();
+
+		this._worldGrey = new WorldGrey();
 	}
 
 
@@ -134,15 +146,19 @@ class SceneApp extends Scene {
 		GL.clear(0, 0, 0, 0);
 		this.renderMap();
 
+		// this._worldGrey.render();
+
 		this.fbo0.bind();
-		GL.clear(0, 0, 0, 1);
-		this._vBalls.render();
-		this._vBox.render();
+		GL.clear(0, 0, 0, 0);
+		this._worldGrey.render();
 		this.fbo0.unbind();
 
 		this.fbo1.bind();
 		GL.clear(0, 0, 0, 0);
 		this._vModel0.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('aomap'));
+		this._vTerrain.render();
+		this._vTree.render();
+
 		this.fbo1.unbind();
 
 
@@ -178,6 +194,7 @@ class SceneApp extends Scene {
 		
 		this.fboMap.unbind();
 	}
+
 
 
 // sudo code

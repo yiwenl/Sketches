@@ -2,6 +2,8 @@
 const assetsToLoad = [
 	{"id":"box","url":"assets/obj/box.obj","type":"text"},
 	{"id":"model","url":"assets/obj/model.obj","type":"text"},
+	{"id":"terrain","url":"assets/obj/terrain.obj","type":"text"},
+	{"id":"tree","url":"assets/obj/tree.obj","type":"text"},
 	{"id":"aomap","url":"assets/img/aomap.jpg","type":"jpg"},
 	{"id":"irr_negx","url":"assets/img/irr_negx.hdr","type":"binary"},
 	{"id":"irr_negy","url":"assets/img/irr_negy.hdr","type":"binary"},
