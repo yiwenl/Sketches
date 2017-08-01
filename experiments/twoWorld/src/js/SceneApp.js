@@ -150,6 +150,7 @@ class SceneApp extends Scene {
 		this._vCompose.render(this.fbo0.getTexture(), this.fbo1.getTexture(), this.fboMap.getTexture());
 		
 		GL.disable(GL.DEPTH_TEST);
+		this._bCopy.draw(this.fbo1.getTexture());
 		const s = 200;
 		GL.viewport(0, 0, s, s/GL.aspectRatio);
 		this._bCopy.draw(this.fbo0.getTexture());
@@ -157,7 +158,14 @@ class SceneApp extends Scene {
 		this._bCopy.draw(this.fbo1.getTexture());
 		GL.viewport(s * 2, 0, s, s/GL.aspectRatio);
 		this._bCopy.draw(this.fboMap.getTexture());
+
+
+		
+
 		GL.enable(GL.DEPTH_TEST);
+
+
+
 	}
 
 

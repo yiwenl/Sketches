@@ -25,7 +25,7 @@ class WorldColor extends World {
 		const o = {
 			minFilter:GL.NEAREST,
 			magFilter:GL.NEAREST,
-			type:GL.FLOAT
+			type:GL.HALF_FLOAT
 		};
 
 		this._bCopy = new alfrid.BatchCopy();
