@@ -23,7 +23,7 @@ class SceneApp extends alfrid.Scene {
 
 		//	camera shadow
 		this._cameraLight = new alfrid.CameraOrtho();
-		const size = 10;
+		const size = 15;
 		this._cameraLight.ortho(-size, size, size, -size, 2, 50);
 		this._cameraLight.lookAt(params.light, [0, 0, 0]);
 		this._biasMatrix = mat4.fromValues(
@@ -146,8 +146,8 @@ class SceneApp extends alfrid.Scene {
 		// 	this._bCopy.draw(this._fboCurrent.getTexture(i));
 		// }
 
-		GL.viewport(0, 0, size, size);
-		this._bCopy.draw(this._fboDepth.getDepthTexture());
+		// GL.viewport(0, 0, size, size);
+		// this._bCopy.draw(this._fboDepth.getDepthTexture());
 	}
 
 	renderShadowMap() {

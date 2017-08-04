@@ -12,9 +12,9 @@ class ViewFloor extends alfrid.View {
 
 
 	_init() {
-		const s = 20;
+		const s = 40;
 		this.mesh = alfrid.Geom.plane(s, s, 1, 'xz');
-		this.position = [0, -10, 0];
+		this.position = [0, -15, 0];
 	}
 
 

@@ -119,14 +119,14 @@ void main(void) {
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
 	vec3 orgPos     = texture2D(textureOrgPos, vTextureCoord).rgb;
-	float posOffset = (0.5 + extra.r * 0.2) * .25;
-	vec3 acc        = curlNoise(pos * posOffset + time * .3);
+	float posOffset = mix(extra.r, 1.0, 0.2) * .1;
+	vec3 acc        = curlNoise(pos * posOffset + time * .1);
 	
 	vel += acc * .02;
 
 	float dist = length(pos);
 	if(dist > maxRadius) {
-		float f = (dist - maxRadius) * .005;
+		float f = (dist - maxRadius) * .002;
 		vel -= normalize(pos) * f;
 	}
 
