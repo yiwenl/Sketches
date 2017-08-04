@@ -20,7 +20,8 @@ window.params = {
 	exposure:5,
 	numParticles:256,
 	skipCount:10,
-	maxRadius:2.5
+	maxRadius:2.5,
+	debug:false
 };
 
 function _init() {
@@ -105,7 +106,8 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	// window.gui = new dat.GUI({ width:300 });
+	window.gui = new dat.GUI({ width:300 });
+	gui.add(params, 'debug');
 
 	//	CREATE SCENE
 	scene = new SceneApp();

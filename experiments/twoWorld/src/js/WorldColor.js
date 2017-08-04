@@ -8,6 +8,10 @@ import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 
+import ViewDome from './ViewDome';
+import ViewTree from './ViewTree';
+import ViewTerrain from './ViewTerrain';
+
 class WorldColor extends World {
 
 	constructor(mScene) {
@@ -57,6 +61,12 @@ class WorldColor extends World {
 		this._fboTargetPos.unbind();
 
 		GL.setMatrices(this.camera);
+
+
+		//	Views
+		this._vTree = new ViewTree();
+		this._vTerrain = new ViewTerrain();
+		this._vDome = new ViewDome();
 	}
 
 	updateFbo() {
@@ -95,7 +105,10 @@ class WorldColor extends World {
 	render() {
 		let p = this._count / params.skipCount;
 
-		this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
+		this._vTree.render();
+		this._vTerrain.render();
+		this._vDome.render();
+		// this._vRender.render(this._fboTargetPos.getTexture(), this._fboCurrentPos.getTexture(), p, this._fboExtra.getTexture());
 
 	}
 }

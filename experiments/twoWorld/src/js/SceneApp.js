@@ -4,8 +4,6 @@ import alfrid, { Scene, GL } from 'alfrid';
 import Assets from './Assets';
 import VRUtils from './utils/VRUtils';
 import ViewCompose from './ViewCompose';
-import ViewTerrain from './ViewTerrain';
-import ViewTree from './ViewTree';
 
 import WorldGrey from './WorldGrey';
 import WorldColor from './WorldColor';
@@ -21,16 +19,17 @@ class SceneApp extends Scene {
 		super();
 		
 		//	ORBITAL CONTROL
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.2;
-		this.orbitalControl.radius.value = 5;
-
+		this.orbitalControl.radius.value = 0.005;
+		const easing = 0.02;
+		this.x = new alfrid.EaseNumber(0, easing);
+		this.z = new alfrid.EaseNumber(-5, easing);
 
 		//	VR CAMERA
 		this.cameraVR = new alfrid.Camera();
 
 		//	MODEL MATRIX
 		this._modelMatrix = mat4.create();
-		console.log('Has VR :', VRUtils.hasVR);
+		this._identiyMatrix = mat4.create();
 
 		if(VRUtils.canPresent) {
 			// mat4.translate(this._modelMatrix, this._modelMatrix, vec3.fromValues(0, 0, -3));
@@ -39,8 +38,12 @@ class SceneApp extends Scene {
 
 			this.resize();
 		} else {
-			mat4.translate(this._modelMatrix, this._modelMatrix, vec3.fromValues(0, -1.83, 0));
+			
 		}
+
+		mat4.translate(this._modelMatrix, this._identiyMatrix, vec3.fromValues(this.x.value, -1.83, this.z.value));
+
+		gui.add(this, 'move');
 	}
 
 	_initTextures() {
@@ -51,13 +54,16 @@ class SceneApp extends Scene {
 		this.fboMap = new alfrid.FrameBuffer(GL.width, GL.height);
 	}
 
+	move() {
+		this.z.value = -this.z.targetValue;
+		// this.orbitalControl.ry.value = this.z.targetValue === -5 ? 0 : Math.PI;
+	}
+
 
 	_initViews() {
 		this._bCopy = new alfrid.BatchCopy();
 		this._bAxis = new alfrid.BatchAxis();
 
-		this._vTree = new ViewTree();
-		this._vTerrain = new ViewTerrain();
 		this._vCompose = new ViewCompose();
 
 		this._worldGrey = new WorldGrey();
@@ -72,6 +78,10 @@ class SceneApp extends Scene {
 
 
 	toRender() {
+
+		//	UPDATE CAMERA POSITION
+		mat4.translate(this._modelMatrix, this._identiyMatrix, vec3.fromValues(this.x.value, -1.83, this.z.value));
+
 		if(VRUtils.canPresent) {	VRUtils.vrDisplay.requestAnimationFrame(()=>this.toRender());	}		
 
 		VRUtils.getFrameData();
@@ -141,8 +151,6 @@ class SceneApp extends Scene {
 
 		this.fbo1.bind();
 		GL.clear(0, 0, 0, 0);
-		this._vTerrain.render();
-		this._vTree.render();
 		this._worldColor.render();
 
 		this.fbo1.unbind();
@@ -150,22 +158,22 @@ class SceneApp extends Scene {
 		this._vCompose.render(this.fbo0.getTexture(), this.fbo1.getTexture(), this.fboMap.getTexture());
 		
 		GL.disable(GL.DEPTH_TEST);
-		this._bCopy.draw(this.fbo1.getTexture());
-		const s = 200;
-		GL.viewport(0, 0, s, s/GL.aspectRatio);
-		this._bCopy.draw(this.fbo0.getTexture());
-		GL.viewport(s, 0, s, s/GL.aspectRatio);
-		this._bCopy.draw(this.fbo1.getTexture());
-		GL.viewport(s * 2, 0, s, s/GL.aspectRatio);
-		this._bCopy.draw(this.fboMap.getTexture());
-
-
+		if(params.debug) {
+			this._bCopy.draw(this.fbo1.getTexture());	
+		}
 		
 
+		if(!GL.isMobile && 0) {
+			const s = 200;
+			GL.viewport(0, 0, s, s/GL.aspectRatio);
+			this._bCopy.draw(this.fbo0.getTexture());
+			GL.viewport(s, 0, s, s/GL.aspectRatio);
+			this._bCopy.draw(this.fbo1.getTexture());
+			GL.viewport(s * 2, 0, s, s/GL.aspectRatio);
+			this._bCopy.draw(this.fboMap.getTexture());	
+		}
+
 		GL.enable(GL.DEPTH_TEST);
-
-
-
 	}
 
 

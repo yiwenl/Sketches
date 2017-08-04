@@ -4,11 +4,12 @@ import World from './World';
 import Assets from './Assets';
 
 import vs from 'shaders/outline.vert';
+import fs from 'shaders/cel.frag';
 
 class WorldGrey extends World {
 
 	_init() {
-		this.shaderNormal = new GLShader(null, alfrid.ShaderLibs.simpleColorFrag);
+		this.shaderNormal = new GLShader(null, fs);
 		this.shaderNormal.bind();
 		this.shaderNormal.uniform("color", "vec3", [1, 1, 1]);
 		this.shaderNormal.uniform("opacity", "float", 1);
