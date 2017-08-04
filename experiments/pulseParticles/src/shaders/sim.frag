@@ -133,7 +133,7 @@ void main(void) {
 	const float decrease = .93;
 	vel *= decrease;
 
-	extra.b -= 0.02;
+	// extra.b -= 0.02;
 	extra.b = max(0.0, extra.b);
 
 	gl_FragData[0] = vec4(pos + vel, 1.0);

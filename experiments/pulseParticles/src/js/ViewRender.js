@@ -81,7 +81,7 @@ class ViewRender extends alfrid.View {
 		this.shaderSimple.uniform("uShadowMatrix", "mat4", shadowMatrix);
 		this.shaderSimple.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 		this.shaderSimple.uniform('percent', 'float', p);
-		this.shaderSimple.uniform("fixSize", "float", 2);
+		this.shaderSimple.uniform("fixSize", "float", 3);
 		GL.draw(this.mesh);
 	}
 
