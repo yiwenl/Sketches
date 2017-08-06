@@ -9,11 +9,11 @@ import Assets from './Assets';
 
 window.params = {
 	numParticles:32,
-	skipCount:2,
+	skipCount: 2,
 	maxRadius: 2.,
 	light:[1, 2, 4],
 	bias:0.001,
-	minBeatDiff:3.0,
+	minBeatDiff:4.0,
 	maxSum:150,
 };
 
