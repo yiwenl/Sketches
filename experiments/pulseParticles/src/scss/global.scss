@@ -80,3 +80,18 @@ h1,h2,h3,h4,text,p {
 		opacity: 1;
 	}
 }
+
+
+a {
+	color:inherit;
+}
+
+.desc {
+	color:#aaa;
+	letter-spacing: 1px;
+	position: absolute;
+
+	left:40px;
+	bottom:40px;
+	z-index: 9999;
+}
