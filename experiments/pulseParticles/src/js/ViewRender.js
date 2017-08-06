@@ -14,6 +14,13 @@ class ViewRender extends alfrid.View {
 		this.shaderSimple.bind();
 		this.shaderSimple.uniform('color', 'vec3', [1, 1, 1]);
 		this.shaderSimple.uniform("opacity", "float", 1);
+
+
+		this._mtxGlobal = mat4.create();
+		mat4.rotateY(this._mtxGlobal, this._mtxGlobal, 1.9);
+		mat4.rotateX(this._mtxGlobal, this._mtxGlobal, 0.7);
+		
+		// mat4.rotateY(this._mtxGlobal, this._mtxGlobal, 0.5);
 	}
 
 
@@ -58,6 +65,7 @@ class ViewRender extends alfrid.View {
 		textureDepth.bind(3);
 
 		this.shader.uniform("bias", "float", params.bias);
+		this.shader.uniform("uGlobalMatrix", "mat4", this._mtxGlobal);
 		this.shader.uniform("uShadowMatrix", "mat4", shadowMatrix);
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 		this.shader.uniform('percent', 'float', p);
@@ -78,6 +86,7 @@ class ViewRender extends alfrid.View {
 		this.shaderSimple.uniform('textureExtra', 'uniform1i', 2);
 		textureExtra.bind(2);
 
+		this.shaderSimple.uniform("uGlobalMatrix", "mat4", this._mtxGlobal);
 		this.shaderSimple.uniform("uShadowMatrix", "mat4", shadowMatrix);
 		this.shaderSimple.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 		this.shaderSimple.uniform('percent', 'float', p);

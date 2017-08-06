@@ -8,11 +8,13 @@ import assets from './asset-list';
 import Assets from './Assets';
 
 window.params = {
-	numParticles:128 * 3,
-	skipCount:10,
-	maxRadius: 2.5,
-	light:[.1, 10, 0.1],
-	bias:0.001
+	numParticles:32,
+	skipCount:4,
+	maxRadius: 2.,
+	light:[2, 12, 7],
+	bias:0.001,
+	minBeatDiff:2.0,
+	maxSum:150,
 };
 
 if(document.body) {

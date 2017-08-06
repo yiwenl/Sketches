@@ -7,6 +7,9 @@ varying vec4 vColor;
 varying vec4 vShadowCoord;
 
 void main(void) {
+	if(vColor.a <= 0.0) {
+		discard;
+	}
 	if(distance(gl_PointCoord, vec2(.5)) > .5) discard;
 
 
@@ -17,7 +20,7 @@ void main(void) {
 
 	float visibility = 1.0;
 	if(d < shadowCoord.z - bias) {
-		visibility = 0.2;
+		visibility = 0.1;
 	}
 
 	vec4 color = vColor;
