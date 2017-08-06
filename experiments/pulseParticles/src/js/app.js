@@ -26,9 +26,11 @@ if(document.body) {
 
 function _init() {
 
+	document.body.classList.add('isLoading');
+
 	//	LOADING ASSETS
 	if(assets.length > 0) {
-		document.body.classList.add('isLoading');
+		
 
 		let loader = new AssetsLoader({
 			assets:assets
@@ -56,9 +58,9 @@ function _onImageLoaded(o) {
 
 	_init3D();
 
-	setTimeout(()=> {
-		document.body.classList.remove('isLoading');
-	}, 250);
+	// setTimeout(()=> {
+	// 	document.body.classList.remove('isLoading');
+	// }, 250);
 }
 
 

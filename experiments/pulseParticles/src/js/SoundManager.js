@@ -50,6 +50,7 @@ class SoundManager extends EventDispatcher {
 				volume: 1.01,
 				loop: true,
 				onComplete: (sound) => {
+					document.body.classList.remove('isLoading');
 					this._onSoundLoaded(sound);
 				}
 			});
