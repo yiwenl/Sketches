@@ -43,7 +43,8 @@ class SoundManager extends EventDispatcher {
 
 		if(useLocal) {
 			// let src = './assets/audio/Oscillate01.mp3';
-			let src = './assets/audio/KarmaFieldsSweat.mp3';
+			// let src = './assets/audio/KarmaFieldsSweat.mp3';
+			let src = './assets/audio/Gescom.mp3';
 			this.sound = Sono.load({
 				url: [src],
 				volume: 1.01,

@@ -141,7 +141,7 @@ void main(void) {
 	// vec3 acc = vec3(extra.r - 0.5, 1.0, extra.g - 0.5);
 	float posOffset = mix(extra.r, 1.0, .5) * 0.05;
 	vec3 acc = curlNoise(posOffset * pos + time * 0.01);
-	acc.y = acc.y * .5 + .5;
+	acc.y = acc.y * .5 + 1.75;
 	acc *= 6.0;
 	
 	vec3 velDir = normalize(orgPos - uEmitPoint);
@@ -151,24 +151,25 @@ void main(void) {
 	vr = rotate(vr, PI * 0.65);
 	acc.xz += vr * 10.0;
 	acc.xz *= 0.75;
-	vel += acc * .01 * uOffset;
-	// vel.xz += vr * 0.1;
+	vel += acc * .0025 * uOffset;
 
 
 	const float decrease = .8;
 	vel *= decrease;
 
-	extra.b -= 0.07;
+	extra.b -= 0.05;
 	extra.b = max(0.0, extra.b);
 
 	pos += vel;
 
 	if(uResetting > 0.5) {
 		extra.b = extra.g + 1.0;
-		vel = vec3(0.0, uForce , 0.0);
+		vel = vec3(0.0, uForce *0.5, 0.0);
+		// vel = vec3(0.0);
 		pos = orgPos;
 		pos.xz *= (1.0 + uForce * 2.0);
-		vel.xz = normalize(orgPos.xz) * uForce * 0.35;
+		// vel.xz = normalize(orgPos.xz) * uForce * 0.35;
+		vel.xz = normalize(orgPos.xz) * uForce * 0.75;
 	}
 
 	// pos = mix(pos + vel, orgPos, uResetting);

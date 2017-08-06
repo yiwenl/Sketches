@@ -8,7 +8,14 @@ html, body {
 	overflow:hidden;
 	position: static;
 
-	background: #000;
+	$gradient0: #222222;
+	$gradient1: #000000;
+
+	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#6d6d6d+0,000000+100 */
+	background: $gradient0; /* Old browsers */
+	background: -moz-radial-gradient(center, ellipse cover,  $gradient0 0%, $gradient1 100%); /* FF3.6-15 */
+	background: -webkit-radial-gradient(center, ellipse cover,  $gradient0 0%,$gradient1 100%); /* Chrome10-25,Safari5.1-6 */
+	background: radial-gradient(ellipse at center,  $gradient0 0%,$gradient1 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }
 
 html {

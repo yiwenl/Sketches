@@ -1,14 +1,12 @@
 // SceneApp.js
 
 import alfrid, { Scene, GL } from 'alfrid';
-import ViewSave from './ViewSave';
 import ViewRender from './ViewRender';
-import ViewSim from './ViewSim';
-import ViewFloor from './ViewFloor';
+
 import Wave from './Wave';
 import SoundManager from './SoundManager';
 
-const NUM_WAVES = 10;
+const NUM_WAVES = 8;
 
 window.getAsset = function(id) {
 	return assets.find( (a) => a.id === id).file;
@@ -43,11 +41,12 @@ class SceneApp extends alfrid.Scene {
 
 		this._mtx = mat4.create();
 		SoundManager.on('onBeat', (o)=>this._onBeat(o.detail)); 
+
+		//	views
+		this._vRender = new ViewRender(this._shadowMatrix);
 	}
 
 	_initTextures() {
-		console.log('init textures');
-
 		const size = 512;
 		// this._fboDepth = new alfrid.FrameBuffer(size, size, {minFilter:GL.NEAREST, magFilter:GL.NEAREST});
 		this._fboDepth = new alfrid.FrameBuffer(size, size);
@@ -56,21 +55,9 @@ class SceneApp extends alfrid.Scene {
 			let wave = new Wave(this);
 			this._waves.push(wave);
 		}
-	}
-
-
-	_initViews() {
-		console.log('init views');
 		
-		//	helpers
-		this._bCopy = new alfrid.BatchCopy();
-		this._bBall = new alfrid.BatchBall();
-		this._bAxis = new alfrid.BatchAxis();
-
-		//	views
-		this._vFloor  = new ViewFloor();
-		this._vRender = new ViewRender();
 	}
+
 
 	_onBeat(o) {
 		const wave = this._waves.pop();
@@ -80,7 +67,6 @@ class SceneApp extends alfrid.Scene {
 	}
 
 	render() {
-
 		//	update particles
 		this._waves.forEach( w => w.update());
 
@@ -98,12 +84,10 @@ class SceneApp extends alfrid.Scene {
 		this._waves.forEach( w => w.render(this._vRender, this._shadowMatrix, this._fboDepth.getDepthTexture()));
 
 		GL.rotate(this._mtx);
-		// this._bAxis.draw();
-		// this._vFloor.render(this._shadowMatrix, this._fboDepth.getDepthTexture());
 
-		const size = 256;
+		// const size = 256;
 		// GL.viewport(0, 0, size, size);
-		// this._bCopy.draw(this._fboDepth.getDepthTexture());
+		// this._bCopy.draw(this._fboSphere.getDepthTexture());
 
 	}
 

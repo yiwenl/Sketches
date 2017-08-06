@@ -34,7 +34,7 @@ class ViewSave extends alfrid.View {
 
 		for(let j = 0; j < numParticles; j++) {
 			for(let i = 0; i < numParticles; i++) {
-				r = Math.random() * range;
+				r = random(range-.1, range);
 				let v = vec3.fromValues(0, 0, r);
 				mat4.identity(m, m);
 				a = vec3.fromValues(random(-1, 1), random(-1, 1), random(-1, 1));

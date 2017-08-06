@@ -9,11 +9,11 @@ import Assets from './Assets';
 
 window.params = {
 	numParticles:32,
-	skipCount:4,
+	skipCount:2,
 	maxRadius: 2.,
-	light:[5, 7, 10],
+	light:[1, 2, 4],
 	bias:0.001,
-	minBeatDiff:2.0,
+	minBeatDiff:3.0,
 	maxSum:150,
 };
 
@@ -76,15 +76,15 @@ function _init3D() {
 	Assets.init();
 
 	//	INIT DAT-GUI
-	window.gui = new dat.GUI({ width:300 });
-	gui.add(params, 'maxRadius', 0.0, 10.0);
+	// window.gui = new dat.GUI({ width:300 });
+	// gui.add(params, 'maxRadius', 0.0, 10.0);
 
 	//	CREATE SCENE
 	const scene = new SceneApp();
 
 	//	STATS
-	const stats = new Stats();
-	document.body.appendChild(stats.domElement);
-	alfrid.Scheduler.addEF(()=>stats.update());
+	// const stats = new Stats();
+	// document.body.appendChild(stats.domElement);
+	// alfrid.Scheduler.addEF(()=>stats.update());
 
 }

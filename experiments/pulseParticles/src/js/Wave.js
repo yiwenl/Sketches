@@ -1,10 +1,9 @@
 // Wave.js
 import alfrid, { Scene, GL } from 'alfrid';
 import ViewSave from './ViewSave';
-import ViewRender from './ViewRender';
 import ViewSim from './ViewSim';
 
-const NUM_SETS = 20; 
+const NUM_SETS = 10; 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 
 class Wave {
@@ -18,7 +17,6 @@ class Wave {
 		this._isResetting = false;
 
 		//	views
-		this._vRender = new ViewRender();
 		this._vSim 	  = new ViewSim();
 
 		this._vSave = new ViewSave();

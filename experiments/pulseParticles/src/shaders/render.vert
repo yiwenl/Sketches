@@ -21,6 +21,7 @@ varying vec4 vColor;
 varying vec3 vNormal;
 varying vec3 vExtra;
 varying vec4 vShadowCoord;
+varying vec3 vWorldPosition;
 
 const float radius = 0.015;
 
@@ -32,6 +33,7 @@ void main(void) {
 	vec3 extra   = texture2D(textureExtra, uv).rgb;
 
 	vec4 worldPosition = uGlobalMatrix * uModelMatrix * vec4(pos, 1.0);
+	vWorldPosition = worldPosition.xyz;
 	gl_Position  = uProjectionMatrix * uViewMatrix * worldPosition;
 
 	vShadowCoord  = uShadowMatrix * worldPosition;
@@ -41,7 +43,8 @@ void main(void) {
 	if(extra.b <= 0.0) {
 		vColor = vec4(0.0);	
 	} else {
-		vColor = vec4(1.0);
+		float grey = mix(extra.r, 1.0, .5);
+		vColor = vec4(vec3(grey), 1.0);
 	}
 
 	const vec3 emit = vec3(0.0, -5.0, 0.0);
