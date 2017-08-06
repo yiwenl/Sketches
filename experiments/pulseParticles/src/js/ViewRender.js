@@ -17,8 +17,9 @@ class ViewRender extends alfrid.View {
 
 
 		this._mtxGlobal = mat4.create();
-		mat4.rotateY(this._mtxGlobal, this._mtxGlobal, 1.9);
+		mat4.rotateY(this._mtxGlobal, this._mtxGlobal, 2.3);
 		mat4.rotateX(this._mtxGlobal, this._mtxGlobal, 0.7);
+		mat4.translate(this._mtxGlobal, this._mtxGlobal, vec3.fromValues(0, -2, 0));
 		
 		// mat4.rotateY(this._mtxGlobal, this._mtxGlobal, 0.5);
 	}

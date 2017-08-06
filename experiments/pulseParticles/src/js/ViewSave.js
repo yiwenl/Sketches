@@ -41,7 +41,7 @@ class ViewSave extends alfrid.View {
 				vec3.normalize(a, a);
 				quat.setAxisAngle(q, a, random(-PI, PI));
 				vec3.transformQuat(v, v, q);
-				v[1] *= 0.75;
+				// v[1] *= 0.75;
 				// positions.push([random(-range, range), random(-range, range), random(-range, range)]);
 				positions.push(v);
 				ux = i / numParticles * 2.0 - 1.0 + .5 / numParticles;

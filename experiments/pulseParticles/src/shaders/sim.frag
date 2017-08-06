@@ -148,10 +148,11 @@ void main(void) {
 	acc += velDir * 0.5;
 
 	vec2 vr = normalize(pos.xz);
-	vr = rotate(vr, PI * 0.6);
-	
+	vr = rotate(vr, PI * 0.65);
+	acc.xz += vr * 10.0;
+	acc.xz *= 0.75;
 	vel += acc * .01 * uOffset;
-	vel.xz += vr * 0.05;
+	// vel.xz += vr * 0.1;
 
 
 	const float decrease = .8;
@@ -167,7 +168,7 @@ void main(void) {
 		vel = vec3(0.0, uForce , 0.0);
 		pos = orgPos;
 		pos.xz *= (1.0 + uForce * 2.0);
-		vel.xz = normalize(orgPos.xz) * uForce * 0.5;
+		vel.xz = normalize(orgPos.xz) * uForce * 0.35;
 	}
 
 	// pos = mix(pos + vel, orgPos, uResetting);

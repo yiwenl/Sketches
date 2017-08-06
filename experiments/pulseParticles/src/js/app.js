@@ -11,7 +11,7 @@ window.params = {
 	numParticles:32,
 	skipCount:4,
 	maxRadius: 2.,
-	light:[2, 12, 7],
+	light:[5, 7, 10],
 	bias:0.001,
 	minBeatDiff:2.0,
 	maxSum:150,
