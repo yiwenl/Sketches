@@ -134,7 +134,7 @@ class SceneApp extends alfrid.Scene {
 
 		
 		GL.rotate(this._identityMatrix);
-		this._vFloor.render(this._shadowMatrix, this._fboDepth.getDepthTexture());
+		// this._vFloor.render(this._shadowMatrix, this._fboDepth.getDepthTexture());
 		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2), this._shadowMatrix, this._fboDepth.getDepthTexture());
 		GL.rotate(this._modelMatrix);
 		this._vRender.render(this._fboTarget.getTexture(0), this._fboCurrent.getTexture(0), p, this._fboCurrent.getTexture(2), this._shadowMatrix, this._fboDepth.getDepthTexture());
