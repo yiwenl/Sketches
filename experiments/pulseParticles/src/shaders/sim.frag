@@ -10,6 +10,10 @@ uniform sampler2D textureExtra;
 uniform sampler2D textureOrgPos;
 uniform float time;
 uniform float maxRadius;
+uniform float uForce;
+uniform float uResetting;
+uniform float uOffset;
+uniform vec3 uEmitPoint;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -90,6 +94,13 @@ vec3 snoiseVec3( vec3 x ){
 
 }
 
+float exponentialIn(float t) {
+  return t == 0.0 ? t : pow(2.0, 10.0 * (t - 1.0));
+}
+
+float exponentialOut(float t) {
+  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);
+}
 
 vec3 curlNoise( vec3 p ){
 	
@@ -114,29 +125,56 @@ vec3 curlNoise( vec3 p ){
 
 }
 
+vec2 rotate(vec2 v, float a) {
+	float s = sin(a);
+	float c = cos(a);
+	mat2 m = mat2(c, -s, s, c);
+	return m * v;
+}
+const float PI = 3.141592653;
+
 void main(void) {
 	vec3 pos        = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel        = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra      = texture2D(textureExtra, vTextureCoord).rgb;
 	vec3 orgPos     = texture2D(textureOrgPos, vTextureCoord).rgb;
-	float posOffset = mix(extra.r, 1.0, 0.2) * .1;
-	vec3 acc        = curlNoise(pos * posOffset + time * .1);
+	// vec3 acc = vec3(extra.r - 0.5, 1.0, extra.g - 0.5);
+	float posOffset = mix(extra.r, 1.0, .5) * 0.05;
+	vec3 acc = curlNoise(posOffset * pos + time * 0.01);
+	acc.y = acc.y * .5 + 1.75;
+	acc *= 6.0;
 	
-	vel += acc * .02;
+	vec3 velDir = normalize(orgPos - uEmitPoint);
+	acc += velDir * 0.5;
 
-	float dist = length(pos);
-	if(dist > maxRadius) {
-		float f = (dist - maxRadius) * .002;
-		vel -= normalize(pos) * f;
-	}
+	vec2 vr = normalize(pos.xz);
+	vr = rotate(vr, PI * 0.65);
+	acc.xz += vr * 10.0;
+	acc.xz *= 0.75;
+	vel += acc * .0025 * uOffset;
 
-	const float decrease = .93;
+
+	const float decrease = .8;
 	vel *= decrease;
 
-	// extra.b -= 0.02;
+	extra.b -= 0.05;
 	extra.b = max(0.0, extra.b);
 
-	gl_FragData[0] = vec4(pos + vel, 1.0);
+	pos += vel;
+
+	if(uResetting > 0.5) {
+		extra.b = extra.g + 1.0;
+		vel = vec3(0.0, uForce *0.5, 0.0);
+		// vel = vec3(0.0);
+		pos = orgPos;
+		pos.xz *= (1.0 + uForce * 2.0);
+		// vel.xz = normalize(orgPos.xz) * uForce * 0.35;
+		vel.xz = normalize(orgPos.xz) * uForce * 0.75;
+	}
+
+	// pos = mix(pos + vel, orgPos, uResetting);
+
+	gl_FragData[0] = vec4(pos, 1.0);
 	gl_FragData[1] = vec4(vel, 1.0);
 	gl_FragData[2] = vec4(extra, 1.0);
 	gl_FragData[3] = vec4(orgPos, 1.0);

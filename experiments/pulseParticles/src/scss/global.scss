@@ -7,8 +7,8 @@ html, body {
 
 	overflow:hidden;
 	position: static;
-	
-	$gradient0: #333333;
+
+	$gradient0: #222222;
 	$gradient1: #000000;
 
 	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#6d6d6d+0,000000+100 */
@@ -79,4 +79,19 @@ h1,h2,h3,h4,text,p {
 	.isLoading & {
 		opacity: 1;
 	}
+}
+
+
+a {
+	color:inherit;
+}
+
+.desc {
+	color:#aaa;
+	letter-spacing: 1px;
+	position: absolute;
+
+	left:40px;
+	bottom:40px;
+	z-index: 9999;
 }

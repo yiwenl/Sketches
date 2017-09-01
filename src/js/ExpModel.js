@@ -178,6 +178,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchMaelstrom.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/blackHole/dist/index.html',
 		title:'Maelstrom'
+	},
+	{
+		cover:'assets/img/coverSketchPulse.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/pulseParticles/dist/index.html',
+		title:'Pulse'
 	}
 ]
 
