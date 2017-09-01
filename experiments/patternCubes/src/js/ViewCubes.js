@@ -22,6 +22,7 @@ class ViewCubes extends alfrid.View {
 		const numX = 10;
 		const numY = 14;
 		const posOffset = [];
+		const extra = [];
 		const range = 4;
 		const { floor } = Math;
 
@@ -39,15 +40,25 @@ class ViewCubes extends alfrid.View {
 		for(let i=0; i<numX; i++) {
 			for(let j=0; j<numY; j++) {
 				posOffset.push(getPos(i, j));
+
+
+				let a = Math.floor(Math.random() * 4) * Math.PI/2;
+				let index = Math.floor(Math.random() * 16);
+				let u = index % 4 * 0.25;
+				let v = Math.floor(index/4) * 0.25;
+
+				extra.push([u, v, a]);
 			}
 		}
 
 		this.mesh.bufferInstance(posOffset, 'aPosOffset');
+		this.mesh.bufferInstance(extra, 'aExtra');
 	}
 
 
-	render() {
+	render(texture) {
 		this.shader.bind();
+		this.shader.uniform("num", "float", 4);
 		GL.draw(this.mesh);
 	}
 

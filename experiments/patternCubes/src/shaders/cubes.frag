@@ -3,7 +3,9 @@
 #define SHADER_NAME SIMPLE_TEXTURE
 
 precision highp float;
+uniform sampler2D texture;
 varying vec3 vNormal;
+varying vec2 vTextureCoord;
 
 const vec3 LIGHT = vec3(1.0, .8, .6);
 
@@ -17,7 +19,10 @@ vec3 diffuse(vec3 N, vec3 L, vec3 C) {
 }
 
 void main(void) {
-	float d = diffuse(vNormal, LIGHT);
-	d = mix(d, 1.0, .5);
-    gl_FragColor = vec4(vec3(d), 1.0);
+	// float d = diffuse(vNormal, LIGHT);
+	// d = mix(d, 1.0, .5);
+ //    gl_FragColor = vec4(vec3(d), 1.0);
+
+
+ 	gl_FragColor = texture2D(texture, vTextureCoord);
 }

@@ -24,7 +24,9 @@ class SceneApp extends Scene {
 
 
 		this.useOrthoCamera = true;
+		this.showTexture = false;
 		gui.add(this, 'useOrthoCamera');
+		gui.add(this, 'showTexture');
 
 		this.control = new alfrid.OrbitalControl(this.cameraOrtho, window, 100);
 		this.control.lock(true);
@@ -67,14 +69,17 @@ class SceneApp extends Scene {
 		this._bAxis.draw();
 		this._bDots.draw();
 
-		this._vCubes.render();
+		this._vCubes.render(this.texture);
 
 
-		GL.disable(GL.DEPTH_TEST);
-		const s = 256 * 2;
-		GL.viewport(0, 0, s, s);
-		this._bCopy.draw(this.texture);
-		GL.enable(GL.DEPTH_TEST);
+		if(this.showTexture) {
+			GL.disable(GL.DEPTH_TEST);
+			const s = 256 * 2;
+			GL.viewport(0, 0, s, s);
+			this._bCopy.draw(this.texture);
+			GL.enable(GL.DEPTH_TEST);	
+		}
+		
 	}
 
 
