@@ -41,14 +41,27 @@ vec3 rotate(vec3 v, vec3 axis, float angle) {
 const float PI = 3.141592653;
 const float PI2 = PI/2.0;
 
+float exponentialIn(float t) {
+  	return t == 0.0 ? t : pow(2.0, 10.0 * (t - 1.0));
+}
+
+float exponentialInOut(float t) {
+  return t == 0.0 || t == 1.0
+    ? t
+    : t < 0.5
+      ? +0.5 * pow(2.0, (20.0 * t) - 10.0)
+      : -0.5 * pow(2.0, 10.0 - (t * 20.0)) + 1.0;
+}
 
 void main(void) {
 	vec3 position = aVertexPosition;
-	float angle = floor((aExtra.z + time)/PI2) * PI2;
-	// angle = fract(angle);
-	// angle = smoothstep(0.9, 1.0, angle);
 
-	position = rotate(aVertexPosition, aDirection, angle);
+	float currentAngle = aExtra.z + time;
+	float angle = floor((currentAngle)/PI2) * PI2;
+	float delta = currentAngle - angle;
+	delta = exponentialInOut(smoothstep(PI2-0.2, PI2, delta)) * PI2;
+
+	position = rotate(aVertexPosition, aDirection, angle + delta);
 
 	position += aPosOffset;
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);

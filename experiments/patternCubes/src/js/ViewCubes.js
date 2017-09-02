@@ -19,8 +19,6 @@ class ViewCubes extends alfrid.View {
 		const s = 1-0.001;
 		this.mesh = alfrid.Geom.cube(s, s, s);
 
-		console.log(this.mesh.attributes);
-
 		const numCubes = 40;
 		const numX = 8;
 		const numY = 11;
@@ -56,7 +54,7 @@ class ViewCubes extends alfrid.View {
 			let a = Math.floor(Math.random() * 4) * Math.PI/2;
 			let index = Math.floor(Math.random() * 16);
 
-			return [index, a, Math.random()];
+			return [index, a, Math.random() * 0xFF];
 		}
 
 
@@ -79,6 +77,17 @@ class ViewCubes extends alfrid.View {
 			}
 		}
 
+		function checkPos(x, y, z) {
+			let overlapped = false;
+			posOffset.forEach(p => {
+				if(abs(p[0]-x) < .1 && abs(p[1]-y) < .1 && abs(p[2]-z) < .1 ) {
+					overlapped = true;
+				}
+			});
+
+			return overlapped;
+		}
+
 
 		function getRadomPos() {
 			let x, y, z;
@@ -88,7 +97,7 @@ class ViewCubes extends alfrid.View {
 				z = floor(random(-1, 2));
 				if(Math.random() > .5) x *= -1;
 				if(Math.random() > .5) y *= -1;	
-			} while( abs(x) < numX/2 && abs(y) < numY/2);
+			} while( abs(x) < numX/2 && abs(y) < numY/2 || checkPos(x,y,z));
 			
 
 			return [x, y, z];
@@ -110,7 +119,7 @@ class ViewCubes extends alfrid.View {
 
 
 	render(texture) {
-		this.time += 0.01;
+		this.time += 0.002;
 		this.shader.bind();
 		this.shader.uniform("num", "float", 4);
 		this.shader.uniform("time", "float", this.time);

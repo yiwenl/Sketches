@@ -57,6 +57,8 @@ class SceneApp extends Scene {
 
 
 	render() {
+		this._generator.update();
+		
 		GL.clear(0, 0, 0, 0);
 		if(this.useOrthoCamera) {
 			GL.setMatrices(this.cameraOrtho);	
