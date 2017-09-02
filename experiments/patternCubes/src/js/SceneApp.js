@@ -1,8 +1,8 @@
 // SceneApp.js
 
 import alfrid, { Scene, GL } from 'alfrid';
-// import ViewObjModel from './ViewObjModel';
 import ViewCubes from './ViewCubes';
+import ViewLines from './ViewLines';
 import TextureGenerator from './TextureGenerator';
 import Assets from './Assets';
 
@@ -36,39 +36,35 @@ class SceneApp extends Scene {
 	}
 
 	_initTextures() {
-		console.log('init textures');
 		this._generator = new TextureGenerator();
 		this.texture = this._generator.texture;
 	}
 
 
 	_initViews() {
-		console.log('init views');
-
 		this._bCopy = new alfrid.BatchCopy();
-		this._bAxis = new alfrid.BatchAxis();
-		this._bDots = new alfrid.BatchDotsPlane();
-		this._bSky = new alfrid.BatchSkybox();
 
 		// this._vModel = new ViewObjModel();
 		this._vCubes = new ViewCubes();
+		this._vLines = new ViewLines();
+
+		GL.disable(GL.DEPTH_TEST);
+		const s = 256 * 2;
+		GL.viewport(0, 0, s, s);
+		this._bCopy.draw(this.texture);
+		GL.enable(GL.DEPTH_TEST);	
 	}
 
 
 	render() {
-		// if(Math.random() > .9) {
-		// 	const DEG = 180 / Math.PI;
-		// 	console.log(this.control.rx.value * DEG, this.control.ry.value * DEG);
-		// }
-		// this.orbitalControl.ry.value += 0.01;
 		GL.clear(0, 0, 0, 0);
 		if(this.useOrthoCamera) {
 			GL.setMatrices(this.cameraOrtho);	
 		}
 		
-		this._bAxis.draw();
-		this._bDots.draw();
-
+		GL.disable(GL.DEPTH_TEST);
+		this._vLines.render();
+		GL.enable(GL.DEPTH_TEST);
 		this._vCubes.render(this.texture);
 
 

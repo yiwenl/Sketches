@@ -14,7 +14,7 @@ import gradients from './gradients.json';
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 
 const size = 1024;
-const s = 1024/4;
+const s = size/4;
 let vs;
 
 function hexToRgb(hex) {
@@ -54,13 +54,13 @@ class TextureGenerator {
 		this._fbo.bind();
 		
 		this.drawPattern(0, 0, shaderLines, {angle:0, size:0, numBars:10.0});
-		this.drawPattern(s, 0, shaderLines, {angle:Math.PI/4, size:.2, numBars:10.0});
+		this.drawPattern(s, 0, shaderLines, {angle:Math.PI/4, size:.3, numBars:8.0});
 		this.drawPattern(s * 2, 0, shaderLines, {angle:-Math.PI/4, size:.5, numBars:6.0});
 		this.drawPattern(s * 3, 0, shaderOutline, {range:0.2});
 
 		this.drawPattern(0, s, shaderDots, {num:10, noiseScale:0, offset:0.5});
 		this.drawPattern(s, s, shaderDots, {num:8, noiseScale:1.5, seed:Math.random() * 0xff, offset:0.0});
-		this.drawPattern(s * 2, s, shaderDots, {num:12, noiseScale:2.5, seed:Math.random() * 0xff, offset:0.0});
+		// this.drawPattern(s * 2, s, shaderDots, {num:12, noiseScale:2.5, seed:Math.random() * 0xff, offset:0.0});
 		this.drawPattern(s * 3, s, shaderOutline, {range:0.75});
 
 		this.drawPattern(0, s * 2, shaderNoise, {num:10, noiseScale:30});
@@ -71,7 +71,7 @@ class TextureGenerator {
 		this.drawPattern(0, s * 3, shaderColorDots, {num:10, noiseScale:0, offset:0.5, color0, color1, opacity:0});
 		this.drawPattern(s, s * 3, shaderColorDots, {num:10, noiseScale:0, offset:0.5, color0, color1, opacity:1});
 		this.drawPattern(s * 2, s * 3, shaderColorDots, {num:12, noiseScale:3, seed:Math.random() * 0xff, offset:0.0, opacity:1});
-		this.drawPattern(s * 3, s * 3, shaderColorLines, {angle:Math.PI/2, size:.1, numBars:10.0, color0, color1});
+		// this.drawPattern(s * 3, s * 3, shaderColorLines, {angle:Math.PI/2, size:.2, numBars:10.0, color0, color1});
 
 		this._fbo.unbind();
 
