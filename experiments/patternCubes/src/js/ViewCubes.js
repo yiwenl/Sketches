@@ -16,7 +16,7 @@ class ViewCubes extends alfrid.View {
 
 
 	_init() {
-		const s = 1-0.001;
+		const s = 1;
 		this.mesh = alfrid.Geom.cube(s, s, s);
 
 		const numCubes = 40;

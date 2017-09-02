@@ -3,6 +3,7 @@
 import alfrid, { Scene, GL } from 'alfrid';
 import ViewCubes from './ViewCubes';
 import ViewLines from './ViewLines';
+import ViewMask from './ViewMask';
 import TextureGenerator from './TextureGenerator';
 import Assets from './Assets';
 
@@ -47,6 +48,7 @@ class SceneApp extends Scene {
 		// this._vModel = new ViewObjModel();
 		this._vCubes = new ViewCubes();
 		this._vLines = new ViewLines();
+		this._vMask = new ViewMask();
 
 		GL.disable(GL.DEPTH_TEST);
 		const s = 256 * 2;
@@ -66,6 +68,7 @@ class SceneApp extends Scene {
 		
 		GL.disable(GL.DEPTH_TEST);
 		this._vLines.render();
+		this._vMask.render();
 		GL.enable(GL.DEPTH_TEST);
 		this._vCubes.render(this.texture);
 
@@ -82,13 +85,14 @@ class SceneApp extends Scene {
 
 
 	resize() {
-		GL.setSize(window.innerWidth, window.innerHeight);
+		const s = 1;
+		GL.setSize(window.innerWidth * s, window.innerHeight * s);
 		this.camera.setAspectRatio(GL.aspectRatio);
 
 		const scale = .01;
 		const w = window.innerWidth/2 * scale;
 		const h = window.innerHeight/2 * scale;
-		this.cameraOrtho.ortho(-w, w, -h, h, -10000.1, 10000);
+		this.cameraOrtho.ortho(-w, w, -h, h, 0.1, 100);
 	}
 }
 

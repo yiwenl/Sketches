@@ -63,7 +63,7 @@ class TextureGenerator {
 			shader = mShader;
 		}
 
-		const b = 0.01;
+		const b = 0.001;
 
 		GL.viewport(x+b/2, y+b/2, s-b, s-b);
 		shader.bind();

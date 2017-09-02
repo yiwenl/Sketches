@@ -54,7 +54,7 @@ h1,h2,h3,h4,text,p {
 	top: calc(50% - 50px);
 	text-align: center;
 	letter-spacing: 11px;
-	color:white;
+	color:black;
 
 	opacity: 0;
 	transition:opacity .5s ease-out, letter-spacing .5s ease-out;
@@ -71,7 +71,7 @@ h1,h2,h3,h4,text,p {
 	width: 0%;
 	height:1px;
 	top:50%;
-	background:rgba(255, 255, 255, .5);
+	background:rgba(0, 0, 0, .5);
 	opacity: 0;
 
 	transition:width .5s ease-out, opacity .5s ease-out;
@@ -79,4 +79,16 @@ h1,h2,h3,h4,text,p {
 	.isLoading & {
 		opacity: 1;
 	}
+}
+
+
+.desc {
+	position: fixed;
+	z-index: 9999;
+	color: black;
+	left: 0;
+	bottom: 0;
+	margin-left: 40px;
+	letter-spacing: 2px;
+	font-size: 14px;
 }
