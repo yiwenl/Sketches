@@ -28,6 +28,8 @@ function hexToRgb(hex) {
 class TextureGenerator {
 
 	constructor() {
+		this.step = 0;
+
 		let grd = gradients[Math.floor(Math.random() * gradients.length)].colors;
 		grd = grd.map(c => hexToRgb(c));
 		this.color0 = [grd[0].r/255, grd[0].g/255, grd[0].b/255];
@@ -111,9 +113,12 @@ class TextureGenerator {
 	}
 
 	update() {
-		this.time += 0.003;
-		// this._fbo.bind();
-		// this._fbo.unbind();
+		this.step++;
+		if(this.step % 2 === 0) {
+			return;
+		}
+
+		this.time += 0.003 * 2;
 		this.draw();
 	}
 

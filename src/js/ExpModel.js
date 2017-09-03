@@ -183,6 +183,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchPulse.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/pulseParticles/dist/index.html',
 		title:'Pulse'
+	},
+	{
+		cover:'assets/img/coverSketchPattern.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/patternCubes/dist/index.html',
+		title:'Patterns'
 	}
 ]
 
