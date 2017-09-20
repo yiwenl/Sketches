@@ -4,7 +4,7 @@ import alfrid, { GL } from 'alfrid';
 import createRingMesh from './utils/createRingMesh';
 import vs from 'shaders/ring.vert';
 
-const NUM_RINGS = 20;
+const NUM_RINGS = 40;
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 
 class ViewRing extends alfrid.View {
@@ -22,18 +22,19 @@ class ViewRing extends alfrid.View {
 
 		let currY = 0;
 		let height, radius, theta;
+		const r = .2;
 
 		for(let i = 0; i < NUM_RINGS; i++) {
 
 			//	get height
-			height = random(.1, .2);
+			height = random(.1, .2)/2;
 
 			//	calculate the y position
 			let y = currY + height/2;
 			currY += height;
 
 			//	get radius
-			radius = random(2.5, 2.7);
+			radius = random(2.6-r, 2.6+r);
 
 			//	get theta
 			theta = random(.5, 1);

@@ -2,7 +2,7 @@
 
 import alfrid, { Mesh } from 'alfrid';
 
-const num = 20;
+const num = 10;
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 
@@ -24,7 +24,7 @@ const createRingMesh = (y, height, radius, theta) => {
 	const uvs = [];
 	const indices = [];
 	const extras = [];
-	const thickness = random(.2, .4);
+	const thickness = random(.2, .3);
 	let count = 0;
 
 	const rotation = Math.random() * Math.PI * 2;
