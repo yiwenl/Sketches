@@ -80,3 +80,16 @@ h1,h2,h3,h4,text,p {
 		opacity: 1;
 	}
 }
+
+
+.desc {
+	position: fixed;
+	width:100%;
+	text-align: center;
+
+	bottom: 50px;
+	z-index: 8888;
+	color: white;
+	letter-spacing: 8px;
+	font-size: 14px;
+}

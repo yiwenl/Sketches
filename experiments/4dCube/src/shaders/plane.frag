@@ -8,6 +8,7 @@ uniform mat4 uInvertRotationMatrix;
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
 varying vec3 vPosition;
+varying vec3 vPositionRotated;
 
 const float bias = -0.001;
 
@@ -50,7 +51,7 @@ void main(void) {
 		offset = 0.0;
 	}
 
-	vec4 adjustedPos = uInvertRotationMatrix * vec4(vPosition, 1.0);
+	vec4 adjustedPos = uInvertRotationMatrix * vec4(vPositionRotated, 1.0);
 	if(adjustedPos.x > uDimensionMask.x) {
 		offset = 0.0;
 	} else if(adjustedPos.x < -uDimensionMask.x) {

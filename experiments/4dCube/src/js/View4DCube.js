@@ -8,7 +8,6 @@ import vsPlane from 'shaders/plane.vert';
 import fsPlane from 'shaders/plane.frag';
 
 import getRandomAxis from './utils/getRandomAxis';
-import Scheduler from 'scheduling';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 
@@ -30,7 +29,7 @@ class View4DCube extends alfrid.View {
 		this._rotationAxis = getRandomAxis();
 		this._position = vec3.create();
 
-		this.dimensionMask = vec3.fromValues(.5, .5, .5);
+		
 		this._rotationMask = 0;
 		this._rotationAxisMask = getRandomAxis();
 		this._positionMask = vec3.create();
@@ -40,17 +39,18 @@ class View4DCube extends alfrid.View {
 		this._mtxRotationMask = mat4.create();
 		this._mtxRotationMaskInvert = mat4.create();
 
-		this._boundUpDist = new EaseNumber(.5, this._ease);
-		this._boundBottomDist = new EaseNumber(.5, this._ease);
+		this._dx = new EaseNumber(.5, this._ease);
+		this._dy = new EaseNumber(.5, this._ease);
+		this._dz = new EaseNumber(.5, this._ease);
 
+		this._boundRight = vec4.fromValues(1, 0, 0., this._dx.value);
+		this._boundLeft = vec4.fromValues(-1, 0, 0., this._dx.value);
+		this._boundUp = vec4.fromValues(0.001, 1, 0, this._dy.value);
+		this._boundBottom = vec4.fromValues(0.001, -1, 0, this._dy.value);
+		this._boundFront = vec4.fromValues(0, 0, 1, this._dz.value);
+		this._boundBack = vec4.fromValues(0, 0, -1, this._dz.value);
 
-		const r = 0.25;
-		this._boundUp = vec4.fromValues(0.001, 1, 0, this.dimensionMask[1]);
-		this._boundBottom = vec4.fromValues(0.001, -1, 0, this.dimensionMask[1]);
-		this._boundRight = vec4.fromValues(1, 0, 0., this.dimensionMask[0]);
-		this._boundLeft = vec4.fromValues(-1, 0, 0., this.dimensionMask[0]);
-		this._boundFront = vec4.fromValues(0, 0, 1, this.dimensionMask[2]);
-		this._boundBack = vec4.fromValues(0, 0, -1, this.dimensionMask[2]);
+		this.dimensionMask = vec3.fromValues(this.dx, this.dy, this.dz);
 
 		this._bounds = [
 			this._boundUp,
@@ -61,8 +61,6 @@ class View4DCube extends alfrid.View {
 			this._boundBack
 		];
 
-
-		gui.add(this, 'rotationMask', 0, 1.5);
 	}
 
 
@@ -75,9 +73,6 @@ class View4DCube extends alfrid.View {
 
 	render() {
 		this.update();
-
-		this._boundUp[3] = this._boundUpDist.value;
-		this._boundBottom[3] = this._boundBottomDist.value;
 
 		const bounds = this._bounds.map( bound => {
 			const boundTransformed = vec4.create();
@@ -122,15 +117,21 @@ class View4DCube extends alfrid.View {
 			this._isDirty = false;
 		}
 
-		// this.rotationMask = 0.3;
-
 		const scale = this._scale.value;
-
 		mat4.fromScaling(this._mtxScale, vec3.fromValues(scale, scale, scale));
 
 		mat4.fromTranslation(this._modelMatrix, this._position);
 		mat4.multiply(this._modelMatrix, this._modelMatrix, this._mtxScale);
 		mat4.multiply(this._modelMatrix, this._modelMatrix, this._mtxRotation);
+
+		this._boundRight[3] = this._dx.value;
+		this._boundLeft[3] = this._dx.value;
+		this._boundUp[3] = this._dy.value;
+		this._boundBottom[3] = this._dy.value;
+		this._boundFront[3] = this._dz.value;
+		this._boundBack[3] = this._dz.value;
+
+		this.dimensionMask = vec3.fromValues(this.dx, this.dy, this.dz);
 	}
 
 
@@ -145,22 +146,6 @@ class View4DCube extends alfrid.View {
 		mat4.invert(this._mtxRotationMaskInvert, this._mtxRotationMask);
 	}
 
-
-	get boundUpDist() {
-		return this._boundUpDist.value;
-	}
-
-	set boundUpDist(mValue) {
-		this._boundUpDist.value = mValue;
-	}
-
-	get boundBottomDist() {
-		return this._boundBottomDist.value;
-	}
-
-	set boundBottomDist(mValue) {
-		this._boundBottomDist.value = mValue;
-	}
 
 
 	get rotation() {
@@ -189,6 +174,16 @@ class View4DCube extends alfrid.View {
 		this._rotationMask = mValue;
 		this._isDirty = true;
 	}
+
+
+	get dx() { return this._dx.value; }
+	set dx(value) { this._dx.value = value; }
+
+	get dy() { return this._dy.value; }
+	set dy(value) { this._dy.value = value; }
+
+	get dz() { return this._dz.value; }
+	set dz(value) { this._dz.value = value; }
 }
 
 export default View4DCube;
