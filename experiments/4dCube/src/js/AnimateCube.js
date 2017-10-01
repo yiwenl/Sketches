@@ -2,24 +2,46 @@
 
 import alfrid, { GL } from 'alfrid';
 import View4DCube from './View4DCube';
+import getRandomPos from './utils/getRandomPos';
 import getRandomRotation from './utils/getRandomRotation';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
-const { pow } = Math;
+const { cos, pow, PI } = Math;
 
 
-function expIn(t) {
-	return t == 0.0 ? t : pow(2.0, 10.0 * (t - 1.0));
-}
-
-function exponentialOut(t) {
+const exponentialOut = function(t) {
   return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);
 }
+
+const cubicInOut = function(t) {
+  return t < 0.5
+    ? 4.0 * t * t * t
+    : 0.5 * pow(2.0 * t - 2.0, 3.0) + 1.0;
+}
+
+const quadraticInOut = function(t) {
+  let p = 2.0 * t * t;
+  return t < 0.5 ? p : -p + (4.0 * t) - 1.0;
+}
+
+const sineInOut = function(t) {
+  return -0.5 * (cos(PI * t) - 1.0);
+}
+
+function getRandomEase() {
+	const funcs = [exponentialOut, cubicInOut, quadraticInOut, sineInOut];
+
+	return funcs[Math.floor(Math.random() * funcs.length)];
+}
+
+
 
 class AnimateCube extends View4DCube {
 	
 	constructor() {
 		super();
+
+		this._func = getRandomEase();
 
 		this._quat = quat.create();
 		this._quatMask = quat.create();
@@ -37,7 +59,7 @@ class AnimateCube extends View4DCube {
 		this._posMaskTarget = vec3.fromValues(0, 0, 0);
 
 		this._offset = 1;
-		this.speed = 0.01;
+		this.speed = random(0.005, 0.02);
 		this._hasCompleted = false;
 	}
 
@@ -60,7 +82,7 @@ class AnimateCube extends View4DCube {
 
 
 	_updateRotationMatrices() {
-		const t = exponentialOut(this._offset);
+		const t = this._func(this._offset);
 		quat.slerp(this._quatCurr, this._quat, this._quatTarget, t);
 		mat4.fromQuat(this._mtxRotation, this._quatCurr);
 
@@ -87,12 +109,11 @@ class AnimateCube extends View4DCube {
 
 		quat.copy(this._quatTarget, mRot);
 		quat.copy(this._quatMaskTarget, mRotMask);
-
 	}
 
 
 	randomTo() {
-		const d0 = 2;
+		const d0 = 3;
 		const d1 = .5;
 
 		const pos = vec3.fromValues(random(-d0, d0), random(-d0, d0), random(-d0, d0));
@@ -101,7 +122,13 @@ class AnimateCube extends View4DCube {
 		const rot = getRandomRotation();
 		const rotMask = getRandomRotation();
 
-		this.moveTo(pos, posMask, rot, rotMask);		
+		this.moveTo(pos, posMask, rot, rotMask);	
+
+		this.boundUpDist = random(.1, .7);	
+		this.boundBottomDist = random(.1, .7);	
+
+		this._func = getRandomEase();
+		this.speed = random(0.005, 0.02);
 	}
 
 }

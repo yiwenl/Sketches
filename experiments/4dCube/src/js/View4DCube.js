@@ -1,6 +1,6 @@
 // View4DCube.js
 
-import alfrid, { GL, GLShader } from 'alfrid';
+import alfrid, { GL, GLShader, EaseNumber } from 'alfrid';
 import vsCube from 'shaders/cube.vert';
 import fsCube from 'shaders/cube.frag';
 
@@ -35,10 +35,13 @@ class View4DCube extends alfrid.View {
 		this._mtxRotation = mat4.create();
 		this._mtxRotationMask = mat4.create();
 
+		this._boundUpDist = new EaseNumber(.5);
+		this._boundBottomDist = new EaseNumber(.5);
+
 
 		const r = 0.05;
-		this._boundUp = vec4.fromValues(random(-r, r), 1, random(-r, r), .5);
-		this._boundBottom = vec4.fromValues(random(-r, r), -1, random(-r, r), .5);
+		this._boundUp = vec4.fromValues(random(-r, r), 1, random(-r, r), this._boundUpDist.value);
+		this._boundBottom = vec4.fromValues(random(-r, r), -1, random(-r, r), this._boundBottomDist.value);
 		this._boundRight = vec4.fromValues(1, 0, 0., .5);
 		this._boundLeft = vec4.fromValues(-1, 0, 0., .5);
 		this._boundFront = vec4.fromValues(0, 0, 1, .5);
@@ -63,6 +66,9 @@ class View4DCube extends alfrid.View {
 
 	render() {
 		this.update();
+
+		this._boundUp[3] = this._boundUpDist.value;
+		this._boundBottom[3] = this._boundBottomDist.value;
 
 		const bounds = this._bounds.map( bound => {
 			const boundTransformed = vec4.create();
@@ -120,6 +126,23 @@ class View4DCube extends alfrid.View {
 
 		quat.setAxisAngle(q, this._rotationAxisMask, this._rotationMask);
 		mat4.fromQuat(this._mtxRotationMask, q);
+	}
+
+
+	get boundUpDist() {
+		return this._boundUpDist.value;
+	}
+
+	set boundUpDist(mValue) {
+		this._boundUpDist.value = mValue;
+	}
+
+	get boundBottomDist() {
+		return this._boundBottomDist.value;
+	}
+
+	set boundBottomDist(mValue) {
+		this._boundBottomDist.value = mValue;
 	}
 
 

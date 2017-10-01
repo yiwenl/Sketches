@@ -1,9 +1,11 @@
 // SceneApp.js
 
 import alfrid, { Scene, GL } from 'alfrid';
-import View4DCube from './View4DCube';
 import AnimateCube from './AnimateCube';
 import Assets from './Assets';
+
+var random = function(min, max) { return min + Math.random() * (max - min);	}
+const numCubes = 30;
 
 class SceneApp extends Scene {
 	constructor() {
@@ -11,24 +13,37 @@ class SceneApp extends Scene {
 		this.resize();
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
-		this.orbitalControl.radius.value = 5;
+		this.orbitalControl.radius.value = 10;
 	}
 
 	_initTextures() {
 	}
 
 	_initViews() {
-		console.log('init views');
-
 		this._bCopy = new alfrid.BatchCopy();
 		this._bAxis = new alfrid.BatchAxis();
 		this._bDots = new alfrid.BatchDotsPlane();
 		this._bBall = new alfrid.BatchBall();
 
-		this._vCube = new AnimateCube();
+
+		this._cubes = [];
+		for(let i=0; i<numCubes; i++) {
+			const cube = new AnimateCube();
+			cube.randomTo();
+			this._cubes.push(cube);
+		}
+
+		gui.add(this, 'spin');
+	}
 
 
-		gui.add(this._vCube, 'randomTo');
+	spin() {
+		this._cubes.forEach( cube => {
+			let delay = random(0, 200);
+			setTimeout(()=> {
+				cube.randomTo();	
+			}, delay);
+		});
 	}
 
 
@@ -37,8 +52,9 @@ class SceneApp extends Scene {
 		GL.setMatrices(this.camera);
 
 		this._bDots.draw();
-
-		this._vCube.render();
+		this._cubes.forEach( cube => {
+			cube.render();
+		});
 	}
 
 	resize() {
