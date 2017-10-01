@@ -2,10 +2,11 @@
 
 import alfrid, { Scene, GL } from 'alfrid';
 import AnimateCube from './AnimateCube';
+import View4DCube from './View4DCube';
 import Assets from './Assets';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
-const numCubes = 50;
+const numCubes = 0;
 
 class SceneApp extends Scene {
 	constructor() {
@@ -26,6 +27,8 @@ class SceneApp extends Scene {
 		this._bAxis = new alfrid.BatchAxis();
 		this._bDots = new alfrid.BatchDotsPlane();
 		this._bBall = new alfrid.BatchBall();
+
+		this._vCube = new View4DCube();
 
 
 		this._cubes = [];
@@ -67,9 +70,13 @@ class SceneApp extends Scene {
 		GL.setMatrices(this.camera);
 
 		this._bDots.draw();
+		this._bAxis.draw();
+
 		this._cubes.forEach( cube => {
 			cube.render();
 		});
+
+		this._vCube.render();
 	}
 
 	resize() {
