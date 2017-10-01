@@ -2,6 +2,8 @@ precision highp float;
 
 uniform vec3 lightDir;
 uniform vec3 uDimension;
+uniform vec3 uDimensionMask;
+uniform mat4 uInvertRotationMatrix;
 
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
@@ -29,24 +31,48 @@ void main(void) {
 	float _diffuse   = diffuse(vNormal, lightDir);
 	_diffuse = mix(_diffuse, 1.0, .5);
 
+	float offset = 1.0;
 	if(vPosition.x > uDimension.x * 0.5) {
-		discard;
+		offset = 0.0;
 	} else if(vPosition.x < -uDimension.x * 0.5) {
-		discard;
+		offset = 0.0;
 	}
 
 	if(vPosition.y > uDimension.y * 0.5) {
-		discard;
+		offset = 0.0;
 	} else if(vPosition.y < -uDimension.y * 0.5) {
-		discard;
+		offset = 0.0;
 	}
 
 	if(vPosition.z > uDimension.z * 0.5) {
-		discard;
+		offset = 0.0;
 	} else if(vPosition.z < -uDimension.z * 0.5) {
-		discard;
+		offset = 0.0;
 	}
 
+	vec4 adjustedPos = uInvertRotationMatrix * vec4(vPosition, 1.0);
+	if(adjustedPos.x > uDimensionMask.x) {
+		offset = 0.0;
+	} else if(adjustedPos.x < -uDimensionMask.x) {
+		offset = 0.0;
+	}
+
+	if(adjustedPos.y > uDimensionMask.y) {
+		offset = 0.0;
+	} else if(adjustedPos.y < -uDimensionMask.y) {
+		offset = 0.0;
+	}
+
+	if(adjustedPos.z > uDimensionMask.z) {
+		offset = 0.0;
+	} else if(adjustedPos.z < -uDimensionMask.z) {
+		offset = 0.0;
+	}
+
+
+	if(offset < 1.0) {
+		discard;
+	}
 
 	gl_FragColor = vec4(vec3(_diffuse), 1.0);
 }

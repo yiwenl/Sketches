@@ -11,10 +11,12 @@ uniform mat4 uProjectionMatrix;
 uniform vec4 uPlane;
 uniform vec3 uPositionMask;
 uniform mat3 uNormalMatrix;
+uniform vec3 uDimensionMask;
 
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
 varying vec3 vPosition;
+varying vec3 vBounds;
 
 
 mat3 calcLookAtMatrix(vec3 origin, vec3 target, float roll) {
@@ -28,16 +30,17 @@ mat3 calcLookAtMatrix(vec3 origin, vec3 target, float roll) {
 
 
 const vec3 center = vec3(0.0);
+const float bias = 0.001;
 
 void main(void) {
 
-	vec3 dir = normalize(uPlane.xyz);
-	mat3 mtxRotate = calcLookAtMatrix(center, dir, 0.0);
-	vec3 position = mtxRotate * aVertexPosition + dir * uPlane.w + uPositionMask;
+	vec3 dir        = normalize(uPlane.xyz);
+	mat3 mtxRotate  = calcLookAtMatrix(center, dir, 0.0);
+	vec3 posRotated = mtxRotate * aVertexPosition;
+	vec3 position   = posRotated + dir * (uPlane.w-bias) + uPositionMask;
 
-    gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
-    vTextureCoord = aTextureCoord;
-    vNormal = uNormalMatrix * mtxRotate * aNormal;
-
-    vPosition = position;
+	gl_Position     = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
+	vTextureCoord   = aTextureCoord;
+	vNormal         = uNormalMatrix * mtxRotate * aNormal;
+	vPosition       = position;
 }

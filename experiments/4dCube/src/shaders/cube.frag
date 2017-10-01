@@ -6,10 +6,10 @@ varying vec3 vPosition;
 
 uniform vec4 uPlane0;
 uniform vec4 uPlane1;
-// uniform vec4 uPlane2;
-// uniform vec4 uPlane3;
-// uniform vec4 uPlane4;
-// uniform vec4 uPlane5;
+uniform vec4 uPlane2;
+uniform vec4 uPlane3;
+uniform vec4 uPlane4;
+uniform vec4 uPlane5;
 
 uniform vec3 uPositionMask;
 uniform vec3 lightDir;
@@ -46,12 +46,12 @@ void main(void) {
 
 	float d0 = isInDistance(vPosition - uPositionMask, uPlane0);
 	float d1 = isInDistance(vPosition - uPositionMask, uPlane1);
-	// float d2 = isInDistance(vPosition - uPositionMask, uPlane2);
-	// float d3 = isInDistance(vPosition - uPositionMask, uPlane3);
-	// float d4 = isInDistance(vPosition - uPositionMask, uPlane4);
-	// float d5 = isInDistance(vPosition - uPositionMask, uPlane5);
+	float d2 = isInDistance(vPosition - uPositionMask, uPlane2);
+	float d3 = isInDistance(vPosition - uPositionMask, uPlane3);
+	float d4 = isInDistance(vPosition - uPositionMask, uPlane4);
+	float d5 = isInDistance(vPosition - uPositionMask, uPlane5);
 
-	float t = d0 * d1;
+	float t = d0 * d1 * d2 * d3 * d4 * d5;
 
 	if(t <= 0.0) {
 		discard;

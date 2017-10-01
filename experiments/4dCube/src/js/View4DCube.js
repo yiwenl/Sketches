@@ -30,7 +30,7 @@ class View4DCube extends alfrid.View {
 		this._rotationAxis = getRandomAxis();
 		this._position = vec3.create();
 
-		this.dimensionMask = vec3.create(2, 2, 2);
+		this.dimensionMask = vec3.fromValues(.5, .5, .5);
 		this._rotationMask = 0;
 		this._rotationAxisMask = getRandomAxis();
 		this._positionMask = vec3.create();
@@ -38,33 +38,37 @@ class View4DCube extends alfrid.View {
 		this._modelMatrix = mat4.create();
 		this._mtxRotation = mat4.create();
 		this._mtxRotationMask = mat4.create();
+		this._mtxRotationMaskInvert = mat4.create();
 
 		this._boundUpDist = new EaseNumber(.5, this._ease);
 		this._boundBottomDist = new EaseNumber(.5, this._ease);
 
 
 		const r = 0.25;
-		this._boundUp = vec4.fromValues(random(-r, r), 1, random(-r, r), this._boundUpDist.value);
-		this._boundBottom = vec4.fromValues(random(-r, r), -1, random(-r, r), this._boundBottomDist.value);
-		this._boundRight = vec4.fromValues(1, 0, 0., .5);
-		this._boundLeft = vec4.fromValues(-1, 0, 0., .5);
-		this._boundFront = vec4.fromValues(0, 0, 1, .5);
-		this._boundBack = vec4.fromValues(0, 0, -1, .5);
+		this._boundUp = vec4.fromValues(0.001, 1, 0, this.dimensionMask[1]);
+		this._boundBottom = vec4.fromValues(0.001, -1, 0, this.dimensionMask[1]);
+		this._boundRight = vec4.fromValues(1, 0, 0., this.dimensionMask[0]);
+		this._boundLeft = vec4.fromValues(-1, 0, 0., this.dimensionMask[0]);
+		this._boundFront = vec4.fromValues(0, 0, 1, this.dimensionMask[2]);
+		this._boundBack = vec4.fromValues(0, 0, -1, this.dimensionMask[2]);
 
 		this._bounds = [
 			this._boundUp,
-			this._boundBottom
-			// this._boundRight,
-			// this._boundLeft,
-			// this._boundFront,
-			// this._boundBack
-		]
+			this._boundBottom,
+			this._boundRight,
+			this._boundLeft,
+			this._boundFront,
+			this._boundBack
+		];
+
+
+		gui.add(this, 'rotationMask', 0, 1.5);
 	}
 
 
 	_init() {
 		this.mesh = alfrid.Geom.cube(1, 1, 1);
-		const s = 5 * 2;
+		const s = 2;
 		this.plane = alfrid.Geom.plane(s, s, 1);
 	}
 
@@ -92,15 +96,15 @@ class View4DCube extends alfrid.View {
 		GL.rotate(this._modelMatrix);
 		GL.draw(this.mesh);
 
-
-
 		GL.gl.cullFace(GL.gl.FRONT);
 
 		//	draw cull plane
 		this._shaderPlane.bind();
 		this._shaderPlane.uniform(params.light);
 		this._shaderPlane.uniform("uDimension", "vec3", this.dimension);
+		this._shaderPlane.uniform("uDimensionMask", "vec3", this.dimensionMask);
 		this._shaderPlane.uniform("uPositionMask", "vec3", this._positionMask);
+		this._shaderPlane.uniform("uInvertRotationMatrix", "mat4", this._mtxRotationMaskInvert);
 
 		const boundTransformed = vec4.create();
 		bounds.forEach( bound => {
@@ -117,6 +121,8 @@ class View4DCube extends alfrid.View {
 			this._updateRotationMatrices();
 			this._isDirty = false;
 		}
+
+		// this.rotationMask = 0.3;
 
 		const scale = this._scale.value;
 
@@ -136,6 +142,7 @@ class View4DCube extends alfrid.View {
 
 		quat.setAxisAngle(q, this._rotationAxisMask, this._rotationMask);
 		mat4.fromQuat(this._mtxRotationMask, q);
+		mat4.invert(this._mtxRotationMaskInvert, this._mtxRotationMask);
 	}
 
 

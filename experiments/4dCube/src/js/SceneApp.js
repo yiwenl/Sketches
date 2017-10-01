@@ -16,7 +16,9 @@ class SceneApp extends Scene {
 		this.orbitalControl.rx.value = 0.3;
 		this.orbitalControl.radius.value = 10;
 
-		this.orbitalControl.lockZoom(true);
+		// this.orbitalControl.lockZoom(true);
+
+		GL.disable(GL.CULL_FACE);
 	}
 
 	_initTextures() {
