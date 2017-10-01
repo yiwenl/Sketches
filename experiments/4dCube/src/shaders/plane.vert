@@ -9,6 +9,8 @@ uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform vec4 uPlane;
+uniform vec3 uPositionMask;
+uniform mat3 uNormalMatrix;
 
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
@@ -31,11 +33,11 @@ void main(void) {
 
 	vec3 dir = normalize(uPlane.xyz);
 	mat3 mtxRotate = calcLookAtMatrix(center, dir, 0.0);
-	vec3 position = mtxRotate * aVertexPosition + dir * uPlane.w;
+	vec3 position = mtxRotate * aVertexPosition + dir * uPlane.w + uPositionMask;
 
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(position, 1.0);
     vTextureCoord = aTextureCoord;
-    vNormal = mtxRotate * aNormal;
+    vNormal = uNormalMatrix * mtxRotate * aNormal;
 
     vPosition = position;
 }
