@@ -17,9 +17,13 @@ class View4DCube extends alfrid.View {
 	
 	constructor() {
 		super(vsCube, fsCube);
+
+		this._ease = random( 0.02, 0.05 ) * 0.5;
 		this._shaderPlane = new GLShader(vsPlane, fsPlane);
 
 		this._isDirty = true;
+		this._scale = new EaseNumber(1, this._ease);
+		this._mtxScale = mat4.create();
 
 		this.dimension = vec3.fromValues(1, 1, 1);
 		this._rotation = 0;
@@ -35,11 +39,11 @@ class View4DCube extends alfrid.View {
 		this._mtxRotation = mat4.create();
 		this._mtxRotationMask = mat4.create();
 
-		this._boundUpDist = new EaseNumber(.5);
-		this._boundBottomDist = new EaseNumber(.5);
+		this._boundUpDist = new EaseNumber(.5, this._ease);
+		this._boundBottomDist = new EaseNumber(.5, this._ease);
 
 
-		const r = 0.05;
+		const r = 0.25;
 		this._boundUp = vec4.fromValues(random(-r, r), 1, random(-r, r), this._boundUpDist.value);
 		this._boundBottom = vec4.fromValues(random(-r, r), -1, random(-r, r), this._boundBottomDist.value);
 		this._boundRight = vec4.fromValues(1, 0, 0., .5);
@@ -60,7 +64,8 @@ class View4DCube extends alfrid.View {
 
 	_init() {
 		this.mesh = alfrid.Geom.cube(1, 1, 1);
-		this.plane = alfrid.Geom.plane(3, 3, 1);
+		const s = 5 * 2;
+		this.plane = alfrid.Geom.plane(s, s, 1);
 	}
 
 
@@ -76,7 +81,7 @@ class View4DCube extends alfrid.View {
 
 			return boundTransformed;
 		});
-		
+
 
 		this.shader.bind();
 		this.shader.uniform("uPositionMask", "vec3", this._positionMask);
@@ -113,7 +118,12 @@ class View4DCube extends alfrid.View {
 			this._isDirty = false;
 		}
 
+		const scale = this._scale.value;
+
+		mat4.fromScaling(this._mtxScale, vec3.fromValues(scale, scale, scale));
+
 		mat4.fromTranslation(this._modelMatrix, this._position);
+		mat4.multiply(this._modelMatrix, this._modelMatrix, this._mtxScale);
 		mat4.multiply(this._modelMatrix, this._modelMatrix, this._mtxRotation);
 	}
 
@@ -153,6 +163,14 @@ class View4DCube extends alfrid.View {
 	set rotation(mValue) {
 		this._rotation = mValue;
 		this._isDirty = true;
+	}
+
+	get scale() {
+		return this._scale.value;
+	}
+
+	set scale(mValue) {
+		this._scale.value = mValue;
 	}
 
 

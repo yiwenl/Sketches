@@ -40,7 +40,6 @@ class AnimateCube extends View4DCube {
 	
 	constructor() {
 		super();
-
 		this._func = getRandomEase();
 
 		this._quat = quat.create();
@@ -59,7 +58,7 @@ class AnimateCube extends View4DCube {
 		this._posMaskTarget = vec3.fromValues(0, 0, 0);
 
 		this._offset = 1;
-		this.speed = random(0.005, 0.02);
+		this.speed = random(0.005, 0.02) * 0.5;
 		this._hasCompleted = false;
 	}
 
@@ -90,6 +89,7 @@ class AnimateCube extends View4DCube {
 		mat4.fromQuat(this._mtxRotationMask, this._quatMaskCurr);
 
 		vec3.lerp(this._position, this._pos, this._posTarget, t);
+		vec3.lerp(this._positionMask, this._posMask, this._posMaskTarget, t);
 	}
 
 
@@ -113,8 +113,8 @@ class AnimateCube extends View4DCube {
 
 
 	randomTo() {
-		const d0 = 3;
-		const d1 = .5;
+		const d0 = 2;
+		const d1 = 2;
 
 		const pos = vec3.fromValues(random(-d0, d0), random(-d0, d0), random(-d0, d0));
 		const posMask = vec3.fromValues(random(-d1, d1), random(-d1, d1), random(-d1, d1));
@@ -129,6 +129,7 @@ class AnimateCube extends View4DCube {
 
 		this._func = getRandomEase();
 		this.speed = random(0.005, 0.02);
+		this.scale = random(.5, 1);
 	}
 
 }

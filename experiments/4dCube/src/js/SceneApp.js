@@ -5,15 +5,17 @@ import AnimateCube from './AnimateCube';
 import Assets from './Assets';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
-const numCubes = 30;
+const numCubes = 50;
 
 class SceneApp extends Scene {
 	constructor() {
 		super();
 		this.resize();
 		GL.enableAlphaBlending();
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+		this.orbitalControl.rx.value = 0.3;
 		this.orbitalControl.radius.value = 10;
+
+		this.orbitalControl.lockZoom(true);
 	}
 
 	_initTextures() {
@@ -34,6 +36,18 @@ class SceneApp extends Scene {
 		}
 
 		gui.add(this, 'spin');
+
+
+		if(GL.isMobile) {
+			window.addEventListener('click', ()=>this.spin());	
+		} 
+
+		window.addEventListener('keydown', (e)=> {
+			if(e.keyCode === 32) {
+				this.spin();
+			}
+		});
+		
 	}
 
 
@@ -44,6 +58,7 @@ class SceneApp extends Scene {
 				cube.randomTo();	
 			}, delay);
 		});
+
 	}
 
 
