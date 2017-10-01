@@ -6,7 +6,7 @@ import View4DCube from './View4DCube';
 import Assets from './Assets';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
-const numCubes = 40;
+const numCubes = GL.isMobile ? 20 : 40;
 
 const getMouse = function(e) {
 	if(e.touches) {
@@ -55,6 +55,10 @@ class SceneApp extends Scene {
 		window.addEventListener('mousedown', (e)=>this._onDown(e));
 		window.addEventListener('mousemove', (e)=>this._onMove(e));
 		window.addEventListener('mouseup', ()=>this._onUp());
+
+		window.addEventListener('touchstart', (e)=>this._onDown(e));
+		window.addEventListener('touchmove', (e)=>this._onMove(e));
+		window.addEventListener('touchend', ()=>this._onUp());
 		this._isMouseDown = false;
 	}
 
