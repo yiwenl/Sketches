@@ -4,10 +4,23 @@ import alfrid, { Scene, GL } from 'alfrid';
 import AnimateCube from './AnimateCube';
 import View4DCube from './View4DCube';
 import Assets from './Assets';
-import Scheduler from 'scheduling';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 const numCubes = 40;
+
+const getMouse = function(e) {
+	if(e.touches) {
+		return {
+			x:e.touches[0].pageX,
+			y:e.touches[0].pageY
+		}
+	} else {
+		return {
+			x:e.clientX,
+			y:e.clientY
+		}
+	}
+}
 
 class SceneApp extends Scene {
 	constructor() {
@@ -15,7 +28,9 @@ class SceneApp extends Scene {
 		this.resize();
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = 0.3;
-		this.orbitalControl.radius.value = 10;
+		this.orbitalControl.radius.value = 12;
+		this.orbitalControl.radius.easing = 0.03;
+		this.orbitalControl.lockZoom(true);
 		this.time = 0;
 
 	}
@@ -24,7 +39,6 @@ class SceneApp extends Scene {
 	}
 
 	_initViews() {
-		this._bDots = new alfrid.BatchDotsPlane();
 		this._vCube = new View4DCube();
 
 
@@ -38,16 +52,43 @@ class SceneApp extends Scene {
 		gui.add(this, 'spin');
 
 
-		if(GL.isMobile) {
-			window.addEventListener('click', ()=>this.spin());	
-		} 
+		window.addEventListener('mousedown', (e)=>this._onDown(e));
+		window.addEventListener('mousemove', (e)=>this._onMove(e));
+		window.addEventListener('mouseup', ()=>this._onUp());
+		this._isMouseDown = false;
+	}
 
-		window.addEventListener('keydown', (e)=> {
-			if(e.keyCode === 32) {
-				this.spin();
-			}
+
+	_onDown(e) {
+		this._isMouseDown = true;
+		this._cubes.forEach( cube => {
+			cube.reset();
 		});
-		
+
+		this._pointDown = getMouse(e);
+
+		this.orbitalControl.radius.value = 10;
+	}
+
+	_onMove(e) {
+		if(!this._isMouseDown) {
+			return;
+		}
+
+		this._pointMove = getMouse(e);
+		let dx = Math.abs(this._pointMove.x - this._pointDown.x);
+		const maxDist = 500;
+		let p = dx / maxDist;
+		p = Math.min(p, 1.0);
+
+		this._cubes.forEach( cube => {
+			cube.offset = p;
+		});
+	}
+
+	_onUp() {
+		this._isMouseDown = false;
+		this.orbitalControl.radius.value = 12;
 	}
 
 
@@ -59,6 +100,7 @@ class SceneApp extends Scene {
 			}, delay);
 		});
 
+		this.orbitalControl.ry.value += Math.PI * random( .7, 1);
 	}
 
 
@@ -67,8 +109,6 @@ class SceneApp extends Scene {
 
 		GL.clear(0, 0, 0, 0);
 		GL.setMatrices(this.camera);
-
-		// this._bDots.draw();
 
 		this._cubes.forEach( cube => {
 			cube.render();

@@ -188,6 +188,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchPattern.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/patternCubes/dist/index.html',
 		title:'Patterns'
+	},
+	{
+		cover:'assets/img/coverSketchGeometries.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/4dCube/dist/index.html',
+		title:'Disappearing Geometries'
 	}
 ]
 

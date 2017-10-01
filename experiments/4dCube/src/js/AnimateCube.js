@@ -65,18 +65,20 @@ class AnimateCube extends View4DCube {
 
 	update() {
 		super.update();
-		this._offset += this.speed;
-		this._offset = Math.min(this._offset, 1.0);
+		if(!this._hasCompleted) {
+			this._offset += this.speed;
+			this._offset = Math.min(this._offset, 1.0);	
 
-
-		if(this._offset === 1) {
-			if(!this._hasCompleted) {
-				this._hasCompleted = true;
-				this._isDirty= true;
-			}	
-		} else {
-			this._isDirty = true;
+			if(this._offset === 1) {
+				if(!this._hasCompleted) {
+					this._hasCompleted = true;
+					this._isDirty= true;
+				}	
+			} else {
+				this._isDirty = true;
+			}
 		}
+		
 	}
 
 
@@ -95,7 +97,6 @@ class AnimateCube extends View4DCube {
 
 
 	moveTo(mPos, mPosMask, mRot, mRotMask) {
-		this._hasCompleted = false;
 		this._offset = 0;
 
 		vec3.copy(this._pos, this._position);
@@ -112,8 +113,7 @@ class AnimateCube extends View4DCube {
 		quat.copy(this._quatMaskTarget, mRotMask);
 	}
 
-
-	randomTo() {
+	reset() {
 		const d0 = 2;
 		const d1 = 1.25;
 
@@ -131,7 +131,39 @@ class AnimateCube extends View4DCube {
 
 		this.dx = random(.4, .6);		
 		this.dy = random(.4, .6);		
+		this.dz = random(.4, .6);	
+	}
+
+
+	randomTo() {
+		const d0 = 2.5;
+		const d1 = 1.25;
+
+		const pos = vec3.fromValues(random(-d0, d0), random(-d0, d0), random(-d0, d0));
+		const posMask = vec3.fromValues(random(-d1, d1), random(-d1, d1), random(-d1, d1));
+
+		const rot = getRandomRotation();
+		const rotMask = getRandomRotation();
+
+		this.moveTo(pos, posMask, rot, rotMask);	
+
+		this._func = getRandomEase();
+		this.speed = random(0.005, 0.02);
+		this.scale = random(.5, 1);
+
+		this.dx = random(.4, .6);		
+		this.dy = random(.4, .6);		
 		this.dz = random(.4, .6);		
+	}
+
+
+	set offset(value) {
+		this._offset = value;
+		this._isDirty = true;
+	}
+
+	get offet() {
+		return this._offset;
 	}
 
 }
