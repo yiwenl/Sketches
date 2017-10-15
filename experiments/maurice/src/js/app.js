@@ -29,7 +29,6 @@ window.params = {
 };
 
 function _init() {
-
 	//	LOADING ASSETS
 	if(assets.length > 0) {
 		document.body.classList.add('isLoading');
@@ -56,6 +55,12 @@ function _init() {
 
 
 function _onImageLoaded(o) {
+	const btn = document.body.querySelector('.button-next');
+	console.log('btn:', btn);
+	btn.style.background = 'url(./assets/img/next.jpg)';
+	btn.style.backgroundSize = '100%';
+
+
 	//	ASSETS
 	console.log('Image Loaded : ', o);
 	window.assets = o;
