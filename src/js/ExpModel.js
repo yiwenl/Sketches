@@ -193,6 +193,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchGeometries.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/4dCube/dist/index.html',
 		title:'Disappearing Geometries'
+	},
+	{
+		cover:'assets/img/coverSketchMaurice.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/maurice/dist/index.html',
+		title:'Maurice the Sea Cat'
 	}
 ]
 
