@@ -47,6 +47,7 @@
     "alfrid": "^0.1.29",
     "assets-loader": "^0.5.1",
     "dat-gui": "^0.5.0",
+    "scheduling": "^1.1.1",
     "stats.js": "^0.17.0"
   }
 }

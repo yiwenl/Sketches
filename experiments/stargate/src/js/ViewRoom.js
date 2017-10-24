@@ -12,7 +12,7 @@ class ViewRoom extends alfrid.View {
 
 
 	_init() {
-		const s = 10;
+		const s = 20;
 		this.mesh = alfrid.Geom.sphere(10, 24, true);
 		this.texture = new alfrid.GLTexture(Assets.get('dungeon'));
 	}
