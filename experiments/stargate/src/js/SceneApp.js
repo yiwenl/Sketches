@@ -7,10 +7,14 @@ import ViewSwirl from './ViewSwirl';
 import ViewLine from './ViewLine';
 
 import ViewParticles from './ViewParticles';
+import ViewPost from './ViewPost';
 
 import Assets from './Assets';
 import VRUtils from './utils/VRUtils';
 import TouchDetect from './TouchDetect';
+
+import vsNormal from 'shaders/normal.vert';
+import fsNormal from 'shaders/normal.frag';
 
 const UP = vec3.fromValues(0, 1, 0);
 var random = function(min, max) { return min + Math.random() * (max - min);	}
@@ -23,6 +27,9 @@ const scissor = function(x, y, w, h) {
 class SceneApp extends Scene {
 	constructor() {
 		super();
+
+		this._shaderMap = new alfrid.GLShader(null, alfrid.ShaderLibs.simpleColorFrag);
+		this._shaderNormal = new alfrid.GLShader(vsNormal, fsNormal);
 
 		//	ORBITAL CONTROL
 		// this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.1;
@@ -59,6 +66,14 @@ class SceneApp extends Scene {
 
 	_initTextures() {
 		console.log('init textures');
+
+		const size = 1024;
+		this._fboInner = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboOutter = new alfrid.FrameBuffer(GL.width, GL.height);
+		this._fboNormal = new alfrid.FrameBuffer(size, size, {minFilter:GL.LINEAR, magFilter:GL.LINEAR, type:GL.FLOAT});
+		this._fboMap = new alfrid.FrameBuffer(size, size, {minFilter:GL.LINEAR, magFilter:GL.LINEAR});
+
+
 	}
 
 
@@ -75,6 +90,8 @@ class SceneApp extends Scene {
 		this._vSwirl = new ViewSwirl();
 		this._vLine = new ViewLine();
 		this._vParticles = new ViewParticles();
+
+		this._vPost = new ViewPost();
 	}
 
 
@@ -87,6 +104,7 @@ class SceneApp extends Scene {
 		if(VRUtils.canPresent) {	VRUtils.vrDisplay.requestAnimationFrame(()=>this.toRender());	}		
 
 		VRUtils.getFrameData();
+
 
 		if(VRUtils.isPresenting) {
 			
@@ -133,6 +151,24 @@ class SceneApp extends Scene {
 			}
 			
 		}
+
+/*
+		let s = 200;
+		GL.disable(GL.DEPTH_TEST);
+		GL.viewport(0, 0, s, s);
+		this._bCopy.draw(this._fboInner.getTexture());
+
+		GL.viewport(s, 0, s, s);
+		this._bCopy.draw(this._fboOutter.getTexture());
+
+		GL.viewport(s * 2, 0, s, s);
+		this._bCopy.draw(this._fboMap.getTexture());
+
+		GL.viewport(s * 3, 0, s, s);
+		this._bCopy.draw(this._fboNormal.getTexture());
+
+		GL.enable(GL.DEPTH_TEST);
+*/		
 	}
 
 
@@ -149,36 +185,71 @@ class SceneApp extends Scene {
 
 		let angle = random(1, 1.7);
 		if(Math.random() > .5) angle *= -1;
-		this.orbitalControl.ry.value += angle;
+		// this.orbitalControl.ry.value += angle;
 	} 
 
 
-	renderScene() {
+	renderMap() {
+		this._fboMap.bind();
+		GL.clear(1, 0, 0, 1);
+
+		this._shaderMap.bind();
+		this._shaderMap.uniform("opacity", "float", 1);
+
+		GL.rotate(this._tunnelMatrix);
+
+		//	inner
+		GL.gl.cullFace(GL.gl.FRONT);
+		this._shaderMap.uniform("color", "vec3", [0, 0, 0]);
+		GL.draw(this._vSwirl.mesh);
+		GL.gl.cullFace(GL.gl.BACK);
+
+		this._shaderMap.uniform("color", "vec3", [1, 1, 0]);
+		GL.draw(this._vSwirl.mesh);
+
+		this._fboMap.unbind();
+
+		this._fboNormal.bind();
 		GL.clear(0, 0, 0, 0);
+		this._shaderNormal.bind();
+		GL.draw(this._vSwirl.mesh);
+		this._fboNormal.unbind();
+	}
+
+
+	renderScene() {
+		this.renderMap();
+
+		GL.clear(0, 0, 0, 0);
+
+		this._fboOutter.bind();
+
+		GL.clear();
+		GL.rotate(this._modelMatrix);
 		this._vRoom.render();
-		
-		this._bAxis.draw();
-		// this._vSwirl.render();
-		if(this.touchDetect) {
-			// this.touchDetect.render(this.camera);
-		}
+
+		GL.rotate(this._tunnelMatrix);
+		// this._vParticles.render();
+
+		this._fboOutter.unbind();
 
 
-		if(this._hit) {
-			const s = 0.05;
-			this._bBall.draw(this._hit, [s, s, s], [1, 0, 0]);
-			this._vLine.render(this._hit, this._dir);
-		}
-
+		this._fboInner.bind();
+		GL.clear(0, 0, 0, 0);
 
 		GL.rotate(this._tunnelMatrix);
 		this._vSwirl.render();
+		// this._vParticles.render();
 
-		GL.enableAdditiveBlending();
-		GL.disable(GL.DEPTH_TEST);
-		this._vParticles.render();
-		GL.enableAlphaBlending();
-		GL.enable(GL.DEPTH_TEST);
+		this._fboInner.unbind();
+
+		
+		this._vPost.render(
+			this._fboOutter.getTexture(), 
+			this._fboInner.getTexture(), 
+			this._fboMap.getTexture(),
+			this._fboNormal.getTexture()
+			);
 
 		// this._vModel.render(Assets.get('studio_radiance'), Assets.get('irr'), Assets.get('aomap'));
 	}

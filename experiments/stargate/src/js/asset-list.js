@@ -1,23 +1,13 @@
 
 const assetsToLoad = [
 	{"id":"swirl","url":"assets/obj/swirl.obj","type":"text"},
-	{"id":"aomap","url":"assets/img/aomap.jpg","type":"jpg"},
 	{"id":"color0","url":"assets/img/color0.jpg","type":"jpg"},
 	{"id":"color1","url":"assets/img/color1.jpg","type":"jpg"},
 	{"id":"color2","url":"assets/img/color2.jpg","type":"jpg"},
 	{"id":"dungeon","url":"assets/img/dungeon.hdr","type":"binary"},
-	{"id":"flower","url":"assets/img/flower.hdr","type":"binary"},
-	{"id":"graffiti","url":"assets/img/graffiti.hdr","type":"binary"},
-	{"id":"irr_negx","url":"assets/img/irr_negx.hdr","type":"binary"},
-	{"id":"irr_negy","url":"assets/img/irr_negy.hdr","type":"binary"},
-	{"id":"irr_negz","url":"assets/img/irr_negz.hdr","type":"binary"},
-	{"id":"irr_posx","url":"assets/img/irr_posx.hdr","type":"binary"},
-	{"id":"irr_posy","url":"assets/img/irr_posy.hdr","type":"binary"},
-	{"id":"irr_posz","url":"assets/img/irr_posz.hdr","type":"binary"},
 	{"id":"logo_vr","url":"assets/img/logo_vr.png","type":"png"},
-	{"id":"noise","url":"assets/img/noise.png","type":"png"},
-	{"id":"station","url":"assets/img/station.hdr","type":"binary"},
-	{"id":"studio_radiance","url":"assets/img/studio_radiance.dds","type":"binary"}
+	{"id":"reflection","url":"assets/img/reflection.dds","type":"binary"},
+	{"id":"room","url":"assets/img/room.dds","type":"binary"}
 ];
 
 
