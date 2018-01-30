@@ -208,6 +208,11 @@ const ExpModel = [
 		cover:'assets/img/coverDissolve.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/dissolve/dist/index.html',
 		title:'Dissolve'
+	},
+	{
+		cover:'assets/img/coverSketchSubstrate.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/substrateSphere/dist/index.html',
+		title:'Substrate sphere'
 	}
 ]
 
