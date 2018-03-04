@@ -107,10 +107,20 @@ class SceneApp extends Scene {
 		const width = window.innerWidth >> Config.TEXTURE_DOWNSAMPLE;
 		const height = window.innerHeight >> Config.TEXTURE_DOWNSAMPLE;
 
-		this._fboVelocity   = new FboPingPong(width, height, {minFilter:GL.LINEAR, magFilter:GL.LINEAR, type:GL.FLOAT});
-		this._fboDensity    = new FboPingPong(width, height, {minFilter:GL.LINEAR, magFilter:GL.LINEAR, type:GL.FLOAT});
-		this._fboPressure   = new FboPingPong(width, height, {minFilter:GL.LINEAR, magFilter:GL.LINEAR, type:GL.FLOAT});
-		this._fboDivergence = new alfrid.FrameBuffer(width, height, {minFilter:GL.NEAREST, magFilter:GL.NEAREST, type:GL.FLOAT});
+		let type = GL.FLOAT;
+		if(GL.isMobile) {
+			//	if is ios
+			const iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+			if(iOS) {
+				type = GL.HALF_FLOAT;
+			}
+
+		}
+
+		this._fboVelocity   = new FboPingPong(width, height, {minFilter:GL.LINEAR, magFilter:GL.LINEAR, type});
+		this._fboDensity    = new FboPingPong(width, height, {minFilter:GL.LINEAR, magFilter:GL.LINEAR, type});
+		this._fboPressure   = new FboPingPong(width, height, {minFilter:GL.LINEAR, magFilter:GL.LINEAR, type});
+		this._fboDivergence = new alfrid.FrameBuffer(width, height, {minFilter:GL.NEAREST, magFilter:GL.NEAREST, type});
 		this._fboNormal     = new alfrid.FrameBuffer(width, height, {minFilter:GL.LINEAR, magFilter:GL.LINEAR});
 	}
 
