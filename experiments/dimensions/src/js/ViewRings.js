@@ -53,7 +53,7 @@ class ViewRings extends alfrid.View {
 
 		// GL.disable(GL.DEPTH_TEST);
 		this.meshes.forEach( (mesh, i) => {
-			this.shader.uniform("zOffset", "float", i+1);
+			this.shader.uniform("zOffset", "float", i+0.5);
 			GL.draw(mesh);
 		});
 		// GL.enable(GL.DEPTH_TEST);
