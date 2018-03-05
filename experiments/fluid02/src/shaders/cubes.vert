@@ -47,7 +47,8 @@ void main(void) {
 	float sizeXY		    = mix(aExtra.r, 1.0, .5);
 	vec3 position 			= aVertexPosition;
 	position.xy 			*= sizeXY * (1.0 + speed);
-	position.yz 			*= (1.0 + speed * 2.0);
+	position.y 				*= (1.0 + speed * 5.0);
+	position.z 				*= (1.0 + speed * 2.0);
 	vec3 scale 				= mix(aExtra, vec3(1.0), .5);
 	position 				*= scale * (1.0 + speed);
 

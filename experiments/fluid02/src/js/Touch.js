@@ -30,15 +30,15 @@ class Touch extends EventDispatcher {
 
 		let x = getTextureSpacePos(this._position[0]);
 		let z = getTextureSpacePos(this._position[2]);
-		let dx = (x - getTextureSpacePos(this._prePos[0])) * 10;
-		let dz = (z - getTextureSpacePos(this._prePos[2])) * 10;
+		let dx = (x - getTextureSpacePos(this._prePos[0])) * 20;
+		let dz = (z - getTextureSpacePos(this._prePos[2])) * 20;
 
 		this.trigger('onDrag', {
 			x,
 			y:z,
 			dx,
 			dy:dz,
-			radius:0.005
+			radius:0.0025
 		});
 	}
 }

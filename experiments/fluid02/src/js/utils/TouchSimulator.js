@@ -47,12 +47,13 @@ class TouchSimulator extends EventDispatcher {
 		vec3.add(this._position, this._position, this._direction);
 
 		this._checkBound();
+		const scale = 12;
 	
 		this.trigger('onDrag', {
 			x:this._position[0],
 			y:this._position[1],
-			dx:(this._position[0] - this._prePos[0]) * 10,
-			dy:(this._position[1] - this._prePos[1]) * 10,
+			dx:(this._position[0] - this._prePos[0]) * scale,
+			dy:(this._position[1] - this._prePos[1]) * scale,
 			radius:this._radius
 		});
 
