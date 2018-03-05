@@ -50,7 +50,7 @@ class SceneApp extends Scene {
 		this._fluid.update();
 		GL.clear(0, 0, 0, 0);
 
-		this._vCubes.render(Assets.get('studio_radiance'), Assets.get('irr'), this._fluid.velocity, this._fluid.density);
+		this._vCubes.render( this._fluid.velocity, this._fluid.density);
 
 		const s = 200;
 		GL.viewport(0, 0, s, s);

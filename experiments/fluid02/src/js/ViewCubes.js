@@ -45,25 +45,13 @@ class ViewCubes extends alfrid.View {
 	}
 
 
-	render(textureRad, textureIrr, textureVel, texture) {
+	render(textureVel, texture) {
 		this.shader.bind();
 
 		this.shader.uniform("uColorMap", "uniform1i", 0);
 		this.shader.uniform('uVelMap', 'uniform1i', 1);
-		this.shader.uniform('uRadianceMap', 'uniform1i', 2);
-		this.shader.uniform('uIrradianceMap', 'uniform1i', 3);
 		texture.bind(0);
 		textureVel.bind(1);
-		textureRad.bind(2);
-		textureIrr.bind(3);
-
-		this.shader.uniform('uBaseColor', 'uniform3fv', this.baseColor);
-		this.shader.uniform('uRoughness', 'uniform1f', this.roughness);
-		this.shader.uniform('uMetallic', 'uniform1f', this.metallic);
-		this.shader.uniform('uSpecular', 'uniform1f', this.specular);
-
-		this.shader.uniform('uExposure', 'uniform1f', params.exposure);
-		this.shader.uniform('uGamma', 'uniform1f', params.gamma);
 
 		this.shader.uniform("uPlaneSize", "float", Config.PLANE_SIZE/2);
 
