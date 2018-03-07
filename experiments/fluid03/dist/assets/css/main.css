@@ -51,6 +51,23 @@ h1, h2, h3, h4, text, p {
     letter-spacing: 10px;
     opacity: 1; }
 
+.link {
+  color: white;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  margin: 20px;
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 1px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity	.5s ease-out; }
+  .showLink .link {
+    opacity: 1;
+    pointer-events: auto; }
+
 .Loading-Bar {
   position: absolute;
   z-index: 998;

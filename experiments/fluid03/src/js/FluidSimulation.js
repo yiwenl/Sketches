@@ -63,7 +63,27 @@ class FluidSimulation {
 
 
 	_initTextures() {
-		this._texture = Assets.get('liquid');
+		let index = 1;
+		this._texture = Assets.get(`liquid0${index}`);
+
+		const textures = [];
+		for(let i=0; i<5; i++) {
+			textures.push(`liquid0${i+1}`);
+		}
+
+		this.image = `liquid0${index}`;
+		gui.add(this, 'image', textures).onChange(()=> {
+			this._texture = Assets.get(this.image);
+
+			const showLink = this.image !== 'liquid01';
+			document.body.classList.remove('showLink');
+
+			if(showLink) {
+				document.body.classList.add('showLink');
+			} 
+		});
+
+		// this._texture = Assets.get(`liquid0${index}`);
 		this._texture.minFilter = this._texture.magFilter = GL.LINEAR;
 		this._texture.wrapS = this._texture.wrapT = GL.MIRRORED_REPEAT;
 

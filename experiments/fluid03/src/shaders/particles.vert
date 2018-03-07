@@ -49,8 +49,8 @@ void main(void) {
 	vec3 position = aVertexPosition * ( 1.0 + speed) * size;
 
 	float noise = mix(aExtra.y, 1.0, .5);
-	position.z *= ( 1.0 + speed) * noise;
-	position.y *= ( 1.0 + speed * 2.0) * noise;
+	position.z *= ( 1.0 + speed * 0.5) * noise;
+	position.y *= ( 1.0 + speed * 4.0) * noise;
 	position.xz = rotate(position.xz, angle);
 
 	position += posOffset;
