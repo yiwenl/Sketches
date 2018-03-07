@@ -32,15 +32,16 @@ vec2 rotate(vec2 v, float a) {
 
 void main(void) {
 	vec3 posOffset = texture2D(texturePos, aUVOffset).xyz;
+	vec3 posPrev = texture2D(textureVel, aUVOffset).xyz;
 
 	vec2 uv = posOffset.xz / uSize;
 	uv = uv * .5 + .5;
 	
 
-	vec3 vel = texture2D(textureVel, uv).xyz;
-	float speed = length(vel) * 0.005;
+	vec3 vel = (posOffset - posPrev).xzy;
+	float speed = length(vel) * 5.0;
 
-	float angle = atan(vel.y, vel.x) + PI * 0.5;
+	float angle = atan(vel.x, vel.y);
 
 	vColor = texture2D(textureColor, uv).xyz * ( 1.0 + speed * 0.2) * mix(aExtra.z, 1.0, .9);
 

@@ -19,7 +19,9 @@ class SceneApp extends Scene {
 		this.resize();
 		this.camera.setPerspective(Math.PI/4, GL.aspectRatio, 1, 50);
 		GL.enableAlphaBlending();
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.8;
+		// this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.8;
+		this.orbitalControl.rx.value  = 0.8;
+		// this.orbitalControl.ry.value = Math.PI;
 		this.orbitalControl.radius.value = 15;
 		this.orbitalControl.radius.limit(10, 25);
 		this.orbitalControl.rx.limit(0.1, Math.PI / 2-0.1);
@@ -74,7 +76,7 @@ class SceneApp extends Scene {
 		this._fboPos.write.unbind();
 		this._fboPos.swap();
 
-		this._vParticles.render(this._fboPos.readTexture, this._fluid.velocity, this._fluid.density);
+		this._vParticles.render(this._fboPos.readTexture, this._fboPos.writeTexture, this._fluid.density);
 	}
 
 

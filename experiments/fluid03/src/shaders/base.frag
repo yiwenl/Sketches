@@ -75,11 +75,13 @@ float snoise(float x, float y, float z){
 void main () {
 	float scale  = .1;
 	// float noise  = snoise(vec3(vTextureCoord * scale, uTime * 0.02));
-	float nx  = snoise(vec3(vTextureCoord * scale, uTime * 0.02));
-	float ny  = snoise(vec3(uTime * 0.02, vTextureCoord * scale));
+	// float nx  = snoise(vec3(vTextureCoord * scale, uTime * 0.02));
+	// float ny  = snoise(vec3(uTime * 0.02, vTextureCoord * scale));
 
 	// vec2 uv      = vec2(vTextureCoord * 0.5 + noise);
-	vec2 uv      = vTextureCoord + vec2(nx, ny) * 0.01;
+    vec2 uv      = vTextureCoord;
+    uv.y         = 1.0 - uv.y;
+	// uv           +=  vec2(nx, ny) * 0.01;
 
 	// vec2 uv      = vec2(sin(uTime * 0.03) * .5 + .5, noise);
 	vec3 splat   = texture2D(texture, uv).rgb * uBaseStrength;
