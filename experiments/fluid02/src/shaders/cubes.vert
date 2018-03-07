@@ -55,7 +55,7 @@ void main(void) {
 
 	
 
-	float angle 			= atan(vel.y, vel.x) + PI * 0.5;
+	float angle 			= atan(vel.x, vel.y);
 	// vDebug					= vec3(speed);
 	vDebug					= vel;
 	// vDebug					= vel * .5 + .5;
