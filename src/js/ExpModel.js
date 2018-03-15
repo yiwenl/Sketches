@@ -228,6 +228,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchFluid03.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/fluid03/dist/index.html',
 		title:'Liquid 03'
+	},
+	{
+		cover:'assets/img/coverSketchFluid04.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/fluid04/dist/index.html',
+		title:'Liquid 04'
 	}
 ]
 
