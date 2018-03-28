@@ -1,7 +1,9 @@
 // ViewNoise.js
 
 import alfrid, { GL } from 'alfrid';
-import fs from '../shaders/noise.frag';
+import fs from 'shaders/noise.frag';
+import Config from './Config';
+
 class ViewNoise extends alfrid.View {
 	
 	constructor() {
@@ -11,14 +13,13 @@ class ViewNoise extends alfrid.View {
 
 	_init() {
 		this.mesh = alfrid.Geom.bigTriangle();
-		this._noiseScale = 2.0;
 	}
 
 
-	render(mSeed = 0.0) {
+	render(mIndex) {
 		this.shader.bind();
-		this.shader.uniform("uNoiseScale", "float", this._noiseScale);
-		this.shader.uniform("uSeed", "float", mSeed);
+		this.shader.uniform("uIndex", "float", mIndex);
+		this.shader.uniform("uNoiseScale", "float", Config.noiseScale);
 		GL.draw(this.mesh);
 	}
 

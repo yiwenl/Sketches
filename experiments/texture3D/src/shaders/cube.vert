@@ -1,4 +1,4 @@
-// cube.vert
+// basic.vert
 
 precision highp float;
 attribute vec3 aVertexPosition;
@@ -14,8 +14,9 @@ varying vec3 vNormal;
 varying vec3 vPosition;
 
 void main(void) {
-	gl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);
-	vTextureCoord = aTextureCoord;
-	vNormal       = aNormal;
-	vPosition     = aVertexPosition;
+    gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);
+    vTextureCoord = aTextureCoord;
+    vNormal = aNormal;
+
+    vPosition = aVertexPosition;
 }
