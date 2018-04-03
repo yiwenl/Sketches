@@ -4,8 +4,8 @@ import GL from './GLTool';
 
 class Batch {
 
-	constructor(mMesh, mShader) {
-		this._mesh = mMesh;
+	constructor(mGeometry, mShader) {
+		this._geometry = mGeometry;
 		this._shader = mShader;
 	}
 
@@ -14,13 +14,13 @@ class Batch {
 
 	draw() {
 		this._shader.bind();
-		GL.draw(this.mesh);
+		GL.draw(this._geometry);
 	}
 
 
 	//	GETTER AND SETTER
 
-	get mesh() {	return this._mesh;	}
+	get geometry() {	return this._geometry;	}
 
 	get shader() {	return this._shader;	}
 }

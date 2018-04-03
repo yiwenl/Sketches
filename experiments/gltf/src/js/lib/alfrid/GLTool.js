@@ -9,6 +9,10 @@ import getHalfFloat from './utils/getHalfFloat';
 import getAttribLoc from './utils/getAttribLoc';
 import ExtensionsList from './utils/ExtensionsList';
 
+import Geometry from './Geometry';
+import Mesh from './Mesh';
+import Object3D from './objects/Object3D';
+
 let gl;
 
 class GLTool {
@@ -163,15 +167,15 @@ class GLTool {
 	}
 
 
-	draw(mMesh, mDrawingType) {
-		if(mMesh.length) {
-			for(let i = 0; i < mMesh.length; i++) {
-				this.draw(mMesh[i]);
+	drawGeometry(mGeometry, modelMatrix) {
+		if(mGeometry.length) {
+			for(let i = 0; i < mGeometry.length; i++) {
+				this.draw(mGeometry[i]);
 			}
 			return;
 		}
 
-		mMesh.bind(this.shaderProgram);
+		mGeometry.bind(this.shaderProgram);
 
 		//	DEFAULT UNIFORMS
 		if(this.camera !== undefined) {
@@ -179,27 +183,53 @@ class GLTool {
 			this.shader.uniform('uViewMatrix', 'mat4', this.camera.matrix);
 		}
 		
-		this.shader.uniform('uModelMatrix', 'mat4', this._modelMatrix);
+		this.shader.uniform('uCameraPos', 'vec3', this.camera.position);
+		this.shader.uniform('uModelMatrix', 'mat4', modelMatrix || this._modelMatrix);
 		this.shader.uniform('uNormalMatrix', 'mat3', this._normalMatrix);
 		this.shader.uniform('uModelViewMatrixInverse', 'mat3', this._inverseModelViewMatrix);
 
-		let drawType = mMesh.drawType;
-		if(mDrawingType !== undefined) {
-			drawType = mDrawingType;
-		}
+		const drawType = mGeometry.drawType;
 
-		if(mMesh.isInstanced) {
-			//	DRAWING
-			gl.drawElementsInstanced(mMesh.drawType, mMesh.iBuffer.numItems, gl.UNSIGNED_SHORT, 0, mMesh.numInstance);
+		if(mGeometry.isInstanced) {
+			gl.drawElementsInstanced(mGeometry.drawType, mGeometry.iBuffer.numItems, gl.UNSIGNED_SHORT, 0, mGeometry.numInstance);
 		} else {
 			if(drawType === gl.POINTS) {
-				gl.drawArrays(drawType, 0, mMesh.vertexSize);	
+				gl.drawArrays(drawType, 0, mGeometry.vertexSize);	
 			} else {
-				gl.drawElements(drawType, mMesh.iBuffer.numItems, gl.UNSIGNED_SHORT, 0);	
+				gl.drawElements(drawType, mGeometry.iBuffer.numItems, gl.UNSIGNED_SHORT, 0);	
 			}	
 		}
 
-		mMesh.unbind();
+		mGeometry.unbind();
+	}
+
+
+	drawMesh(mMesh) {
+		const { material, geometry } = mMesh;
+
+		if(material.doubleSided) {
+			this.disable(GL.CULL_FACE);
+		} else {
+			this.enable(GL.CULL_FACE);
+		}
+
+		material.update();
+		this.drawGeometry(geometry, mMesh.matrix);
+	}
+
+
+	draw(mObj) {
+		if(mObj instanceof Geometry) {
+			this.drawGeometry(mObj);
+		} else if(mObj instanceof Mesh) {
+			this.drawMesh(mObj);
+		} else if(mObj instanceof Object3D) {
+			// console.log('here');
+			mObj.updateMatrix();
+			mObj.children.forEach(child => {
+				this.draw(child);
+			});
+		}
 	}
 
 

@@ -12,7 +12,7 @@ class EffectComposer {
 
 		this._params = {};
 		this.setSize(mWidth, mHeight);
-		this._mesh = Geom.bigTriangle();
+		this._geometry = Geom.bigTriangle();
 		this._passes = [];
 		this._returnTexture;
 	}
@@ -50,7 +50,7 @@ class EffectComposer {
 			fboTarget.bind();
 			GL.clear(0, 0, 0, 0);
 			pass.render(source);
-			GL.draw(this._mesh);
+			GL.draw(this._geometry);
 			fboTarget.unbind();
 
 			//	reset source

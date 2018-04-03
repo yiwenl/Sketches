@@ -2,7 +2,7 @@
 
 import GL from './GLTool';
 import GLShader from './GLShader';
-import Mesh from './Mesh';
+import Geometry from './Geometry';
 
 let gl;
 
@@ -19,8 +19,8 @@ class TransformFeedbackObject {
 
 
 	_init() {
-		this._meshCurrent = new Mesh();
-		this._meshTarget = new Mesh();
+		this._geoCurrent = new Geometry();
+		this._geoTarget = new Geometry();
 		this._numPoints = -1;
 
 		this._varyings = [];
@@ -31,8 +31,8 @@ class TransformFeedbackObject {
 	bufferData(mData, mName, mVaryingName) {
 		const isTransformFeedback = !!mVaryingName;
 		console.log('is Transform feedback ?', mName, isTransformFeedback);
-		this._meshCurrent.bufferData(mData, mName, null, gl.STREAM_COPY, false);
-		this._meshTarget.bufferData(mData, mName, null, gl.STREAM_COPY, false);
+		this._geoCurrent.bufferData(mData, mName, null, gl.STREAM_COPY, false);
+		this._geoTarget.bufferData(mData, mName, null, gl.STREAM_COPY, false);
 
 		if(isTransformFeedback) {
 			this._varyings.push(mVaryingName);
@@ -44,8 +44,8 @@ class TransformFeedbackObject {
 	}
 
 	bufferIndex(mArrayIndices) {
-		this._meshCurrent.bufferIndex(mArrayIndices);
-		this._meshTarget.bufferIndex(mArrayIndices);
+		this._geoCurrent.bufferIndex(mArrayIndices);
+		this._geoTarget.bufferIndex(mArrayIndices);
 	}
 
 
@@ -70,16 +70,16 @@ class TransformFeedbackObject {
 	}
 
 	_swap() {
-		const tmp          = this._meshCurrent;
-		this._meshCurrent = this._meshTarget;
-		this._meshTarget  = tmp;
+		const tmp          = this._geoCurrent;
+		this._geoCurrent = this._geoTarget;
+		this._geoTarget  = tmp;
 	}
 
 	get numPoints() {	return this._numPoints;	}
-	get meshCurrent() {	return this._meshCurrent;	}
-	get meshTarget() {	return this._meshTarget;	}
-	get meshSource() {	return this._meshCurrent;	}
-	get meshDestination() {	return this._meshTarget;	}
+	get geoCurrent() {	return this._geoCurrent;	}
+	get geoTarget() {	return this._geoTarget;	}
+	get geoSource() {	return this._geoCurrent;	}
+	get geoDestination() {	return this._geoTarget;	}
 }
 
 

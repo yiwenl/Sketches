@@ -4,17 +4,17 @@ import Geom from '../Geom';
 import GLShader from '../GLShader';
 import Batch from '../Batch';
 
-const vs = require('../shaders/skybox.vert');
-const fs = require('../shaders/skybox.frag');
+const vs = require('../glsl/skybox.vert');
+const fs = require('../glsl/skybox.frag');
 
 
 class BatchSkybox extends Batch {
 
 	constructor(size = 20) {
-		const mesh = Geom.skybox(size);
+		const geometry = Geom.skybox(size);
 		const shader = new GLShader(vs, fs);
 
-		super(mesh, shader);
+		super(geometry, shader);
 	}
 
 	draw(texture) {

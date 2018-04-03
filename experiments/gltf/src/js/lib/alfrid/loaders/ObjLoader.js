@@ -3,7 +3,7 @@
 'use strict';
 
 import BinaryLoader from './BinaryLoader';
-import Mesh from '../Mesh';
+import Geometry from '../Geometry';
 
 class ObjLoader extends BinaryLoader {
 
@@ -218,7 +218,7 @@ class ObjLoader extends BinaryLoader {
 			} 
 		}
 
-		return this._generateMeshes({	
+		return this._generateGeometry({	
 			positions,
 			coords,
 			normals:finalNormals,
@@ -227,14 +227,14 @@ class ObjLoader extends BinaryLoader {
 		
 	}
 
-	_generateMeshes(o) {
+	_generateGeometry(o) {
 		const maxNumVertices = 65535;
 		const hasNormals = o.normals.length > 0;
 		const hasUVs = o.coords.length > 0;
-		let mesh;
+		let geometry;
 
 		if(o.positions.length > maxNumVertices) {
-			const meshes = [];
+			const geometries = [];
 			let lastIndex = 0;
 
 			const oCopy       = {};
@@ -272,41 +272,41 @@ class ObjLoader extends BinaryLoader {
 
 				lastIndex = tmpIndex + 1;
 
-				mesh = new Mesh(this._drawType);
-				mesh.bufferVertex(positions);
+				geometry = new Geometry(this._drawType);
+				geometry.bufferVertex(positions);
 				if(hasUVs) {
-					mesh.bufferTexCoord(coords);	
+					geometry.bufferTexCoord(coords);	
 				}
 				
-				mesh.bufferIndex(indices);
+				geometry.bufferIndex(indices);
 				if(hasNormals) {
-					mesh.bufferNormal(normals);
+					geometry.bufferNormal(normals);
 				}
 
-				meshes.push(mesh);
+				geometries.push(geometry);
 			}
 
 			if(this._callback) {
-				this._callback(meshes, oCopy);
+				this._callback(geometries, oCopy);
 			}
 
-			return meshes;
+			return geometries;
 		} else {
-			mesh = new Mesh(this._drawType);
-			mesh.bufferVertex(o.positions);
+			geometry = new Geometry(this._drawType);
+			geometry.bufferVertex(o.positions);
 			if(hasUVs) {
-				mesh.bufferTexCoord(o.coords);	
+				geometry.bufferTexCoord(o.coords);	
 			}
-			mesh.bufferIndex(o.indices);
+			geometry.bufferIndex(o.indices);
 			if(hasNormals) {
-				mesh.bufferNormal(o.normals);
+				geometry.bufferNormal(o.normals);
 			}
 
 			if(this._callback) {
-				this._callback(mesh, o);
+				this._callback(geometry, o);
 			}
 
-			return mesh;
+			return geometry;
 		}
 		
 		return null;

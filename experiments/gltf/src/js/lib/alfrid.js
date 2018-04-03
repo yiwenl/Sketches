@@ -3,10 +3,11 @@
 import * as GLM 			from 'gl-matrix';
 import GL 					from './alfrid/GLTool';
 import GLShader 			from './alfrid/GLShader';
-import GLTextureOld 		from './alfrid/GLTexture';
-import GLTexture 			from './alfrid/GLTexture2';
+import GLTexture 			from './alfrid/GLTexture';
 import GLCubeTexture 		from './alfrid/GLCubeTexture';
 import Mesh 				from './alfrid/Mesh';
+import Geometry 			from './alfrid/Geometry';
+import Material 			from './alfrid/Material';
 import Geom					from './alfrid/Geom';
 import Batch				from './alfrid/Batch';
 import FrameBuffer			from './alfrid/FrameBuffer';
@@ -27,6 +28,10 @@ import TouchDetector		from './alfrid/utils/TouchDetector';
 import WebglNumber			from './alfrid/utils/WebglNumber';
 import WebglConst			from './alfrid/utils/WebglConst';
 
+//	SHADERS
+import Shaders				from './alfrid/shaders/Shaders';
+import ShaderLibs			from './alfrid/shaders/ShaderLibs';
+
 //	CAMERAS
 import Camera 				from './alfrid/cameras/Camera';
 import CameraOrtho 			from './alfrid/cameras/CameraOrtho';
@@ -45,6 +50,7 @@ import ObjLoader			from './alfrid/loaders/ObjLoader';
 import HDRLoader			from './alfrid/loaders/HDRLoader';
 import ColladaParser		from './alfrid/loaders/ColladaParser';
 import GLTFLoader			from './alfrid/loaders/GltfLoader';
+import loadImages			from './alfrid/loaders/loadImages';
 
 //	POST EFFECT
 import EffectComposer 		from './alfrid/post/EffectComposer';
@@ -68,7 +74,7 @@ import BatchFXAA			from './alfrid/helpers/BatchFXAA';
 import Scene				from './alfrid/helpers/Scene';
 import View					from './alfrid/helpers/View';
 import View3D				from './alfrid/helpers/View3D';
-import ShaderLibs			from './alfrid/utils/ShaderLibs';
+
 
 
 const VERSION = '0.2.0';
@@ -80,9 +86,10 @@ class Alfrid {
 		this.GLTool            = GL;
 		this.GLShader          = GLShader;
 		this.GLTexture         = GLTexture;
-		this.GLTextureOld      = GLTextureOld;
 		this.GLCubeTexture     = GLCubeTexture;
 		this.Mesh              = Mesh;
+		this.Geometry          = Geometry;
+		this.Material          = Material;
 		this.Geom              = Geom;
 		this.Batch             = Batch;
 		this.FrameBuffer       = FrameBuffer;
@@ -98,11 +105,13 @@ class Alfrid {
 		this.CameraCube        = CameraCube;
 		this.OrbitalControl    = OrbitalControl;
 		this.QuatRotation      = QuatRotation;
+		this.TouchDetector     = TouchDetector;
 		this.BinaryLoader      = BinaryLoader;
 		this.ObjLoader         = ObjLoader;
 		this.ColladaParser     = ColladaParser;
 		this.HDRLoader         = HDRLoader;
 		this.GLTFLoader        = GLTFLoader;
+		this.loadImages		   = loadImages;
 		this.BatchCopy         = BatchCopy;
 		this.BatchAxis         = BatchAxis;
 		this.BatchBall         = BatchBall;
@@ -116,6 +125,7 @@ class Alfrid {
 		this.View              = View;
 		this.View3D            = View3D;
 		this.Object3D          = Object3D;
+		this.Shaders           = Shaders;
 		this.ShaderLibs        = ShaderLibs;
 		this.WebglNumber       = WebglNumber;
 		
@@ -163,9 +173,10 @@ export {
 	GL,
 	GLShader,
 	GLTexture,
-	GLTextureOld,
 	GLCubeTexture,
 	Mesh,
+	Geometry,
+	Material,
 	Geom,
 	Batch,
 	FrameBuffer,
@@ -190,6 +201,7 @@ export {
 	ObjLoader,
 	HDRLoader,
 	GLTFLoader,
+	loadImages,
 	ColladaParser,
 	EffectComposer,
 	Pass,
@@ -209,5 +221,6 @@ export {
 	Scene,
 	View,
 	View3D,
+	Shaders,
 	ShaderLibs
 };

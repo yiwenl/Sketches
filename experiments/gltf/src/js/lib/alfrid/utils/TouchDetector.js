@@ -11,13 +11,13 @@ function distance(a, b) {
 }
 
 class TouchDetector extends EventDispatcher {
-	constructor(mMesh, mCamera, mSkipMoveCheck=false, mListenerTarget=window) {
+	constructor(mGeometry, mCamera, mSkipMoveCheck=false, mListenerTarget=window) {
 		super();
 
-		this._mesh = mMesh;
-		this._mesh.generateFaces();
+		this._geometry = mGeometry;
+		this._geometry.generateFaces();
 		this._camera = mCamera;
-		this.faceVertices = mMesh.faces.map((face)=>(face.vertices));
+		this.faceVertices = mGeometry.faces.map((face)=>(face.vertices));
 		this.clickTolerance = 8;
 
 		this._ray = new Ray([0, 0, 0], [0, 0, -1]);

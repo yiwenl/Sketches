@@ -3,9 +3,9 @@
 import GL from '../GLTool';
 import Pass from './Pass';
 
-const fsBlur5 = require('../shaders/blur5.frag');
-const fsBlur9 = require('../shaders/blur9.frag');
-const fsBlur13 = require('../shaders/blur13.frag');
+const fsBlur5 = require('../glsl/blur5.frag');
+const fsBlur9 = require('../glsl/blur9.frag');
+const fsBlur13 = require('../glsl/blur13.frag');
 
 class PassBlurBase extends Pass {
 	constructor(mQuality = 9, mDirection, mWidth, mHeight, mParams = {}) {

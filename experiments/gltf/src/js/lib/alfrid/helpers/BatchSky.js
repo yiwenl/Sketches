@@ -4,17 +4,17 @@ import Geom from '../Geom';
 import GLShader from '../GLShader';
 import Batch from '../Batch';
 
-const vs = require('../shaders/sky.vert');
-const fs = require('../shaders/copy.frag');
+const vs = require('../glsl/sky.vert');
+const fs = require('../glsl/copy.frag');
 
 
 class BatchSky extends Batch {
 
 	constructor(size = 50, seg = 24) {
-		const mesh = Geom.sphere(size, seg, true);
+		const geometry = Geom.sphere(size, seg, true);
 		const shader = new GLShader(vs, fs);
 
-		super(mesh, shader);
+		super(geometry, shader);
 	}
 
 	draw(texture) {

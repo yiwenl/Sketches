@@ -1,7 +1,21 @@
 // GltfLoader.js
 
 import xhr from './xhr';
+import loadImages from './loadImages';
+import Geometry from '../Geometry';
+import Material from '../Material';
 import Mesh from '../Mesh';
+import GLShader from '../GLShader';
+import ShaderLibs from '../shaders/ShaderLibs';
+import Shaders from '../shaders/Shaders';
+
+import GLTexture from '../GLTexture';
+import Object3D from '../objects/Object3D';
+import Promise from 'promise-polyfill';
+import objectAssign from 'object-assign';
+import WebglNumber from '../utils/WebglNumber';
+
+
 
 const ARRAY_CTOR_MAP = {
 	5120: Int8Array,
@@ -27,7 +41,7 @@ const semanticAttributeMap = {
 	POSITION: 'aVertexPosition',
 	// 'TANGENT': 'aTangent',
 	TEXCOORD_0: 'aTextureCoord',
-	TEXCOORD_1: 'aTextureCoord1',
+	// TEXCOORD_1: 'aTextureCoord1',
 	WEIGHTS_0: 'aWeight',
 	JOINTS_0: 'aJoint',
 	COLOR: 'aColor'
@@ -44,8 +58,9 @@ const load = (mSource) => new Promise((resolve, reject) => {
 
 	_loadGltf(mSource)
 		.then(_loadBin)
-		.then(_getBufferViewData)
 		.then(_loadTextures)
+		.then(_getBufferViewData)
+		.then(_parseMaterials)
 		.then(_parseMesh)
 		.then(_parseNodes)
 		.then((gltfInfo)=>{
@@ -58,48 +73,93 @@ const load = (mSource) => new Promise((resolve, reject) => {
 
 
 const _parseNodes = (gltf) => new Promise((resolve, reject) => {
-	const { nodes } = gltf;
+	const { nodes, scenes } = gltf;
 
-	nodes.forEach((nodeInfo, i) => {
-		if (nodeInfo.camera != null && this.includeCamera) {
-			// setup camera
-		} else if(nodeInfo.mesh != null) {
-			// console.log(i, 'Mesh index :', nodeInfo.mesh);
+	const getTree = (nodeIndex) => {
+		const node = nodes[nodeIndex];
+		const obj3D = node.mesh === undefined ? new Object3D() : gltf.output.meshes[node.mesh];
+
+
+		if(node.scale) {
+			obj3D.scaleX = node.scale[0];
+			obj3D.scaleY = node.scale[1];
+			obj3D.scaleZ = node.scale[2];
 		}
 
+		if(node.rotation) {
+			obj3D.setRotationFromQuaternion(node.rotation);
+		}
+
+		if(node.translation) {
+			obj3D.x = node.translation[0];
+			obj3D.y = node.translation[1];
+			obj3D.z = node.translation[2];
+		}
+
+		if(node.children) {
+			node.children.forEach(child => {
+				const _child = getTree(child);
+				obj3D.addChild(_child);
+			});	
+		}
+		
+
+		return obj3D;
+	};
+
+	gltf.output.scenes = scenes.map(scene => {
+		const container = new Object3D();
+		scene.nodes.forEach(nodeIndex => {
+			const childTree = getTree(nodeIndex);
+			container.addChild(childTree);
+		});
+
+		return container;
 	});
+
 	resolve(gltf);
 });
 
+
 const _parseMesh = (gltf) => new Promise((resolve, reject) => {
 	const { meshes } = gltf;
-	gltf.geometries = [];
-	gltf.output = {
-		meshes:[],
-		scene:{}
-	};
+	
 
-	meshes.forEach((mesh, i) => {
+	meshes.forEach( mesh => {
 		const { primitives } = mesh;
-		const geometry = {};
 
-		primitives.forEach((primitiveInfo, i) => {
+		const geometryInfo = {};
+
+		primitives.forEach( primitiveInfo => {
 			const semantics = Object.keys(primitiveInfo.attributes);
+			let defines = {};
 
-			semantics.forEach((semantic, i) => {
+			semantics.forEach( semantic => {
 				const accessorIdx = primitiveInfo.attributes[semantic];
 				const attributeInfo = gltf.accessors[accessorIdx];
 				const attributeName = semanticAttributeMap[semantic];
 				if(!attributeName) {
 					return;
 				}
+				if(semantic === 'NORMAL') {
+					defines.HAS_NORMALS = 1;
+				} 
+				if(semantic.indexOf('TEXCOORD') > -1) {
+					defines.HAS_UV = 1;
+				}
+
+
 				const size = SIZE_MAP[attributeInfo.type];
 				let attributeArray = _getAccessorData(gltf, accessorIdx);
 				if (attributeArray instanceof Uint32Array) {
 					attributeArray = new Float32Array(attributeArray);
 				}
 
-				geometry[attributeName] = {
+				if(semantic === 'TEXCOORD_1') {
+					console.log(size, attributeArray);
+				}
+
+				geometryInfo[attributeName] = {
 					value:attributeArray,
 					size,
 				};
@@ -109,32 +169,78 @@ const _parseMesh = (gltf) => new Promise((resolve, reject) => {
 			//	parse index
 			if (primitiveInfo.indices != null) {
 				const attributeArray = _getAccessorData(gltf, primitiveInfo.indices, true);
-				geometry.indices = {
+				geometryInfo.indices = {
 					value:attributeArray,
 					size:1
 				};
 			}
 
-			const m = new Mesh();
+			const geometry = new Geometry();
 
-			for(const s in geometry) {
-				const data = geometry[s];
+			for(const s in geometryInfo) {
+				const data = geometryInfo[s];
 				if(s !== 'indices') {
-					// console.log(s, data);
-					m.bufferFlattenData(data.value, s, data.size);
+					geometry.bufferFlattenData(data.value, s, data.size);
 				} else {
-					// console.log(data.value);
-					m.bufferIndex(data.value);
+					geometry.bufferIndex(data.value);
 				}
 			}
-			gltf.output.meshes.push(m);
-			gltf.geometries.push(geometry);
+
+			const materialInfo = gltf.output.materialInfo[primitiveInfo.material];
+			defines = objectAssign(defines, materialInfo.defines);
+			
+
+			const {
+				emissiveFacotr,
+				normalTexture,
+				occlusionTexture,
+				pbrMetallicRoughness,
+			} = materialInfo;
+
+			const {
+				baseColorTexture,
+				metallicRoughnessTexture
+			} = pbrMetallicRoughness;
+
+			const uniforms = {
+				uEmissiveFactor:emissiveFacotr || [0, 0, 0],
+				uBaseColor:pbrMetallicRoughness.baseColorFactor || [1, 1, 1, 1],
+				uRoughness:pbrMetallicRoughness.roughnessFactor || 1,
+				uMetallic:pbrMetallicRoughness.metallicFactor || 1,
+				uScaleDiffBaseMR:[0, 0, 0, 0],
+				uScaleFGDSpec:[0, 0, 0, 0],
+				uScaleIBLAmbient:[1, 1, 1, 1],
+				uLightDirection:[1, 1, 1],
+				uLightColor:[1, 1, 1],
+				uGamma:1
+			};
+
+			if (baseColorTexture) {
+				uniforms.uColorMap = baseColorTexture.glTexture;
+			}
+
+			if (metallicRoughnessTexture) {
+				uniforms.uMetallicRoughnessMap = metallicRoughnessTexture.glTexture;	
+			}
+
+			if (normalTexture) {
+				uniforms.uNormalScale = normalTexture.scale || 1;
+				uniforms.uNormalMap = normalTexture.glTexture;
+			}
+
+			if (occlusionTexture) {
+				uniforms.uAoMap = occlusionTexture.glTexture;
+				uniforms.uOcclusionStrength = occlusionTexture.strength || 1;
+			}
+
+			const material = new Material(ShaderLibs.gltfVert, ShaderLibs.gltfFrag, uniforms, defines);
+			const mesh = new Mesh(geometry, material);
+			gltf.output.meshes.push(mesh);
 		});
 	});
 
 	resolve(gltf);
 });
-
 
 const _getBufferViewData = (gltfInfo) => new Promise((resolve, reject) => {
 	const { bufferViews, buffers } = gltfInfo;
@@ -151,7 +257,16 @@ const _loadGltf = (mSource) => new Promise((resolve, reject) => {
 		resolve(mSource);
 	} else {
 		xhr(mSource).then((o)=>{
-			resolve(JSON.parse(o));
+			const gltfInfo = JSON.parse(o);
+			gltfInfo.output = {
+				meshes:[],
+				scenes:[],
+				textures:[],
+				material:[],
+				materialInfo:[]
+			};
+
+			resolve(gltfInfo);
 		}, (e)=> {
 			reject(e);
 		});
@@ -187,7 +302,62 @@ const _loadBin = (gltfInfo) => new Promise((resolve, reject) => {
 });
 
 const _loadTextures = (gltfInfo) => new Promise((resolve, reject) => {
-	console.log('TODO : Loading textures');
+	const { textures, images, samplers } = gltfInfo;
+	if(!images) {
+		resolve(gltfInfo);
+	}
+
+	const imagesToLoad = images.map(img => `${base}${img.uri}`);
+
+	loadImages(imagesToLoad).then((o) => {
+		gltfInfo.output.textures = o.map((img, i) => {
+			const settings = objectAssign({}, samplers ? samplers[textures[i].sampler] : {});
+			return new GLTexture(img, settings);
+		});
+		resolve(gltfInfo);
+	}, (e)=> {
+		reject(e);
+	});
+});
+
+const _parseMaterials = (gltfInfo) => new Promise((resolve, reject) => {
+	const { materials } = gltfInfo;
+	const { textures } = gltfInfo.output;
+	
+
+	gltfInfo.output.materialInfo = materials.map(material => {
+		material.defines = {
+			USE_IBL:1
+		};
+
+		if(material.normalTexture) {
+			material.defines.HAS_NORMALMAP = 1;
+			material.normalTexture.glTexture = textures[material.normalTexture.index];
+		}
+
+		if(material.occlusionTexture) {
+			material.defines.HAS_OCCLUSIONMAP = 1;
+			material.occlusionTexture.glTexture = textures[material.occlusionTexture.index];	
+		}
+
+
+		// if(material.pbrMetallicRoughness) {
+		if(material.pbrMetallicRoughness.baseColorTexture) {
+			material.defines.HAS_BASECOLORMAP = 1;
+			material.pbrMetallicRoughness.baseColorTexture.glTexture = textures[material.pbrMetallicRoughness.baseColorTexture.index];	
+		}
+
+		if(material.pbrMetallicRoughness.metallicRoughnessTexture) {
+			material.defines.HAS_METALROUGHNESSMAP = 1;
+			material.pbrMetallicRoughness.metallicRoughnessTexture.glTexture = textures[material.pbrMetallicRoughness.metallicRoughnessTexture.index];	
+		}
+
+		// }
+
+		return material;
+	});
+
+
 	resolve(gltfInfo);
 });
 

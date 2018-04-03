@@ -4,15 +4,15 @@ import Geom from '../Geom';
 import GLShader from '../GLShader';
 import Batch from '../Batch';
 
-const vs = require('../shaders/bigTriangle.vert');
-const fs = require('../shaders/fxaa.frag');
+const vs = require('../glsl/bigTriangle.vert');
+const fs = require('../glsl/fxaa.frag');
 
 class BatchFXAA extends Batch {
 
 	constructor() {
-		const mesh = Geom.bigTriangle();
+		const geometry = Geom.bigTriangle();
 		const shader = new GLShader(vs, fs);
-		super(mesh, shader);
+		super(geometry, shader);
 
 		shader.bind();
 		shader.uniform('texture', 'uniform1i', 0);

@@ -1,8 +1,9 @@
 // FrameBuffer.js
 
 import GL from './GLTool';
-import GLTexture2 from './GLTexture2';
+import GLTexture from './GLTexture';
 import WebglNumber from './utils/WebglNumber';
+import objectAssign from 'object-assign';
 
 let gl;
 let webglDepthTexture;
@@ -129,7 +130,7 @@ class FrameBuffer {
 	}
 
 	_createTexture(mInternalformat, mTexelType, mFormat, mParameters = {}) {
-		const parameters = Object.assign({}, this._parameters);
+		const parameters = objectAssign({}, this._parameters);
 		if(!mFormat) {	mFormat = mInternalformat; }
 		
 		parameters.internalFormat = mInternalformat || gl.RGBA;
@@ -139,7 +140,7 @@ class FrameBuffer {
 			parameters[s] = mParameters[s];
 		}
 
-		const texture = new GLTexture2(null, parameters, this.width, this.height);
+		const texture = new GLTexture(null, parameters, this.width, this.height);
 		return texture;
 	}
 

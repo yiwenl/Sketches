@@ -3,6 +3,9 @@
 'use strict';
 
 import GL from './GLTool';
+import GLTexture from './GLTexture';
+import GLCubeTexture from './GLCubeTexture';
+
 const glslify = require('glslify');
 const isSame = (array1, array2) => {
 	if(array1.length !== array2.length) {
@@ -36,8 +39,8 @@ const cloneArray = (mArray) => {
 };
 
 let gl;
-const defaultVertexShader = require('./shaders/basic.vert');
-const defaultFragmentShader = require('./shaders/basic.frag');
+const defaultVertexShader = require('./glsl/basic.vert');
+const defaultFragmentShader = require('./glsl/basic.frag');
 
 const uniformMapping = {
 	float: 'uniform1f',
@@ -54,7 +57,7 @@ class GLShader {
 
 		gl                   = GL.gl;
 		this.parameters      = [];
-		this.uniformTextures = [];
+		this._uniformTextures = [];
 		this._varyings 		 = mVaryings;
 
 		if(!strVertexShader) { strVertexShader = defaultVertexShader; }
@@ -74,7 +77,7 @@ class GLShader {
 		}
 		gl.useProgram(this.shaderProgram);
 		GL.useShader(this);
-		this.uniformTextures = [];
+		// this.uniformTextures = [];
 
 	}
 
@@ -155,18 +158,43 @@ class GLShader {
 
 	uniformObject(mUniformObj) {
 		for(const uniformName in mUniformObj) {
-			let uniformValue = mUniformObj[uniformName];
-			const uniformType = GLShader.getUniformType(uniformValue);
+			
+			if (mUniformObj[uniformName] instanceof GLTexture || mUniformObj[uniformName] instanceof GLCubeTexture) {
+				const texture = mUniformObj[uniformName];
 
-			if(uniformValue.concat && uniformValue[0].concat) {
-				let tmp = [];
-				for(let i=0; i<uniformValue.length; i++) {
-					tmp = tmp.concat(uniformValue[i]);
+				let textureIndex = -1; ;
+				this._uniformTextures.forEach((ut, i) => {
+					if(ut.name === uniformName) {
+						textureIndex = i;
+						ut.texture = texture;
+					}
+				});
+
+				if(textureIndex === -1) {
+					textureIndex = this._uniformTextures.length;	
+					this._uniformTextures.push({
+						name:uniformName,
+						texture
+					});
 				}
-				uniformValue = tmp;
+
+				this.uniform(uniformName, 'uniform1i', textureIndex);
+				texture.bind(textureIndex);
+			} else {
+				let uniformValue = mUniformObj[uniformName];
+				const uniformType = GLShader.getUniformType(uniformValue);
+
+				if(uniformValue.concat && uniformValue[0].concat) {
+					let tmp = [];
+					for(let i=0; i<uniformValue.length; i++) {
+						tmp = tmp.concat(uniformValue[i]);
+					}
+					uniformValue = tmp;
+				}
+				
+				this.uniform(uniformName, uniformType, uniformValue);
 			}
 			
-			this.uniform(uniformName, uniformType, uniformValue);
 		}
 
 	}

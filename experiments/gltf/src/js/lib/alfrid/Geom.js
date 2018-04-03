@@ -2,7 +2,7 @@
 
 'use strict';
 
-import Mesh from './Mesh';
+import Geometry from './Geometry';
 
 const Geom = {};
 let meshTri;
@@ -87,7 +87,7 @@ Geom.plane = function plane(width, height, numSegments, axis = 'xy', drawType = 
 		}
 	}
 
-	const mesh = new Mesh(drawType);
+	const mesh = new Geometry(drawType);
 	mesh.bufferVertex(positions);
 	mesh.bufferTexCoord(coords);
 	mesh.bufferIndex(indices);
@@ -162,7 +162,7 @@ Geom.sphere = function sphere(size, numSegments, isInvert = false, drawType = 4)
 		indices.reverse();
 	}
 
-	const mesh = new Mesh(drawType);
+	const mesh = new Geometry(drawType);
 	mesh.bufferVertex(positions);
 	mesh.bufferTexCoord(coords);
 	mesh.bufferIndex(indices);
@@ -338,7 +338,7 @@ Geom.cube = function cube(w, h, d, drawType = 4) {
 	count ++;
 
 
-	const mesh = new Mesh(drawType);
+	const mesh = new Geometry(drawType);
 	mesh.bufferVertex(positions);
 	mesh.bufferTexCoord(coords);
 	mesh.bufferIndex(indices);
@@ -502,7 +502,7 @@ Geom.skybox = function skybox(size, drawType = 4) {
 	indices.push(count * 4 + 2);
 	indices.push(count * 4 + 3);
 
-	const mesh = new Mesh(drawType);
+	const mesh = new Geometry(drawType);
 	mesh.bufferVertex(positions);
 	mesh.bufferTexCoord(coords);
 	mesh.bufferIndex(indices);
@@ -521,7 +521,7 @@ Geom.bigTriangle = function bigTriangle() {
 			[4, -1]
 		];
 		
-		meshTri = new Mesh();
+		meshTri = new Geometry();
 		meshTri.bufferData(positions, 'aPosition', 2);
 		meshTri.bufferIndex(indices);	
 	}

@@ -5,6 +5,8 @@ const assetsToLoad = [
 	{"id":"brdfLUT","url":"assets/img/brdfLUT.png","type":"png"},
 	{"id":"metalGloss","url":"assets/img/metalGloss.jpg","type":"jpg"},
 	{"id":"normal","url":"assets/img/normal.jpg","type":"jpg"},
+	{"id":"pisa_irradiance","url":"assets/img/pisa_irradiance.dds","type":"binary"},
+	{"id":"pisa_radiance","url":"assets/img/pisa_radiance.dds","type":"binary"},
 	{"id":"studio10_irradiance","url":"assets/img/studio10_irradiance.dds","type":"binary"},
 	{"id":"studio10_radiance","url":"assets/img/studio10_radiance.dds","type":"binary"},
 	{"id":"studio11_irradiance","url":"assets/img/studio11_irradiance.dds","type":"binary"},
@@ -28,7 +30,9 @@ const assetsToLoad = [
 	{"id":"studio8_irradiance","url":"assets/img/studio8_irradiance.dds","type":"binary"},
 	{"id":"studio8_radiance","url":"assets/img/studio8_radiance.dds","type":"binary"},
 	{"id":"studio9_irradiance","url":"assets/img/studio9_irradiance.dds","type":"binary"},
-	{"id":"studio9_radiance","url":"assets/img/studio9_radiance.dds","type":"binary"}
+	{"id":"studio9_radiance","url":"assets/img/studio9_radiance.dds","type":"binary"},
+	{"id":"vatican_irradiance","url":"assets/img/vatican_irradiance.dds","type":"binary"},
+	{"id":"vatican_radiance","url":"assets/img/vatican_radiance.dds","type":"binary"}
 ];
 
 

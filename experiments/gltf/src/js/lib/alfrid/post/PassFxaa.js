@@ -2,7 +2,7 @@
 
 import GL from '../GLTool';
 import Pass from './Pass';
-import fsFxaa from '../shaders/fxaa.frag';
+import fsFxaa from '../glsl/fxaa.frag';
 
 class PassFxaa extends Pass {
 	constructor() {

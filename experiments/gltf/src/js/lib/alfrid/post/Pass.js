@@ -2,7 +2,7 @@
 
 import GLShader from '../GLShader';
 import FrameBuffer from '../FrameBuffer';
-import ShaderLibs from '../utils/ShaderLibs';
+import ShaderLibs from '../shaders/ShaderLibs';
 
 class Pass {
 	constructor(mSource, mWidth = 0, mHeight = 0, mParams = {}) {

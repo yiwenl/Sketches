@@ -95,7 +95,7 @@ class GLCubeTexture {
 
 		gl.activeTexture(gl.TEXTURE0 + index);
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-		gl.uniform1i(GL.shader.uniformTextures[index], index);
+		// gl.uniform1i(GL.shader.uniformTextures[index], index);
 		this._bindIndex = index;
 	}
 

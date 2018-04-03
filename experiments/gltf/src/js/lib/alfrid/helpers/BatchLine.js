@@ -2,12 +2,12 @@
 
 
 import GL from '../GLTool';
-import Mesh from '../Mesh';
+import Geometry from '../Geometry';
 import GLShader from '../GLShader';
 import Batch from '../Batch';
 
-const vs = require('../shaders/basic.vert');
-const fs = require('../shaders/simpleColor.frag');
+const vs = require('../glsl/basic.vert');
+const fs = require('../glsl/simpleColor.frag');
 
 
 
@@ -20,19 +20,19 @@ class BatchAxis extends Batch {
 		positions.push([0,  0,  0]);
 		positions.push([0,  0,  0]);
 
-		const mesh = new Mesh(GL.LINES);
-		mesh.bufferVertex(positions);
-		mesh.bufferTexCoord(coords);
-		mesh.bufferIndex(indices);
+		const geometry = new Geometry(GL.LINES);
+		geometry.bufferVertex(positions);
+		geometry.bufferTexCoord(coords);
+		geometry.bufferIndex(indices);
 
 		const shader = new GLShader(vs, fs);
 
-		super(mesh, shader);
+		super(geometry, shader);
 	}
 
 
 	draw(mPositionA, mPositionB, color = [1, 1, 1], opacity = 1.0) {
-		this._mesh.bufferVertex([mPositionA, mPositionB]);
+		this._geometry.bufferVertex([mPositionA, mPositionB]);
 
 		this._shader.bind();
 		this._shader.uniform('color', 'vec3', color);

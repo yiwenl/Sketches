@@ -1,38 +1,38 @@
 // ColladaParser.js
 
 import parser from 'collada-parser';
-import Mesh from '../Mesh';
+import Geometry from '../Geometry';
 
 
-const generateMesh = function (meshes) {
+const generateGeometry = function (meshes) {
 	const caches = {};
 
 	meshes.forEach((mesh)=> {
 		const { vertices, normals, coords, triangles, name } = mesh.mesh;
 		if(!caches[name]) {
-			const glMesh = new Mesh()
+			const glGeometry = new Geometry()
 				.bufferFlattenData(vertices, 'aVertexPosition', 3)
 				.bufferFlattenData(coords, 'aTextureCoord', 2)
 				.bufferFlattenData(normals, 'aNormal', 3)
 				.bufferIndex(triangles);
 
-			caches[name] = glMesh;
+			caches[name] = glGeometry;
 		}
 
-		mesh.glMesh = caches[name];
+		mesh.glGeometry = caches[name];
 	});
 };
 
 const parse = function (mData) {
 	const meshes = parser.parse(mData);
-	generateMesh(meshes);
+	generateGeometry(meshes);
 
 	return meshes;
 };
 
 const load = function (mPath, mCallback) {
 	parser.load(mPath, (meshes)=> {
-		generateMesh(meshes);
+		generateGeometry(meshes);
 		mCallback(meshes);
 	});
 };

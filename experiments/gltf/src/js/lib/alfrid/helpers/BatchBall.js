@@ -4,15 +4,15 @@ import Geom from '../Geom';
 import GLShader from '../GLShader';
 import Batch from '../Batch';
 
-const vs = require('../shaders/general.vert');
-const fs = require('../shaders/simpleColor.frag');
+const vs = require('../glsl/general.vert');
+const fs = require('../glsl/simpleColor.frag');
 
 class BatchBall extends Batch {
 
 	constructor() {
-		const mesh = Geom.sphere(1, 24);
+		const geometry = Geom.sphere(1, 24);
 		const shader = new GLShader(vs, fs);
-		super(mesh, shader);
+		super(geometry, shader);
 	}
 
 
