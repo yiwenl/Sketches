@@ -18,7 +18,7 @@ class SceneApp extends Scene {
 
 	_initTextures() {
 		this.textureBrdf = Assets.get('brdfLUT');
-		this.env = 'studio1';
+		this.env = 'studio11';
 		
 		const envs = ['pisa', 'vatican'];
 		for(let i=1; i<=12; i++) {
