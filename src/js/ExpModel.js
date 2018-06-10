@@ -238,6 +238,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchStrangeBubbles.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/strangeBubbles/dist/index.html',
 		title:'Strange Bubbles'
+	},
+	{
+		cover:'assets/img/coverSketchCamera01.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/camera01/dist/index.html',
+		title:'untitled'
 	}
 ]
 
