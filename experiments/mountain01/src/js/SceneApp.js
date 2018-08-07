@@ -20,7 +20,7 @@ class SceneApp extends Scene {
 		const r = 5;
 		// this.orbitalControl.radius.limit(r, r);
 		this.orbitalControl.radius.value = r;
-		this.orbitalControl.center[1] = 2;
+		// this.orbitalControl.center[1] = 2;
 
 
 
@@ -93,10 +93,10 @@ class SceneApp extends Scene {
 
 		this._bBall.draw(light, [s, s, s], [1, 1, .5]);
 
-		this._vMountain.render(this._fbo.getTexture(0), this._fbo.getTexture(1) );
+		this._vMountain.render(this._fbo.getTexture(0), this._fbo.getTexture(1), this.camera.position );
 
 
-		s = 200;
+		s = 100;
 		GL.viewport(0, 0, s, s);
 		this._bCopy.draw(this._fbo.getTexture(0));
 		GL.viewport(s, 0, s, s);

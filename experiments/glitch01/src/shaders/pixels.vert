@@ -9,6 +9,7 @@ uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform vec2 uViewport;
+uniform vec3 uCameraPos;
 
 uniform sampler2D texture;
 
@@ -23,8 +24,14 @@ void main(void) {
 	vTextureCoord = aTextureCoord;
 	vNormal = aNormal;
 
+
+	float distToCamera = distance(aVertexPosition, uCameraPos);
+
+	float maxRadius = 1.0;
+	float scale = smoothstep(0.0, maxRadius, distToCamera);
+
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
-	gl_PointSize = distOffset * mix(aTextureCoord.x, 1.0, .2);
+	gl_PointSize = distOffset * mix(aTextureCoord.x, 1.0, .2) * scale;
 
 	vec2 uv = gl_Position.xy / gl_Position.w * .5 + .5;
 

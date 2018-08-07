@@ -243,8 +243,15 @@ const ExpModel = [
 		cover:'assets/img/coverSketchCamera01.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/camera01/dist/index.html',
 		title:'untitled'
+	},
+	{
+		cover:'assets/img/coverSketchWires.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/wires/dist/index.html',
+		title:'Wires'
 	}
 ]
+
+
 
 
 

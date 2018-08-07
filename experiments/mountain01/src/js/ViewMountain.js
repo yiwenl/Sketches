@@ -18,7 +18,7 @@ class ViewMountain extends alfrid.View {
 	}
 
 
-	render(textureHeight, textureNormal) {
+	render(textureHeight, textureNormal, mCameraPos) {
 		const { NUM_TILE } = Config;
 		const uvScale = 1.0 / NUM_TILE;
 		let u, v, x, y;
@@ -26,6 +26,7 @@ class ViewMountain extends alfrid.View {
 
 		this.shader.bind();
 
+		this.shader.uniform("uCameraPos", "vec3", mCameraPos);
 		this.shader.uniform("uHeight", "float", Config.height);
 		this.shader.uniform("uLight", "vec3", Config.lightPos);
 

@@ -69,11 +69,12 @@ class ViewPixels extends alfrid.View {
 	}
 
 
-	render(texture) {
+	render(texture, cameraPos) {
 		this.shader.bind();
 		this.shader.uniform("texture", "uniform1i", 0);
 		texture.bind(0);
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
+		this.shader.uniform("uCameraPos", "vec3", cameraPos);
 		GL.draw(this.mesh);
 	}
 

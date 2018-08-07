@@ -82,8 +82,8 @@ void main () {
 	vec2 uv      = vTextureCoord + vec2(nx, ny) * 0.01;
 
 	// vec2 uv      = vec2(sin(uTime * 0.03) * .5 + .5, noise);
-	vec3 splat   = texture2D(texture, uv).rgb * uBaseStrength;
+	vec3 splat   = texture2D(texture, uv).rgb;
 	
 	vec3 base    = texture2D(uTarget, vTextureCoord).xyz;
-	gl_FragColor = vec4(base + splat, 1.0);
+	gl_FragColor = vec4(splat, 1.0);
 }

@@ -48,7 +48,7 @@ class SceneApp extends Scene {
 
 
 	render() {
-		this.orbitalControl.ry.value += 0.01;
+		// this.orbitalControl.ry.value += 0.01;
 		this._fboBg.bind();
 		GL.clear(0, 0, 0, 0);
 		this._vBg.render();
@@ -59,7 +59,7 @@ class SceneApp extends Scene {
 		GL.disable(GL.DEPTH_TEST);
 		this._bCopy.draw(this._fboBg.getTexture());
 		GL.enable(GL.DEPTH_TEST);
-		this._vPixels.render(this._fboBg.getTexture());
+		this._vPixels.render(this._fboBg.getTexture(), GL.camera.position);
 		// this._fboRender.unbind();
 
 		// this._passBloom.render(this._fboRender.getTexture());
