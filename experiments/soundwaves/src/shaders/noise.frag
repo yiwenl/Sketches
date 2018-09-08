@@ -54,10 +54,11 @@ void main(void) {
 	float distToCenter = distance(vTextureCoord, vec2(.5));
 	vec2 dir = vTextureCoord - vec2(.5);
 	// float theta = (atan(dir.y, dir.x) + PI) / PI / 2.0;
-	float theta = atan(dir.y, dir.x) + distToCenter * 10.0 + uTime * 2.0;
+	float theta = atan(dir.y, dir.x) + distToCenter * 20.0 + uTime * 2.0;
 
-	float scale = 150.0;
+	float scale = 130.0;
 	float noise = noise(distToCenter * scale, sin(theta), uTime);
+	noise = pow(noise, 2.0);
     
     gl_FragColor = vec4(vec3(noise), 1.0);
 }

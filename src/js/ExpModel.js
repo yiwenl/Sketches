@@ -248,6 +248,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchWires.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/wires/dist/index.html',
 		title:'Wires'
+	},
+	{
+		cover:'assets/img/coverSketchSoundwaves.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/soundwaves/dist/index.html',
+		title:'Waves'
 	}
 ]
 
