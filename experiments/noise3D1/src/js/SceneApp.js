@@ -34,7 +34,7 @@ class SceneApp extends Scene {
 
 		this.offset = 0.5;
 		setTimeout(()=> {
-			// gui.add(this, 'offset', 0, 1).listen();	
+			gui.add(this, 'offset', 0, 1).listen();	
 			gui.add(Config, 'animated').onFinishChange(Settings.refresh);
 		}, 200);
 
