@@ -55,10 +55,12 @@ void main(void) {
 	a = smoothstep(.5, .1, a);
 
 	vec4 color = vec4(vec3(s), 1.0);
+	// vec4 color = vec4(vec3(s), 1.0);
+	// vec4 color = vec4( s);
 
 	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
 	float fogAmount = fogFactorExp2(fogDistance - 4.5, FOG_DENSITY);
-	const vec4 fogColor = vec4(0.0, 0.0, 0.0, 1.0); // white
+	const vec4 fogColor = vec4(1.0, 1.0, 1.0, 0.0); // white
 
 	gl_FragColor = mix(color, fogColor, fogAmount);
 	gl_FragColor *= a;

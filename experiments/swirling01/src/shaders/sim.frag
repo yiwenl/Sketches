@@ -7,8 +7,12 @@ varying vec2 vTextureCoord;
 uniform sampler2D textureVel;
 uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
+uniform sampler2D textureOrg;
 uniform float time;
 uniform float maxRadius;
+
+uniform vec3 uHit;
+uniform float uHitForce;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0;  }
 
@@ -113,28 +117,59 @@ vec3 curlNoise( vec3 p ){
 
 }
 
+
+vec2 rotate(vec2 v, float a) {
+	float s = sin(a);
+	float c = cos(a);
+	mat2 m = mat2(c, -s, s, c);
+	return m * v;
+}
+
+#define PI 3.141592653
+
 void main(void) {
 	vec3 pos             = texture2D(texturePos, vTextureCoord).rgb;
 	vec3 vel             = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra           = texture2D(textureExtra, vTextureCoord).rgb;
-	float posOffset      = mix(extra.r, 1.0, .75) * .08;
-	vec3 acc             = curlNoise(pos * posOffset + time * .5);
-	float speedOffset    = mix(extra.g, 1.0, .5);
+	vec3 org             = texture2D(textureOrg, vTextureCoord).rgb;
+	float posOffset      = 0.1;
+	vec3 acc             = curlNoise(pos * posOffset + time * .1);
+	acc.y 				 += 1.0;
+	acc.y 				 *= 0.85;
+	float speedOffset    = mix(extra.g, 1.0, .9);
+	float life 			 = extra.r;
+
+
+	//	rotation 
+	vec2 dir = normalize(pos.xz);
+	dir      = rotate(dir, PI * 0.75);
+	acc.xz   += dir * 0.5;
+
+	//	interaction
+	float d               = distance(pos, uHit);
+	const float maxRadius = 4.0;
+	d                     = smoothstep(maxRadius, 0.0, d);
+	vec3 dirToHit         = normalize(uHit - pos);
+	acc                   += dirToHit * 3.5 * d * uHitForce;
 	
-	float dist           = length(pos);
-	if(dist > maxRadius) {
-		float f          = pow(2.0, (dist - maxRadius) * 2.0) * 0.2;
-		acc              -= normalize(pos) * f;
-	}
-	
-	vel                  += acc * .02 * speedOffset;
+	vel                  += acc * .001 * speedOffset;
 	
 	const float decrease = .96;
 	vel                  *= decrease;
 	
 	pos                  += vel;
 
+	life -= 0.0015;
+	if(life <= 0.0) {
+		life = 1.0;
+		vel *= 0.0;
+		pos = org;
+	}
+
+	extra.r = life;
+
 	gl_FragData[0] = vec4(pos, 1.0);
 	gl_FragData[1] = vec4(vel, 1.0);
 	gl_FragData[2] = vec4(extra, 1.0);
+	gl_FragData[3] = vec4(org, 1.0);
 }

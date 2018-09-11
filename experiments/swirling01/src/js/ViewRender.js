@@ -4,6 +4,7 @@ import alfrid, { GL } from 'alfrid';
 import vs from 'shaders/render.vert';
 import fs from 'shaders/render.frag';
 import Config from './Config';
+import Assets from './Assets';
 
 class ViewRender extends alfrid.View {
 	
@@ -27,6 +28,7 @@ class ViewRender extends alfrid.View {
 				uy = j / numParticles;
 				positions.push([ux, uy, 0]);
 				indices.push(count);
+				coords.push([Math.random(), Math.random()]);
 				count ++;
 
 			}
@@ -34,11 +36,16 @@ class ViewRender extends alfrid.View {
 
 		this.mesh = new alfrid.Mesh(GL.POINTS);
 		this.mesh.bufferVertex(positions);
+		this.mesh.bufferTexCoord(coords);
 		this.mesh.bufferIndex(indices);
+
+		
 	}
 
 
 	render(textureCurr, textureNext, p, textureExtra, mShadowMatrix, mTextureDepth, textureParticle) {
+		this.textureColor = Assets.get(Config.colorMap);
+
 		this.time += 0.1;
 		this.shader.bind();
 
@@ -57,6 +64,9 @@ class ViewRender extends alfrid.View {
 		this.shader.uniform("uShadowMatrix", "mat4", mShadowMatrix);
 		this.shader.uniform("textureDepth", "uniform1i", 3);
 		mTextureDepth.bind(3);
+
+		this.shader.uniform("textureColor", "uniform1i", 5);
+		this.textureColor.bind(5);
 
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 		this.shader.uniform('percent', 'float', p);

@@ -68,14 +68,15 @@ void main(void) {
 	s = mix(s, 1.0, .25);
 
 	float d = diffuse(N, LIGHT_POS);
-	// d = mix(d, 1.0, .25);
+	vec3 finalColor = mix(vec3(d), vColor.rgb, .5);
 
-	vec4 color = vec4(vec3(d), 1.0);
+	vec4 color = vec4(finalColor, 1.0);
 	color.rgb *= s;
 
 	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
 	float fogAmount = fogFactorExp2(fogDistance - 4.5, FOG_DENSITY);
 	const vec4 fogColor = vec4(0.0, 0.0, 0.0, 1.0); // white
 
-	gl_FragColor = mix(color, fogColor, fogAmount);
+	// gl_FragColor = mix(color, fogColor, fogAmount);
+	gl_FragColor = color;
 }

@@ -3,6 +3,7 @@
 precision highp float;
 attribute vec3 aVertexPosition;
 attribute vec3 aNormal;
+attribute vec2 aTextureCoord;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
@@ -11,6 +12,7 @@ uniform mat4 uShadowMatrix;
 uniform sampler2D textureCurr;
 uniform sampler2D textureNext;
 uniform sampler2D textureExtra;
+uniform sampler2D textureColor;
 uniform float percent;
 uniform float time;
 uniform vec2 uViewport;
@@ -31,13 +33,18 @@ void main(void) {
 	gl_Position  = uProjectionMatrix * uViewMatrix * wsPosition;
 	
 
-	float g 	 = sin(extra.r + time * mix(extra.b, 1.0, .5));
+	float g 	 = sin(extra.g + time * mix(extra.b, 1.0, .5));
 	g 			 = smoothstep(0.0, 1.0, g);
 	g 			 = mix(g, 1.0, .75);
-	vColor       = vec4(vec3(g), 1.0);
+	vec3 color 	 = texture2D(textureColor, aTextureCoord).rgb;
+	
+	color 		 = pow(color, vec3(2.0));
+	color *= 2.0;
+
+	vColor       = vec4(color, 1.0);
 
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
-    gl_PointSize = distOffset * (1.0 + extra.x * 1.0);
+    gl_PointSize = distOffset * (1.0 + extra.b * 1.0);
 
 	vNormal 	 = aNormal;
 	vShadowCoord = uShadowMatrix * wsPosition;

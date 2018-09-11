@@ -2,6 +2,7 @@
 
 export default {
 	numParticles:256*2,
-	skipCount:6,
-	maxRadius: 3.5
+	skipCount: 1,
+	maxRadius: 3.5,
+	colorMap:'01'
 };

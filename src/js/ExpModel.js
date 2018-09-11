@@ -253,6 +253,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchSoundwaves.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/soundwaves/dist/index.html',
 		title:'Waves'
+	},
+	{
+		cover:'assets/img/coverSketchSwirl01.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/swirling01/dist/index.html',
+		title:'Swirling'
 	}
 ]
 
