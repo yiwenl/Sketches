@@ -13,6 +13,7 @@ uniform mat4 uProjectionMatrix;
 uniform sampler2D texture;
 uniform sampler2D textureExtra;
 uniform float uFishScale;
+uniform float uTime;
 
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
@@ -30,20 +31,32 @@ vec2 rotate(vec2 v, float a) {
 void main(void) {
 	vec2 uvExtra  = aUV * vec2(2.0, 1.0);
 	vec3 extra 	  = texture2D(textureExtra, uvExtra).xyz;
+	vec3 vel      = texture2D(texture, aUV + vec2(0.5, 0.0)).xyz;
+
+	float g = 0.0;
+	float s = 0.8;
+	g = mod(aVertexPosition.x + s + 0.1, s * 2.0);
+
+	vec3 pos = aVertexPosition;
+	float theta = 2.5 * g + uTime * (5.0 + length(vel) * 30.0) + extra.r * 12.0;
+	pos.xz = rotate(pos.xz, sin(theta) * pow(g, 1.0) * 0.2);
+
 
 	vec3 posOffset = texture2D(texture, aUV).xyz;
-	vec3 pos      = aVertexPosition * uFishScale * mix(extra.x, 1.0, .8);
+	pos      = pos * uFishScale * mix(extra.x, 1.0, .8);
 	
-	vec3 vel      = texture2D(texture, aUV + vec2(0.5, 0.0)).xyz;
-	vDebug        = vel;
+	
 
 	float angle 	 = atan(vel.x, vel.z);
 	pos.xz = rotate(pos.xz, angle + PI * 0.5);
 
 
 	pos += posOffset;
+	// pos.xz += aUV * vec2(2.0, 1.0) * 10.0 - 5.0;
 
 	gl_Position   = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 	vTextureCoord = aTextureCoord;
 	vNormal       = aNormal;
+
+	vDebug = vec3(g);
 }

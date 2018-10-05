@@ -18,6 +18,7 @@ class SceneApp extends Scene {
 		this.resize();
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+		// this.orbitalControl.rx.value = Math.PI * 0.5;
 		this.orbitalControl.radius.value = 10;
 
 		this._koiSim = new KoiSimulation();
@@ -25,7 +26,7 @@ class SceneApp extends Scene {
 
 		alfrid.Scheduler.next(()=> {
 			gui.add(Config, 'numParticles', 1, 32).name('Number of fishes').step(1).onFinishChange(Settings.reload);
-			gui.add(Config.fish, 'uFishScale', 0, 1).name('Fish Scale').onChange(Settings.refresh);
+			gui.add(Config.fish, 'uFishScale', 0, 2).name('Fish Scale').onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uDrawDistance', 0, 5).onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uDrawForce', 0, 10).onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uFishCapY', 0, 1).onChange(Settings.refresh);
@@ -78,15 +79,12 @@ class SceneApp extends Scene {
 		this._koiSim.update(this._hit, this._touchForce.value);
 
 		GL.clear(0, 0, 0, 0);
-
-		this._bAxis.draw();
 		this._bDots.draw();
-
 
 		this._vFloor.render();
 		this._vFishes.render(this._koiSim.texture, this._koiSim.textureExtra);
 
-		let s = 0.1;
+		let s = 0.1 * this._touchForce.value;
 		this._bBall.draw(this._touch, [s, s, s], [1, 1, 1]);
 
 		s = Config.numParticles * 4;
