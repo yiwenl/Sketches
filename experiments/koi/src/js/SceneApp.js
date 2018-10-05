@@ -24,6 +24,25 @@ class SceneApp extends Scene {
 		this._koiSim = new KoiSimulation();
 
 
+
+		//	shadow map
+		this._cameraLight = new alfrid.CameraOrtho();
+		const s = 10;
+		this._cameraLight.ortho(-s, s, -s, s, 1, 50);
+		this._cameraLight.lookAt([0, 10, 0], [0, 0, 0], [0, 0, -1]);
+
+		this._biasMatrix = mat4.fromValues(
+			0.5, 0.0, 0.0, 0.0,
+			0.0, 0.5, 0.0, 0.0,
+			0.0, 0.0, 0.5, 0.0,
+			0.5, 0.5, 0.5, 1.0
+		);
+		this._shadowMatrix = mat4.create();
+		mat4.multiply(this._shadowMatrix, this._cameraLight.projection, this._cameraLight.viewMatrix);
+		mat4.multiply(this._shadowMatrix, this._biasMatrix, this._shadowMatrix);
+
+
+
 		alfrid.Scheduler.next(()=> {
 			gui.add(Config, 'numParticles', 1, 32).name('Number of fishes').step(1).onFinishChange(Settings.reload);
 			gui.add(Config.fish, 'uFishScale', 0, 2).name('Fish Scale').onChange(Settings.refresh);
@@ -31,6 +50,9 @@ class SceneApp extends Scene {
 			gui.add(Config.simulation, 'uDrawForce', 0, 10).onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uFishCapY', 0, 1).onChange(Settings.refresh);
 		});
+
+
+		//	touch detection
 
 		this._hit = vec3.create();
 		this._touch = vec3.create();
@@ -53,6 +75,7 @@ class SceneApp extends Scene {
 
 	_initTextures() {
 		console.log('init textures');
+		this._fboShadow = new alfrid.FrameBuffer(1024, 1024, {minFilter:GL.LINEAR, magFilter:GL.LINEAR});
 	}
 
 
@@ -70,7 +93,13 @@ class SceneApp extends Scene {
 
 
 	renderShadow() {
+		
+		this._fboShadow.bind();
+		GL.clear(0, 0, 0, 0);
+		GL.setMatrices(this._cameraLight);
 		this._vFishes.render(this._koiSim.texture, this._koiSim.textureExtra);
+		this._fboShadow.unbind();
+
 	}
 
 
@@ -78,20 +107,26 @@ class SceneApp extends Scene {
 		//	update fish position
 		this._koiSim.update(this._hit, this._touchForce.value);
 
+		this.renderShadow();
+
 		GL.clear(0, 0, 0, 0);
+		GL.setMatrices(this.camera);
 		this._bDots.draw();
 
-		this._vFloor.render();
+		this._vFloor.render(this._shadowMatrix, this._fboShadow.getDepthTexture());
 		this._vFishes.render(this._koiSim.texture, this._koiSim.textureExtra);
 
 		let s = 0.1 * this._touchForce.value;
 		this._bBall.draw(this._touch, [s, s, s], [1, 1, 1]);
 
-		s = Config.numParticles * 4;
-		GL.viewport(0, 0, s * 2, s);
-		this._bCopy.draw(this._koiSim.texture);
-		GL.viewport(s*2, 0, s, s);
-		this._bCopy.draw(this._koiSim.textureExtra);
+		// s = Config.numParticles * 4;
+		// GL.viewport(0, 0, s * 2, s);
+		// this._bCopy.draw(this._koiSim.texture);
+		// GL.viewport(s*2, 0, s, s);
+		// this._bCopy.draw(this._koiSim.textureExtra);
+		s = 256;
+		GL.viewport(0, 0, s, s*GL.aspectRatio);
+		this._bCopy.draw(this._fboShadow.getTexture());
 	}
 
 
