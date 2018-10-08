@@ -5,6 +5,7 @@ export default {
 	maxRadius: 10,
 	fish: {
 		uFishScale:0.75,
+		uColor:[32.0, 35.0, 40.0]
 	},
 	simulation: {
 		uDrawDistance:3.5,

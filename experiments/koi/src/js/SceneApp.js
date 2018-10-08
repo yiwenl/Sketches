@@ -48,6 +48,7 @@ class SceneApp extends Scene {
 		alfrid.Scheduler.delay(()=> {
 			gui.add(Config, 'numParticles', 1, 32).name('Number of fishes').step(1).onFinishChange(Settings.reload);
 			gui.add(Config.fish, 'uFishScale', 0, 2).name('Fish Scale').onChange(Settings.refresh);
+			gui.addColor(Config.fish, 'uColor').name('Fish Color').onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uDrawDistance', 0, 5).onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uDrawForce', 0, 10).onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uFishCapY', 0, 1).onChange(Settings.refresh);
