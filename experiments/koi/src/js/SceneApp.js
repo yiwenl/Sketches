@@ -18,6 +18,7 @@ class SceneApp extends Scene {
 		this.resize();
 		GL.enableAlphaBlending();
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+		this.orbitalControl.rx.limit(0.2, Math.PI / 2);
 		// this.orbitalControl.rx.value = Math.PI * 0.5;
 		this.orbitalControl.radius.value = 10;
 
@@ -27,7 +28,7 @@ class SceneApp extends Scene {
 
 		//	shadow map
 		this._cameraLight = new alfrid.CameraOrtho();
-		const s = 10;
+		const s = 4;
 		this._cameraLight.ortho(-s, s, -s, s, 1, 50);
 		this._cameraLight.lookAt([0, 10, 0], [0, 0, 0], [0, 0, -1]);
 
@@ -43,13 +44,17 @@ class SceneApp extends Scene {
 
 
 
-		alfrid.Scheduler.next(()=> {
+		alfrid.Scheduler.delay(()=> {
 			gui.add(Config, 'numParticles', 1, 32).name('Number of fishes').step(1).onFinishChange(Settings.reload);
 			gui.add(Config.fish, 'uFishScale', 0, 2).name('Fish Scale').onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uDrawDistance', 0, 5).onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uDrawForce', 0, 10).onChange(Settings.refresh);
 			gui.add(Config.simulation, 'uFishCapY', 0, 1).onChange(Settings.refresh);
-		});
+
+			gui.add(Config.simulation, 'uRadius', 0, 5).onChange(Settings.refresh);
+			gui.add(Config.simulation, 'uMinThreshold', 0, 1).onChange(Settings.refresh);
+			gui.add(Config.simulation, 'uMaxThreshold', 0, 1).onChange(Settings.refresh);
+		}, null, 500);
 
 
 		//	touch detection
@@ -75,7 +80,8 @@ class SceneApp extends Scene {
 
 	_initTextures() {
 		console.log('init textures');
-		this._fboShadow = new alfrid.FrameBuffer(1024, 1024, {minFilter:GL.LINEAR, magFilter:GL.LINEAR});
+		const shadowMapSize = GL.isMobile ? 1024 : 2048;
+		this._fboShadow = new alfrid.FrameBuffer(shadowMapSize, shadowMapSize, {minFilter:GL.LINEAR, magFilter:GL.LINEAR});
 	}
 
 
@@ -95,7 +101,7 @@ class SceneApp extends Scene {
 	renderShadow() {
 		
 		this._fboShadow.bind();
-		GL.clear(0, 0, 0, 0);
+		GL.clear(1, 0, 0, 1);
 		GL.setMatrices(this._cameraLight);
 		this._vFishes.render(this._koiSim.texture, this._koiSim.textureExtra);
 		this._fboShadow.unbind();
@@ -111,7 +117,6 @@ class SceneApp extends Scene {
 
 		GL.clear(0, 0, 0, 0);
 		GL.setMatrices(this.camera);
-		this._bDots.draw();
 
 		this._vFloor.render(this._shadowMatrix, this._fboShadow.getDepthTexture());
 		this._vFishes.render(this._koiSim.texture, this._koiSim.textureExtra);
@@ -125,7 +130,7 @@ class SceneApp extends Scene {
 		// GL.viewport(s*2, 0, s, s);
 		// this._bCopy.draw(this._koiSim.textureExtra);
 		s = 256;
-		GL.viewport(0, 0, s, s*GL.aspectRatio);
+		GL.viewport(0, 0, s, s * GL.aspectRatio);
 		this._bCopy.draw(this._fboShadow.getTexture());
 	}
 

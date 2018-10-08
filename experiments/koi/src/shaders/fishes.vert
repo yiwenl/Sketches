@@ -38,7 +38,18 @@ void main(void) {
 	g = mod(aVertexPosition.x + s + 0.1, s * 2.0);
 
 	vec3 pos = aVertexPosition;
-	float theta = 2.5 * g + uTime * (5.0 + length(vel) * 30.0) + extra.r * 12.0;
+
+	float t = length(vel.xz);
+	float thetaY = atan(vel.y, t);
+	float minAngle = 0.4;
+	thetaY *= minAngle;
+
+	// s = sign(thetaY);
+	
+	// thetaY = s * min(abs(thetaY), minAngle);
+	pos.xy = rotate(pos.xy, thetaY);
+
+	float theta = 2.5 * g + uTime * (5.0) + extra.r * 12.0;
 	pos.xz = rotate(pos.xz, sin(theta) * pow(g, 1.0) * 0.2);
 
 

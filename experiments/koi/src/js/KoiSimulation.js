@@ -8,6 +8,7 @@ import vsSave from 'shaders/save.vert';
 import fsSave from 'shaders/save.frag';
 
 import fsSim from 'shaders/sim.frag';
+import fsFlock from 'shaders/flocking.frag';
 
 var random = function(min, max) { return min + Math.random() * (max - min);	}
 
@@ -88,7 +89,8 @@ class KoiSimulation {
 
 
 		//	simulation 
-		this.shader = new alfrid.GLShader(alfrid.ShaderLibs.bigTriangleVert, fsSim);
+		const _fsFlock = fsFlock.replace('${NUM}', Config.numParticles);
+		this.shader = new alfrid.GLShader(alfrid.ShaderLibs.bigTriangleVert, _fsFlock);
 		this.meshTri = alfrid.Geom.bigTriangle();
 	}
 

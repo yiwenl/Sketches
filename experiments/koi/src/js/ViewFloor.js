@@ -14,7 +14,8 @@ class ViewFloor extends alfrid.View {
 
 	_init() {
 		const { maxRadius } = Config;
-		this.mesh = alfrid.Geom.plane(maxRadius, maxRadius, 1, 'xz');
+		const s = 1.5;
+		this.mesh = alfrid.Geom.plane(maxRadius * s, maxRadius * s, 1, 'xz');
 	}
 
 

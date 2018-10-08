@@ -37,6 +37,19 @@ float PCFShadow(sampler2D depths, vec2 size, vec4 shadowCoord) {
 
 }
 
+float hardShadow(sampler2D depths, vec2 size, vec4 shadowCoord) {
+	float result = 0.0;
+	float bias = 0.005;
+	vec2 uv = shadowCoord.xy;
+
+	float d = texture2D(depths, uv).r;
+	if(d < shadowCoord.z - bias) {
+		result = 1.0;
+	}
+
+	return result;
+}
+
 
 float fogFactorExp2(const float dist, const float density) {
 	const float LOG2 = -1.442695;
@@ -45,8 +58,18 @@ float fogFactorExp2(const float dist, const float density) {
 }
 
 void main(void) {
+
+	float d = distance(vTextureCoord, vec2(.5));
+	d = smoothstep(0.5, 0.0, d);
+
 	vec4 shadowCoord = vShadowCoord / vShadowCoord.w;
-	float s          = 1.0 - PCFShadow(textureDepth, uMapSize, shadowCoord);
+	// float s          = 1.0 - PCFShadow(textureDepth, uMapSize, shadowCoord);
+	float s          = hardShadow(textureDepth, uMapSize, shadowCoord);
+
+	vec4 color 		 = vec4(vec3(d), 1.0);
+
 	
 	gl_FragColor     = vec4(COLOR_SHADOW, 1.0) * s;
+
+	gl_FragColor = mix(color, gl_FragColor, .8);
 }
