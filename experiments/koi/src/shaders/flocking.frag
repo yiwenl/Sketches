@@ -17,6 +17,7 @@ uniform float uFishCapY;
 uniform float uRadius;
 uniform float uMinThreshold;
 uniform float uMaxThreshold;
+uniform vec3 uCenter;
 
 
 vec3 mod289(vec3 x) {	return x - floor(x * (1.0 / 289.0)) * 289.0;	}
@@ -209,7 +210,7 @@ void main(void) {
 
 
 		//	prevent going over
-		d = length(pos.xz);
+		d = distance(pos.xz, uCenter.xz);
 		float r = uMaxRadius * 0.25;
 		if(d > r) {
 			float f = (d - r) * 0.7;

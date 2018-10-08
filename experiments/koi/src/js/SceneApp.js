@@ -21,6 +21,7 @@ class SceneApp extends Scene {
 		this.orbitalControl.rx.limit(0.2, Math.PI / 2);
 		// this.orbitalControl.rx.value = Math.PI * 0.5;
 		this.orbitalControl.radius.value = 10;
+		this.orbitalControl.radius.limit(5, 10);
 
 		this._koiSim = new KoiSimulation();
 
@@ -28,7 +29,7 @@ class SceneApp extends Scene {
 
 		//	shadow map
 		this._cameraLight = new alfrid.CameraOrtho();
-		const s = 4;
+		const s = 5;
 		this._cameraLight.ortho(-s, s, -s, s, 1, 50);
 		this._cameraLight.lookAt([0, 10, 0], [0, 0, 0], [0, 0, -1]);
 
@@ -61,6 +62,7 @@ class SceneApp extends Scene {
 
 		this._hit = vec3.create();
 		this._touch = vec3.create();
+		this._center = vec3.create();
 
 		const detector = new TouchDetector(this._vFloor.mesh, this.camera);
 		this._touchForce = new alfrid.EaseNumber(0, 0.01);
@@ -99,6 +101,9 @@ class SceneApp extends Scene {
 
 
 	renderShadow() {
+		//	update shadow matrix
+		//	copy touch.xz to camera.xz
+		//	move floor.xz to touch.xz
 		
 		this._fboShadow.bind();
 		GL.clear(1, 0, 0, 1);
@@ -111,7 +116,7 @@ class SceneApp extends Scene {
 
 	render() {
 		//	update fish position
-		this._koiSim.update(this._hit, this._touchForce.value);
+		this._koiSim.update(this._hit, this._touchForce.value, this._center);
 
 		this.renderShadow();
 
@@ -129,9 +134,9 @@ class SceneApp extends Scene {
 		// this._bCopy.draw(this._koiSim.texture);
 		// GL.viewport(s*2, 0, s, s);
 		// this._bCopy.draw(this._koiSim.textureExtra);
-		s = 256;
-		GL.viewport(0, 0, s, s * GL.aspectRatio);
-		this._bCopy.draw(this._fboShadow.getTexture());
+		// s = 256;
+		// GL.viewport(0, 0, s, s);
+		// this._bCopy.draw(this._fboShadow.getTexture());
 	}
 
 

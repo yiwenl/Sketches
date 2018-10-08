@@ -112,7 +112,7 @@ class KoiSimulation {
 		}, num, num);
 	}
 
-	update(mHit, mHitForce) {
+	update(mHit, mHitForce, mCenter) {
 		this._fbo.write.bind();
 
 		//	simulation
@@ -129,6 +129,7 @@ class KoiSimulation {
 		this.shader.uniform("uHit", "vec3", mHit);
 		this.shader.uniform("uHitForce", "float", mHitForce);
 		this.shader.uniform(Config.simulation);
+		this.shader.uniform("uCenter", "vec3", mCenter);
 
 		this._fbo.write.unbind();
 		this._fbo.swap();
