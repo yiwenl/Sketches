@@ -46,7 +46,7 @@ class KoiSimulation {
 
 				//	save position
 				uv = [i/num * 0.5, j/num];
-				color = [random(-r, r), 0.0, random(-r, r)];
+				color = [random(-r, r), -1.5, random(-r, r)];
 				positions.push(color);
 				uvs.push(uv);
 				indices.push(count);
