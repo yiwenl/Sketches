@@ -6,13 +6,13 @@ html, body {
   overflow: hidden;
   position: static;
   /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#6d6d6d+0,000000+100 */
-  background: #333333;
+  background: #e3dbd7;
   /* Old browsers */
-  background: -moz-radial-gradient(center, ellipse cover, #333333 0%, #000000 100%);
+  background: -moz-radial-gradient(center, ellipse cover, #e3dbd7 0%, #b1aaa7 100%);
   /* FF3.6-15 */
-  background: -webkit-radial-gradient(center, ellipse cover, #333333 0%, #000000 100%);
+  background: -webkit-radial-gradient(center, ellipse cover, #e3dbd7 0%, #b1aaa7 100%);
   /* Chrome10-25,Safari5.1-6 */
-  background: radial-gradient(ellipse at center, #333333 0%, #000000 100%);
+  background: radial-gradient(ellipse at center, #e3dbd7 0%, #b1aaa7 100%);
   /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */ }
 
 html {
@@ -23,7 +23,8 @@ html {
 h1, h2, h3, h4, text, p {
   -webkit-font-smoothing: antialiased;
   -moz-osx-webkit-font-smoothing: antialiased;
-  font-family: 'Open Sans', sans-serif; }
+  font-family: 'Open Sans', sans-serif;
+  pointer-events: none; }
 
 .Main-Canvas {
   width: 100%;

@@ -5,6 +5,7 @@ attribute vec3 aVertexPosition;
 attribute vec2 aTextureCoord;
 attribute vec3 aNormal;
 attribute vec2 aUV;
+attribute vec3 aUVOffset;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
@@ -18,6 +19,7 @@ uniform float uTime;
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
 varying vec3 vDebug;
+varying vec3 vUVOffset;
 
 vec2 rotate(vec2 v, float a) {
 	float s = sin(a);
@@ -70,4 +72,6 @@ void main(void) {
 	vNormal       = aNormal;
 
 	vDebug = vec3(g);
+
+	vUVOffset = aUVOffset;
 }

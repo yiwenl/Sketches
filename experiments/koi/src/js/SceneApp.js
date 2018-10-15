@@ -20,8 +20,8 @@ class SceneApp extends Scene {
 		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
 		this.orbitalControl.rx.limit(0.2, Math.PI / 2);
 		// this.orbitalControl.rx.value = Math.PI * 0.5;
-		this.orbitalControl.radius.value = 10;
-		this.orbitalControl.radius.limit(5, 10);
+		this.orbitalControl.radius.value = 8;
+		// this.orbitalControl.radius.limit(5, 10);
 
 		this._koiSim = new KoiSimulation();
 
@@ -48,14 +48,20 @@ class SceneApp extends Scene {
 		alfrid.Scheduler.delay(()=> {
 			gui.add(Config, 'numParticles', 1, 32).name('Number of fishes').step(1).onFinishChange(Settings.reload);
 			gui.add(Config.fish, 'uFishScale', 0, 2).name('Fish Scale').onChange(Settings.refresh);
-			gui.addColor(Config.fish, 'uColor').name('Fish Color').onChange(Settings.refresh);
-			gui.add(Config.simulation, 'uDrawDistance', 0, 5).onChange(Settings.refresh);
-			gui.add(Config.simulation, 'uDrawForce', 0, 10).onChange(Settings.refresh);
-			gui.add(Config.simulation, 'uFishCapY', 0, 1).onChange(Settings.refresh);
+			// gui.addColor(Config.fish, 'uColor').name('Fish Color').onChange(Settings.refresh);
+			// gui.add(Config.simulation, 'uDrawDistance', 0, 5).onChange(Settings.refresh);
+			// gui.add(Config.simulation, 'uDrawForce', 0, 10).onChange(Settings.refresh);
+			// gui.add(Config.simulation, 'uFishCapY', 0, 1).onChange(Settings.refresh);
 
-			gui.add(Config.simulation, 'uRadius', 0, 5).onChange(Settings.refresh);
-			gui.add(Config.simulation, 'uMinThreshold', 0, 1).onChange(Settings.refresh);
-			gui.add(Config.simulation, 'uMaxThreshold', 0, 1).onChange(Settings.refresh);
+			// gui.add(Config.simulation, 'uRadius', 0, 5).onChange(Settings.refresh);
+			// gui.add(Config.simulation, 'uMinThreshold', 0, 1).onChange(Settings.refresh);
+			// gui.add(Config.simulation, 'uMaxThreshold', 0, 1).onChange(Settings.refresh);
+
+			gui.add(Config, 'hideFloor').onChange(Settings.refresh);
+			gui.add(Config, 'useTexture').onChange(Settings.refresh);
+			gui.add(Config, 'renderBall').onChange(Settings.refresh);
+			gui.addColor(Config, 'backgroundColor').onFinishChange(Settings.refresh);
+			
 		}, null, 500);
 
 
@@ -121,14 +127,23 @@ class SceneApp extends Scene {
 
 		this.renderShadow();
 
-		GL.clear(0, 0, 0, 0);
+		GL.clear(Config.backgroundColor[0]/255, Config.backgroundColor[1]/255, Config.backgroundColor[2]/255, 1);
 		GL.setMatrices(this.camera);
 
-		this._vFloor.render(this._shadowMatrix, this._fboShadow.getDepthTexture());
-		this._vFishes.render(this._koiSim.texture, this._koiSim.textureExtra);
+		if(Config.hideFloor) {
+			this._vFishes.render(this._koiSim.texture, this._koiSim.textureExtra);
+			this._vFloor.render(this._shadowMatrix, this._fboShadow.getDepthTexture());	
+		}else {
+			this._vFloor.render(this._shadowMatrix, this._fboShadow.getDepthTexture());	
+			this._vFishes.render(this._koiSim.texture, this._koiSim.textureExtra);
+		}
+		
 
 		let s = 0.1 * this._touchForce.value;
-		this._bBall.draw(this._touch, [s, s, s], [1, 1, 1]);
+		if(Config.renderBall) {
+			this._bBall.draw(this._touch, [s, s, s], [1, 1, 1]);	
+		}
+		
 
 		// s = Config.numParticles * 4;
 		// GL.viewport(0, 0, s * 2, s);

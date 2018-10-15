@@ -11,5 +11,5 @@ div.style.zIndex = '999';
 
 //	STATS
 const stats = new Stats();
-document.body.appendChild(stats.domElement);
+// document.body.appendChild(stats.domElement);
 alfrid.Scheduler.addEF(()=>stats.update());

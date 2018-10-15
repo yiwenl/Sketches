@@ -71,5 +71,5 @@ void main(void) {
 	
 	gl_FragColor     = vec4(COLOR_SHADOW, 1.0) * s;
 
-	gl_FragColor = mix(color, gl_FragColor, .8);
+	// gl_FragColor = mix(color, gl_FragColor, .8);
 }

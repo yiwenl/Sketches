@@ -3,6 +3,10 @@
 export default {
 	numParticles:8,
 	maxRadius: 10,
+	hideFloor:false,
+	useTexture:false,
+	backgroundColor:[255, 255, 255],
+	renderBall:true,
 	fish: {
 		uFishScale:0.75,
 		uColor:[32.0, 35.0, 40.0]
