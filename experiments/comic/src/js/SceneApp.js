@@ -60,16 +60,13 @@ class SceneApp extends Scene {
 		const g = 1;
 		GL.clear(g, g, g, 1);
 
-		GL.rotate(this._modelMatrix);
+		// GL.rotate(this._modelMatrix);
 
 		this.shader.bind();
-		// GL.disable(GL.CULL_FACE);
 		GL.gl.cullFace(GL.gl.FRONT);
 		GL.draw(this.meshBoxes);
 		GL.gl.cullFace(GL.gl.BACK);
 		GL.draw(this.mesh);
-		// GL.enable(GL.CULL_FACE);
-
 
 		this.shaderOutline.bind();
 		GL.draw(this.meshFrames);

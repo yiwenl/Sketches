@@ -36,6 +36,7 @@ class SceneApp extends Scene {
 		setTimeout(()=> {
 			gui.add(this, 'offset', 0, 1).listen();	
 			gui.add(Config, 'animated').onFinishChange(Settings.refresh);
+			gui.add(Config, 'numSlides', 1, 50).step(1).onFinishChange(Settings.reload);
 		}, 200);
 
 

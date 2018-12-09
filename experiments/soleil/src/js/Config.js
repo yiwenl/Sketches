@@ -1,0 +1,4 @@
+// Config.js
+
+export default {
+};
