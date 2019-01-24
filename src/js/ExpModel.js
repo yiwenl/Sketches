@@ -273,6 +273,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchForestSpririt.jpg',
 		url:'http://www.bongiovi.tw/xmas2018/',
 		title:'Forest Spirits'
+	},
+	{
+		cover:'assets/img/coverSketchLight.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/light/dist/index.html',
+		title:'Light'
 	}
 ]
 
