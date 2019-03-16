@@ -79,7 +79,7 @@ class FluidSimulation {
 		}
 
 		const oSettings = {
-			minFilter:GL.LINEAR, 
+			minFilter:GL.LINEAR_MIPMAP_NEAREST, 
 			magFilter:GL.LINEAR, 
 			wrapS:GL.MIRRORED_REPEAT, 
 			wrapT:GL.MIRRORED_REPEAT, 
