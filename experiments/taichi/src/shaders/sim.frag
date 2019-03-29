@@ -12,6 +12,8 @@ uniform sampler2D textureNeighbor;
 uniform float time;
 uniform float maxRadius;
 uniform float uRandomness;
+uniform float uNoise;
+uniform float uNoiseSpeed;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
@@ -152,9 +154,10 @@ void main(void) {
 
 	vec3 vel             = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra           = texture2D(textureExtra, vTextureCoord).rgb;
-	float noisePos 		 = snoise(pos * 0.1 + time * 0.1) * .5 + 1.0;
-	float posOffset      = noisePos * .1 * (1.0 - colorBg * 0.5);
-	vec3 acc             = curlNoise(pos * posOffset + time * .1);
+	float noisePos 		 = snoise(pos * 0.1 + time * 0.1 * uNoiseSpeed) * .5 + 0.6;
+	float posOffset      = noisePos * .1 * (1.0 - colorBg * 0.15);
+	vec3 acc             = curlNoise(pos * posOffset * uNoise + time * 0.1 * uNoiseSpeed);
+	// vec3 acc             = curlNoise(pos * posOffset * uNoise + time * 0.1 * uNoiseSpeed);
 	float speedOffset    = mix(extra.g, 1.0, randomness);
 
 	vec2 dirRot 		 = normalize(pos.xz);
@@ -164,13 +167,13 @@ void main(void) {
 
 	
 	float dist           = length(pos);
-	float radius = maxRadius - colorBg * 1.0;
+	float radius = maxRadius - colorBg * 2.0;
 	if(dist > radius) {
-		float f          = pow(2.0, (dist - radius) * 2.0) * 0.2 + colorBg * 0.2;
+		float f          = pow(2.0, (dist - radius) * 2.0) * 0.2 + colorBg * 0.3;
 		acc              -= normalize(pos) * f;
 	}
 
-	vel                  += acc * .002 * speedOffset * (1.0 - colorBg * 0.5);
+	vel                  += acc * .002 * speedOffset * (1.0 - colorBg * 0.75);
 
 	float maxSpeed = 0.2 * mix(extra.r, 1.0, randomness);
 	float minSpeed = 0.03 * mix(extra.b, 1.0, randomness);
@@ -183,7 +186,7 @@ void main(void) {
 		vel = normalize(vel) * minSpeed;
 	}
 	
-	float decrease 		 = .99 - colorBg * 0.02;
+	float decrease 		 = .99 - colorBg * 0.01;
 	vel                  *= decrease;
 	
 	pos                  += vel;

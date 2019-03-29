@@ -9,6 +9,8 @@ const addControls = (scene) => {
 		gui.add(Config, 'numParticles', 256, 1024).step(1).onFinishChange(Settings.reload);
 		gui.add(Config, 'maxRadius', 1, 5).onChange(Settings.refresh);
 		gui.add(Config, 'randomness', 0, 1).onChange(Settings.refresh);
+		gui.add(Config, 'noiseSpeed', 0, 5).onChange(Settings.refresh);
+		gui.add(Config, 'noise', 0, 5).onChange(Settings.refresh);
 	}, 200);
 }
 

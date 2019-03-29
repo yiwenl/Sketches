@@ -73,24 +73,18 @@ void main(void) {
 	float t = texture2D(textureBg, vColor.xy).r;
 	float d = diffuse(N, uPosLight);
 
+	
+
 	if(t < 0.5) {
-		// d = smoothstep(0.8, 0.2, d);
 		d += 0.1;
 		d *= 6.0;
-	} 
-	s = mix(s, 1.0, .25);
-	
+		s = mix(s, 1.0, .25);
+	} else {
+		d += 0.05;
+		s = mix(s, 1.0, .5);
+	}
 
 	vec4 color = vec4(vec3(d), 1.0);
-	
-
-	// vec3 colorMap = texture2D(textureColor, vUV).rgb;
-	// if(t < 0.5) {
-	// 	color.rgb = mix(color.rgb, vec3(1.0), .2);
-	// } else {
-	// 	d = mix(d, 1.0, .25);
-	// 	color.rgb = colorMap* s * d * 3.0;
-	// }
 
 	vec3 colorMap = texture2D(textureColor, vUV).rgb;
 	if(t < 0.5) {
@@ -101,15 +95,11 @@ void main(void) {
 		n = smoothstep(1.0, 0.0, n);
 		n = mix(n, 1.0, .5);
 		color.rgb *= n;
-
-	} else {
-		// d = mix(d, 1.0, .25);
-		
-	}
+	} 
 
 	color.rgb *= s;
 
-	color.rgb *= mix(vExtra.b, 1.0, .5);
+	// color.rgb *= mix(vExtra.b, 1.0, .5);
 	
 
 	gl_FragColor = color;

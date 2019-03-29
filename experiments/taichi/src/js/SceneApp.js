@@ -28,8 +28,8 @@ class SceneApp extends Scene {
 		this.resize();
 		GL.enableAlphaBlending();
 		this.orbitalControl.radius.setTo(5);
-		this.orbitalControl.rx.value = -1.4207963267948964;
-		this.orbitalControl.ry.value = 5.67;
+		this.orbitalControl.rx.value = -1.490796326794896;
+		this.orbitalControl.ry.value = 5.35;
 
 		this._posLight = [0, 10, 2];
 		this._cameraLight = new alfrid.CameraOrtho();
@@ -187,7 +187,6 @@ class SceneApp extends Scene {
 		this._bCopy.draw(this.textureBG);
 		// this._vBg.render(this.textureBG, this._vRender.textureColor);
 		GL.enable(GL.DEPTH_TEST);
-
 
 		// let s = .02;
 		// GL.setMatrices(this.camera);
