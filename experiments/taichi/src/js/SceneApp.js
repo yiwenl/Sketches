@@ -20,9 +20,10 @@ class SceneApp extends Scene {
 		super();
 
 		this.cameraFront = new alfrid.CameraPerspective();
-		const fov = 90;
+		const fov = 70;
+		this.camera.setPerspective(fov * Math.PI / 180, GL.aspectRatio, 0.1, 100);
 		this.cameraFront.setPerspective(fov * Math.PI / 180, GL.aspectRatio, 0.1, 100);
-		this.cameraFront.lookAt([0, 0, 10], [0, 0, 0]);
+		this.cameraFront.lookAt([0, 0, 12], [0, 0, 0]);
 		this._count = 0;
 
 		this.resize();
@@ -54,6 +55,14 @@ class SceneApp extends Scene {
 
 
 		this.textureParticle = getNormalTexture(this.cameraFront);
+
+		setTimeout(()=> {
+			document.body.classList.add('showDesc');
+		}, 500);
+		
+		setTimeout(()=> {
+			document.body.classList.remove('showDesc');
+		}, 5000);
 	}
 
 
@@ -198,7 +207,7 @@ class SceneApp extends Scene {
 		this._renderParticles();
 
 		if(Math.random() > .99) {
-			console.log(this.orbitalControl.rx.value, this.orbitalControl.ry.value);
+			// console.log(this.orbitalControl.rx.value, this.orbitalControl.ry.value);
 		}
 	}
 

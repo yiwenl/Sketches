@@ -55,6 +55,7 @@ function _onImageLoaded(o) {
 
 	setTimeout(()=> {
 		document.body.classList.remove('isLoading');
+		document.body.classList.add('isLoaded');
 	}, 250);
 }
 

@@ -37,11 +37,17 @@ class ViewRender extends alfrid.View {
 		this.mesh.bufferVertex(positions);
 		this.mesh.bufferIndex(indices);
 
+		this._colorIndex = Math.floor(Math.random() * 7 + 1);
+
 
 		const pickColorMap = () => {
-			let index = Math.floor(Math.random() * 7 + 1);
+			// let index = Math.floor(Math.random() * 7 + 1);
+			let index = this._colorIndex +1;
+			if(index > 7) {
+				index = 1;
+			}
 			this.textureColor = Assets.get(`0${index}`);	
-			console.log(`0${index}`);
+			this._colorIndex = index;
 		}
 
 		pickColorMap();

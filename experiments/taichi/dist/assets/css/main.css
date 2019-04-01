@@ -23,7 +23,8 @@ html {
 h1, h2, h3, h4, text, p {
   -webkit-font-smoothing: antialiased;
   -moz-osx-webkit-font-smoothing: antialiased;
-  font-family: 'Open Sans', sans-serif; }
+  font-family: 'Open Sans', sans-serif;
+  pointer-events: none; }
 
 .Main-Canvas {
   user-select: none;
@@ -31,6 +32,24 @@ h1, h2, h3, h4, text, p {
   transition: opacity .5s ease-out .25s; }
   .isLoading .Main-Canvas {
     opacity: 0; }
+
+.Description {
+  position: fixed;
+  bottom: 10%;
+  width: 100%;
+  text-align: center;
+  color: white;
+  letter-spacing: 3px;
+  z-index: 999;
+  font-size: 13px;
+  display: none;
+  opacity: 0;
+  transition: opacity .5s ease-out; }
+  .isLoaded .Description {
+    display: block; }
+  .showDesc .Description {
+    transition: opacity .5s ease-out .5s;
+    opacity: 1; }
 
 .container {
   width: 100%;
