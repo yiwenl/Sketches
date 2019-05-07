@@ -12,6 +12,10 @@ import {
 	selectBack
 } from './utils';
 
+const X_AXIS = vec3.fromValues(1, 0, 0);
+const Y_AXIS = vec3.fromValues(0, 1, 0);
+const Z_AXIS = vec3.fromValues(0, 0, 1);
+
 class RubixCube {
 
 	constructor() {
@@ -41,42 +45,30 @@ class RubixCube {
 
 
 	rotateTop(mAngle=Math.PI/2) {
-		const mtx = mat4.create();
-		mat4.rotateY(mtx, mtx, mAngle);
-		this.top.forEach( c => c.rotate(mtx) );
+		this.top.forEach( c => c.rotateAnim(Y_AXIS, mAngle));
 	}
 
 	rotateBottom(mAngle=Math.PI/2) {
-		const mtx = mat4.create();
-		mat4.rotateY(mtx, mtx, mAngle);
-		this.bottom.forEach( c => c.rotate(mtx) );
+		this.bottom.forEach( c => c.rotateAnim(Y_AXIS, mAngle));
 	}
 
 
 	rotateRight(mAngle=Math.PI/2) {
-		const mtx = mat4.create();
-		mat4.rotateX(mtx, mtx, mAngle);
-		this.right.forEach( c => c.rotate(mtx) );
+		this.right.forEach( c => c.rotateAnim(X_AXIS, mAngle));
 	}
 
 	rotateLeft(mAngle=Math.PI/2) {
-		const mtx = mat4.create();
-		mat4.rotateX(mtx, mtx, mAngle);
-		this.left.forEach( c => c.rotate(mtx) );
+		this.left.forEach( c => c.rotateAnim(X_AXIS, mAngle));
 	}
 
 
 	rotateFront(mAngle=Math.PI/2) {
-		const mtx = mat4.create();
-		mat4.rotateZ(mtx, mtx, mAngle);
-		this.front.forEach( c => c.rotate(mtx) );
+		this.front.forEach( c => c.rotateAnim(Z_AXIS, mAngle));
 	}
 
 
 	rotateBack(mAngle=Math.PI/2) {
-		const mtx = mat4.create();
-		mat4.rotateZ(mtx, mtx, mAngle);
-		this.back.forEach( c => c.rotate(mtx) );
+		this.back.forEach( c => c.rotateAnim(Z_AXIS, mAngle));
 	}
 
 

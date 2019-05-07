@@ -13,7 +13,7 @@ import {
 	selectRight,
 	selectFront,
 	selectBack
-} from './utils';
+} from './utils';		
 
 
 class SceneApp extends Scene {
