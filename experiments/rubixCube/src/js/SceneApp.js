@@ -119,8 +119,7 @@ class SceneApp extends Scene {
 			// gui.add(controls, 'rotateLeftCCW');
 
 			moveSets.forEach( m => {
-				// console.log('rotate${m}', `rotate${m}`);
-				gui.add(this._cube, `rotate${m}`);
+				// gui.add(this._cube, `rotate${m}`);
 			});
 
 			gui.add(controls, 'shuffle').name('Shuffle');
