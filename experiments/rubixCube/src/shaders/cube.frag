@@ -38,14 +38,14 @@ vec3 diffuse(vec3 N, vec3 L, vec3 C) {
 }
 
 
-#define LIGHT vec3(1.0, .8, .6)
+#define LIGHT vec3(1.0, .8, -.6)
 
 void main(void) {
 	float d = diffuse(vNormal, LIGHT);
-	d = mix(d, 1.0, .75);
+	d = mix(d, 1.0, .85);
 
 
-	vec3 color = vec3(0.75);
+	vec3 color = vec3(0.05);
 
 	//	UP
 	if(dot(vNormalOrg, UP) > THRESHOLD && vPosOrg.y > 0.0) {
@@ -76,6 +76,20 @@ void main(void) {
 	if(dot(vNormalOrg, BACK) > THRESHOLD && vPosOrg.z < 0.0) {
 		color = YELLOW;
 	}
+
+	float dx = abs(vTextureCoord.x - 0.5);
+	float dy = abs(vTextureCoord.y - 0.5);
+
+	float t = 0.45;
+	float t1 = 0.61;
+	float gap = 0.03;
+	float gap1 = 0.03;
+	dx = smoothstep(t + gap, t, dx);
+	dy = smoothstep(t + gap, t, dy);
+	float dist = distance(vTextureCoord, vec2(.5));
+	dist = smoothstep(t1+gap1, t1, dist);
+
+	color *= dist * dx * dy;
 
     gl_FragColor = vec4(color * d, 1.0);
 }

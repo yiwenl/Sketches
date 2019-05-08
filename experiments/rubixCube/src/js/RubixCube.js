@@ -15,6 +15,7 @@ import {
 const X_AXIS = vec3.fromValues(1, 0, 0);
 const Y_AXIS = vec3.fromValues(0, 1, 0);
 const Z_AXIS = vec3.fromValues(0, 0, 1);
+const LOCK_DURATION = 650;
 
 class RubixCube {
 
@@ -32,52 +33,129 @@ class RubixCube {
 			}
 		}
 
+		this._steps = [];
 
-		setTimeout(()=> {
-			gui.add(this, 'rotateTop');
-			gui.add(this, 'rotateBottom');
-			gui.add(this, 'rotateRight');
-			gui.add(this, 'rotateLeft');
-			gui.add(this, 'rotateFront');
-			gui.add(this, 'rotateBack');
-		}, 500);
+		this._isLocked = false;
+		this._isSolving = false;
 	}
 
 
-	rotateTop(mAngle=Math.PI/2) {
+	solve() {
+		this._isSolving = true;
+		const move = this._steps.pop();
+		this[`rotate${move.face}`](-move.angle, true);
+
+		this._cubes.forEach( c => {
+			c.speed = 0.05;
+			c.easing = 'cubicOut';
+		});
+
+		if(this._steps.length > 0) {
+			setTimeout(()=>this.solve(), 300);
+		} else {
+			this._isSolving = false; 
+			this._cubes.forEach( c => {
+				c.speed = 0.02;
+				c.easing = 'expInOut';
+			});
+		}
+	}
+
+
+	tempLock() {
+		if(!this._isSolving) {
+			this._isLocked = true;
+			setTimeout(()=> {
+				this._isLocked = false;
+			}, LOCK_DURATION);	
+		}
+	}
+
+
+	rotateTop(mAngle=Math.PI/2, mIsSolving=false) {
+		if(this._isLocked ) {	return;	}
+		if(!mIsSolving) {
+			this._steps.push({
+				angle:mAngle,
+				face:'Top'
+			});
+
+		}
 		this.top.forEach( c => c.rotateAnim(Y_AXIS, mAngle));
+		this.tempLock();
 	}
 
-	rotateBottom(mAngle=Math.PI/2) {
+	rotateBottom(mAngle=Math.PI/2, mIsSolving=false) {
+		if(this._isLocked) {	return;	}
+		if(!mIsSolving) {
+			this._steps.push({
+				angle:mAngle,
+				face:'Bottom'
+			});
+
+		}
 		this.bottom.forEach( c => c.rotateAnim(Y_AXIS, mAngle));
+		this.tempLock();
 	}
 
+	rotateRight(mAngle=Math.PI/2, mIsSolving=false) {
+		if(this._isLocked) {	return;	}
+		if(!mIsSolving) {
+			this._steps.push({
+				angle:mAngle,
+				face:'Right'
+			});
 
-	rotateRight(mAngle=Math.PI/2) {
+		}
 		this.right.forEach( c => c.rotateAnim(X_AXIS, mAngle));
+		this.tempLock();
 	}
 
-	rotateLeft(mAngle=Math.PI/2) {
+	rotateLeft(mAngle=Math.PI/2, mIsSolving=false) {
+		if(this._isLocked) {	return;	}
+		if(!mIsSolving) {
+			this._steps.push({
+				angle:mAngle,
+				face:'Left'
+			});
+
+		}
 		this.left.forEach( c => c.rotateAnim(X_AXIS, mAngle));
+		this.tempLock();
 	}
 
+	rotateFront(mAngle=Math.PI/2, mIsSolving=false) {
+		if(this._isLocked) {	return;	}
+		if(!mIsSolving) {
+			this._steps.push({
+				angle:mAngle,
+				face:'Front'
+			});
 
-	rotateFront(mAngle=Math.PI/2) {
+		}
 		this.front.forEach( c => c.rotateAnim(Z_AXIS, mAngle));
+		this.tempLock();
 	}
 
+	rotateBack(mAngle=Math.PI/2, mIsSolving=false) {
+		if(this._isLocked) {	return;	}
+		if(!mIsSolving) {
+			this._steps.push({
+				angle:mAngle,
+				face:'Back'
+			});
 
-	rotateBack(mAngle=Math.PI/2) {
+		}
 		this.back.forEach( c => c.rotateAnim(Z_AXIS, mAngle));
+		this.tempLock();
 	}
-
-
 
 
 	render() {
 		this._cubes.forEach( cube => cube.render() );
 	}
 
+	get isSolving() {	return this._isSolving;	}
 
 	get top() {	return selectTop(this._cubes);	}
 	get bottom() {	return selectBottom(this._cubes);	}

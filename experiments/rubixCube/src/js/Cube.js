@@ -18,13 +18,14 @@ class Cube extends alfrid.View {
 		this._mtx = mat4.create();			//	base transform
 		this._mtxCurr = mat4.create();		//	transform for animation
 		this._mtxFinal = mat4.create();		//	final transform = mtx * mtxCurr
-		this._angle = new alfrid.EaseNumber(0);
+		// this._angle = new alfrid.EaseNumber(0);
+		this._angle = new alfrid.TweenNumber(0, 'expInOut', 0.02);
 		this._axis = vec3.create();
 	}
 
 
 	_init() {
-		const s = 0.95;
+		const s = 1.01;
 		this.mesh = alfrid.Geom.cube(s, s, s);
 	}
 
@@ -74,6 +75,10 @@ class Cube extends alfrid.View {
 		this.shader.uniform("uPos", "vec3", this._pos);
 
 		GL.draw(this.mesh);
+	}
+
+	set speed(mValue) {
+		this._angle.speed = mValue;
 	}
 
 
