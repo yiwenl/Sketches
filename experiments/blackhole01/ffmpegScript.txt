@@ -1,0 +1,1 @@
+ffmpeg -framerate 30 -i BlackHole%06d.png blackhole.mp4

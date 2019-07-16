@@ -288,6 +288,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchRubix.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/rubixCube/dist/index.html',
 		title:'Rubiks Cube'
+	},
+	{
+		cover:'assets/img/coverSketchBlackHole.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/blackhole01/dist/index.html',
+		title:'Black Hole'
 	}
 ]
 
