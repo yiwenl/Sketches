@@ -7,9 +7,9 @@ import ViewRenderShadow from './ViewRenderShadow';
 import ViewSim from './ViewSim';
 import ViewFloor from './ViewFloor';
 import ViewCylinder from './ViewCylinder';
-import fs from 'shaders/normal.frag';
 import Config from './Config';
-import PoseDetection from './PoseDetection';
+// import PoseDetection from './PoseDetection';
+import ParticleTexture from './ParticleTexture';
 import { hitTest, checkBounds } from './utils';
 
 window.getAsset = function(id) {
@@ -47,19 +47,6 @@ class SceneApp extends alfrid.Scene {
 		mat4.multiply(this._shadowMatrix, this._cameraLight.projection, this._cameraLight.viewMatrix);
 		mat4.multiply(this._shadowMatrix, this._biasMatrix, this._shadowMatrix);
 
-		//	get particle normal map
-		const size = 1;
-		this.cameraOrtho.ortho(-size, size, -size, size);
-		this.cameraOrtho.lookAt([0, 0, 3], [0, 0, 0]);
-		const mesh = alfrid.Geom.sphere(1, 12);
-		const shader = new alfrid.GLShader(null, fs);
-		this._fboParticle.bind();
-		// GL.clear(1, 0, 0, 1);
-		GL.clear(0, 0, 0, 0);
-		GL.setMatrices(this.cameraOrtho);
-		shader.bind();
-		GL.draw(mesh);
-		this._fboParticle.unbind();
 
 
 		this._hit = vec3.create();
@@ -69,7 +56,7 @@ class SceneApp extends alfrid.Scene {
 		});
 
 
-		PoseDetection.on('poses', (o)=>this._onPoses(o));
+		// PoseDetection.on('poses', (o)=>this._onPoses(o));
 
 		this._hits = [];
 	}
@@ -88,10 +75,10 @@ class SceneApp extends alfrid.Scene {
 		this._fboCurrent  	= new alfrid.FrameBuffer(numParticles, numParticles, o, 3);
 		this._fboTarget  	= new alfrid.FrameBuffer(numParticles, numParticles, o, 3);
 
-		const shadowMapSize = 1024;
+		const shadowMapSize = 512;
 		this._fboShadow = new alfrid.FrameBuffer(shadowMapSize, shadowMapSize, {minFilter:GL.LINEAR, magFilter:GL.LINEAR});
-		const s = 32 * 2;
-		this._fboParticle = new alfrid.FrameBuffer(s, s, {minFilter:GL.LINEAR, magFilter:GL.LINEAR});
+
+		this._textureParticle = new ParticleTexture();
 	}
 
 
@@ -271,7 +258,7 @@ class SceneApp extends alfrid.Scene {
 
 
 	get textureParticle() {
-		return this._fboParticle.getTexture();
+		return this._textureParticle.getTexture();
 	}
 }
 

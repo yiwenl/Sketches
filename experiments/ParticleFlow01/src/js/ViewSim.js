@@ -43,6 +43,7 @@ class ViewSim extends alfrid.View {
 		this.shader.uniform("uRange", "float", Config.range);
 		this.shader.uniform("uHit", "vec3", mHit);
 		this.shader.uniform("uHits", "vec3", hits);
+		this.shader.uniform("uSkipCount", "float", Config.skipCount);
 		textureVel.bind(0);
 		texturePos.bind(1);
 		textureExtra.bind(2);

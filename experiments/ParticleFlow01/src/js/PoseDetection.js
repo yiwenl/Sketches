@@ -6,7 +6,7 @@ import { drawKeypoints, drawSkeleton, drawPoint } from './utils';
 import Config from './Config';
 
 const defaultQuantBytes = 2;
-const scale = 1;
+const scale = 2;
 const videoWidth = 600 * scale;
 const videoHeight = 480 * scale;
 
@@ -22,7 +22,7 @@ const defaultResNetInputResolution = Config.ResNetInputResolution;
  // 161,193,257,289,321,353,385,417,449,481,513,801 
 
 const guiState = {
-	algorithm: 'multi-pose',
+	algorithm: 'single-pose',
 	input: {
 		architecture: 'ResNet50',
 		outputStride: defaultResNetStride,
@@ -31,8 +31,8 @@ const guiState = {
 		quantBytes: defaultQuantBytes
 	},
 	singlePoseDetection: {
-		minPoseConfidence: 0.1,
-		minPartConfidence: 0.5,
+		minPoseConfidence: 0.15,
+		minPartConfidence: 0.25,
 	},
 	multiPoseDetection: {
 		maxPoseDetections: 5,
@@ -41,7 +41,7 @@ const guiState = {
 		nmsRadius: 30.0,
 	},
 	output: {
-		showVideo: true,
+		showVideo: false,
 		showSkeleton: true,
 		showPoints: true,
 		showBoundingBox: false,

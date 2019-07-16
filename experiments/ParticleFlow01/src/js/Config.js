@@ -6,6 +6,6 @@ export default {
 	skipCount:1,
 	maxRadius: 3.5,
 	range:15,
-	ResNetInputResolution:193,
-	hideTracking:false
+	ResNetInputResolution:161,
+	hideTracking:true
 };

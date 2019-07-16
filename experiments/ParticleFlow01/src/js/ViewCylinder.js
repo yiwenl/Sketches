@@ -55,10 +55,12 @@ class ViewCylinder extends alfrid.View {
 		}
 
 
-		this.mesh = new alfrid.Mesh();
-		this.mesh.bufferVertex(positions);
-		this.mesh.bufferTexCoord(uvs);
-		this.mesh.bufferIndex(indices);
+		// this.mesh = new alfrid.Mesh();
+		// this.mesh.bufferVertex(positions);
+		// this.mesh.bufferTexCoord(uvs);
+		// this.mesh.bufferIndex(indices);
+
+		this.mesh = alfrid.Geom.plane(range * 3, maxRadius * 4.0, 1, 'xy');
 	}
 
 

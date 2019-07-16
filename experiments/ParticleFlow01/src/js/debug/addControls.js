@@ -22,6 +22,7 @@ const addControls = (scene) => {
 			Settings.refresh();
 		}
 
+		gui.add(Config, 'skipCount', 1, 10).step(1).onFinishChange(Settings.refresh);
 		gui.add(Config, 'hideTracking').onFinishChange(checkTracking);
 
 		checkTracking();

@@ -12,6 +12,7 @@ uniform sampler2D textureExtra;
 uniform float time;
 uniform float maxRadius;
 uniform float uRange;
+uniform float uSkipCount;
 uniform vec3 uHit;
 uniform vec3 uHits[NUM];
 
@@ -56,21 +57,20 @@ void main(void) {
 	}
 
 
-
-	const float range = 6.0;
+	//	pulling force
+	const float range = 8.0;
 	for(int i=0; i<NUM; i++) {
 		vec3 hit = uHits[i];
 		dist = distance(hit, pos);
 		
-
-		float f = smoothstep(range, 0.0, dist);
+		float f = smoothstep(range, range * 0.5, dist);
 		vec3 dirToHit = normalize(hit - pos);
-		acc -= dirToHit * f * 5.0;	
+		acc += dirToHit * f * 2.0;	
 	}
 
 	
 	
-	vel                  += acc * .002 * speedOffset;
+	vel                  += acc * .002 * speedOffset * uSkipCount;
 	
 	const float decrease = .96;
 	vel                  *= decrease;
