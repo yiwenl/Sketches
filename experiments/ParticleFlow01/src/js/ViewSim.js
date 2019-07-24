@@ -22,19 +22,29 @@ class ViewSim extends alfrid.View {
 		this.shader.uniform('texturePos', 'uniform1i', 1);
 		this.shader.uniform('textureExtra', 'uniform1i', 2);
 
+		this._preHits;
+		this._hits;
 	}
 
 
 	render(textureVel, texturePos, textureExtra, mHit, mHits) {
-		const hits = [];
+		if(this._hits) {
+			this._preHits = this._hits.concat();
+		}
+
+		this._hits = [];
 
 		for(let i=0; i<Config.NUM_HANDS; i++) {
 			if(mHits[i]) {
-				hits.push(mHits[i][0], mHits[i][1], mHits[i][2]);
+				this._hits.push(mHits[i][0], mHits[i][1], mHits[i][2]);
 			} else {
-				hits.push(999, 999, 999);
+				this._hits.push(999, 999, 999);
 			}
 		} 
+		if(!this._preHits) {
+			this._preHits = this._hits.concat();
+		}
+
 
 		this.time += .01;
 		this.shader.bind();
@@ -42,7 +52,8 @@ class ViewSim extends alfrid.View {
 		this.shader.uniform('maxRadius', 'float', Config.maxRadius);
 		this.shader.uniform("uRange", "float", Config.range);
 		this.shader.uniform("uHit", "vec3", mHit);
-		this.shader.uniform("uHits", "vec3", hits);
+		this.shader.uniform("uHits", "vec3", this._hits);
+		this.shader.uniform("uPreHits", "vec3", this._preHits);
 		this.shader.uniform("uSkipCount", "float", Config.skipCount);
 		textureVel.bind(0);
 		texturePos.bind(1);

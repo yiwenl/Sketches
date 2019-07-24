@@ -18,7 +18,7 @@ varying vec3 vExtra;
 void main(void) {
 	vColor       = aVertexPosition;
 	vec3 pos     = vec3(aTextureCoord, 0.0);
-	gl_Position  = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
+	gl_Position  = vec4(pos, 1.0);
 	
 	gl_PointSize = 1.0;
 	

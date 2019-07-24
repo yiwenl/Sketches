@@ -72,7 +72,7 @@ function _init3D() {
 	container.appendChild(canvas);
 
 	//	INIT 3D TOOL
-	GL.init(canvas, {ignoreWebgl2:true, preserveDrawingBuffer:true});
+	GL.init(canvas, {ignoreWebgl2:true, preserveDrawingBuffer:true, alpha:false});
 
 	//	INIT ASSETS
 	Assets.init();

@@ -7,7 +7,7 @@ uniform sampler2D textureParticle;
 
 #define uMapSize vec2(1024.0)
 #define FOG_DENSITY 0.2
-#define LIGHT_POS vec3(0.0, 10.0, 5.0)
+#define LIGHT_POS vec3(0.0, 10.0, 0.0)
 
 
 float rand(vec4 seed4) {

@@ -30,6 +30,7 @@ h1,h2,h3,h4,text,p {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-webkit-font-smoothing: antialiased;
 	font-family: 'Open Sans', sans-serif;
+	pointer-events: none;
 }
 
 .Main-Canvas {
@@ -66,28 +67,6 @@ h1,h2,h3,h4,text,p {
 		opacity: 1;
 	}
 }
-
-
-
-
-.webcam {
-	position: fixed;
-	left: -50%;
-}
-
-
-.imageData {
-	position: fixed;
-	z-index: 500;
-	transition: opacity .25s ease-in-out;
-	opacity: .25;
-
-	.hideCam & {
-		opacity: 0;
-		pointer-events: none;
-	}
-}
-
 
 .Loading-Bar {
 	position: absolute;

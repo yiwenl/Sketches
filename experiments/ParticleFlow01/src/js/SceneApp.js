@@ -8,7 +8,7 @@ import ViewSim from './ViewSim';
 import ViewFloor from './ViewFloor';
 import ViewCylinder from './ViewCylinder';
 import Config from './Config';
-// import PoseDetection from './PoseDetection';
+import PoseDetection from './PoseDetection';
 import ParticleTexture from './ParticleTexture';
 import { hitTest, checkBounds } from './utils';
 
@@ -23,17 +23,14 @@ class SceneApp extends alfrid.Scene {
 
 		this._count = 0;
 		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
+		this.orbitalControl.radius.setTo(9);
 		this.orbitalControl.radius.value = 10.0;
-		// this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
-		// this.orbitalControl.rx.value = 0.3;
 		this.orbitalControl.ry.easing = 0.01;
 		this.orbitalControl.lock();
 
 		this._cameraLight = new alfrid.CameraOrtho();
 		const s = Config.range;
 		this._cameraLight.ortho(-s, s, -s, s, 1, 50);
-		// this._cameraLight.lookAt([0, 10, 0.1], [0, 0, 0], [0, 1, 0]);
-		// this._cameraLight.lookAt([0, 10, 0], [0, 0, 0], [0, 0, -1]);
 
 		this._cameraLight.lookAt([0, 10, 3], [0, 0, 0]);
 
@@ -56,7 +53,7 @@ class SceneApp extends alfrid.Scene {
 		});
 
 
-		// PoseDetection.on('poses', (o)=>this._onPoses(o));
+		PoseDetection.on('poses', (o)=>this._onPoses(o));
 
 		this._hits = [];
 	}
@@ -156,18 +153,12 @@ class SceneApp extends alfrid.Scene {
 			
 		});
 
-		if(count > 0) {
-			sumX /= count;	
-			this.orbitalControl.ry.value = -(sumX) * 0.3;
-		} else {
-			this.orbitalControl.ry.value = 0;
-		}
 	}
 
 
 	updateFbo() {
 		this._fboTarget.bind();
-		GL.clear(0, 0, 0, 1);
+		GL.clear(0, 0, 0, 0);
 		this._vSim.render(
 			this._fboCurrent.getTexture(1), 
 			this._fboCurrent.getTexture(0), 

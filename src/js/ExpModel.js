@@ -293,6 +293,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchBlackHole.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/blackhole01/dist/index.html',
 		title:'Black Hole'
+	},
+	{
+		cover:'assets/img/coverSketchFluid06.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/fluid06/dist/index.html',
+		title:'Swirly Liquid'
 	}
 ]
 

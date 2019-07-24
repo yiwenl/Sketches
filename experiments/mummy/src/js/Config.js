@@ -2,13 +2,8 @@
 
 export default {
 	numParticles:256*2,
-	skipCount:6,
+	skipCount: 1,
+	numSets:1,
 	maxRadius: 3.5,
-	range:10,
-	minTrackingScale:1,
-	transform: {
-		scale:1,
-		x:0,
-		y:0
-	},
+	modelScale:3
 };

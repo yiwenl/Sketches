@@ -4,8 +4,7 @@ import alfrid, { GL } from 'alfrid';
 import vs from 'shaders/save.vert';
 import fs from 'shaders/save.frag';
 import Config from './Config';
-// const random = function (min, max) { return min + Math.random() * (max - min);	};
-import { random } from 'randomutils';
+import { random, randomGaussian } from 'randomutils';
 
 class ViewSave extends alfrid.View {
 	
@@ -21,21 +20,23 @@ class ViewSave extends alfrid.View {
 		let extras = [];
 		let count = 0;
 
-		const { maxRadius, range } = Config;
-
 		let numParticles = Config.numParticles;
 		let totalParticles = numParticles * numParticles;
 		console.debug('Total Particles : ', totalParticles);
 		let ux, uy;
+		let range = 10;
 		const m = mat4.create();
 
 		const getPos = () => {
-			return [
-				random(-maxRadius, maxRadius),
-				random(-range, range),
-				2
-			];
+			let a = random(Math.PI * 2);
+			let r = Math.sqrt(random(1)) * 4.0;
+			let x = Math.cos(a) * r;
+			let z = Math.sin(a) * r;
+			let y = random(-range, range);
+			return [x, y, z];
 		}
+
+		const n = 4;
 
 		for(let j = 0; j < numParticles; j++) {
 			for(let i = 0; i < numParticles; i++) {
@@ -45,7 +46,7 @@ class ViewSave extends alfrid.View {
 				ux = i / numParticles * 2.0 - 1.0 + .5 / numParticles;
 				uy = j / numParticles * 2.0 - 1.0 + .5 / numParticles;
 
-				extras.push([Math.random(), Math.random(), Math.random()]);
+				extras.push([randomGaussian(n), randomGaussian(n), randomGaussian(n)]);
 				coords.push([ux, uy]);
 				indices.push(count);
 				count ++;

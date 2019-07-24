@@ -19,7 +19,7 @@ varying vec4 vColor;
 varying vec3 vNormal;
 varying vec4 vShadowCoord;
 
-const float radius = 0.015;
+const float radius = 0.02;
 
 void main(void) {
 	vec2 uv      = aVertexPosition.xy;

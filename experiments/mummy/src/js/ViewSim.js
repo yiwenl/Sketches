@@ -28,7 +28,7 @@ class ViewSim extends alfrid.View {
 		this.time += .01;
 		this.shader.bind();
 		this.shader.uniform('time', 'float', this.time);
-		this.shader.uniform('maxRadius', 'float', Config.maxRadius);
+		this.shader.uniform('maxRadius', 'float', Config.maxRadius * 0.75);
 		textureVel.bind(0);
 		texturePos.bind(1);
 		textureExtra.bind(2);
