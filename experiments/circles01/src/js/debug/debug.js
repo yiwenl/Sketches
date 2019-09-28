@@ -9,7 +9,7 @@ window.gui = new dat.GUI({ width:300 });
 const div = document.body.querySelector('.dg.ac');
 div.style.zIndex = '999';
 
-dat.GUI.toggleHide();
+// dat.GUI.toggleHide();
 
 
 //	STATS
