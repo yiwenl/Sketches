@@ -57,7 +57,7 @@
     "webpack-dev-server": "^3.7.1"
   },
   "dependencies": {
-    "alfrid": "^0.3.7",
+    "alfrid": "^0.3.8",
     "assets-loader": "github:madclem/assets-loader",
     "dat-gui": "^0.5.0",
     "fast-url-parser": "^1.1.3",

@@ -38,7 +38,7 @@ class ViewRender extends alfrid.View {
 	}
 
 
-	render(textureCurr, textureNext, p, textureExtra, mShadowMatrix, mTextureDepth, textureParticle) {
+	render(textureCurr, textureNext, p, textureExtra, mShadowMatrix, mTextureDepth, textureParticle, textureDebug, depthMatrix, textureMap) {
 		this.time += 0.1;
 		this.shader.bind();
 
@@ -57,6 +57,14 @@ class ViewRender extends alfrid.View {
 		this.shader.uniform("uShadowMatrix", "mat4", mShadowMatrix);
 		this.shader.uniform("textureDepth", "uniform1i", 3);
 		mTextureDepth.bind(3);
+
+		this.shader.uniform("textureDebug", "uniform1i", 5);
+		textureDebug.bind(5);
+
+		this.shader.uniform("uDepthMatrix", "mat4", depthMatrix);
+		this.shader.uniform("textureMap", "uniform1i", 6);
+		textureMap.bind(6);
+
 
 		this.shader.uniform('uViewport', 'vec2', [GL.width, GL.height]);
 		this.shader.uniform('percent', 'float', p);

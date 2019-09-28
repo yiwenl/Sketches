@@ -7,7 +7,11 @@ import ViewRenderShadow from './ViewRenderShadow';
 import ViewSim from './ViewSim';
 import ViewModel from './ViewModel';
 import Config from './Config';
+import Assets from './Assets';
 import ParticleTexture from './ParticleTexture';
+
+import fsBg from 'shaders/bg.frag';
+import FaceTracking from './FaceTracking';
 
 window.getAsset = function(id) {
 	return assets.find( (a) => a.id === id).file;
@@ -19,9 +23,9 @@ class SceneApp extends alfrid.Scene {
 		GL.enableAlphaBlending();
 
 		this._count = 0;
-		this.camera.setPerspective(Math.PI/2, GL.aspectRatio, .1, 100);
-		this.orbitalControl.radius.value = 10;
-		this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+		this.camera.setPerspective(60 * Math.PI/180, GL.aspectRatio, .1, 100);
+		this.orbitalControl.radius.value = 12;
+		// this.orbitalControl.rx.value = this.orbitalControl.ry.value = -0.1;
 
 		this._cameraLight = new alfrid.CameraOrtho();
 		const s = 10;
@@ -43,7 +47,25 @@ class SceneApp extends alfrid.Scene {
 		this.cameraFront.setPerspective(30 * Math.PI / 180, GL.aspectRatio, 1, 30);
 		this.cameraFront.lookAt([0, 0, 22], [0, 0, 0]);
 
-		this._capture();
+		this._depthMatrix = mat4.create();
+		mat4.multiply(this._depthMatrix, this.cameraFront.projection, this.cameraFront.viewMatrix);
+		mat4.multiply(this._depthMatrix, this._biasMatrix, this._depthMatrix);
+
+
+		this.mtx = mat4.create();
+
+		this._nose = vec3.create();
+		this._preNose = vec3.create();
+
+		FaceTracking.init()
+		.then(()=> {
+			console.log('done');
+
+			FaceTracking.on('onFace', (o)=>this._onFace(o))
+		}, (e)=> {
+			console.log('Error' ,e);
+		});
+		
 	}
 
 	_initTextures() {
@@ -55,14 +77,13 @@ class SceneApp extends alfrid.Scene {
 			minFilter:GL.NEAREST,
 			magFilter:GL.NEAREST,
 			type:GL.FLOAT,
-			mipmap:false
 		};
 
 		// this._fbo 			= new FboPingPong(numParticles, numParticles, o, 3);
 		this._fbos = [];
 		let i = Config.numSets;
 		while(i--) {
-			this._fbos.push(new FboPingPong(numParticles, numParticles, o, 3));
+			this._fbos.push(new FboPingPong(numParticles, numParticles, o, 4));
 		}
 
 		this._fbos.forEach(fbo => {
@@ -77,7 +98,7 @@ class SceneApp extends alfrid.Scene {
 		this._textureParticle = new ParticleTexture();
 
 		const fboSize = 2048;
-		this._fboModel = new alfrid.FrameBuffer(fboSize, fboSize, {type:GL.FLOAT});
+		this._fboModel = new alfrid.FrameBuffer(fboSize, fboSize, o, 2);
 		this._hasCapture = false;
 
 		console.log('Num particles : ', numParticles * numParticles * Config.numSets);
@@ -108,9 +129,37 @@ class SceneApp extends alfrid.Scene {
 			this._vSave.render();
 			fbo.read.unbind();	
 		});
+
+		this.drawBg = new alfrid.Draw()
+			.useProgram(alfrid.ShaderLibs.bigTriangleVert, fsBg)
+			.setMesh(alfrid.Geom.bigTriangle())
+			.uniformTexture('texture', Assets.get('lutMap'))
 		
 
 		GL.setMatrices(this.camera);
+	}
+
+	_onFace(o) {
+		const { rx, ry, rz, x, y, scale } = o;
+
+		mat4.identity(this.mtx);
+		mat4.scale(this.mtx, this.mtx, vec3.fromValues(scale, scale, scale));
+		mat4.rotateX(this.mtx, this.mtx, -rx);
+		mat4.rotateY(this.mtx, this.mtx, ry);
+		mat4.rotateZ(this.mtx, this.mtx, -rz);
+		const xyScale = 0.025;
+		let tx = x * xyScale;
+		let ty = y * xyScale + 2;
+		mat4.translate(this.mtx, this.mtx, vec3.fromValues(tx, ty, 0));
+
+		
+
+		vec3.copy(this._preNose, this._nose);
+		this._nose[0] = tx;
+		this._nose[1] = ty;
+		this._nose[2] = 1.5;
+
+		this._capture();
 	}
 
 
@@ -121,7 +170,12 @@ class SceneApp extends alfrid.Scene {
 			this._vSim.render(
 				fbo.read.getTexture(1), 
 				fbo.read.getTexture(0), 
-				fbo.read.getTexture(2));
+				fbo.read.getTexture(2),
+				this._fboModel.getTexture(0),
+				this._depthMatrix,
+				this._nose,
+				this._preNose
+				);
 			fbo.write.unbind();
 			fbo.swap();	
 		})
@@ -139,7 +193,11 @@ class SceneApp extends alfrid.Scene {
 				fbo.read.getTexture(2),
 				this._shadowMatrix, 
 				this._fboShadow.getDepthTexture(),
-				this.textureParticle
+				this.textureParticle,
+				fbo.read.getTexture(3),
+				this._depthMatrix,
+				this._fboModel.getTexture(1),
+				this._fboModel.getTexture(0)
 			);	
 		})
 		
@@ -165,13 +223,18 @@ class SceneApp extends alfrid.Scene {
 
 
 	_capture() {
-		if(this._hasCapture) {
+		if(!this._vModel.isReady) {
 			return;
 		}
 
+		// if(this._hasCapture) {
+		// 	return;
+		// }
+
 		GL.setMatrices(this.cameraFront);
 		this._fboModel.bind();
-		GL.clear(0, 0, 0, 0);
+		GL.clear(0.1, 0.1, 0.1, 0.5);
+		GL.rotate(this.mtx);
 		this._vModel.render();
 		this._fboModel.unbind();
 
@@ -181,6 +244,11 @@ class SceneApp extends alfrid.Scene {
 
 
 	render() {
+
+		let s;
+
+		if(!this._hasCapture) { return; }
+
 		GL.setMatrices(this.camera);
 
 		this._count ++;
@@ -191,28 +259,37 @@ class SceneApp extends alfrid.Scene {
 
 		this._renderShadowMap();
 
-		GL.clear(0, 0, 0, 0);
+		GL.clear(205/255, 31/255, 14/255, 1);
+		GL.clear(0, 0, 0, 1);
 		GL.setMatrices(this.camera);
-		this._bAxis.draw();
-		this._bDots.draw();
 
 		this._renderParticles();
 
-		this._vModel.render();
-		this._bBall.draw([0, 0, 10], [.1, .1, .1], [1, 0 ,0])
+		s = 2;
+		// this._bBall.draw(this._nose, [s, s, s], [1, 0, 0], .5);
 
-		const s = 200;
+		// this._vModel.render();
+
+		// this._vModel.render();
+		// this._bBall.draw([0, 0, 10], [.1, .1, .1], [1, 0 ,0])
+		s = 256;
+		GL.viewport(0, 0, s, s);
+		// this._bCopy.draw(this.textureParticle);
+/*/
+		
 		GL.viewport(0, 0, s, s/GL.aspectRatio);
-		// this._bCopy.draw(this._fbos[0].read.getTexture(0));
-		// this._bCopy.draw(this._fboShadow.getTexture());
 		this._bCopy.draw(this._fboModel.getTexture());
+		GL.viewport(s, 0, s, s/GL.aspectRatio);
+		this._bCopy.draw(this._fboModel.getTexture(1));
+//*/		
 	}
 
 
 
 	resize() {
 		const { innerWidth, innerHeight, devicePixelRatio } = window;
-		GL.setSize(innerWidth, innerHeight);
+		// GL.setSize(innerWidth, innerHeight);
+		GL.setSize(1080, 1350);
 		this.camera.setAspectRatio(GL.aspectRatio);
 	}
 

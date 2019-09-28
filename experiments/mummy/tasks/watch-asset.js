@@ -9,7 +9,8 @@ const getFileName = require('./getFileName');
 
 const ASSETS_PATH   = [
 						'./dist/assets/img', 
-						'./dist/assets/obj'
+						'./dist/assets/obj',
+						'./dist/assets/gltf'
 						];
 
 
@@ -123,6 +124,10 @@ function getAssetType(mExt) {
 			return 'png';
 		case 'obj' :
 			return 'text';
+		case 'gltf' :
+			return 'text';
+		case 'bin' :
+			return 'binary';
 		case 'dds' :
 			return 'binary';
 		case 'hdr' :
@@ -143,6 +148,21 @@ function generateAssetList() {
 			type
 		}
 	});
+
+
+	const contains = (mId) => {
+		let a = list.filter( item => item.id === mId);
+		return a.length > 1;
+	}
+
+	list.forEach( item => {
+		let hasDuplicated = contains(item.id);
+		if(hasDuplicated) {
+			if(item.type === 'binary') {
+				item.id = `${item.id}_bin`;
+			}
+		}
+	})
 
 	let strList = JSON.stringify(list);
 	strList = strList.replace('[', '[\n\t');

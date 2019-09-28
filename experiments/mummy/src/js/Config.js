@@ -5,5 +5,7 @@ export default {
 	skipCount: 1,
 	numSets:1,
 	maxRadius: 3.5,
-	modelScale:3
+	modelScale:4,
+	roughness:1,
+	metallic:0
 };

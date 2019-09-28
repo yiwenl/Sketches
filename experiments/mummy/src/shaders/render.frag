@@ -2,8 +2,12 @@ precision highp float;
 
 varying vec4 vColor;
 varying vec4 vShadowCoord;
+varying vec4 vDepthCoord;
+varying vec3 vExtra;
+
 uniform sampler2D textureDepth;
 uniform sampler2D textureParticle;
+uniform sampler2D textureMap;
 
 #define uMapSize vec2(1024.0)
 #define FOG_DENSITY 0.2
@@ -68,14 +72,27 @@ void main(void) {
 	s = mix(s, 1.0, .25);
 
 	float d = diffuse(N, LIGHT_POS);
-	// d = mix(d, 1.0, .25);
+	d = mix(d, 1.0, .25);
 
 	vec4 color = vec4(vec3(d), 1.0);
-	color.rgb *= s;
+	
 
 	float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
-	float fogAmount = fogFactorExp2(fogDistance - 4.5, FOG_DENSITY);
+	float fogAmount = fogFactorExp2(fogDistance - 8.5, FOG_DENSITY);
 	const vec4 fogColor = vec4(0.0, 0.0, 0.0, 1.0); // white
+
+	uv = vDepthCoord.xy / vDepthCoord.w;
+/*/
+	colorMap = texture2D(textureMap, uv);
+	if(colorMap.a <= 0.01) {
+		// color.rgb *= mix(1.0, 1.5, vExtra.g);
+	} else {
+		color.rgb *= colorMap.rgb * 2.0;
+	}
+/*/	
+	color.rgb *= mix(1.0, 2.0, vExtra.g);
+//*/	
+	color.rgb *= s;
 
 	gl_FragColor = mix(color, fogColor, fogAmount);
 }

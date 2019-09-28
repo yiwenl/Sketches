@@ -76,10 +76,11 @@ class SceneApp extends alfrid.Scene {
 		this._textureMountains = [];
 		this._mountains = [];
 
-		const NUM_MOUNTAINS = 100;
+		const NUM_MOUNTAINS = 150;
 		const RANGE = 7;
 		const RANGE_Z = params.maxRange;
 		const RIVER_WIDTH = 2.3;
+		console.log('Number of mountains', NUM_MOUNTAINS);
 		for(let i=0; i<NUM_MOUNTAINS; i++) {
 			let v = new ViewMountain();
 			let x = random(RIVER_WIDTH, RANGE);

@@ -29,6 +29,7 @@ module.exports = {
   devtool,
   output,
   devServer: {
+    https:true,
     host:'0.0.0.0',
     contentBase: './dist',
     hot:true,

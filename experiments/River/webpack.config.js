@@ -1,71 +1,96 @@
-/* eslint comma-dangle: 0 */
-const webpack           = require('webpack');
-const path              = require('path');
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
-const ip                = require('ip');
-const prod              = process.env.NODE_ENV === 'production';
+const path = require('path');
+const pathOutput = path.resolve(__dirname, 'dist');
+const pathNodeModules = path.resolve(__dirname, 'node_modules');
+const HtmlWebPackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+// const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+//   .BundleAnalyzerPlugin;
+const TerserPlugin = require("terser-webpack-plugin");
 
-const serverIp = ip.address();
+const env = process.env.NODE_ENV;
+const isProd = env === 'production';
+console.log('Environment isProd :', isProd);
 
-// console.log('Serverip : ', serverIp, 'http://'+serverIp+':8080');
 
-function getOutput() {
-  return path.resolve(__dirname, "dist" )
-}
+const entry = isProd ? {app:'./src/js/app.js'}
+        : {app:'./src/js/app.js', debug:'./src/js/debug/debug.js'};
+const output = isProd ? {
+    filename:'assets/js/app.js',
+    path: pathOutput
+  } : {
+    filename:'assets/js/[name].js',
+    path: pathOutput
+  };
+
+const devtool = isProd ? 'source-map' : 'inline-source-map';
 
 module.exports = {
-  entry: {
-    app: ['./src/js/app.js']
-  },
-  stats: {
-    cached: false,
-    cachedAssets: false,
-    chunkModules: false,
-    chunks: false,
-    colors: true,
-    errorDetails: true,
-    hash: false,
-    progress: true,
-    reasons: false,
-    timings: true,
-    version: false
-  },
-  output: {
-    path: getOutput(),
-    filename:'bundle.js'
+  entry,
+  devtool,
+  output,
+  devServer: {
+    host:'0.0.0.0',
+    contentBase: './dist',
+    hot:true,
+    disableHostCheck:true
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
-        loader: 'babel',
         exclude: /node_modules/,
-        query: {
-          plugins: ['transform-runtime', 'add-module-exports'],
-          presets: ['es2015', 'stage-1']
+        use: {
+          loader: "babel-loader"
         }
       },
       {
+        test: /\.hbs$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "handlebars-loader"
+        }
+      },
+      {
+        test: /\.html$/,
+        use: [
+          {
+            loader: "html-loader",
+            options: { minimize: true }
+          }
+        ]
+      },
+      {
         test: /\.css$/,
-        loader: 'style!css'
+        use: [MiniCssExtractPlugin.loader, "css-loader"]
       },
       {
         test: /\.scss$/,
-        loader: prod ?
-          ExtractTextPlugin.extract("style-loader", `css-loader!autoprefixer-loader?browsers=last 3 version!sass-loader?includePaths[]=dist`) :
-          `style!css!autoprefixer?browsers=last 3 version!sass?includePaths[]=dist` 
+        use: [
+                "style-loader", // creates style nodes from JS strings
+                "css-loader", // translates CSS into CommonJS
+                "sass-loader" // compiles Sass to CSS, using Node Sass by default
+            ]
       },
-      { test: /\.(glsl|frag|vert)$/, loader: 'raw', exclude: /node_modules/ },
-      { test: /\.(glsl|frag|vert)$/, loader: 'glslify', exclude: /node_modules/ }
+      {
+        test: /\.(glsl|vert|frag)$/,
+        use: ["raw-loader", "glslify-loader"]
+      }
     ]
   },
-  plugins: prod ? [
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        screw_ie8: true,
-        warnings: false
-      }
-    }),
-    new ExtractTextPlugin('main.css')
-  ] : []
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+      chunkFilename: "[id].css"
+    })
+    // new BundleAnalyzerPlugin()
+  ],
+  optimization: {
+    minimizer: [new TerserPlugin({ parallel: true })]
+  },
+  resolve: {
+    alias: {
+      'libs':path.resolve(__dirname, 'src/js/libs'),
+      'shaders':path.resolve(__dirname, 'src/shaders')
+    }
+  }
 };
