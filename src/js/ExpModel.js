@@ -303,6 +303,11 @@ const ExpModel = [
 		cover:'assets/img/coverSketchDots.jpg',
 		url:'//yiwenl.github.io/Sketches/experiments/circles01/dist/index.html',
 		title:'Dots'
+	},
+	{
+		cover:'assets/img/coverSketchChars.jpg',
+		url:'//yiwenl.github.io/Sketches/experiments/sutraFlow/dist/index.html',
+		title:'Words'
 	}
 ]
 
