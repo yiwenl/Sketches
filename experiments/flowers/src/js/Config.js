@@ -1,4 +1,25 @@
 // Config.js
 
+const TEXTURE_SIZE = 64
+
 export default {
-};
+  TEXTURE_SIZE,
+  TEXTURE_WIDTH: TEXTURE_SIZE * 2,
+  TEXTURE_HEIGHT: TEXTURE_SIZE,
+  TEXTURE_DOWNSAMPLE: 2,
+  DENSITY_DISSIPATION: 0.9975,
+  VELOCITY_DISSIPATION: 0.9975,
+  PRESSURE_DISSIPATION: 0.996,
+  PRESSURE_ITERATIONS: 20,
+  SPLAT_RADIUS: 0.04,
+  NUM_CIRCLES: 10,
+  PLANE_SIZE: 10,
+  NUM_PARTICLES: 150,
+  numParticles: 100,
+  sphereSize: 1,
+  touchSize: 10,
+  fluidSpeed: 1.0,
+  roughness: 1,
+  metallic: 0,
+  lightmap: 9
+}

@@ -313,6 +313,11 @@ const ExpModel = [
     cover: 'assets/img/coverSketchGlassDatavisGlobe.jpg',
     url: 'https://www.bongiovi.tw/datavis/globe/',
     title: 'DataVis Globe'
+  },
+  {
+    cover: 'assets/img/coverSketchFlower.jpg',
+    url: '//yiwenl.github.io/Sketches/experiments/flowers/dist/index.html',
+    title: 'Flower'
   }
 ]
 

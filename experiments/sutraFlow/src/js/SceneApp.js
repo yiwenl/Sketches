@@ -85,7 +85,14 @@ class SceneApp extends Scene {
       .uniformTexture('texturePrev', this._fbo.write.texture, 2)
       .uniform('uPercent', 'float', this._count / NUM_STEP)
       .draw()
-    GL.enable(GL.DEPTH_TEST)
+
+
+    const s = GL.width / 4
+
+    this._fluid.allTextures.forEach((t, i) => {
+      GL.viewport(s * i, 0, s, s / 2)
+      this._bCopy.draw(t)
+    })
   }
 
   resize (w, h) {

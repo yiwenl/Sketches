@@ -50,7 +50,7 @@ function getAssetsInDir(mSourceDir, mCallback) {
 		}
 
 		let assets = files.filter((f)=> {
-			return f.indexOf('DS_Store') === -1 && f.indexOf('.mtl') === -1;
+			return f.indexOf('DS_Store') === -1;
 		});
 
 		// console.log('Assets in ', mSourceDir, assets);

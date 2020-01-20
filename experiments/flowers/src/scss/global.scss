@@ -5,8 +5,8 @@ html, body {
 	margin:0;
 	padding:0;
 
-	overflow: hidden;
-	position: fixed;
+	overflow:hidden;
+	position: static;
 	
 	$gradient0: #333333;
 	$gradient1: #000000;
@@ -28,6 +28,7 @@ h1,h2,h3,h4,text,p {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-webkit-font-smoothing: antialiased;
 	font-family: 'Open Sans', sans-serif;
+	pointer-events: none;
 }
 
 .Main-Canvas {
@@ -35,6 +36,8 @@ h1,h2,h3,h4,text,p {
 
 	opacity: 1;
 	transition: opacity .5s ease-out .25s;
+	top: auto;
+	left: auto;
 
 	.isLoading & {
 		opacity: 0;
@@ -72,6 +75,27 @@ h1,h2,h3,h4,text,p {
 	}
 }
 
+.link {
+	color:white;
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	margin:20px;
+	text-decoration: none;
+	font-size: 13px;
+	letter-spacing: 1px;
+	z-index: 9999;
+	opacity: 0;
+	pointer-events: none;
+
+	transition: opacity	.5s ease-out;
+
+	.showLink & {
+		opacity: 1;
+		pointer-events: auto;
+	}
+}
+
 .Loading-Bar {
 	position: absolute;
 	z-index: 998;
@@ -86,4 +110,20 @@ h1,h2,h3,h4,text,p {
 	.isLoading & {
 		opacity: 1;
 	}
+}
+
+.desc {
+	color: white;
+
+	z-index: 9999;
+	position: absolute;
+
+	left: 0;
+	bottom: 30px;
+	text-align: center;
+
+	font-size: 12px;
+	width: 100%;
+
+	letter-spacing: 2px;
 }
