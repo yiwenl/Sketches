@@ -33,7 +33,7 @@ void main(void) {
 	vec4 colorMask = texture2D(textureMask, screenUV);
 	vec3 posMask = colorMask.xyz;
 
-	float noise 		 = snoise(pos * 0.2 + extra * 0.05 + time * 0.15);
+	float noise 		 		 = snoise(pos * 0.2 + extra * 0.15 + time * 0.15);
 	float posOffset      = mix(0.01, 0.25, noise * .5 + .5);
 	vec3 acc             = curlNoise(pos * posOffset - time * .15);
 	acc.y *= 0.5;
@@ -43,7 +43,7 @@ void main(void) {
 
 	float d = length(pos.xz);
 	vec2 dir = normalize(pos.xz);
-	acc.xz -= dir * 0.1 * d;
+	acc.xz -= dir * 0.08 * d;
 
 	if(colorMask.a <= 0.0) {
 		acc.z -= 0.25;
@@ -56,7 +56,8 @@ void main(void) {
 	
 	pos                  += vel;
 	if(colorMask.a > 0.0) {
-		pos.z += (posMask.z - pos.z) * 0.15;
+		float easing = mix(0.05, 0.15, extra.z);
+		pos.z += (posMask.z - pos.z) * easing;
 	}
 
 	if(pos.y > uRange) {

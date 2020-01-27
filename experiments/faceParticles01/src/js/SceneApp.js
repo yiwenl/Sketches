@@ -6,6 +6,7 @@ import ViewRender from './ViewRender'
 import ViewRenderShadow from './ViewRenderShadow'
 import ViewSim from './ViewSim'
 import ViewMask from './ViewMask'
+import FaceDetector from './FaceDetector'
 import Config from './Config'
 import ParticleTexture from './ParticleTexture'
 import { resize, biasMatrix } from './utils'
@@ -25,7 +26,7 @@ class SceneApp extends alfrid.Scene {
     this.camera.setPerspective(Math.PI / 2, GL.aspectRatio, 0.1, 50)
     this.orbitalControl.radius.value = 10
     this.orbitalControl.radius.limit(10, 10)
-    // this.orbitalControl.lock()
+    this.orbitalControl.lock()
 
     this._cameraLight = new alfrid.CameraOrtho()
     const s = 7
@@ -34,6 +35,15 @@ class SceneApp extends alfrid.Scene {
     this._shadowMatrix = mat4.create()
     mat4.multiply(this._shadowMatrix, this._cameraLight.projection, this._cameraLight.viewMatrix)
     mat4.multiply(this._shadowMatrix, biasMatrix, this._shadowMatrix)
+
+    this._noses = []
+    FaceDetector.on('result', (o) => {
+      this._noses = o.map(p => {
+        return [p.x, p.y, 0]
+      })
+    })
+
+    this.cameraOrtho.ortho(0, GL.width, 0, GL.height)
   }
 
   _initTextures () {
@@ -76,6 +86,7 @@ class SceneApp extends alfrid.Scene {
     //	helpers
     this._bCopy = new alfrid.BatchCopy()
     this._bAxis = new alfrid.BatchAxis()
+    this._bBall = new alfrid.BatchBall()
 
     //	views
     this._vRender = new ViewRender()
@@ -163,10 +174,15 @@ class SceneApp extends alfrid.Scene {
     GL.clear(r, r, r, 1)
     GL.setMatrices(this.camera)
 
-    this._bAxis.draw()
-
     this._renderParticles()
-/*
+
+    // GL.setMatrices(this.cameraOrtho)
+    // const s = 5
+    // this._noses.forEach((p, i) => {
+    //   const color = i === 1 ? [1, 0, 0] : [0, 1, 0]
+    //   this._bBall.draw(p, [s, s, s], color)
+    // })
+    /*
     const s = 256
     GL.viewport(0, 0, s, s)
     this._bCopy.draw(this.textureParticle)
@@ -174,7 +190,7 @@ class SceneApp extends alfrid.Scene {
     this._bCopy.draw(this._fboShadow.depthTexture)
     GL.viewport(s * 2, 0, s, s)
     this._bCopy.draw(this._fboMask.texture)
-*/    
+*/
   }
 
   resize (w, h) {

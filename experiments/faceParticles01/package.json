@@ -67,6 +67,7 @@
     "glsl-easings": "^1.0.0",
     "parse-dds": "^1.2.1",
     "querystringparser": "^0.1.1",
+    "glsl-utils": "github:yiwenl/glsl-utils",
     "randomutils": "github:yiwenl/randomUtils",
     "scheduling": "^1.2.0",
     "stats.js": "^0.17.0"

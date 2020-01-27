@@ -1,25 +1,10 @@
 import alfrid, { GL } from 'alfrid'
-
-// import * as faceapi from 'face-api.js'
-
 import Assets from './Assets'
 import Config from './Config'
+import FaceDetector from './FaceDetector'
+
 import vs from 'shaders/mask.vert'
 import fs from 'shaders/mask.frag'
-
-const MODEL_URL = '/weights'
-const SSD_MOBILENETV1 = 'ssd_mobilenetv1'
-const TINY_FACE_DETECTOR = 'tiny_face_detector'
-const inputSize = 224
-const scoreThreshold = 0.5
-
-function getCurrentFaceDetectionNet () {
-  return faceapi.nets.tinyFaceDetector
-}
-
-function isFaceDetectionModelLoaded () {
-  return !!getCurrentFaceDetectionNet().params
-}
 
 class ViewMask extends alfrid.View {
   constructor () {
@@ -29,50 +14,44 @@ class ViewMask extends alfrid.View {
   _init () {
     this.mesh = Assets.get('mask')
 
-    console.log('faceapi', faceapi)
+    FaceDetector.on('result', (o) => this._onResult(o))
+    FaceDetector.on('lost', (o) => this._onLost())
+    const easing = 0.1
+    this._x = new alfrid.EaseNumber(0, easing)
+    this._y = new alfrid.EaseNumber(0, easing)
+    this._z = new alfrid.EaseNumber(0, 0.02)
 
-    this._initWebcam()
-    this.startFaceDetection()
+    this._rotation = new alfrid.EaseNumber(0, easing)
+
+    this._z.value = 2
   }
 
-  async _initWebcam () {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
-    this._videoEl = document.querySelector('.webcamVideo')
-    this._videoEl.srcObject = stream
-    console.log('init webcam')
+  _onResult (o) {
+    const point0 = o[0]
+    const point1 = o[1]
+
+    const dy = point1.y - point0.y
+    const dx = point1.x - point0.x
+
+    const theta = (Math.atan2(dy, dx) - Math.PI / 2)
+    const scale = 0.01
+    this._x.value = -(point1.x - FaceDetector.videoWidth / 2) * scale
+    this._y.value = -(point1.y - FaceDetector.videoHeight / 2) * scale
+
+    this._rotation.value = theta
   }
 
-  async startFaceDetection () {
-    await faceapi.loadTinyFaceDetectorModel(MODEL_URL)
-    await faceapi.loadFaceLandmarkModel(MODEL_URL)
-    this._facedetectionOption = new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold })
-
-    this.getFace()
-  }
-
-  async getFace () {
-    const videoEl = document.querySelector('.webcamVideo')
-
-    if (videoEl.paused || videoEl.ended || !isFaceDetectionModelLoaded()) {
-      return setTimeout(() => this.getFace())
-    }
-
-    const result = await faceapi.detectSingleFace(this._videoEl, this._facedetectionOption).withFaceLandmarks()
-    if (result) {
-      const { positions, relativePositions } = result.landmarks
-      if (Math.random() > 0.9) {
-        console.log('result:', result.landmarks.getNose())
-        console.log('result:', result.landmarks.getRefPointsForAlignment())
-      }
-    }
-
-    setTimeout(() => this.getFace())
+  _onLost () {
+    this._rotation.value = 0
+    this._x.value = 0
+    this._y.value = 0
   }
 
   render () {
     this.shader.bind()
-    this.shader.uniform('uPosition', 'vec3', [0, 0, 2])
+    this.shader.uniform('uPosition', 'vec3', [this._x.value, this._y.value, this._z.value])
     this.shader.uniform('uScale', 'float', 1.0 * Config.maskScale)
+    this.shader.uniform('uRotation', 'float', this._rotation.value)
     GL.draw(this.mesh)
   }
 }
