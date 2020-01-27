@@ -52,7 +52,10 @@ class FaceDetector extends EventDispatcher {
 
     const result = await faceapi.detectSingleFace(this._videoEl, this._facedetectionOption).withFaceLandmarks()
     if (result) {
-      this.emit('result', result.landmarks.getNose())
+      const points = result.landmarks.getNose().map(p => {
+        return [p.x - this.videoWidth / 2, p.y - this.videoHeight / 2, 0]
+      })
+      this.emit('result', points)
     } else {
       this.emit('lost')
     }

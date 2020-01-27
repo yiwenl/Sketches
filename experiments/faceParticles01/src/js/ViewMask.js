@@ -19,7 +19,7 @@ class ViewMask extends alfrid.View {
     const easing = 0.1
     this._x = new alfrid.EaseNumber(0, easing)
     this._y = new alfrid.EaseNumber(0, easing)
-    this._z = new alfrid.EaseNumber(0, 0.02)
+    this._z = new alfrid.EaseNumber(0, 0.05)
 
     this._rotation = new alfrid.EaseNumber(0, easing)
 
@@ -30,13 +30,13 @@ class ViewMask extends alfrid.View {
     const point0 = o[0]
     const point1 = o[1]
 
-    const dy = point1.y - point0.y
-    const dx = point1.x - point0.x
+    const dy = point1[1] - point0[1]
+    const dx = point1[0] - point0[0]
 
     const theta = (Math.atan2(dy, dx) - Math.PI / 2)
     const scale = 0.01
-    this._x.value = -(point1.x - FaceDetector.videoWidth / 2) * scale
-    this._y.value = -(point1.y - FaceDetector.videoHeight / 2) * scale
+    this._x.value = -point1[0] * scale
+    this._y.value = -point1[1] * scale
 
     this._rotation.value = theta
   }

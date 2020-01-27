@@ -16,6 +16,7 @@ uniform sampler2D textureMask;
 uniform float time;
 uniform float uRadius;
 uniform float uRange;
+uniform float uAttractForce;
 
 #pragma glslify: curlNoise = require(./fragments/curlNoise.glsl)
 #pragma glslify: snoise    = require(./fragments/snoise.glsl)
@@ -57,7 +58,7 @@ void main(void) {
 	pos                  += vel;
 	if(colorMask.a > 0.0) {
 		float easing = mix(0.05, 0.15, extra.z);
-		pos.z += (posMask.z - pos.z) * easing;
+		pos.z += (posMask.z - pos.z) * easing * uAttractForce;
 	}
 
 	if(pos.y > uRange) {
