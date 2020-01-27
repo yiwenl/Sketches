@@ -1,7 +1,7 @@
 import EventDispatcher from 'events'
 import Config from './Config'
 
-const MODEL_URL = '/weights'
+const MODEL_URL = './weights'
 const inputSize = 224
 const scoreThreshold = 0.5
 const { faceapi } = window
