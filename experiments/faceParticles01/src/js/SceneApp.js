@@ -166,7 +166,7 @@ class SceneApp extends alfrid.Scene {
     this._bAxis.draw()
 
     this._renderParticles()
-
+/*
     const s = 256
     GL.viewport(0, 0, s, s)
     this._bCopy.draw(this.textureParticle)
@@ -174,6 +174,7 @@ class SceneApp extends alfrid.Scene {
     this._bCopy.draw(this._fboShadow.depthTexture)
     GL.viewport(s * 2, 0, s, s)
     this._bCopy.draw(this._fboMask.texture)
+*/    
   }
 
   resize (w, h) {

@@ -7,5 +7,5 @@ export default {
   maxRadius: 2,
   yRange: 12,
   background: 0.1,
-  maskScale: 2
+  maskScale: 2.5
 }
