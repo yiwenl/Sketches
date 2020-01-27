@@ -21,6 +21,7 @@ class ViewSim extends alfrid.View {
     this.shader.uniform('textureMask', 'uniform1i', 3)
 
     this._attractForce = new alfrid.EaseNumber(0, 0.025)
+    this._dir = [0, 0, 0]
 
     FaceDetector.on('result', () => {
       setTimeout(() => {
@@ -30,6 +31,7 @@ class ViewSim extends alfrid.View {
     })
 
     FaceDetector.on('lost', () => {
+      this._dir = [0, 0, 0]
       this._attractForce.easing = 0.025
       this._attractForce.value = 0
     })

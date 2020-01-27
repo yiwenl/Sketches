@@ -36,7 +36,7 @@ void main(void) {
 
 	float noise 		 		 = snoise(pos * 0.2 + extra * 0.15 + time * 0.15);
 	float posOffset      = mix(0.01, 0.25, noise * .5 + .5);
-	vec3 acc             = curlNoise(pos * posOffset - time * .15);
+	vec3 acc             = curlNoise(pos * posOffset - time * .05);
 	acc.y *= 0.5;
 	float speedOffset    = mix(extra.g, 1.0, .5);
 	acc.y += 1.0;
@@ -63,6 +63,7 @@ void main(void) {
 
 	if(pos.y > uRange) {
 		pos.y -= uRange * 2.0;
+		pos.xz *= 0.75;
 		vel *= 0.95;
 	}
 

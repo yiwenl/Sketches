@@ -1,4 +1,6 @@
 import EventDispatcher from 'events'
+import Config from './Config'
+
 const MODEL_URL = '/weights'
 const inputSize = 224
 const scoreThreshold = 0.5
@@ -53,7 +55,7 @@ class FaceDetector extends EventDispatcher {
     const result = await faceapi.detectSingleFace(this._videoEl, this._facedetectionOption).withFaceLandmarks()
     if (result) {
       const points = result.landmarks.getNose().map(p => {
-        return [p.x - this.videoWidth / 2, p.y - this.videoHeight / 2, 0]
+        return [(p.x - this.videoWidth / 2) * Config.faceDetectionScale, (p.y - this.videoHeight / 2) * Config.faceDetectionScale, 0]
       })
       this.emit('result', points)
     } else {

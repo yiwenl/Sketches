@@ -34,9 +34,8 @@ class ViewMask extends alfrid.View {
     const dx = point1[0] - point0[0]
 
     const theta = (Math.atan2(dy, dx) - Math.PI / 2)
-    const scale = 0.01
-    this._x.value = -point1[0] * scale
-    this._y.value = -point1[1] * scale
+    this._x.value = -point1[0]
+    this._y.value = -point1[1]
 
     this._rotation.value = theta
   }
