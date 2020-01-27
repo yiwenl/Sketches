@@ -8,5 +8,6 @@ export default {
   yRange: 12,
   background: 0.1,
   maskScale: 2.5,
-  faceDetectionScale: 0.01
+  faceDetectionScale: 0.01,
+  shadowStrength: 0.5
 }

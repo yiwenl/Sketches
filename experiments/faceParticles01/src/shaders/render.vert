@@ -19,7 +19,7 @@ varying vec4 vColor;
 varying vec3 vNormal;
 varying vec4 vShadowCoord;
 
-const float radius = 0.02;
+const float radius = 0.015;
 
 void main(void) {
 	vec2 uv      = aVertexPosition.xy;
@@ -31,13 +31,13 @@ void main(void) {
 	gl_Position  = uProjectionMatrix * uViewMatrix * wsPosition;
 	
 
-	float g 	 = sin(extra.r + time * mix(extra.b, 1.0, .5));
-	g 			 = smoothstep(0.0, 1.0, g);
-	g 			 = mix(g, 1.0, .75);
-	vColor       = vec4(vec3(g), 1.0);
+	float g 	 	= sin(extra.r + time * mix(extra.b, 1.0, .5));
+	g 			 		= smoothstep(0.0, 1.0, g);
+	g 			 		= mix(g, 1.0, .75);
+	vColor      = vec4(vec3(g), 1.0);
 
 	float distOffset = uViewport.y * uProjectionMatrix[1][1] * radius / gl_Position.w;
-	gl_PointSize = distOffset * (1.0 + extra.x * 2.0);
+	gl_PointSize = distOffset * (1.0 + extra.x * 2.5);
 
 	vNormal 	 = aNormal;
 	vShadowCoord = uShadowMatrix * wsPosition;

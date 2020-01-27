@@ -23,7 +23,8 @@ class ViewMask extends alfrid.View {
 
     this._rotation = new alfrid.EaseNumber(0, easing)
 
-    this._z.value = 2
+    this.center = [0, 0, 0]
+    this.preCenter = [0, 0, 0]
   }
 
   _onResult (o) {
@@ -36,6 +37,7 @@ class ViewMask extends alfrid.View {
     const theta = (Math.atan2(dy, dx) - Math.PI / 2)
     this._x.value = -point1[0]
     this._y.value = -point1[1]
+    this._z.value = 2
 
     this._rotation.value = theta
   }
@@ -44,11 +46,17 @@ class ViewMask extends alfrid.View {
     this._rotation.value = 0
     this._x.value = 0
     this._y.value = 0
+    this._z.value = 0
   }
 
   render () {
+    this.preCenter = this.center.concat()
+    this.center[0] = this._x.value
+    this.center[1] = this._y.value
+    this.center[2] = this._z.value
+
     this.shader.bind()
-    this.shader.uniform('uPosition', 'vec3', [this._x.value, this._y.value, this._z.value])
+    this.shader.uniform('uPosition', 'vec3', this.center)
     this.shader.uniform('uScale', 'float', 1.0 * Config.maskScale)
     this.shader.uniform('uRotation', 'float', this._rotation.value)
     GL.draw(this.mesh)

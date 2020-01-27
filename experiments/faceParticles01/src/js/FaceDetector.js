@@ -54,6 +54,17 @@ class FaceDetector extends EventDispatcher {
 
     const result = await faceapi.detectSingleFace(this._videoEl, this._facedetectionOption).withFaceLandmarks()
     if (result) {
+      const pointsMouth = result.landmarks.getMouth()
+      const d = Math.abs(pointsMouth[14].y - pointsMouth[18].y)
+      const mouthOpened = d > 20
+
+      if (mouthOpened) {
+        this.emit('mouthOpened')
+      } else {
+        this.emit('mouthClosed')
+      }
+
+      this.emit('resultMouth', pointsMouth)
       const points = result.landmarks.getNose().map(p => {
         return [(p.x - this.videoWidth / 2) * Config.faceDetectionScale, (p.y - this.videoHeight / 2) * Config.faceDetectionScale, 0]
       })

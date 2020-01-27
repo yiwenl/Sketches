@@ -17,6 +17,11 @@ uniform float time;
 uniform float uRadius;
 uniform float uRange;
 uniform float uAttractForce;
+uniform float uOffsetMouth;
+
+uniform vec3 uCenter;
+uniform vec3 uDir;
+uniform float uForce;
 
 #pragma glslify: curlNoise = require(./fragments/curlNoise.glsl)
 #pragma glslify: snoise    = require(./fragments/snoise.glsl)
@@ -36,7 +41,8 @@ void main(void) {
 
 	float noise 		 		 = snoise(pos * 0.2 + extra * 0.15 + time * 0.15);
 	float posOffset      = mix(0.01, 0.25, noise * .5 + .5);
-	vec3 acc             = curlNoise(pos * posOffset - time * .05);
+	vec3 acc             = curlNoise(pos * posOffset * (1.0 + uOffsetMouth * 3.0) - time * .05) * (1.0 + uOffsetMouth * 0.5);
+
 	acc.y *= 0.5;
 	float speedOffset    = mix(extra.g, 1.0, .5);
 	acc.y += 1.0;
@@ -49,8 +55,13 @@ void main(void) {
 	if(colorMask.a <= 0.0) {
 		acc.z -= 0.25;
 	}
-	
-	vel                  += acc * .003 * speedOffset;
+
+	// face movement
+	d = distance(pos, uCenter);
+	float f = smoothstep(3.0 + uOffsetMouth, 1.0 + uOffsetMouth, d);
+	acc += uDir * f * 2.5;
+
+	vel                  += acc * .003 * speedOffset * (1.0 + uOffsetMouth);
 	
 	const float decrease = .96;
 	vel                  *= decrease;

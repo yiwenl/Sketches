@@ -25,8 +25,8 @@ class ParticleTexture extends FrameBuffer {
     const s = 64
     super(s, s, { minFilter: GL.LINEAR, magFilter: GL.LINEAR })
 
-    const textureRad = Assets.get('studio_radiance')
-    const textureIrr = Assets.get('irr')
+    const textureRad = Assets.get('studio9_radiance')
+    const textureIrr = Assets.get('studio9_irradiance')
 
     const camera = new CameraPerspective()
     camera.setPerspective(45 * Math.PI / 180, 1, 0.1, 100)

@@ -5,9 +5,10 @@ varying vec4 vShadowCoord;
 uniform sampler2D textureDepth;
 uniform sampler2D textureParticle;
 uniform float uBackground;
+uniform float uShadowStrength;
 
 #define uMapSize vec2(1024.0)
-#define FOG_DENSITY 0.2
+#define FOG_DENSITY 0.3
 #define LIGHT_POS vec3(0.0, 10.0, 0.0)
 
 
@@ -57,7 +58,7 @@ vec3 diffuse(vec3 N, vec3 L, vec3 C) {
 void main(void) {
 	if(distance(gl_PointCoord, vec2(.5)) > .45) discard;
 	vec2 uv = gl_PointCoord;
-	// uv.y = 1.0 - uv.y;
+	uv.y = 1.0 - uv.y;
 	vec4 colorMap = texture2D(textureParticle, uv);
 	if(colorMap.a <= 0.0) {
 		discard;
@@ -66,13 +67,13 @@ void main(void) {
 	
 	vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
 	float s             = PCFShadow(textureDepth, uMapSize, shadowCoord);
-	s                   = mix(s, 1.0, .25);
+	s                   = mix(s, 1.0, uShadowStrength);
 	
 	vec4 color          = vec4(_baseColor, 1.0);
 	color.rgb           *= s;
 	
 	float fogDistance   = gl_FragCoord.z / gl_FragCoord.w;
-	float fogAmount     = fogFactorExp2(fogDistance - 5.5, FOG_DENSITY);
+	float fogAmount     = fogFactorExp2(fogDistance - 6.0, FOG_DENSITY);
 
 
 	vec4 fogColor = vec4(vec3(uBackground), 1.0);

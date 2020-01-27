@@ -20,6 +20,7 @@ const LIGHT_POS = [0, 10, 2]
 class SceneApp extends alfrid.Scene {
   constructor () {
     super()
+    this.resize()
     GL.enableAlphaBlending()
 
     this._count = 0
@@ -36,9 +37,9 @@ class SceneApp extends alfrid.Scene {
     mat4.multiply(this._shadowMatrix, this._cameraLight.projection, this._cameraLight.viewMatrix)
     mat4.multiply(this._shadowMatrix, biasMatrix, this._shadowMatrix)
 
-    this._noses = []
-    FaceDetector.on('result', (o) => {
-      this._noses = o.map(p => {
+    this._debugPoints = []
+    FaceDetector.on('resultMouth', (o) => {
+      this._debugPoints = o.map(p => {
         return [p.x, p.y, 0]
       })
     })
@@ -106,6 +107,11 @@ class SceneApp extends alfrid.Scene {
   }
 
   updateFbo () {
+    const { vec3 } = window
+    const dir = vec3.create()
+    vec3.sub(dir, this._vMask.center, this._vMask.preCenter)
+    const speed = vec3.length(dir)
+
     GL.setMatrices(this.camera)
     this._fbos.forEach(fbo => {
       fbo.write.bind()
@@ -114,7 +120,8 @@ class SceneApp extends alfrid.Scene {
         fbo.read.getTexture(1),
         fbo.read.getTexture(0),
         fbo.read.getTexture(2),
-        this._fboMask.texture
+        this._fboMask.texture,
+        this._vMask.center, dir, speed
       )
       fbo.write.unbind()
       fbo.swap()
@@ -175,26 +182,12 @@ class SceneApp extends alfrid.Scene {
     GL.setMatrices(this.camera)
 
     this._renderParticles()
-
-    // GL.setMatrices(this.cameraOrtho)
-    // const s = 5
-    // this._noses.forEach((p, i) => {
-    //   const color = i === 1 ? [1, 0, 0] : [0, 1, 0]
-    //   this._bBall.draw(p, [s, s, s], color)
-    // })
-    /*
-    const s = 256
-    GL.viewport(0, 0, s, s)
-    this._bCopy.draw(this.textureParticle)
-    GL.viewport(s, 0, s, s)
-    this._bCopy.draw(this._fboShadow.depthTexture)
-    GL.viewport(s * 2, 0, s, s)
-    this._bCopy.draw(this._fboMask.texture)
-*/
   }
 
   resize (w, h) {
-    resize(w, h)
+    // resize(w, h)
+    const s = 1
+    resize(1080 * s, 1350 * s)
     this.camera.setAspectRatio(GL.aspectRatio)
   }
 

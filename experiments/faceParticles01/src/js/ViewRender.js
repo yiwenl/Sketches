@@ -58,6 +58,7 @@ class ViewRender extends alfrid.View {
     this.shader.uniform('percent', 'float', p)
     this.shader.uniform('time', 'float', this.time)
     this.shader.uniform('uBackground', 'float', Config.background)
+    this.shader.uniform('uShadowStrength', 'float', Config.shadowStrength)
     GL.draw(this.mesh)
   }
 }
