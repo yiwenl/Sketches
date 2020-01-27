@@ -4,9 +4,15 @@
 precision highp float;
 
 varying vec2 vTextureCoord;
+uniform mat4 uModelMatrix;
+uniform mat4 uViewMatrix;
+uniform mat4 uProjectionMatrix;
+
 uniform sampler2D textureVel;
 uniform sampler2D texturePos;
 uniform sampler2D textureExtra;
+uniform sampler2D textureMask;
+
 uniform float time;
 uniform float uRadius;
 uniform float uRange;
@@ -21,7 +27,12 @@ void main(void) {
 	vec3 vel             = texture2D(textureVel, vTextureCoord).rgb;
 	vec3 extra           = texture2D(textureExtra, vTextureCoord).rgb;
 
-	// float noise 		 = snoise(pos * 3.0 + extra * 0.5 + sin(time * 5.0 * cos(time * 3.0)));
+
+	vec4 screenPos = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
+	vec2 screenUV = screenPos.xy / screenPos.w * .5 + .5;
+	vec4 colorMask = texture2D(textureMask, screenUV);
+	vec3 posMask = colorMask.xyz;
+
 	float noise 		 = snoise(pos * 0.2 + extra * 0.05 + time * 0.15);
 	float posOffset      = mix(0.01, 0.25, noise * .5 + .5);
 	vec3 acc             = curlNoise(pos * posOffset - time * .15);
@@ -33,6 +44,10 @@ void main(void) {
 	float d = length(pos.xz);
 	vec2 dir = normalize(pos.xz);
 	acc.xz -= dir * 0.1 * d;
+
+	if(colorMask.a <= 0.0) {
+		acc.z -= 0.25;
+	}
 	
 	vel                  += acc * .003 * speedOffset;
 	
@@ -40,6 +55,9 @@ void main(void) {
 	vel                  *= decrease;
 	
 	pos                  += vel;
+	if(colorMask.a > 0.0) {
+		pos.z += (posMask.z - pos.z) * 0.15;
+	}
 
 	if(pos.y > uRange) {
 		pos.y -= uRange * 2.0;

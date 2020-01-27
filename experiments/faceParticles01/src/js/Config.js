@@ -1,11 +1,11 @@
 // Config.js
 
 export default {
-  numParticles: 256 * 2,
+  numParticles: 256,
   skipCount: 1,
-  numSets: 2,
-  maxRadius: 3.5,
-  yRange: 5,
+  numSets: 4,
+  maxRadius: 2,
+  yRange: 12,
   background: 0.1,
-  maskScale: 1.5
+  maskScale: 2
 }

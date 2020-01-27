@@ -25,9 +25,10 @@ class SceneApp extends alfrid.Scene {
     this.camera.setPerspective(Math.PI / 2, GL.aspectRatio, 0.1, 50)
     this.orbitalControl.radius.value = 10
     this.orbitalControl.radius.limit(10, 10)
+    // this.orbitalControl.lock()
 
     this._cameraLight = new alfrid.CameraOrtho()
-    const s = 6
+    const s = 7
     this._cameraLight.ortho(-s, s, s, -s, 1, 50)
     this._cameraLight.lookAt(LIGHT_POS, [0, 0, 0])
     this._shadowMatrix = mat4.create()
@@ -66,7 +67,7 @@ class SceneApp extends alfrid.Scene {
     this._textureParticle = new ParticleTexture()
 
     const fboSize = 1024
-    this._fboMask = new alfrid.FrameBuffer(fboSize, fboSize, { type: GL.FLOAT })
+    this._fboMask = new alfrid.FrameBuffer(GL.width, GL.height, { type: GL.FLOAT, minFilter: GL.LINEAR, magFilter: GL.LINEAR })
   }
 
   _initViews () {
@@ -94,13 +95,16 @@ class SceneApp extends alfrid.Scene {
   }
 
   updateFbo () {
+    GL.setMatrices(this.camera)
     this._fbos.forEach(fbo => {
       fbo.write.bind()
       GL.clear(0, 0, 0, 1)
       this._vSim.render(
         fbo.read.getTexture(1),
         fbo.read.getTexture(0),
-        fbo.read.getTexture(2))
+        fbo.read.getTexture(2),
+        this._fboMask.texture
+      )
       fbo.write.unbind()
       fbo.swap()
     })
@@ -139,6 +143,13 @@ class SceneApp extends alfrid.Scene {
     this._fboShadow.unbind()
   }
 
+  update () {
+    this._fboMask.bind()
+    GL.clear(0, 0, 0, 0)
+    this._vMask.render()
+    this._fboMask.unbind()
+  }
+
   render () {
     this._count++
     if (this._count % Config.skipCount === 0) {
@@ -155,14 +166,14 @@ class SceneApp extends alfrid.Scene {
     this._bAxis.draw()
 
     this._renderParticles()
-    this._vMask.render()
 
     const s = 256
     GL.viewport(0, 0, s, s)
     this._bCopy.draw(this.textureParticle)
     GL.viewport(s, 0, s, s)
     this._bCopy.draw(this._fboShadow.depthTexture)
-    // this._bCopy.draw(this._fboShadow.getTexture());
+    GL.viewport(s * 2, 0, s, s)
+    this._bCopy.draw(this._fboMask.texture)
   }
 
   resize (w, h) {
