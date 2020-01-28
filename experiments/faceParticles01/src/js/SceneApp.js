@@ -185,9 +185,7 @@ class SceneApp extends alfrid.Scene {
   }
 
   resize (w, h) {
-    // resize(w, h)
-    const s = 1
-    resize(1080 * s, 1350 * s)
+    resize(w, h)
     this.camera.setAspectRatio(GL.aspectRatio)
   }
 
