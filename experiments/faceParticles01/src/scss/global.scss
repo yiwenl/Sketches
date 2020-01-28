@@ -90,4 +90,27 @@ h1,h2,h3,h4,text,p {
 	opacity: 0.0;
 	transform: scale(-1, 1);
 	bottom:0;
+	width:25%;
+	transition:opacity .5s ease-in-out;
+
+	.showWebcam & {
+		opacity: 0.5;
+	}
+}
+
+.desc {
+	position:fixed;
+	z-index:9;
+	width:100%;
+	text-align: center;
+	bottom:8%;
+	color:white;
+	opacity: .5;
+	letter-spacing:5px;
+	transition: opacity 1s ease-out 1s;
+	
+	.hideHint & {
+		transition: opacity 1s ease-out;
+		opacity: 0;
+	}
 }

@@ -49,10 +49,6 @@ function _onImageLoaded (o) {
   loader.style.width = '100%'
 
   _initFaceDetection()
-
-  setTimeout(() => {
-    document.body.classList.remove('isLoading')
-  }, 250)
 }
 
 function _initFaceDetection () {
@@ -61,6 +57,10 @@ function _initFaceDetection () {
 }
 
 function _init3D () {
+  document.body.classList.remove('hideHint')
+  setTimeout(() => {
+    document.body.classList.remove('isLoading')
+  }, 250)
   console.log('IS_DEVELOPMENT', !!window.isDevelopment)
   if (window.isDevelopment) {
     Settings.init()
@@ -84,4 +84,23 @@ function _init3D () {
   if (window.isDevelopment) {
     addControls(scene)
   }
+
+  setTimeout(() => {
+    if (!document.body.classList.contains('hideHint')) {
+      document.body.classList.add('hideHint')
+    }
+  }, 4000)
+
+  window.addEventListener('keydown', (e) => {
+    if (e.keyCode === 32) {
+      if (document.body.classList.contains('showWebcam')) {
+        document.body.classList.remove('showWebcam')
+      } else {
+        document.body.classList.add('showWebcam')
+        if (!document.body.classList.contains('hideHint')) {
+          document.body.classList.add('hideHint')
+        }
+      }
+    }
+  })
 }
