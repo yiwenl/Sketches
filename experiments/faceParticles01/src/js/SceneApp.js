@@ -177,7 +177,7 @@ class SceneApp extends alfrid.Scene {
 
     this._renderShadowMap()
 
-    const r = Config.background
+    const r = Config.background * 0
     GL.clear(r, r, r, 1)
     GL.setMatrices(this.camera)
 

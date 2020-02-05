@@ -17,6 +17,23 @@ function isFaceDetectionModelLoaded () {
 class FaceDetector extends EventDispatcher {
   constructor () {
     super()
+
+    navigator.mediaDevices.enumerateDevices().then(function (devices) {
+      console.log('devices.length', devices.length)
+      console.log('devices.length', devices.length)
+      console.log('devices.length', devices.length)
+      for (var i = 0; i < devices.length; i++) {
+        var device = devices[i]
+        if (device.kind === 'videoinput') {
+          console.log(device.label, device.deviceId)
+          // var option = document.createElement('option')
+          // option.value = device.deviceId
+          // option.text = device.label || 'camera ' + (i + 1)
+          // document.querySelector('select#videoSource').appendChild(option)
+        }
+      };
+    })
+
     this._hasModelLoaded = false
   }
 
@@ -26,7 +43,7 @@ class FaceDetector extends EventDispatcher {
   }
 
   async _initWebcam () {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: '50e7be43db6b95d858f86ac7a0f2b64aa7b6e4c03900edc114b00752c063e82c' } })
     this._videoEl = document.querySelector('.webcamVideo')
     this._videoEl.srcObject = stream
   }
