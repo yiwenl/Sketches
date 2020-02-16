@@ -11,7 +11,7 @@ varying float vIndex;
 
 uniform sampler2D texture;
 uniform float uTime;
-uniform float uIsInvert;
+uniform float uUseGreen;
 
 #define NUM 8.0
 #define FOG_DENSITY 0.3
@@ -46,14 +46,12 @@ void main(void) {
 
     br = mix(br, 1.0, 0.025);
     color *= br;
-    if(uIsInvert > 0.5) {
-        color.rgb = vec3(1.0) - color.rgb;
-    }
+    color.rb *= (1.0 - uUseGreen * 0.75);
 
     float fogDistance   = gl_FragCoord.z / gl_FragCoord.w;
 	float fogAmount     = fogFactorExp2(fogDistance, FOG_DENSITY);
     
-	vec4 fogColor = vec4(vec3(uIsInvert), 1.0);
+	vec4 fogColor = vec4(vec3(0.0), 1.0);
 	
 	gl_FragColor        = mix(color, fogColor, fogAmount);
 }

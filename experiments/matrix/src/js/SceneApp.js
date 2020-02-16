@@ -15,14 +15,12 @@ class SceneApp extends Scene {
     super()
     // GL.enableAlphaBlending()
     GL.enableAdditiveBlending()
-    // this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3
-    // this.orbitalControl.rx.value = -0.3
     let r = 0.4
     this.orbitalControl.rx.limit(-r, r)
     r = 0.75
     this.orbitalControl.ry.limit(-r, r)
-    this.orbitalControl.radius.value = 5
-    this.orbitalControl.radius.limit(2, 6)
+    this.orbitalControl.radius.value = 4
+    this.orbitalControl.radius.limit(3, 6)
     this.camera.setPerspective(75 * Math.PI / 180, GL.aspectRatio, 0.1, 20)
 
     this.cameraFront = new alfrid.CameraPerspective()
@@ -39,30 +37,34 @@ class SceneApp extends Scene {
     this._index = 0
     window.addEventListener('keydown', (e) => {
       if (e.keyCode === 32) {
-        console.log('here')
-        this._index++
-        if (this._index >= 3) {
-          this._index = 0
-        }
+        this.nextShape()
       }
     })
+
+    gui.add(this, 'nextShape').name('Next Shape')
 
     this.resize()
   }
 
+  nextShape () {
+    this._index++
+    if (this._index >= 3) {
+      this._index = 0
+    }
+  }
+
   _initTextures () {
-    console.log('init textures')
-    const fboSize = 1024
+    let fboSize = 1024
     this._fbo = new alfrid.FrameBuffer(fboSize, fboSize, { type: GL.FLOAT })
+
+    fboSize = 1024 * 2
+    this._fboRender = new alfrid.FrameBuffer(fboSize, fboSize)
   }
 
   _initViews () {
     console.log('init views')
 
     this._bCopy = new alfrid.BatchCopy()
-    this._bAxis = new alfrid.BatchAxis()
-    this._bDots = new alfrid.BatchDotsPlane()
-    this._bBall = new alfrid.BatchBall()
 
     this._vLetters = new ViewLetters()
 
@@ -121,6 +123,12 @@ class SceneApp extends Scene {
     GL.disable(GL.DEPTH_TEST)
     GL.setMatrices(this.camera)
     this._vLetters.render(this._fbo.texture, this._shadowMatrix)
+    // this._fboRender.unbind()
+
+    // this._passBloom.render(this._fboRender.texture)
+
+    // this._bCopy.draw(this._fboRender.texture)
+    // this._bCopy.draw(this._passBloom.texture)
 
     // const s = 500
     // GL.viewport(0, 0, s, s / GL.aspectRatio)

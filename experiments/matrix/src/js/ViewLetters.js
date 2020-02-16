@@ -82,6 +82,7 @@ class ViewLetters extends alfrid.View {
 
   render (textureDepth, mShadowMatrix) {
     this.shader.bind()
+    this.shader.uniform('uUseGreen', 'float', Config.useGreen)
     this.shader.uniform('uTime', 'float', alfrid.Scheduler.deltaTime)
     this.shader.uniform('uShadowMatrix', 'mat4', mShadowMatrix)
     this.shader.uniform('uIsInvert', 'float', Config.isInvert ? 1.0 : 0.0)
