@@ -56,6 +56,8 @@ class ViewLetters extends alfrid.View {
     const posOffsets = []
     const extras = []
     const num = 1500
+
+    console.log(num * numChars)
     const r = 3.5
     const rz = 0.1
     for (let i = 0; i < num; i++) {

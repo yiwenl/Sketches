@@ -29,6 +29,9 @@ class SceneApp extends Scene {
     this.cameraFront.setPerspective(90 * Math.PI / 180, GL.aspectRatio, 0.1, 100)
     this.cameraFront.lookAt([0, 0, 10], [0, 0, 0])
 
+    this.mtx = mat4.create()
+    this.mtxIdentity = mat4.create()
+
     this._shadowMatrix = mat4.create()
     mat4.multiply(this._shadowMatrix, this.cameraFront.projection, this.cameraFront.viewMatrix)
     mat4.multiply(this._shadowMatrix, biasMatrix, this._shadowMatrix)
@@ -77,15 +80,19 @@ class SceneApp extends Scene {
     s = 5
     this._drawBox = new alfrid.Draw()
       .setMesh(alfrid.Geom.cube(s, s, s))
+      // .setMesh(alfrid.Geom.sphere(3.5, 24))
       .useProgram(vs, fs)
   }
 
   update () {
+    mat4.identity(this.mtx)
+    mat4.rotateY(this.mtx, this.mtx, alfrid.Scheduler.deltaTime * 0.5)
     GL.enableAlphaBlending()
     GL.enable(GL.DEPTH_TEST)
     this._fbo.bind()
     GL.clear(0, 0, 0, 0)
     GL.setMatrices(this.cameraFront)
+    GL.rotate(this.mtx)
 
     if (this._index === 0) {
       this._drawHead.draw()
@@ -100,6 +107,7 @@ class SceneApp extends Scene {
     }
 
     GL.cullFace(GL.FRONT)
+    GL.rotate(this.mtxIdentity)
     this._drawBox.draw()
     GL.cullFace(GL.BACK)
     this._fbo.unbind()

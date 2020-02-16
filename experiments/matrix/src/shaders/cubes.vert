@@ -24,8 +24,9 @@ void main(void) {
     vec3 pos = aVertexPosition * aExtra.x + aPosOffset;
     float angle = aExtra.y + uTime * mix(0.2, 1.0, aExtra.z);
     pos = rotate(pos, normalize(aAxis), angle);
-    gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
+    vec4 wsPos = uModelMatrix * vec4(pos, 1.0);
+    gl_Position = uProjectionMatrix * uViewMatrix * wsPos;
     vTextureCoord = aTextureCoord;
     vNormal = aNormal;
-    vPosition = pos;
+    vPosition = wsPos.xyz;
 }

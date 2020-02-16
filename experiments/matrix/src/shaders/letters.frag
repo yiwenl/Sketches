@@ -44,7 +44,7 @@ void main(void) {
         br = 0.0;
     }
 
-    br = mix(br, 1.0, 0.05);
+    br = mix(br, 1.0, 0.025);
     color *= br;
     if(uIsInvert > 0.5) {
         color.rgb = vec3(1.0) - color.rgb;
