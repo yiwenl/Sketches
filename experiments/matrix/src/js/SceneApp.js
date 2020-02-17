@@ -130,9 +130,9 @@ class SceneApp extends Scene {
     // this._bCopy.draw(this._fboRender.texture)
     // this._bCopy.draw(this._passBloom.texture)
 
-    // const s = 500
-    // GL.viewport(0, 0, s, s / GL.aspectRatio)
-    // this._bCopy.draw(this._fbo.texture)
+    const s = 500
+    GL.viewport(0, 0, s, s / GL.aspectRatio)
+    this._bCopy.draw(this._fbo.texture)
     // GL.enable(GL.DEPTH_TEST)
   }
 
