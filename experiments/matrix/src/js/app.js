@@ -22,7 +22,7 @@ function logError (e) {
 function init3D () {
   console.log('IS_DEVELOPMENT', !!window.isDevelopment)
   if (window.isDevelopment) {
-    Settings.init()
+    // Settings.init()
   }
 
   //	CREATE SCENE

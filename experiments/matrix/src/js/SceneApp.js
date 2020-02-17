@@ -96,16 +96,16 @@ class SceneApp extends Scene {
     GL.setMatrices(this.cameraFront)
     GL.rotate(this.mtx)
 
-    if (this._index === 0) {
-      this._drawHead.draw()
-    } else if (this._index === 1) {
+    if (this._index === 1) {
       this._drawCubes
         .uniform('uTime', 'float', alfrid.Scheduler.deltaTime)
         .draw()
-    } else {
+    } else if (this._index === 2) {
       this._drawSphere
         .uniform('uTime', 'float', alfrid.Scheduler.deltaTime)
         .draw()
+    } else {
+      this._drawHead.draw()
     }
 
     GL.cullFace(GL.FRONT)
