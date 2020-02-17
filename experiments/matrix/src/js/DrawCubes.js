@@ -1,4 +1,4 @@
-import alfrid, { Draw, GL } from 'alfrid'
+import { Draw } from 'alfrid'
 
 import { random } from 'randomutils'
 

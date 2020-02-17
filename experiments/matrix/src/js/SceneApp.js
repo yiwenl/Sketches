@@ -43,6 +43,16 @@ class SceneApp extends Scene {
 
     gui.add(this, 'nextShape').name('Next Shape')
 
+    setTimeout(() => {
+      this.cameraFront.setPerspective(90 * Math.PI / 180, GL.aspectRatio, 0.1, 100)
+      this.cameraFront.lookAt([0, 0, 10], [0, 0, 0])
+      GL.setMatrices(this.cameraFront)
+
+      mat4.identity(this._shadowMatrix, this._shadowMatrix)
+      mat4.multiply(this._shadowMatrix, this.cameraFront.projection, this.cameraFront.viewMatrix)
+      mat4.multiply(this._shadowMatrix, biasMatrix, this._shadowMatrix)
+    }, 200)
+
     this.resize()
   }
 
@@ -87,12 +97,14 @@ class SceneApp extends Scene {
   }
 
   update () {
+    // console.log('this._index', this._index)
     mat4.identity(this.mtx)
     mat4.rotateY(this.mtx, this.mtx, alfrid.Scheduler.deltaTime * 0.5)
     GL.enableAlphaBlending()
     GL.enable(GL.DEPTH_TEST)
+
     this._fbo.bind()
-    GL.clear(0, 0, 0, 0)
+    GL.clear(0, 0, 0, 1)
     GL.setMatrices(this.cameraFront)
     GL.rotate(this.mtx)
 
@@ -130,18 +142,14 @@ class SceneApp extends Scene {
     // this._bCopy.draw(this._fboRender.texture)
     // this._bCopy.draw(this._passBloom.texture)
 
-    const s = 500
-    GL.viewport(0, 0, s, s / GL.aspectRatio)
-    this._bCopy.draw(this._fbo.texture)
+    // const s = 500
+    // GL.viewport(0, 0, s, s / GL.aspectRatio)
+    // this._bCopy.draw(this._fbo.texture)
     // GL.enable(GL.DEPTH_TEST)
   }
 
   resize (w, h) {
-    // resize(w, h)
-    const ratio = 1
-    resize(window.innerWidth * ratio, window.innerHeight * ratio)
-    // resize(1080 * ratio, 1350 * ratio)
-    // resize(1350 * ratio, 1080 * ratio)
+    resize(w, h)
     this.camera.setAspectRatio(GL.aspectRatio)
   }
 }
