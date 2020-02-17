@@ -323,6 +323,11 @@ const ExpModel = [
     cover: 'assets/img/coverSketchFaceParticle01.jpg',
     url: '//yiwenl.github.io/Sketches/experiments/faceParticles01/dist/index.html',
     title: 'Face Particles'
+  },
+  {
+    cover: 'assets/img/coverSketchMatrix.jpg',
+    url: '//yiwenl.github.io/Sketches/experiments/matrix/dist/index.html',
+    title: 'Matrix Rain'
   }
 ]
 
