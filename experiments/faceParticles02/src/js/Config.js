@@ -5,5 +5,5 @@ export default {
   skipCount: 1,
   numSets: 3,
   maxRadius: 3.5,
-  showFloatingParticles: false
+  showFloatingParticles: true
 }
