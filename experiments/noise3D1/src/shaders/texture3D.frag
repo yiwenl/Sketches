@@ -36,6 +36,8 @@ vec3 texture3D(vec3 pos) {
 
 void main(void) {
 	vec3 color = texture3D(vPosition);
-    gl_FragColor = vec4( pow(color.r, 1.0 + uOffset) * 2.0 );
-    // gl_FragColor = vec4( color.r );
+    // gl_FragColor = vec4( pow(color.r, 1.0 + uOffset) * 2.0 );
+	// gl_FragColor = vec4( vec3(1.0), color.r * 0.05 );
+
+	gl_FragColor = vec4(color.r);
 }

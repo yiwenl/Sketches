@@ -109,12 +109,15 @@ vec3 curlNoise( vec3 p ){
 	return normalize( vec3( x , y , z ) * divisor );
 }
 
+#pragma glslify: fbm = require(./fragments/fbm.glsl)
+
 void main(void) {
 
 	vec3 offset = curlNoise(vec3(vTextureCoord, uSeed)) * .5 + .5;
-	offset = mix(offset, vec3(1.0), .5);
+	float n = fbm(vec3(vTextureCoord, uZ ) * 200.0) - 0.5;
+	// offset = mix(offset, vec3(1.0), .5);
 	offset += 0.5;
-	vec3 noise = curlNoise(vec3(vTextureCoord, uZ ) * uNoiseScale * offset);
+	vec3 noise = curlNoise(vec3(vTextureCoord, uZ ) * uNoiseScale * offset + n * 0.2);
 
 	noise = noise * .5 + .5;
 
