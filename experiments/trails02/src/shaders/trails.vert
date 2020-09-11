@@ -28,6 +28,7 @@ uniform sampler2D texture12;
 uniform sampler2D texture13;
 uniform sampler2D texture14;
 uniform sampler2D textureData;
+uniform sampler2D textureColor;
 
 uniform vec3 uColors[5];
 
@@ -131,7 +132,7 @@ void main(void) {
     vTextureCoord = aTextureCoord;
     vNormalOrg = aNormal;
     vNormal = N;
-
+/*
     vec3 color = vec3(1.0);
 
     if(aColor.x < 0.1) {
@@ -145,6 +146,8 @@ void main(void) {
     } else {
         color = uColors[4];
     }
+*/
+    vec3 color = texture2D(textureData, aColor.xy).rgb;
     vColor = color * mix(0.8, 1.2, aColor.z);
 
     vShadowCoord = uShadowMatrix * uModelMatrix * vec4(v, 1.0);

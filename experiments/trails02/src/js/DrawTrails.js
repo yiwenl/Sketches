@@ -1,6 +1,7 @@
 import alfrid, { GL } from "alfrid";
 
 import Config from "./Config";
+import Assets from "./Assets";
 import { getRandomElement } from "randomutils";
 import vs from "shaders/trails.vert";
 import fs from "shaders/traisl.frag";
@@ -39,6 +40,8 @@ class DrawTrails extends alfrid.Draw {
         count++;
       }
     }
+
+    console.log("color image :", Assets.get("test")._source);
 
     const mesh = new alfrid.Mesh();
     mesh.bufferVertex(positions);

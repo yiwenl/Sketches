@@ -13,6 +13,7 @@ uniform sampler2D textureShadow;
 uniform vec3 uLight;
 uniform vec2 uMapSize;
 
+
 #pragma glslify: diffuse = require(glsl-utils/diffuse.glsl)
 
 
@@ -22,13 +23,16 @@ float rand(vec4 seed4) {
 }
 
 
+#define NUM_LEVEL 1
+
 float PCFShadow(sampler2D depths, vec2 size, vec4 shadowCoord) {
 	float result = 0.0;
 	float bias = 0.005;
 	vec2 uv = shadowCoord.xy;
+	float total = 1.0;
 
-	for(int x=-1; x<=1; x++){
-		for(int y=-1; y<=1; y++){
+	for(int x=-NUM_LEVEL; x<=NUM_LEVEL; x++){
+		for(int y=-NUM_LEVEL; y<=NUM_LEVEL; y++){
 			vec2 off = vec2(x,y) + rand(vec4(gl_FragCoord.xy, float(x), float(y)));
 			off /= size;
 
@@ -37,9 +41,17 @@ float PCFShadow(sampler2D depths, vec2 size, vec4 shadowCoord) {
 				result += 1.0;
 			}
 
+			total ++;
+
 		}
 	}
-	return 1.0 -result/9.0;
+
+	float d = texture2D(depths, uv).r;
+	if(d < shadowCoord.z - bias) {
+		result += 1.0;
+	}
+
+	return 1.0 -result/total;
 
 }
 

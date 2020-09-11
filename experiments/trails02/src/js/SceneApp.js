@@ -10,31 +10,32 @@ import DrawSave from "./DrawSave";
 import DrawDebug from "./DrawDebug";
 import DrawSim from "./DrawSim";
 import DrawTrails from "./DrawTrails";
+import DrawBackground from "./DrawBackground";
 
 import DebugCamera from "debug-camera";
 import getColorTheme from "get-color-themes";
 import { getRandomElement } from "randomutils";
 import { vec3 } from "gl-matrix";
 
-let toLog = true;
-
 class SceneApp extends Scene {
   constructor() {
     super();
     GL.enableAlphaBlending();
-    this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
+    // this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
     this.orbitalControl.radius.value = 8;
-    this.orbitalControl.radius.limit(4, 12);
+    // this.orbitalControl.radius.limit(4, 12);
     this._seed = Math.random() * 0xff;
 
-    this._hit = vec3.create();
+    this._hit0 = vec3.create();
+    this._hit1 = vec3.create();
 
-    const s = 8;
+    let s = 8;
     this.mesh = alfrid.Geom.plane(s, s / 2, 1);
 
     this._detector = new TouchDetector(this.mesh, this.camera);
     this._detector.on("onHit", (e) => {
-      vec3.copy(this._hit, e.detail.hit);
+      vec3.copy(this._hit0, e.detail.hit);
+      vec3.scale(this._hit1, this._hit0, -1);
     });
 
     this._drawHit = new alfrid.Draw()
@@ -43,9 +44,10 @@ class SceneApp extends Scene {
       .uniform("color", "vec3", [1, 1, 1])
       .uniform("opacity", "float", 0.2);
 
-    // shadow
+    // shadow`
+    // s = 6;
     this._cameraTop = new alfrid.CameraOrtho();
-    this._cameraTop.ortho(-s / 2, s / 2, s / 2, -s / 2, 1, 8);
+    this._cameraTop.ortho(-s, s, s / 2, -s / 2, 0.5, 10);
     this._lightPos = [0, 5, 2];
     this._cameraTop.lookAt(this._lightPos, [0, 0, 0]);
     this._mtxShadow = mat4.create();
@@ -84,8 +86,14 @@ class SceneApp extends Scene {
 
     this._fboOrgPos = new alfrid.FrameBuffer(num, num, oSettings);
 
-    const fboSize = 1024 * 1;
+    const fboSize = 1024 * 2;
     this._fboShadow = new alfrid.FrameBuffer(fboSize, fboSize);
+
+    const { gui } = window;
+    gui
+      .add(this._fboShadow, "width")
+      .name("Shadow Map Size")
+      .listen();
 
     this._textureGrey = alfrid.GLTexture.greyTexture();
   }
@@ -100,6 +108,9 @@ class SceneApp extends Scene {
     this._bAxis = new alfrid.BatchAxis();
     this._bDots = new alfrid.BatchDotsPlane();
     this._bBall = new alfrid.BatchBall();
+
+    // background
+    this._drawBackground = new DrawBackground();
 
     // simulation
     this._drawSim = new DrawSim();
@@ -128,6 +139,10 @@ class SceneApp extends Scene {
     if (this._isPaused) {
       return;
     }
+
+    const { trailLength, numSets } = Config;
+
+    const totalFrames = trailLength * numSets;
     this._drawSim
       .bindFrameBuffer(this._fboTrails.write)
       .uniformTexture("texturePos", this._fboTrails.read.getTexture(0), 0)
@@ -138,7 +153,9 @@ class SceneApp extends Scene {
       .uniformTexture("textureOrgPos", this._fboOrgPos.texture, 5)
       .uniform("uTime", "float", alfrid.Scheduler.deltaTime + this._seed)
       .uniform("uNoiseScale", "float", Config.noiseScale)
-      .uniform("uCenter", "vec3", this._hit)
+      .uniform("uCenter0", "vec3", this._hit0)
+      .uniform("uCenter1", "vec3", this._hit1)
+      .uniform("uNumFrames", "float", totalFrames)
       .draw();
 
     this._fboTrails.swap();
@@ -164,15 +181,8 @@ class SceneApp extends Scene {
         this._fboShadow.height,
       ]);
 
-    if (toLog) {
-      console.log(numSets * trailLength);
-    }
-
     for (let j = 0; j < numSets; j++) {
       for (let i = 0; i < trailLength; i++) {
-        if (toLog) {
-          console.log(i, j, i + j * trailLength - j);
-        }
         const t = this._fboTrails.all[i + j * trailLength - j].getTexture(0);
         this._drawTrails.uniformTexture(`texture${i}`, t, i);
       }
@@ -184,10 +194,9 @@ class SceneApp extends Scene {
           mShadow ? this._textureGrey : this._fboShadow.depthTexture,
           16
         )
+        .uniformTexture("textureColor", Assets.get("test"), 17)
         .draw();
     }
-
-    toLog = false;
   }
 
   render() {
@@ -202,21 +211,23 @@ class SceneApp extends Scene {
       1
     );
 
+    this._drawBackground.uniform("uColor", "vec3", this._bgColor).draw();
+
     if (Config.helperLines) {
       this._bAxis.draw();
     }
     this.renderTrails(false);
 
     if (Config.helperLines) {
-      let s = 0.05;
-      this._bBall.draw(this._hit, [s, s, s], [1, 0, 0]);
+      const s = 0.05;
+      this._bBall.draw(this._hit0, [s, s, s], [1, 0, 0]);
       DebugCamera(this._cameraTop);
     }
     // this._drawHit.draw();
 
     // const s = Config.numParticles;
 
-    // s = 100;
+    // let s = 300;
     // GL.viewport(0, 0, s, s);
     // this._bCopy.draw(this._fboShadow.depthTexture);
 

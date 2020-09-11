@@ -13,10 +13,14 @@ uniform sampler2D textureOrgPos;
 
 uniform float uNoiseScale;
 uniform float uTime;
-uniform vec3 uCenter;
+uniform float uNumFrames;
+uniform vec3 uCenter0;
+uniform vec3 uCenter1;
 
 
 #pragma glslify: curlNoise = require(glsl-utils/curlNoise.glsl)
+#pragma glslify: rotate = require(glsl-utils/rotate.glsl)
+#define PI 3.141592653
 
 void main(void) {
     vec3 pos = texture2D(texturePos, vTextureCoord).xyz;
@@ -38,6 +42,12 @@ void main(void) {
     dir = normalize((pos - center) * vec3(1.0, 1.0, 0.0));
     float speed = mix(1.0, 2.0, extra.g);
     acc += dir * 1.5;
+
+
+    // rotate
+    dir.xy = rotate(dir.xy, PI * 0.7);
+    acc += dir * mix(1.0, 1.5, extra.b);
+
     vel += acc * 0.00035 * speed;
 
     if(life > 0.0) {
@@ -49,12 +59,14 @@ void main(void) {
 
 
     life -= mix(0.01, 0.02, extra.b) * 0.75;
-    if(life < -0.75) {
+    float maxLife = 0.02 * 0.75 * uNumFrames;
+    if(life < -maxLife) {
         // respwan
+        vec3 newCenter = extra.r > 0.5 ? uCenter0 : uCenter1;
         life = 1.0;
-        pos = orgPos + uCenter;
+        pos = orgPos + newCenter;
         vel *= 0.0;
-        center = uCenter;
+        center = newCenter;
     }
     
 
