@@ -6,6 +6,7 @@ attribute vec2 aTextureCoord;
 attribute vec3 aNormal;
 attribute vec3 aPosOffset;
 attribute vec3 aExtra;
+attribute vec3 aColor;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
@@ -18,6 +19,7 @@ uniform float uTime;
 varying vec2 vTextureCoord;
 varying vec3 vNormal;
 varying vec3 vPosition;
+varying vec3 vColor;
 varying vec3 vExtra;
 varying vec4 vShadowCoord;
 
@@ -28,7 +30,7 @@ varying vec4 vShadowCoord;
 void main(void) {
 	float isFront = step(0.0, aVertexPosition.z);
 	vec3 pos = aVertexPosition;
-	float r = 0.2;
+	float r = 0.4;
 
 	float base = snoise(aExtra + uTime * 0.1) * .5 + .5;
 	float posOffset = mix(0.5, 1.0, base);
@@ -46,9 +48,11 @@ void main(void) {
 		pos.yz = rotate(pos.yz, rx);
 		pos.xz = rotate(pos.xz, ry);
 		pos.z += t;
+	} else {
+		pos.z *= 0.0;
 	}
 
-	pos.z += mix(0.0, mix(0.5, 1.0, noise.z), isFront) * 0.2;
+	pos.z += mix(0.0, mix(0.25, 1.0, noise.z), isFront) * 0.1;
 
 
 	vec4 position = uModelMatrix * vec4(pos, 1.0);
@@ -65,6 +69,7 @@ void main(void) {
 	gl_Position   = uProjectionMatrix * uViewMatrix * position;
 
 	vExtra = aExtra;
+	vColor = aColor;
 
 	vShadowCoord = uShadowMatrix * position;
 }

@@ -5,8 +5,6 @@
 
 precision highp float;
 
-#define uMapSize vec2(1024.0) * 0.5
-
 uniform sampler2D 	uBRDFMap;
 uniform sampler2D 	uShadowMap;
 uniform samplerCube uRadianceMap;
@@ -15,6 +13,8 @@ uniform float uUVScale;
 uniform float uExposure;
 uniform float uShadowStrength;
 uniform vec2 uEnvRot;
+uniform vec2 uMapSize;
+
 
 #ifdef HAS_BASECOLORMAP
 uniform sampler2D uColorMap;
@@ -48,6 +48,7 @@ uniform float uRoughness;
 uniform float uMetallic;
 
 varying vec2 vTextureCoord;
+varying vec3 vColor;
 varying vec3 vNormal;
 varying vec3 vPosition;
 varying vec4 vShadowCoord;
@@ -322,6 +323,6 @@ void main() {
 	color *= s;
 	
 	// output the fragment color
-	gl_FragColor        = vec4(pow(color,vec3(1.0/uExposure)), baseColor.a);
+	gl_FragColor        = vec4(pow(color * vColor,vec3(1.0/uExposure)), baseColor.a);
 
 }
