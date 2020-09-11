@@ -2,7 +2,7 @@ import alfrid, { GL } from "alfrid";
 
 import Config from "./Config";
 import Assets from "./Assets";
-import { getRandomElement } from "randomutils";
+import { getRandomElement, randomFloor } from "randomutils";
 import vs from "shaders/trails.vert";
 import fs from "shaders/traisl.frag";
 
@@ -41,25 +41,48 @@ class DrawTrails extends alfrid.Draw {
       }
     }
 
-    console.log("color image :", Assets.get("test")._source);
+    const { _source: source } = Assets.get("test");
+
+    const cvs = document.createElement("canvas");
+    cvs.width = source.width;
+    cvs.height = source.height;
+    const ctx = cvs.getContext("2d");
+    ctx.drawImage(source, 0, 0);
+    const imgData = ctx.getImageData(0, 0, source.width, source.height).data;
+
+    const getRandomColor = () => {
+      const x = randomFloor(source.width);
+      const y = randomFloor(source.height);
+      const index = (x + y * source.width) * 4;
+      return [
+        imgData[index] / 255,
+        imgData[index + 1] / 255,
+        imgData[index + 2] / 255,
+      ];
+    };
 
     const mesh = new alfrid.Mesh();
     mesh.bufferVertex(positions);
     mesh.bufferTexCoord(uvs);
     mesh.bufferIndex(indices);
 
+    this.randomColor = getRandomColor();
+
     // instancing
     const uvOffsets = [];
+    const extras = [];
     const colors = [];
 
     for (let i = 0; i < num; i++) {
       for (let j = 0; j < num; j++) {
         uvOffsets.push([i / num, j / num]);
-        colors.push([Math.random(), Math.random(), Math.random()]);
+        extras.push([Math.random(), Math.random(), Math.random()]);
+        colors.push(getRandomColor());
       }
     }
 
     mesh.bufferInstance(uvOffsets, "aUVOffset");
+    mesh.bufferInstance(extras, "aExtra");
     mesh.bufferInstance(colors, "aColor");
 
     this.setMesh(mesh).useProgram(vs, fs);

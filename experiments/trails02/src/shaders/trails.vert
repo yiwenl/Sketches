@@ -4,6 +4,7 @@ precision highp float;
 attribute vec3 aVertexPosition;
 attribute vec2 aTextureCoord;
 attribute vec3 aNormal;
+attribute vec3 aExtra;
 attribute vec3 aColor;
 attribute vec2 aUVOffset;
 
@@ -107,7 +108,7 @@ void main(void) {
     float life = texture2D(textureData, aUVOffset).x;
     float t = life;
     float scale = clamp(t, 0.0, 1.0);
-    scale = sin(scale * PI) * mix(1.0, 2.0, aColor.y);
+    scale = sin(scale * PI) * mix(1.0, 2.0, aExtra.y);
     
     // scale = abs(scale - 0.5) / 0.5;
 
@@ -135,20 +136,20 @@ void main(void) {
 /*
     vec3 color = vec3(1.0);
 
-    if(aColor.x < 0.1) {
+    if(aExtra.x < 0.1) {
         color = uColors[0];
-    } else if(aColor.x < 0.3) {
+    } else if(aExtra.x < 0.3) {
         color = uColors[1];
-    } else if(aColor.x < 0.5) {
+    } else if(aExtra.x < 0.5) {
         color = uColors[2];
-    } else if(aColor.x < 0.7) {
+    } else if(aExtra.x < 0.7) {
         color = uColors[3];
     } else {
         color = uColors[4];
     }
 */
-    vec3 color = texture2D(textureData, aColor.xy).rgb;
-    vColor = color * mix(0.8, 1.2, aColor.z);
+    // vec3 color = texx§ture2D(textureData, aExtra.xy).rgb;
+    vColor = aColor;
 
     vShadowCoord = uShadowMatrix * uModelMatrix * vec4(v, 1.0);
 }

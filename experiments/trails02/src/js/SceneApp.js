@@ -102,7 +102,7 @@ class SceneApp extends Scene {
     console.log("init views");
 
     const theme = getColorTheme();
-    this._bgColor = getRandomElement(theme);
+    // this._bgColor = getRandomElement(theme);
 
     this._bCopy = new alfrid.BatchCopy();
     this._bAxis = new alfrid.BatchAxis();
@@ -133,6 +133,8 @@ class SceneApp extends Scene {
 
     // trails
     this._drawTrails = new DrawTrails(theme);
+
+    this._bgColor = this._drawTrails.randomColor;
   }
 
   update() {
