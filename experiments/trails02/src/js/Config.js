@@ -6,4 +6,5 @@ export default {
   numSets: 2,
   noiseScale: 1,
   helperLines: false,
+  color: "test",
 };

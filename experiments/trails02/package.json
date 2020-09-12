@@ -58,6 +58,7 @@
     "alfrid": "^0.3.8",
     "assets-loader": "github:madclem/assets-loader",
     "dat.gui": "^0.7.6",
+    "debug-camera": "github:yiwenl/debug-camera",
     "fast-url-parser": "^1.1.3",
     "get-color-themes": "0.0.3",
     "gl-matrix": "^3.0.0",
@@ -66,8 +67,8 @@
     "parse-dds": "^1.2.1",
     "querystringparser": "^0.1.1",
     "randomutils": "github:yiwenl/randomUtils",
-    "debug-camera": "github:yiwenl/debug-camera",
     "scheduling": "^1.2.0",
+    "socket.io-client": "^2.3.0",
     "stats.js": "^0.17.0"
   }
 }

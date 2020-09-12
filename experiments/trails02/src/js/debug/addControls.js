@@ -18,6 +18,13 @@ const addControls = (scene) => {
 
     gui.add(Config, "numSets", [1, 2, 3, 4, 5]).onFinishChange(Settings.reload);
     gui.add(Config, "noiseScale", 0.01, 1).onFinishChange(Settings.refresh);
+    gui
+      .add(
+        Config,
+        "color",
+        "001,002,003,004,005,006,007,008,009,test".split(",")
+      )
+      .onFinishChange(Settings.reload);
     gui.add(Config, "helperLines").onFinishChange(Settings.refresh);
     gui.add(oControl, "save").name("Save Settings");
     gui.add(Settings, "reset").name("Reset Default");

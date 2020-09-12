@@ -44,9 +44,9 @@ void main(void) {
     acc += dir * 1.5;
 
 
-    // rotate
-    dir.xy = rotate(dir.xy, PI * 0.7);
-    acc += dir * mix(1.0, 1.5, extra.b);
+    // // rotate
+    // dir.xy = rotate(dir.xy, PI * 0.7);
+    // acc += dir * mix(1.0, 1.5, extra.b);
 
     vel += acc * 0.00035 * speed;
 

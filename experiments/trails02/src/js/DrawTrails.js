@@ -41,7 +41,7 @@ class DrawTrails extends alfrid.Draw {
       }
     }
 
-    const { _source: source } = Assets.get("test");
+    const { _source: source } = Assets.get(Config.color);
 
     const cvs = document.createElement("canvas");
     cvs.width = source.width;

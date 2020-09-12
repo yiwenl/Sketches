@@ -5,6 +5,10 @@ import Assets from "./Assets";
 import Config from "./Config";
 import { resize, biasMatrix } from "./utils";
 
+// web socket
+const io = require("socket.io-client");
+const socket = io("http://localhost:9876");
+
 // draw calls
 import DrawSave from "./DrawSave";
 import DrawDebug from "./DrawDebug";
@@ -32,11 +36,11 @@ class SceneApp extends Scene {
     let s = 8;
     this.mesh = alfrid.Geom.plane(s, s / 2, 1);
 
-    this._detector = new TouchDetector(this.mesh, this.camera);
-    this._detector.on("onHit", (e) => {
-      vec3.copy(this._hit0, e.detail.hit);
-      vec3.scale(this._hit1, this._hit0, -1);
-    });
+    // this._detector = new TouchDetector(this.mesh, this.camera);
+    // this._detector.on("onHit", (e) => {
+    //   vec3.copy(this._hit0, e.detail.hit);
+    //   vec3.scale(this._hit1, this._hit0, -1);
+    // });
 
     this._drawHit = new alfrid.Draw()
       .setMesh(this.mesh)
@@ -66,6 +70,12 @@ class SceneApp extends Scene {
       }
     });
     this.resize();
+
+    // console.log("socket", socket);
+    socket.on("onMouseMove", (o) => {
+      vec3.copy(this._hit0, o.a);
+      vec3.copy(this._hit1, o.b);
+    });
   }
 
   _initTextures() {
@@ -223,6 +233,7 @@ class SceneApp extends Scene {
     if (Config.helperLines) {
       const s = 0.05;
       this._bBall.draw(this._hit0, [s, s, s], [1, 0, 0]);
+      this._bBall.draw(this._hit1, [s, s, s], [1, 0, 0]);
       DebugCamera(this._cameraTop);
     }
     // this._drawHit.draw();
@@ -238,6 +249,21 @@ class SceneApp extends Scene {
     // this._bCopy.draw(this._fboTrails.write.getTexture(0));
     // GL.viewport(s * 2, 0, s, s);
     // this._bCopy.draw(this._fboTrails.read.getTexture(2));
+
+    // color images
+    const t = Assets.get(Config.color);
+    const ratio = t.width / t.height;
+
+    if (Config.helperLines) {
+      let w = 300;
+      let h = w / ratio;
+      const maxHeight = 300;
+      const scale = Math.min(1, maxHeight / h);
+      w *= scale;
+      h *= scale;
+      GL.viewport(0, 0, w, h);
+      this._bCopy.draw(t);
+    }
   }
 
   resize(w, h) {
