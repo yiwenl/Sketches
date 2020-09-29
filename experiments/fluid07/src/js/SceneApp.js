@@ -1,6 +1,6 @@
 // SceneApp.js
 
-import alfrid, { Scene, GL } from "alfrid";
+import alfrid, { Scene, GL, TouchDetector } from "alfrid";
 import Assets from "./Assets";
 import Config from "./Config";
 import { resize, biasMatrix } from "./utils";
@@ -23,11 +23,13 @@ class SceneApp extends Scene {
     GL.enableAlphaBlending();
     // this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
     this.orbitalControl.radius.value = 4;
+    this.orbitalControl.rx.easing = 0.01;
+    this.orbitalControl.ry.easing = 0.01;
     this.orbitalControl.lock();
 
     this._lightPos = [0, 6, 2.5];
     this.cameraLight = new alfrid.CameraOrtho();
-    const s = 4;
+    let s = 4;
     this.cameraLight.ortho(-s, s, s, -s, 1, 8.5);
     this.cameraLight.lookAt(this._lightPos, [0, 0, -1]);
 
@@ -38,12 +40,6 @@ class SceneApp extends Scene {
       this.cameraLight.viewMatrix
     );
     mat4.multiply(this._shadowMatrix, biasMatrix, this._shadowMatrix);
-
-    this._handLeft = vec3.create();
-    this._handRight = vec3.create();
-
-    this._dirHandLeft = vec3.create();
-    this._dirHandRight = vec3.create();
 
     this._trackJoints = [];
     this._bodyIndex = -1;
@@ -60,8 +56,45 @@ class SceneApp extends Scene {
 
     this.resize();
 
+    this._trackJoints = [
+      {
+        pos: vec3.create(),
+        dir: vec3.fromValues(0, 1.0, 0),
+      },
+    ];
+
     setInterval(() => this.nextColor(), 8000);
     this.nextColor();
+
+    // touch event
+    const { planeSize } = Config;
+    const mesh = alfrid.Geom.plane(planeSize, planeSize / 2, 1, "xy");
+    this._detector = new TouchDetector(mesh, this.camera);
+    this._hit = vec3.create();
+    s = 1;
+    const adj = vec3.fromValues(s, s, 0.0);
+    const curr = vec3.create();
+    let prev = vec3.create();
+    const dir = vec3.create();
+    const dirScale = 1.5;
+    let speed;
+
+    this._detector.on("onHit", (e) => {
+      vec3.mul(curr, e.detail.hit, adj);
+      vec3.copy(prev, this._hit);
+
+      vec3.sub(dir, curr, prev);
+      speed = vec3.length(dir);
+      speed = dirScale + speed * 10;
+      // speed = Math.min(speed, 10);
+
+      vec3.normalize(dir, dir);
+      vec3.scale(dir, dir, speed);
+      vec3.copy(this._trackJoints[0].pos, curr);
+      vec3.copy(this._trackJoints[0].dir, dir);
+
+      vec3.copy(this._hit, e.detail.hit);
+    });
   }
 
   nextColor() {
@@ -85,7 +118,7 @@ class SceneApp extends Scene {
     this._fbo = new alfrid.FboPingPong(num, num, oSettings, 4);
     this._fboOrgPos = new alfrid.FrameBuffer(num, num, oSettings);
 
-    const fboSize = 1024;
+    const fboSize = 512 * 2;
     this._fboShadow = new alfrid.FrameBuffer(fboSize, fboSize);
     this._textureWhite = alfrid.GLTexture.whiteTexture();
   }
@@ -120,7 +153,18 @@ class SceneApp extends Scene {
   update() {
     const { planeSize } = Config;
     const s = planeSize * 0.5;
-    this._fluid.update([]);
+    const getPos = (v) => {
+      return [(v[0] / s) * 0.5 + 0.5, (v[1] / s) * 0.5 + 0.5];
+    };
+
+    const joints = this._trackJoints.map(({ pos, dir }) => {
+      return {
+        pos: getPos(pos),
+        dir,
+      };
+    });
+
+    this._fluid.update(joints);
 
     this._drawSim
       .bindFrameBuffer(this._fbo.write)
@@ -183,11 +227,13 @@ class SceneApp extends Scene {
     this._renderBlocks(true);
 
     let s = 0.1;
+
     if (Config.debug) {
       GL.disable(GL.DEPTH_TEST);
-      // this._bBall.draw(this._handLeft, [s, s, s], [1, 0, 0]);
-      // this._bBall.draw(this._handRight, [s, s, s], [1, 0, 0]);
 
+      this._bBall.draw(this._hit, [s, s, s], [1, 1, 0]);
+
+      s *= 0.5;
       this._trackJoints.forEach((joint) => {
         this._bBall.draw(joint.pos, [s, s, s], [1, 0, 0]);
       });

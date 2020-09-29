@@ -15,7 +15,6 @@ const addControls = (scene) => {
     gui
       .add(Config, "numParticles", [64, 128, 144, 200, 256])
       .onFinishChange(Settings.reload);
-
     /*
     gui
       .add(Config, "planeSize", 2, 5)

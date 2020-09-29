@@ -168,9 +168,9 @@ class FluidSimulation {
     this.updateFlow(center, [0.0, -1.5]);
   }
 
-  updateFlow(mPos, mDir) {
+  updateFlow(mPos, mDir, mStrength = 1) {
     const radiusScale = 1.5;
-    const strength = 1000;
+    const strength = 500 * mStrength;
     const time = alfrid.Scheduler.deltaTime * 2.0;
     const radius = 0.2;
 
@@ -202,7 +202,7 @@ class FluidSimulation {
     this._debugSplat();
 
     mJoints.forEach((joint) => {
-      this.updateFlow(joint.pos, [joint.dir[0], joint.dir[1]]);
+      this.updateFlow(joint.pos, [joint.dir[0], joint.dir[1]], 2);
     });
 
     //	advect - velocity
