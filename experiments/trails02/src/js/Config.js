@@ -4,7 +4,7 @@ export default {
   numParticles: 64,
   trailLength: 15,
   numSets: 2,
-  noiseScale: 1,
+  noiseScale: 0.5,
   helperLines: false,
   color: "test",
 };

@@ -17,7 +17,7 @@ const addControls = (scene) => {
       .onFinishChange(Settings.reload);
 
     gui.add(Config, "numSets", [1, 2, 3, 4, 5]).onFinishChange(Settings.reload);
-    gui.add(Config, "noiseScale", 0.01, 1).onFinishChange(Settings.refresh);
+    gui.add(Config, "noiseScale", 0.01, 2).onFinishChange(Settings.refresh);
     gui
       .add(
         Config,

@@ -56,16 +56,16 @@ float PCFShadow(sampler2D depths, vec2 size, vec4 shadowCoord) {
 }
 
 void main(void) {
-    if(vDebug.x < 0.0) {
-        discard;
-    }
+	if(vDebug.x < 0.0) {
+			discard;
+	}
 
-    float _diffuse = diffuse(vNormal, uLight, .5);
+	float _diffuse = diffuse(vNormal, uLight, .65);
 
-    vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
+	vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
 	float s             = PCFShadow(textureShadow, uMapSize, shadowCoord);
 	s                   = mix(s, 1.0, .5);
 
-    gl_FragColor = vec4(vColor * _diffuse * s, 1.0);
+	gl_FragColor = vec4(vColor * _diffuse * s * 1.25, 1.0);
     // gl_FragColor = vec4(vec3(s), 1.0);
 }

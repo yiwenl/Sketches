@@ -14,6 +14,7 @@ uniform sampler2D textureOrgPos;
 uniform float uNoiseScale;
 uniform float uTime;
 uniform float uNumFrames;
+uniform float uSpeed;
 uniform vec3 uCenter0;
 uniform vec3 uCenter1;
 
@@ -37,7 +38,7 @@ void main(void) {
     vec3 noise = curlNoise(pos * uNoiseScale * vec3(1.0, 1.0, 3.0) + vec3(0.0, 0.0, uTime * 0.1));
     noise.z *= 2.0;
 
-    acc += noise;
+    acc += noise * 1.5;
 
     dir = normalize((pos - center) * vec3(1.0, 1.0, 0.0));
     float speed = mix(1.0, 2.0, extra.g);
@@ -48,7 +49,7 @@ void main(void) {
     // dir.xy = rotate(dir.xy, PI * 0.7);
     // acc += dir * mix(1.0, 1.5, extra.b);
 
-    vel += acc * 0.00035 * speed;
+    vel += acc * 0.0005 * speed * uSpeed;
 
     if(life > 0.0) {
         pos += vel;
@@ -68,7 +69,6 @@ void main(void) {
         vel *= 0.0;
         center = newCenter;
     }
-    
 
     data.x = life;
 

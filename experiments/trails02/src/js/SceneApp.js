@@ -6,8 +6,8 @@ import Config from "./Config";
 import { resize, biasMatrix } from "./utils";
 
 // web socket
-const io = require("socket.io-client");
-const socket = io("http://localhost:9876");
+// const io = require("socket.io-client");
+// const socket = io("http://localhost:9876");
 
 // draw calls
 import DrawSave from "./DrawSave";
@@ -21,14 +21,21 @@ import getColorTheme from "get-color-themes";
 import { getRandomElement } from "randomutils";
 import { vec3 } from "gl-matrix";
 
+const colorMaps = "001,002,003,004,005,006,007,008,009,test".split(",");
+
 class SceneApp extends Scene {
   constructor() {
     super();
+
     GL.enableAlphaBlending();
     // this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
     this.orbitalControl.radius.value = 8;
+    this.orbitalControl.lockZoom();
+    const r = 1;
+    this.orbitalControl.ry.limit(-r, r);
     // this.orbitalControl.radius.limit(4, 12);
     this._seed = Math.random() * 0xff;
+    this._speed = new alfrid.EaseNumber(1, 0.1);
 
     this._hit0 = vec3.create();
     this._hit1 = vec3.create();
@@ -36,11 +43,11 @@ class SceneApp extends Scene {
     let s = 8;
     this.mesh = alfrid.Geom.plane(s, s / 2, 1);
 
-    // this._detector = new TouchDetector(this.mesh, this.camera);
-    // this._detector.on("onHit", (e) => {
-    //   vec3.copy(this._hit0, e.detail.hit);
-    //   vec3.scale(this._hit1, this._hit0, -1);
-    // });
+    this._detector = new TouchDetector(this.mesh, this.camera);
+    this._detector.on("onHit", (e) => {
+      vec3.copy(this._hit0, e.detail.hit);
+      vec3.scale(this._hit1, this._hit0, -1);
+    });
 
     this._drawHit = new alfrid.Draw()
       .setMesh(this.mesh)
@@ -67,18 +74,21 @@ class SceneApp extends Scene {
     window.addEventListener("keydown", (e) => {
       if (e.keyCode === 32) {
         this._isPaused = !this._isPaused;
+        document.body.classList.add("hideDesc");
+        // this._speed.value = this._speed.targetValue === 1 ? 0 : 1;
       }
     });
     this.resize();
 
-    // console.log("socket", socket);
-    socket.on("onMouseMove", (o) => {
-      vec3.copy(this._hit0, o.a);
-      vec3.copy(this._hit1, o.b);
-    });
+    // // console.log("socket", socket);
+    // socket.on("onMouseMove", (o) => {
+    //   vec3.copy(this._hit0, o.a);
+    //   vec3.copy(this._hit1, o.b);
+    // });
   }
 
   _initTextures() {
+    Config.color = getRandomElement(colorMaps);
     const { numParticles: num, trailLength, numSets } = Config;
 
     const oSettings = {
@@ -96,14 +106,8 @@ class SceneApp extends Scene {
 
     this._fboOrgPos = new alfrid.FrameBuffer(num, num, oSettings);
 
-    const fboSize = 1024 * 2;
+    const fboSize = 1024;
     this._fboShadow = new alfrid.FrameBuffer(fboSize, fboSize);
-
-    const { gui } = window;
-    gui
-      .add(this._fboShadow, "width")
-      .name("Shadow Map Size")
-      .listen();
 
     this._textureGrey = alfrid.GLTexture.greyTexture();
   }
@@ -168,6 +172,7 @@ class SceneApp extends Scene {
       .uniform("uCenter0", "vec3", this._hit0)
       .uniform("uCenter1", "vec3", this._hit1)
       .uniform("uNumFrames", "float", totalFrames)
+      .uniform("uSpeed", "float", this._speed.value)
       .draw();
 
     this._fboTrails.swap();
@@ -230,40 +235,9 @@ class SceneApp extends Scene {
     }
     this.renderTrails(false);
 
-    if (Config.helperLines) {
-      const s = 0.05;
-      this._bBall.draw(this._hit0, [s, s, s], [1, 0, 0]);
-      this._bBall.draw(this._hit1, [s, s, s], [1, 0, 0]);
-      DebugCamera(this._cameraTop);
-    }
-    // this._drawHit.draw();
-
-    // const s = Config.numParticles;
-
-    // let s = 300;
-    // GL.viewport(0, 0, s, s);
-    // this._bCopy.draw(this._fboShadow.depthTexture);
-
-    // this._bCopy.draw(this._fboTrails.read.getTexture(0));
-    // GL.viewport(s, 0, s, s);
-    // this._bCopy.draw(this._fboTrails.write.getTexture(0));
-    // GL.viewport(s * 2, 0, s, s);
-    // this._bCopy.draw(this._fboTrails.read.getTexture(2));
-
-    // color images
-    const t = Assets.get(Config.color);
-    const ratio = t.width / t.height;
-
-    if (Config.helperLines) {
-      let w = 300;
-      let h = w / ratio;
-      const maxHeight = 300;
-      const scale = Math.min(1, maxHeight / h);
-      w *= scale;
-      h *= scale;
-      GL.viewport(0, 0, w, h);
-      this._bCopy.draw(t);
-    }
+    const s = 0.015;
+    this._bBall.draw(this._hit0, [s, s, s], [1, 1, 1]);
+    this._bBall.draw(this._hit1, [s, s, s], [1, 1, 1]);
   }
 
   resize(w, h) {

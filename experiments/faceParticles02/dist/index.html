@@ -8,9 +8,10 @@
 	<title>Project Template</title>
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="assets/css/main.css">
-	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-	<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/facemesh"></script>
+	<script src="https://unpkg.com/@tensorflow/tfjs-core@2.1.0/dist/tf-core.js"></script>
+	<script src="https://unpkg.com/@tensorflow/tfjs-converter@2.1.0/dist/tf-converter.js"></script>
+	<script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@2.1.0/dist/tf-backend-webgl.js"></script>
+
 </head>
 <body>
 	<p class="Message">Loading Assets ...</p>
@@ -20,9 +21,9 @@
 	<video id="video" playsinline class="webcam">
 	</video>
 
-	
+	<script type="text/javascript">window.isDevelopment=true</script>
 	<script type="text/javascript" src=assets/js/app.js></script>
-	
+	<script type="text/javascript" src=assets/js/debug.js></script>
 	
 </body>
 </html>
