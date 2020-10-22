@@ -30,7 +30,7 @@ class SceneApp extends Scene {
     GL.enableAlphaBlending();
     // this.orbitalControl.rx.value = this.orbitalControl.ry.value = 0.3;
     this.orbitalControl.radius.value = 8;
-    this.orbitalControl.lockZoom();
+    // this.orbitalControl.lockZoom();
     const r = 1;
     this.orbitalControl.ry.limit(-r, r);
     // this.orbitalControl.radius.limit(4, 12);
@@ -88,7 +88,7 @@ class SceneApp extends Scene {
   }
 
   _initTextures() {
-    Config.color = getRandomElement(colorMaps);
+    // Config.color = getRandomElement(colorMaps);
     const { numParticles: num, trailLength, numSets } = Config;
 
     const oSettings = {

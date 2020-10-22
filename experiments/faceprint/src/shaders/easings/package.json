@@ -1,0 +1,42 @@
+{
+  "name": "glsl-easings",
+  "version": "1.0.0",
+  "main": "linear.glsl",
+  "scripts": {
+    "test": "npm run make:test && cd test/visual && beefy index.js -- -t glslify",
+    "make:test": "node test/visual/make.js",
+    "make:page": "npm run make:test && browserify -t glslify test/visual/index.js -o bundle.js"
+  },
+  "author": "Hugh Kennedy <hughskennedy@gmail.com> (http://hughsk.io/)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hughsk/glsl-easings.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hughsk/glsl-easings/issues"
+  },
+  "homepage": "https://github.com/hughsk/glsl-easings",
+  "dependencies": {},
+  "devDependencies": {
+    "beefy": "^2.1.1",
+    "browserify": "^7.0.0",
+    "canvas-fit": "^1.2.0",
+    "gl-buffer": "^2.0.6",
+    "gl-context": "^0.1.1",
+    "gl-mat4": "^1.0.1",
+    "gl-now": "^1.3.1",
+    "gl-vao": "^1.1.2",
+    "glslify": "^1.6.0"
+  },
+  "description": "Robert Penner's easing functions in GLSL, available as a module for glslify.",
+  "keywords": [
+    "glsl",
+    "transition",
+    "ease",
+    "easing",
+    "animation",
+    "webgl",
+    "shader"
+  ]
+}

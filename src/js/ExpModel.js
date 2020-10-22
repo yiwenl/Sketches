@@ -350,6 +350,11 @@ const ExpModel = [
     url: "//yiwenl.github.io/Sketches/experiments/trails02/dist/index.html",
     title: "Trails",
   },
+  {
+    cover: "assets/img/coverSketchFaceprint.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/faceprint/dist/index.html",
+    title: "Faceprint",
+  },
 ];
 
 module.exports = ExpModel;
