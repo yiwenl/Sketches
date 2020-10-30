@@ -252,11 +252,11 @@ class SceneApp extends Scene {
 
     // debugCamera(this._cameraLight);
 
-    // //  debug
-    // s = Math.min(300, GL.width / 4)
-    // const fbo = this._sets[0].read
-    // GL.viewport(0, 0, s, s)
-    // this._bCopy.draw(fbo.getTexture(0))
+    //  debug
+    const s = Math.min(300, GL.width / 4)
+    const fbo = this._sets[0].read
+    GL.viewport(0, 0, s, s)
+    this._bCopy.draw(fbo.getTexture(0))
 
     // GL.viewport(s, 0, s, s)
     // this._bCopy.draw(fbo.getTexture(2))
