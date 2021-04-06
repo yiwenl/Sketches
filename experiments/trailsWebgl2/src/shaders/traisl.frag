@@ -45,7 +45,7 @@ void main(void) {
 
 	vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
 	float s             = samplePCF3x3(shadowCoord);
-	s                   = mix(s, 1.0, .5);
+	s                   = mix(s, 1.0, .25);
 
 	oColor = vec4(vColor * _diffuse * s * 1.25, 1.0);
 
