@@ -355,6 +355,11 @@ const ExpModel = [
     url: "//yiwenl.github.io/Sketches/experiments/faceprint/dist/index.html",
     title: "Faceprint",
   },
+  {
+    cover: "assets/img/coverSketchRipple.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/ripple/dist/index.html",
+    title: "Pulse",
+  },
 ];
 
 module.exports = ExpModel;
