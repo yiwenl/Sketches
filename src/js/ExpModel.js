@@ -357,7 +357,7 @@ const ExpModel = [
   },
   {
     cover: "assets/img/coverSketchRipple.jpg",
-    url: "//yiwenl.github.io/Sketches/experiments/ripple/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/ripples/dist/index.html",
     title: "Pulse",
   },
 ];
