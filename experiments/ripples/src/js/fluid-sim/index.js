@@ -36,7 +36,7 @@ class FluidSimulation {
       magFilter: GL.LINEAR,
       wrapS: GL.CLAMP_TO_EDGE,
       wrapT: GL.CLAMP_TO_EDGE,
-      type: GL.FLOAT,
+      type: GL.HALF_FLOAT,
     };
 
     this._fboVelocity = new FboPingPong(size, size, oSettings);

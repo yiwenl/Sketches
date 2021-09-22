@@ -68,6 +68,7 @@
     "get-color-themes": "0.0.3",
     "gl-matrix": "^3.0.0",
     "glsl-easings": "^1.0.0",
+    "glsl-inverse": "^1.0.0",
     "glsl-utils": "github:yiwenl/glsl-utils",
     "parse-dds": "^1.2.1",
     "querystringparser": "^0.1.1",

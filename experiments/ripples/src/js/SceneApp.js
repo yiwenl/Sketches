@@ -42,11 +42,12 @@ class SceneApp extends Scene {
 
     // camera
     this.orbitalControl.rx.easing = 0.05;
-    this.orbitalControl.rx.setTo(0.1);
+    this.orbitalControl.rx.setTo(0.3);
     this.orbitalControl.rx.value = Math.PI / 2;
     this.orbitalControl.rx.limit(0.1, Math.PI / 2 - 0.1);
     this.orbitalControl.radius.setTo(14);
     this.orbitalControl.radius.limit(5, 15);
+    Config.numParticles = GL.isMobile ? 128 : 256;
     if (GL.isMobile) {
       this.orbitalControl.lock();
     }
@@ -95,7 +96,7 @@ class SceneApp extends Scene {
   _initTextures() {
     const { numParticles: num } = Config;
     const oSettings = {
-      type: GL.FLOAT,
+      type: GL.HALF_FLOAT,
       minFilter: GL.NEAREST,
       magFilter: GL.NEAREST,
       mipmap: false,

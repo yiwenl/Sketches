@@ -5,7 +5,7 @@ import Config from "../Config";
 import { saveJson } from "../utils";
 import { GL } from "alfrid";
 
-const addControls = (scene) => {
+const addControls = () => {
   const oControl = {
     save: () => {
       saveJson(Config, "Settings");
