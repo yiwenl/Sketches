@@ -1,77 +1,82 @@
 /*experiment.scss*/
 
 .Experiment-List {
-	max-width: 1215px;
-	margin:0 auto;
+  max-width: 1215px;
+  margin: 0 auto;
 
-	display: flex;
-	align-items: center;
-	justify-content: flex-start;
-	align-content: flex-start;
-	flex-wrap: wrap;
-	padding-top:50px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  padding-top: 50px;
+
+  .not-home & {
+    display: none;
+  }
 }
 
 @media (max-width: 1215px) {
-	.Experiment-List {
-		max-width: 900px;
-	}
+  .Experiment-List {
+    max-width: 900px;
+  }
 }
 
 @media (max-width: 915px) {
-	.Experiment-List {
-		max-width: 600px;
-	}
+  .Experiment-List {
+    max-width: 600px;
+  }
 }
 
 @media (max-width: 615px) {
-	.Experiment-List {
-		max-width: 300px;
-	}
+  .Experiment-List {
+    max-width: 300px;
+  }
 }
 
 .Experiment-Item {
-	width:280px;
-	height:280px;
-	box-sizing: border-box;
-	margin:10px;
-	transition: transform .25s ease-out, filter .25s ease-out;
-	filter: grayscale(60%);
+  width: 280px;
+  height: 280px;
+  box-sizing: border-box;
+  margin: 10px;
+  transition: transform 0.25s ease-out, filter 0.25s ease-out;
+  filter: grayscale(60%);
 
-	&:hover {
-		transform:scale(.95);
-		filter: grayscale(0%);
-	}
+  &:hover {
+    transform: scale(0.95);
+    filter: grayscale(0%);
+  }
 }
 
 .Experiment-Content {
-	position: fixed;
-	z-index: 999;
-	width: 100%;
-	height: 100%;
-	border:0;
+  position: fixed;
+  z-index: 999;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  overflow: hidden;
 
-	top:0;
-	left:0;
+  top: 0;
+  left: 0;
 }
 
 .Experiment-CloseButton {
-	position: fixed;
-	padding:20px;
-	cursor: pointer;
-	z-index:9999;
-	top:0px;
+  position: fixed;
+  padding: 20px;
+  cursor: pointer;
+  z-index: 9999;
+  top: 0px;
 
-	opacity: .5;
-	transition: opacity .25s ease-out;
+  opacity: 0.5;
+  transition: opacity 0.25s ease-out;
 
-	&:hover {
-		opacity:1;
-	}
+  &:hover {
+    opacity: 1;
+  }
 
-	svg {
-		width: 20px;
-		height: 20px;
-		fill: #AAA; 
-	}
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: #aaa;
+  }
 }

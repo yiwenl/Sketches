@@ -36,6 +36,8 @@ function _init3D(o) {
   const webgl1 = false;
   GL.init(canvas, { webgl1, preserveDrawingBuffer });
 
+  Config.numParticles = GL.isMobile ? 144 : 256;
+
   if (process.env.NODE_ENV === "development") {
     Settings.init();
   }
