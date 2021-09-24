@@ -36,6 +36,11 @@ function _init3D(o) {
   const webgl1 = false;
   GL.init(canvas, { webgl1, preserveDrawingBuffer });
 
+  if (!GL.webgl2) {
+    document.body.classList.add("no-webgl2");
+    return;
+  }
+
   Config.numParticles = GL.isMobile ? 144 : 256;
 
   if (process.env.NODE_ENV === "development") {

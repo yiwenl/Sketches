@@ -71,6 +71,38 @@ p {
   }
 }
 
+.container-button {
+  position: fixed;
+  z-index: 99;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-no-webgl2 {
+  color: white;
+  font-size: 14px;
+  letter-spacing: 6px;
+  text-align: center;
+  z-index: 99;
+  position: absolute;
+  top: 45%;
+
+  transition: opacity 0.5s ease-in-out;
+  pointer-events: none;
+  opacity: 0;
+
+  .no-webgl2 & {
+    opacity: 1;
+  }
+
+  .hide-messages & {
+    opacity: 0;
+  }
+}
+
 .Loading-Bar {
   position: absolute;
   z-index: 998;
