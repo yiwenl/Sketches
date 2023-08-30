@@ -14,10 +14,8 @@ import {
   EaseNumber,
 } from "alfrid";
 import {
-  mix,
   random,
   randomInt,
-  smoothstep,
   getMonocolor,
   biasMatrix,
   saveImage,
@@ -36,6 +34,7 @@ import DrawSave from "./DrawSave";
 import DrawSaveSingle from "./DrawSaveSingle";
 import DrawBlocks from "./DrawBlocks";
 import DrawLine from "./DrawLine";
+import DrawBg from "./DrawBg";
 
 // hand detection
 import HandPoseDetection, {
@@ -54,6 +53,7 @@ import fsSim from "shaders/sim.frag";
 let hasSaved = false;
 let canSave = false;
 const hitPlaneSize = 6;
+const minLifeScale = 0.5;
 
 class SceneApp extends Scene {
   constructor() {
@@ -76,6 +76,7 @@ class SceneApp extends Scene {
 
     this._hit = [0, 0, 0];
     this._preHit = [0, 0, 0];
+    this._lifeScale = minLifeScale;
 
     let x = 0;
     let y = 0;
@@ -110,8 +111,9 @@ class SceneApp extends Scene {
     // shadow
     this._cameraLight = new CameraOrtho();
     const r = 8;
+    this._lightPosition = [0, 7, 3];
     this._cameraLight.ortho(-r, r, r, -r, 1, 15);
-    this._cameraLight.lookAt([0, 7, 3], [0, 0, 0]);
+    this._cameraLight.lookAt(this._lightPosition, [0, 0, 0]);
     this._startTime = random(100);
 
     this.mtxShadow = mat4.create();
@@ -125,17 +127,22 @@ class SceneApp extends Scene {
     this.pulseStrength = new EaseNumber(1, 0.1);
 
     // generate lines
-    this._lines = [];
-    let numLines = 40;
+    const numLines = 40;
     this._pointAs = [];
     this._pointBs = [];
-    while (numLines--) {
+    const { sin, cos, PI } = Math;
+    const getPos = (a) => {
       const r = 3;
-      const a = [random(-r, r), random(-r, r), random(-r, r)];
-      const b = [random(-r, r), random(-r, r), random(-r, r)];
+      const x = cos(a) * r;
+      const y = sin(a) * r;
+      return [x, y, 0];
+    };
+
+    for (let i = 0; i < numLines; i++) {
+      const a = getPos((i / numLines) * PI * 2);
+      const b = getPos(((i + 1) / numLines) * PI * 2);
       this._pointAs.push(a);
       this._pointBs.push(b);
-      this._lines.push({ a, b });
     }
 
     this._pointAs = this._pointAs.flat();
@@ -177,6 +184,7 @@ class SceneApp extends Scene {
   }
 
   _onHandsDetected = (hands) => {
+    this._lifeScale = 1;
     const { width, height } = this.ctx.canvas;
     // debug
     this.ctx.clearRect(0, 0, width, height);
@@ -185,11 +193,11 @@ class SceneApp extends Scene {
 
     const findJoint = (name, points, pointBase) => {
       const { x, y } = pointBase;
-      const baseRange = 10;
+      const baseRange = 20;
       const tx = -(x / width - 0.5) * baseRange;
-      const ty = -(y / height - 0.5) * baseRange * 0.5;
+      const ty = -(y / height - 0.5) * baseRange * 0.5 + baseRange * 0.25;
       const point = points.find((p) => p.name === name);
-      const s = 50;
+      const s = 40;
       return [-point.x * s + tx, -point.y * s + ty, point.z * s];
     };
 
@@ -224,15 +232,34 @@ class SceneApp extends Scene {
           return name.indexOf("tip") > 1;
         });
 
+        jointPairs.forEach(([a, b]) => {
+          const pa = keypoints.find((p) => p.name === a);
+          const pb = keypoints.find((p) => p.name === b);
+
+          this.ctx.fillStyle = "rgb(255, 114, 0)";
+          this.ctx.strokeStyle = "rgba(255, 255, 255, .5)";
+          this.ctx.lineWidth = 2;
+          this.ctx.beginPath();
+          this.ctx.arc(pa.x, pa.y, 5, 0, Math.PI * 2);
+          this.ctx.fill();
+          this.ctx.beginPath();
+          this.ctx.arc(pb.x, pb.y, 5, 0, Math.PI * 2);
+          this.ctx.fill();
+          this.ctx.beginPath();
+          this.ctx.moveTo(pa.x, pa.y);
+          this.ctx.lineTo(pb.x, pb.y);
+          this.ctx.stroke();
+        });
+
         if (fingerTips && fingerTips.length > 0) {
           fingerTips.forEach(({ x, y }, i) => {
             fingers[i].x = this._handDetection.width - x;
             fingers[i].y = this._handDetection.height - y;
 
-            this.ctx.fillStyle = "rgb(255, 114, 0)";
-            this.ctx.beginPath();
-            this.ctx.arc(x, y, 5, 0, Math.PI * 2);
-            this.ctx.fill();
+            // this.ctx.fillStyle = "rgb(255, 114, 0)";
+            // this.ctx.beginPath();
+            // this.ctx.arc(x, y, 5, 0, Math.PI * 2);
+            // this.ctx.fill();
           });
 
           this.needUpdateHit = true;
@@ -246,6 +273,29 @@ class SceneApp extends Scene {
     this.ctx.clearRect(0, 0, width, height);
     this.ctx.fillStyle = `rgba(0, 0, 0, .2)`;
     this.ctx.fillRect(0, 0, width, height);
+
+    this._joints = [];
+    this._pointAs = [];
+    this._pointBs = [];
+    const { sin, cos, PI } = Math;
+    const getPos = (a) => {
+      const r = 3;
+      const x = cos(a) * r;
+      const y = sin(a) * r;
+      return [x, y, 0];
+    };
+
+    const numLines = 40;
+    for (let i = 0; i < numLines; i++) {
+      const a = getPos((i / numLines) * PI * 2);
+      const b = getPos(((i + 1) / numLines) * PI * 2);
+      this._pointAs.push(a);
+      this._pointBs.push(b);
+    }
+
+    this._pointAs = this._pointAs.flat();
+    this._pointBs = this._pointBs.flat();
+    this._lifeScale = minLifeScale;
   };
 
   _initTextures() {
@@ -271,6 +321,8 @@ class SceneApp extends Scene {
     this._dBall = new DrawBall();
     this._dLine = new DrawLine();
     this._dCamera = new DrawCamera();
+
+    this._drawBg = new DrawBg();
 
     // init particles
     new DrawSave()
@@ -314,6 +366,7 @@ class SceneApp extends Scene {
       .uniform("uPointBs", "vec3", this._pointBs)
       .uniform("uTime", Scheduler.getElapsedTime())
       .uniform("uBound", hitPlaneSize)
+      .uniform("uLifeScale", this._lifeScale)
       .draw();
 
     this._fbo.swap();
@@ -322,7 +375,7 @@ class SceneApp extends Scene {
   }
 
   updateFluid() {
-    const strength = 2;
+    const strength = 1;
     const noise = 1;
 
     const num = 4;
@@ -347,7 +400,7 @@ class SceneApp extends Scene {
 
       const dir = [-1, 0];
       vec2.rotate(dir, dir, [0, 0], random(-1, 1) * 0.5);
-      this._fluid.updateFlow([x, y], dir, strength * 0.1, radius * 0.5, noise);
+      this._fluid.updateFlow([x, y], dir, strength, radius, noise);
     }
 
     this.updateFluidWithHand();
@@ -356,7 +409,7 @@ class SceneApp extends Scene {
   }
 
   updateFluidWithHand() {
-    const thresholdMovement = 1;
+    const thresholdMovement = 2;
     const { width, height } = this._handDetection;
     for (let s in this.hands) {
       const hand = this.hands[s];
@@ -403,16 +456,19 @@ class SceneApp extends Scene {
       .bindTexture("uPosOrgMap", this._fboPos.texture, 5)
       .uniform("uShadowMatrix", this.mtxShadow)
       .uniform("uBound", hitPlaneSize)
+      .uniform("uLight", this._lightPosition)
       .draw();
   }
 
   render() {
-    let g = 0.05;
+    let g = 0.85;
     GL.clear(...getMonocolor(g), 1);
     GL.disable(GL.DEPTH_TEST);
-    this._dCopy.draw(Assets.get("bg"));
+    this._drawBg.draw();
     GL.enable(GL.DEPTH_TEST);
     GL.setMatrices(this.camera);
+
+    // this._dAxis.draw();
 
     this.renderBlocks(true);
 

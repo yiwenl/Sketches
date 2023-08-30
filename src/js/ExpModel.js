@@ -354,6 +354,11 @@ const ExpModel = [
     url: "//yiwenl.github.io/Sketches/experiments/blocks1/dist/index.html",
     title: "Blocks",
   },
+  {
+    cover: "assets/img/coverSketchBlockHand.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/blocks4_hands/dist/index.html",
+    title: "Blocks - Hands",
+  },
 ];
 
 module.exports = ExpModel;

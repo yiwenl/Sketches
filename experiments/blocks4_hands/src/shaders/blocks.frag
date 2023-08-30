@@ -6,6 +6,7 @@ in vec3 vColor;
 in vec4 vShadowCoord;
 
 uniform sampler2D uDepthMap;
+uniform vec3 uLight;
 
 out vec4 oColor;
 
@@ -35,9 +36,9 @@ void main(void) {
     // shadow
     vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
 	float s             = samplePCF3x3(shadowCoord);
-    s = mix(s, 1.0, 0.25);
+    s = mix(s, 1.0, 0.4);
 
-    float g = diffuse(vNormal, LIGHT, .85);
+    float g = diffuse(vNormal, uLight, .2);
     oColor = vec4(vColor * g * s, 1.0);
 
 }

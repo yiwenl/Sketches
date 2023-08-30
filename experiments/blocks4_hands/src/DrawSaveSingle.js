@@ -19,7 +19,7 @@ export default class DrawSaveSingle extends Draw {
 
     const getPos = () => {
       const p = vec3.create();
-      const r = Math.pow(Math.sqrt(random()), 1.5) * 0.5;
+      const r = Math.pow(Math.sqrt(random()), 2) * 0.2;
       vec3.random(p, r);
       return p;
     };

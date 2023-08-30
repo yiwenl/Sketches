@@ -16,6 +16,7 @@ uniform sampler2D uPosRndMap;
 
 uniform float uBound;
 uniform float uTime;
+uniform float uLifeScale;
 
 
 uniform vec3 uPointAs[NUM_LINES];
@@ -44,7 +45,7 @@ void main(void) {
     vec3 posOrg = texture(uPosOrgMap, vTextureCoord).xyz;
     vec3 posRnd = texture(uPosRndMap, vTextureCoord).xyz;
     float life = data.x;
-    life -= mix(1.0, 4.0, data.y) * 0.01;
+    life -= mix(1.0, 4.0, data.y) * 0.01 * uLifeScale;
 
     vec3 acc = vec3(0.0);
 
@@ -57,7 +58,7 @@ void main(void) {
 
     // depth noise
     float noise = snoise(vec3(pos * 0.75 + uTime * 0.5 + extra * 0.1));
-    acc.z += noise * 20.0 * density;
+    acc.z += noise * 30.0 * density;
 
     acc += fluid * 0.03 * density;
 
