@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fluid Text</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&display=swap"
+      rel="stylesheet"
+    />
+    <script id="fxhash-snippet">
+      //---- do not edit the following code (you can indent as you wish)
+      let alphabet =
+        "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
+      var fxhash =
+        "oo" +
+        Array(49)
+          .fill(0)
+          .map((_) => alphabet[(Math.random() * alphabet.length) | 0])
+          .join("");
+      // fxhash = "ooviis2FLVW5XXMprTezqQ1aAc2upyZosSvwh6dizP8TPqfEvzq";
+      let b58dec = (str) =>
+        str
+          .split("")
+          .reduce(
+            (p, c, i) =>
+              p +
+              alphabet.indexOf(c) *
+                Math.pow(alphabet.length, str.length - i - 1),
+            0
+          );
+      let fxhashTrunc = fxhash.slice(2);
+      let regex = new RegExp(".{" + ((fxhash.length / 4) | 0) + "}", "g");
+      let hashes = fxhashTrunc.match(regex).map((h) => b58dec(h));
+      let sfc32 = (a, b, c, d) => {
+        return () => {
+          a |= 0;
+          b |= 0;
+          c |= 0;
+          d |= 0;
+          var t = (((a + b) | 0) + d) | 0;
+          d = (d + 1) | 0;
+          a = b ^ (b >>> 9);
+          b = (c + (c << 3)) | 0;
+          c = (c << 21) | (c >>> 11);
+          c = (c + t) | 0;
+          return (t >>> 0) / 4294967296;
+        };
+      };
+      var fxrand = sfc32(...hashes);
+      // call this method to trigger the preview
+      function fxpreview() {
+        console.log("fxhash: TRIGGER PREVIEW");
+      }
+      //---- /do not edit the following code
+    </script>
+
+    <link rel="stylesheet" href="./style.css" />
+
+    <!-- if you need to import js scripts do it here -->
+  </head>
+  <body>
+    <p class="hidden">
+      銀河北冥有魚其名為鯤鯤之大不知其幾千里也化而為鳥其名為鵬鵬之背不知其幾千里也怒而飛其翼若垂天之雲是鳥也海運則將徙於南冥南冥者天池也齊諧者志怪者也諧之言曰鵬之徙於南冥也水擊三千里摶扶搖而上者九萬里去以六月息者也野馬也塵埃也生物之以息相吹也天之蒼蒼其正色邪其遠而無所至極邪其視下也亦若是則已矣且夫水之積也不厚則負大舟也無力覆杯水於坳堂之上則芥為之舟置杯焉則膠水淺而舟大也風之積也不厚則其負大翼也無力故九萬里則風斯在下矣而後乃今培風背負青天而莫之夭閼者而後乃今將圖南蜩與學鳩笑之曰我決起而飛槍榆枋時則不至而控於地而已矣奚以之九萬里而南為適莽蒼者三湌而反腹猶果然適百里者宿舂糧適千里者三月聚糧之二蟲又何知小知不及大知小年不及大年奚以知其然也朝菌不知晦朔蟪蛄不知春秋此小年也楚之南有冥靈者以五百歲為春五百歲為秋上古有大椿者以八千歲為春八千歲為秋而彭祖乃今以久特聞眾人匹之不亦悲乎ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわ
+    </p>
+    <!-- WEBPACK will inject the bundle.js here -->
+  </body>
+</html>

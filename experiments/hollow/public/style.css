@@ -1,0 +1,29 @@
+body {
+  background-color: rgb(33, 33, 33);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.dg {
+  z-index: 99999 !important;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+video {
+  position: fixed;
+  z-index: 888;
+  top: 0;
+  left: 0;
+  opacity: 0.85;
+  width: 300px;
+  height: 300px;
+  display: block;
+}

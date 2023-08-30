@@ -1,0 +1,23 @@
+{
+  "name": "glsl-utils",
+  "version": "1.0.0",
+  "description": "glsl tool functions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://yiwenl@github.com/yiwenl/glsl-utils.git"
+  },
+  "keywords": [
+    "glsl",
+    "tool"
+  ],
+  "author": "Yi-Wen LIN",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yiwenl/glsl-utils/issues"
+  },
+  "homepage": "https://github.com/yiwenl/glsl-utils#readme"
+}
