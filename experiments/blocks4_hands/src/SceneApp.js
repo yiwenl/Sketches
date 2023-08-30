@@ -36,6 +36,16 @@ import DrawSave from "./DrawSave";
 import DrawBlocks from "./DrawBlocks";
 import DrawLine from "./DrawLine";
 
+// hand detection
+import HandPoseDetection, {
+  ON_HANDS_LOST,
+  ON_HANDS_DETECTED,
+} from "./hand-detection";
+import jointPairs from "./skeletonPairs";
+
+// debug hand
+import { createCanvas } from "./utils/setupProject2D";
+
 // shaders
 import vsPass from "shaders/pass.vert";
 import fsSim from "shaders/sim.frag";
@@ -109,6 +119,25 @@ class SceneApp extends Scene {
     this._pointAs = this._pointAs.flat();
     this._pointBs = this._pointBs.flat();
 
+    // hand detection
+    const videoScale = 2;
+    const targetWidth = 360 * videoScale;
+    const targetHeight = 240 * videoScale;
+    this._handDetection = new HandPoseDetection(targetWidth, targetHeight);
+    this._handDetection.on(ON_HANDS_DETECTED, this._onHandsDetected);
+    this._handDetection.on(ON_HANDS_LOST, this._onHandsLost);
+    this._joints = [];
+
+    // debug hands
+    const { canvas, ctx } = createCanvas(targetWidth, targetHeight);
+    document.body.appendChild(canvas);
+    canvas.id = "canvas-hand";
+    this.ctx = ctx;
+    this.ctx.fillStyle = `rgba(0, 0, 0, .5)`;
+    this.ctx.fillRect(0, 0, targetWidth, targetHeight);
+    canvas.style.width = `${targetWidth / 2}px`;
+    canvas.style.height = `${targetHeight / 2}px`;
+
     setTimeout(() => {
       canSave = true;
     }, 500);
@@ -124,6 +153,39 @@ class SceneApp extends Scene {
 
     setTimeout(() => this.pulse(), randomInt(2000, 3000));
   }
+
+  _onHandsDetected = (hands) => {
+    const { width, height } = this.ctx.canvas;
+    // debug
+    this.ctx.clearRect(0, 0, width, height);
+    this.ctx.fillStyle = `rgba(0, 0, 0, .5)`;
+    this.ctx.fillRect(0, 0, width, height);
+
+    const findJoint = (name, points) => {
+      const point = points.find((p) => p.name === name);
+      const s = 20;
+      return [-point.x * s, -point.y * s, point.z * s];
+    };
+
+    this._joints = [];
+    hands.forEach(({ handedness, keypoints3D }) => {
+      if (random() < 0.1) {
+        console.table(keypoints3D);
+      }
+      jointPairs.forEach(([nameA, nameB]) => {
+        const a = findJoint(nameA, keypoints3D);
+        const b = findJoint(nameB, keypoints3D);
+        this._joints.push({ a, b });
+      });
+    });
+  };
+
+  _onHandsLost = () => {
+    const { width, height } = this.ctx.canvas;
+    this.ctx.clearRect(0, 0, width, height);
+    this.ctx.fillStyle = `rgba(0, 0, 0, .2)`;
+    this.ctx.fillRect(0, 0, width, height);
+  };
 
   _initTextures() {
     this.resize();
@@ -290,11 +352,11 @@ class SceneApp extends Scene {
     GL.enable(GL.DEPTH_TEST);
     GL.setMatrices(this.camera);
 
-    this.renderBlocks(true);
+    // this.renderBlocks(true);
 
     g = 0.1;
 
-    this._lines.forEach(({ a, b }) => {
+    this._joints.forEach(({ a, b }) => {
       this._dBall.draw(a, [g, g, g], [1, 0, 0]);
       this._dBall.draw(b, [g, g, g], [0, 1, 0]);
       this._dLine.draw(a, b, [1, 0.5, 0], 0.02);
