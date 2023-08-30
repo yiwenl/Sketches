@@ -14,7 +14,7 @@ let canvas;
 
 function _init3D() {
   if (GL.isMobile) {
-    Config.numParticles = 128 * 2;
+    Config.numParticles = 128;
   }
 
   Settings.init();

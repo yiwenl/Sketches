@@ -1,32 +1,27 @@
 import { GL, Draw, Mesh } from "alfrid";
+
 import Config from "./Config";
 import { random } from "./utils";
-import vs from "shaders/save.vert";
-import fs from "shaders/save.frag";
+import { vec3 } from "gl-matrix";
+import vs from "shaders/saveSingle.vert";
+import fs from "shaders/saveSingle.frag";
 
-export default class DrawSave extends Draw {
+export default class DrawSaveSingle extends Draw {
   constructor() {
     super();
 
     const { numParticles: num } = Config;
 
-    console.log("num", num);
-
     const positions = [];
     const uvs = [];
-    const normals = [];
-    const datas = [];
-    let count = 0;
     const indices = [];
+    let count = 0;
 
-    const r = GL.isMobile ? 5 : 4;
-    const ratio = 16 / 9;
     const getPos = () => {
-      const x = random(-r, r);
-      const y = random(-r / ratio, r / ratio);
-      const z = random(-1, 1) * 0.1;
-
-      return GL.isMobile ? [y, x, z] : [x, y, z];
+      const p = vec3.create();
+      const r = Math.pow(Math.sqrt(random()), 1.5) * 0.5;
+      vec3.random(p, r);
+      return p;
     };
 
     for (let j = 0; j < num; j++) {
@@ -36,18 +31,15 @@ export default class DrawSave extends Draw {
           (i / num) * 2 - 1 + 0.5 / num,
           (j / num) * 2 - 1 + 0.5 / num,
         ]);
-        normals.push([random(), random(), random()]);
-        datas.push([random(), random(), random()]);
-        indices.push(count);
+
         count++;
+        indices.push(count);
       }
     }
 
     const mesh = new Mesh(GL.POINTS)
       .bufferVertex(positions)
       .bufferTexCoord(uvs)
-      .bufferNormal(normals)
-      .bufferData(datas, "aData", 3)
       .bufferIndex(indices);
 
     this.setMesh(mesh).useProgram(vs, fs);

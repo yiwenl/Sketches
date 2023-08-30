@@ -162,7 +162,7 @@ class SceneApp extends Scene {
     this._fbo = new FboPingPong(num, num, oSettings, 4);
     this._fboPos = new FrameBuffer(num, num, oSettings);
 
-    const fboSize = 2048;
+    const fboSize = GL.isMobile ? 1024 : 2048;
     this._fboShadow = new FrameBuffer(fboSize, fboSize);
   }
 
@@ -257,6 +257,7 @@ class SceneApp extends Scene {
     const noise = 1;
 
     const num = 4;
+
     const time = Scheduler.getElapsedTime() * 0.5;
 
     const { sin, cos } = Math;
@@ -285,6 +286,7 @@ class SceneApp extends Scene {
       if (this._handDetection) {
         this.updateFluidWithHand();
       } else {
+        const scale = GL.isMobile ? 5 : 1;
         const _dir = [0, 0, 0];
         vec3.sub(_dir, this._hit, this._preHit);
         const dir = [_dir[0], _dir[1]];
@@ -293,11 +295,11 @@ class SceneApp extends Scene {
           let f = smoothstep(0, 0.5, dist);
           const r = mix(1, 3, f);
           vec2.normalize(dir, dir);
-          f = mix(50, 150, f);
+          f = mix(50, 150, f) * scale;
 
           const x = (this._hit[0] / hitPlaneSize) * 0.5 + 0.5;
           const y = (this._hit[1] / hitPlaneSize) * 0.5 + 0.5;
-          this._fluid.updateFlow([x, y], dir, f, r, 0);
+          this._fluid.updateFlow([x, y], dir, f, r * GL.isMobile ? 2 : 1, 0);
         }
 
         // copy hit position
@@ -384,11 +386,6 @@ class SceneApp extends Scene {
           this._dBall.draw([fx, fy, 0.5], [g, g, g], [1, 0.45, 0]);
         });
       }
-    }
-
-    if (canSave && !hasSaved && Config.autoSave) {
-      saveImage(GL.canvas, getDateString());
-      hasSaved = true;
     }
   }
 

@@ -33,6 +33,7 @@ import FluidSimulation from "./fluid-sim";
 
 // draw calls
 import DrawSave from "./DrawSave";
+import DrawSaveSingle from "./DrawSaveSingle";
 import DrawBlocks from "./DrawBlocks";
 import DrawLine from "./DrawLine";
 
@@ -75,6 +76,27 @@ class SceneApp extends Scene {
 
     this._hit = [0, 0, 0];
     this._preHit = [0, 0, 0];
+
+    let x = 0;
+    let y = 0;
+    const initFingers = () => {
+      const fingers = [];
+      for (let i = 0; i < 5; i++) {
+        fingers.push({ x, y });
+      }
+      return fingers;
+    };
+    this.hands = {
+      left: {
+        fingers: initFingers(),
+        fingersPrev: initFingers(),
+      },
+      right: {
+        fingers: initFingers(),
+        fingersPrev: initFingers(),
+      },
+    };
+
     this.seed = random(10);
     const meshHit = Geom.plane(hitPlaneSize, hitPlaneSize, 1);
 
@@ -104,7 +126,7 @@ class SceneApp extends Scene {
 
     // generate lines
     this._lines = [];
-    let numLines = 10;
+    let numLines = 40;
     this._pointAs = [];
     this._pointBs = [];
     while (numLines--) {
@@ -161,22 +183,61 @@ class SceneApp extends Scene {
     this.ctx.fillStyle = `rgba(0, 0, 0, .5)`;
     this.ctx.fillRect(0, 0, width, height);
 
-    const findJoint = (name, points) => {
+    const findJoint = (name, points, pointBase) => {
+      const { x, y } = pointBase;
+      const baseRange = 10;
+      const tx = -(x / width - 0.5) * baseRange;
+      const ty = -(y / height - 0.5) * baseRange * 0.5;
       const point = points.find((p) => p.name === name);
-      const s = 20;
-      return [-point.x * s, -point.y * s, point.z * s];
+      const s = 50;
+      return [-point.x * s + tx, -point.y * s + ty, point.z * s];
     };
 
     this._joints = [];
-    hands.forEach(({ handedness, keypoints3D }) => {
-      if (random() < 0.1) {
-        console.table(keypoints3D);
-      }
+    this._pointAs = [];
+    this._pointBs = [];
+    const base = "wrist";
+
+    hands.forEach(({ handedness, keypoints3D, keypoints }) => {
+      const pointBase = keypoints.find((p) => p.name === base);
       jointPairs.forEach(([nameA, nameB]) => {
-        const a = findJoint(nameA, keypoints3D);
-        const b = findJoint(nameB, keypoints3D);
+        const a = findJoint(nameA, keypoints3D, pointBase);
+        const b = findJoint(nameB, keypoints3D, pointBase);
         this._joints.push({ a, b });
+        this._pointAs.push(a);
+        this._pointBs.push(b);
       });
+    });
+    if (hands.length === 1) {
+      this._pointAs = this._pointAs.concat(this._pointAs);
+      this._pointBs = this._pointBs.concat(this._pointBs);
+    }
+    this._pointAs = this._pointAs.flat();
+    this._pointBs = this._pointBs.flat();
+
+    // get finger tips
+    hands.forEach(({ handedness, keypoints }) => {
+      const hand = this.hands[handedness.toLowerCase()];
+      if (hand) {
+        const { fingers } = hand;
+        const fingerTips = keypoints.filter(({ name }) => {
+          return name.indexOf("tip") > 1;
+        });
+
+        if (fingerTips && fingerTips.length > 0) {
+          fingerTips.forEach(({ x, y }, i) => {
+            fingers[i].x = this._handDetection.width - x;
+            fingers[i].y = this._handDetection.height - y;
+
+            this.ctx.fillStyle = "rgb(255, 114, 0)";
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, 5, 0, Math.PI * 2);
+            this.ctx.fill();
+          });
+
+          this.needUpdateHit = true;
+        }
+      }
     });
   };
 
@@ -198,6 +259,7 @@ class SceneApp extends Scene {
     const { numParticles: num } = Config;
     this._fbo = new FboPingPong(num, num, oSettings, 5);
     this._fboPos = new FrameBuffer(num, num, oSettings);
+    this._fboRndPos = new FrameBuffer(num, num, oSettings);
 
     const fboSize = 2048;
     this._fboShadow = new FrameBuffer(fboSize, fboSize);
@@ -214,6 +276,11 @@ class SceneApp extends Scene {
     new DrawSave()
       .setClearColor(0, 0, 0, 0)
       .bindFrameBuffer(this._fbo.read)
+      .draw();
+
+    new DrawSaveSingle()
+      .setClearColor(0, 0, 0, 0)
+      .bindFrameBuffer(this._fboRndPos)
       .draw();
 
     this._fboPos.bind();
@@ -242,6 +309,7 @@ class SceneApp extends Scene {
       .bindTexture("uPosOrgMap", this._fboPos.texture, 5)
       .bindTexture("uFluidMap", this._fluid.velocity, 6)
       .bindTexture("uDensityMap", this._fluid.density, 7)
+      .bindTexture("uPosRndMap", this._fboRndPos.texture, 8)
       .uniform("uPointAs", "vec3", this._pointAs)
       .uniform("uPointBs", "vec3", this._pointBs)
       .uniform("uTime", Scheduler.getElapsedTime())
@@ -254,69 +322,63 @@ class SceneApp extends Scene {
   }
 
   updateFluid() {
-    const strength = 1;
+    const strength = 2;
     const noise = 1;
 
-    let num = 6;
-    const time = Scheduler.getElapsedTime() * 0.5 + this._startTime;
+    const num = 4;
+    const time = Scheduler.getElapsedTime() * 0.5;
 
-    const { PI } = Math;
-    const c = [0.5, 0.5];
+    const { sin, cos } = Math;
 
-    const swirl = (c, maxRadius, flowDir) => {
-      for (let i = 0; i < num; i++) {
-        const p = i / num;
-        const r = random(maxRadius * 0.25, maxRadius);
-        const a = p * PI * 2 + random(-1, 1) * 0.2;
-        const pos = [r, 0];
-        vec2.rotate(pos, pos, [0, 0], a);
-        vec2.add(pos, pos, c);
+    for (let i = 0; i < num; i++) {
+      const radius = random(1, 3);
+      let x = (i + 0.5) / num;
+      let y = sin((i / num) * 8.0 + time * 0.8) * 0.25 + 0.5;
 
-        const s = this.pulseStrength.value > 1 ? 0 : 1;
-
-        const dir = [-flowDir * s, flowDir * 0.5];
-        vec2.normalize(dir, dir);
-        vec2.rotate(dir, dir, [0, 0], a);
-
-        const str = random(0.5, 1) * this.pulseStrength.value * 0.2;
-
-        const radius = this.pulseStrength.value > 1 ? 2.4 : 1.8;
-        this._fluid.updateFlow(pos, dir, str, radius, noise);
-      }
-    };
-
-    const pos0 = [0.3, 0.5];
-    const pos1 = [0.7, 0.5];
-    const pos2 = [0.4, 0.3];
-    const t = time * 0.5;
-    vec2.rotate(pos0, pos0, c, t);
-    vec2.rotate(pos1, pos1, c, t * 1.2);
-    vec2.rotate(pos1, pos1, c, -t * 0.6);
-
-    // swirl(pos0, random(0.3, 0.5), 1);
-    swirl(pos0, random(0.3, 0.2), 1);
-    swirl(pos1, random(0.3, 0.2), -1);
-    swirl(pos2, 0.2, -1);
-
-    const dir = vec3.create();
-    vec3.sub(dir, this._hit, this._preHit);
-    // console.log(vec3.length(dir));
-    if (this.needUpdateHit && 0) {
-      let x = (this._hit[0] / hitPlaneSize) * 0.5 + 0.5;
-      let y = (this._hit[1] / hitPlaneSize) * 0.5 + 0.5;
-      const _dir = [dir[0], dir[1]];
-      vec2.normalize(_dir, dir);
-
-      let force = smoothstep(0.0, 0.35, vec3.length(dir));
-      const r = mix(2, 5, force);
-      force = mix(75, 100, force);
-
-      this._fluid.updateFlow([x, y], _dir, 100, 3, 0);
-      vec3.copy(this._preHit, this._hit);
-      this.needUpdateHit = false;
+      const dir = [1, 0];
+      vec2.rotate(dir, dir, [0, 0], random(-1, 1) * 0.5);
+      this._fluid.updateFlow([x, y], dir, strength, radius, noise);
     }
 
+    for (let i = 0; i < num; i++) {
+      const radius = random(1, 3);
+      let x = i / num;
+      let y = cos((i / num) * 6.0 + time * 1.2) * 0.25 + 0.5;
+
+      const dir = [-1, 0];
+      vec2.rotate(dir, dir, [0, 0], random(-1, 1) * 0.5);
+      this._fluid.updateFlow([x, y], dir, strength * 0.1, radius * 0.5, noise);
+    }
+
+    this.updateFluidWithHand();
+
     this._fluid.update();
+  }
+
+  updateFluidWithHand() {
+    const thresholdMovement = 1;
+    const { width, height } = this._handDetection;
+    for (let s in this.hands) {
+      const hand = this.hands[s];
+      const { fingers, fingersPrev } = hand;
+
+      fingers.forEach((finger, i) => {
+        const fingerPrev = fingersPrev[i];
+
+        const dir = [finger.x - fingerPrev.x, finger.y - fingerPrev.y];
+        const len = vec2.length(dir);
+        if (len > thresholdMovement) {
+          const str = 100;
+          const pos = [finger.x / width, finger.y / height];
+          vec2.normalize(dir, dir);
+          this._fluid.updateFlow(pos, dir, str, 1);
+        }
+
+        // overwrite prev
+        fingerPrev.x = finger.x;
+        fingerPrev.y = finger.y;
+      });
+    }
   }
 
   updateShadowMap() {
@@ -352,7 +414,7 @@ class SceneApp extends Scene {
     GL.enable(GL.DEPTH_TEST);
     GL.setMatrices(this.camera);
 
-    // this.renderBlocks(true);
+    this.renderBlocks(true);
 
     g = 0.1;
 
@@ -381,7 +443,7 @@ class SceneApp extends Scene {
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera.setAspectRatio(GL.aspectRatio);
 
-    this.orbitalControl.radius.setTo(innerWidth > innerHeight ? 8 : 20);
+    this.orbitalControl.radius.setTo(innerWidth > innerHeight ? 12 : 20);
   }
 }
 

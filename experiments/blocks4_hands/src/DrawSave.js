@@ -32,6 +32,7 @@ export default class DrawSave extends Draw {
       return [random(-r, r), random(-r, r), random(-1, 1) * 0.2];
     };
 
+    let count = 0;
     for (let j = 0; j < num; j++) {
       for (let i = 0; i < num; i++) {
         positions.push(getPos());
@@ -42,7 +43,7 @@ export default class DrawSave extends Draw {
         normals.push([random(), random(), random()]);
         datas.push([0, random(), random()]);
         spawn.push([random(), random(), random()]);
-        indices.push(i);
+        indices.push(count);
       }
     }
 

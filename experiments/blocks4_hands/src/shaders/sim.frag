@@ -1,6 +1,6 @@
 #version 300 es
 
-#define NUM_LINES 10
+#define NUM_LINES 40
 precision highp float;
 in vec2 vTextureCoord;
 
@@ -12,6 +12,7 @@ uniform sampler2D uPosOrgMap;
 uniform sampler2D uFluidMap;
 uniform sampler2D uDensityMap;
 uniform sampler2D uSpawnMap;
+uniform sampler2D uPosRndMap;
 
 uniform float uBound;
 uniform float uTime;
@@ -41,8 +42,9 @@ void main(void) {
     vec3 data = texture(uDataMap, vTextureCoord).xyz;
     vec3 spawn = texture(uSpawnMap, vTextureCoord).xyz;
     vec3 posOrg = texture(uPosOrgMap, vTextureCoord).xyz;
+    vec3 posRnd = texture(uPosRndMap, vTextureCoord).xyz;
     float life = data.x;
-    life -= mix(1.0, 4.0, data.y) * 0.003;
+    life -= mix(1.0, 4.0, data.y) * 0.01;
 
     vec3 acc = vec3(0.0);
 
@@ -60,7 +62,7 @@ void main(void) {
     acc += fluid * 0.03 * density;
 
     float speed = mix(1.0, 2.0, extra.x);
-    vel += acc * speed * 0.00005;
+    vel += acc * speed * 0.0001;
     vel *= 0.93;
 
     pos += vel;
@@ -73,7 +75,7 @@ void main(void) {
         int index = int(spawn.x * float(NUM_LINES));
         vec3 pointA = uPointAs[index];
         vec3 pointB = uPointBs[index];
-        pos = mix(pointA, pointB, spawn.y);
+        pos = mix(pointA, pointB, spawn.y) + posRnd;
     }
 
     data.x = life;
