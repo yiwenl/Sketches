@@ -1,14 +1,12 @@
 const ExpModel = [
   {
     cover: "assets/img/sketchCoverParticles.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/selfshadingParticles/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/selfshadingParticles/dist/index.html",
     title: "Particles",
   },
   {
     cover: "assets/img/sketchCoverReflection.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/reflectiveSoundVis/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/reflectiveSoundVis/dist/index.html",
     title: "Reflections",
   },
   {
@@ -93,8 +91,7 @@ const ExpModel = [
   },
   {
     cover: "assets/img/coverSketchParticleValley.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/particlesValley/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/particlesValley/dist/index.html",
     title: "Particle Valley",
   },
   {
@@ -114,8 +111,7 @@ const ExpModel = [
   },
   {
     cover: "assets/img/coverSketchGrass.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/grassInstanced2/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/grassInstanced2/dist/index.html",
     title: "Black and Gold",
   },
   {
@@ -125,14 +121,12 @@ const ExpModel = [
   },
   {
     cover: "assets/img/coverSketchPainting.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/drawingLandscape/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/drawingLandscape/dist/index.html",
     title: "Painting Landscape",
   },
   {
     cover: "assets/img/coverSketchPaintingParticles.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/strokeToParticles/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/strokeToParticles/dist/index.html",
     title: "Painting Particles",
   },
   {
@@ -187,8 +181,7 @@ const ExpModel = [
   },
   {
     cover: "assets/img/coverSketchPulse.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/pulseParticles/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/pulseParticles/dist/index.html",
     title: "Pulse",
   },
   {
@@ -218,8 +211,7 @@ const ExpModel = [
   },
   {
     cover: "assets/img/coverSketchSubstrate.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/substrateSphere/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/substrateSphere/dist/index.html",
     title: "Substrate sphere",
   },
   {
@@ -244,8 +236,7 @@ const ExpModel = [
   },
   {
     cover: "assets/img/coverSketchStrangeBubbles.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/strangeBubbles/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/strangeBubbles/dist/index.html",
     title: "Strange Bubbles",
   },
   {
@@ -330,8 +321,7 @@ const ExpModel = [
   },
   {
     cover: "assets/img/coverSketchFaceParticle01.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/faceParticles01/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/faceParticles01/dist/index.html",
     title: "Face Particles",
   },
   {
@@ -341,8 +331,7 @@ const ExpModel = [
   },
   {
     cover: "assets/img/coverSketchFaceParticle02.jpg",
-    url:
-      "//yiwenl.github.io/Sketches/experiments/faceParticles02/dist/index.html",
+    url: "//yiwenl.github.io/Sketches/experiments/faceParticles02/dist/index.html",
     title: "Face Particles",
   },
   {
@@ -359,6 +348,11 @@ const ExpModel = [
     cover: "assets/img/coverSketchRipple.jpg",
     url: "//yiwenl.github.io/Sketches/experiments/ripples/dist/index.html",
     title: "Pulse",
+  },
+  {
+    cover: "assets/img/coverSketchBlock0.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/blocks1/dist/index.html",
+    title: "Blocks",
   },
 ];
 
