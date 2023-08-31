@@ -2,6 +2,7 @@ import Emitter from "events";
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
 import JointPairs from "./JointPairs";
 
+export const ON_VIDEO_READY = "ON_VIDEO_READY";
 export const ON_HANDS_DETECTED = "ON_HANDS_DETECTED";
 export const ON_HANDS_LOST = "ON_HANDS_LOST";
 
@@ -57,6 +58,7 @@ export default class HandPoseDetection extends Emitter {
     };
 
     const stream = await navigator.mediaDevices.getUserMedia(videoConfig);
+    console.log("stream", stream.getVideoTracks()[0].getSettings().deviceId);
     this.video.srcObject = stream;
 
     await new Promise((resolve) => {
@@ -97,6 +99,7 @@ export default class HandPoseDetection extends Emitter {
       z-index: 9;
     `;
 
+    this.emit(ON_VIDEO_READY, { video: this.video, canvas: this.canvas });
     this.getHands();
   }
 

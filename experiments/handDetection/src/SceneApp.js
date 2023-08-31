@@ -3,6 +3,7 @@ import { getMonocolor } from "./utils";
 
 // hand detection
 import HandPoseDetection, {
+  ON_VIDEO_READY,
   ON_HANDS_LOST,
   ON_HANDS_DETECTED,
 } from "./hand-detection";
@@ -22,6 +23,7 @@ class SceneApp extends Scene {
     const targetWidth = 360 * videoScale;
     const targetHeight = 240 * videoScale;
     this._handDetection = new HandPoseDetection(targetWidth, targetHeight, 1);
+    this._handDetection.on(ON_VIDEO_READY, this._onVideoReady);
     this._handDetection.on(ON_HANDS_DETECTED, this._onHandsDetected);
     this._handDetection.on(ON_HANDS_LOST, this._onHandsLost);
 
@@ -30,7 +32,7 @@ class SceneApp extends Scene {
     }, 500);
   }
 
-  addDeviceList() {
+  _onVideoReady = ({ video }) => {
     this.decivesList = [];
     if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
       console.log("enumerateDevices() not supported.");
@@ -39,11 +41,8 @@ class SceneApp extends Scene {
       navigator.mediaDevices
         .enumerateDevices()
         .then((devices) => {
+          console.table(devices);
           devices.forEach((device) => {
-            console.log(
-              `${device.kind}: ${device.label} id = ${device.deviceId}`
-            );
-
             if (device.kind === "videoinput") {
               this.decivesList.push({
                 label: device.label,
@@ -51,23 +50,27 @@ class SceneApp extends Scene {
               });
             }
           });
-          console.table(this.decivesList);
-          this.deviceId = this.decivesList[0].id;
+          const names = this.decivesList.map((d) => d.label);
           const ids = this.decivesList.map((d) => d.id);
-          // console.log("ids", ids);
+
+          const deviceId = video.srcObject
+            .getVideoTracks()[0]
+            .getSettings().deviceId;
+
+          this.deviceName = names[ids.indexOf(deviceId)];
           gui
-            .add(this, "deviceId", ids)
+            .add(this, "deviceName", names)
             .name("Camera")
             .onChange(() => {
-              console.log("Device changed", this.deviceId);
-              this._handDetection.changeDevice(this.deviceId);
+              const index = names.indexOf(this.deviceName);
+              this._handDetection.changeDevice(ids[index]);
             });
         })
         .catch((err) => {
           console.log(`${err.name}: ${err.message}`);
         });
     }
-  }
+  };
 
   _initTextures() {
     this.resize();

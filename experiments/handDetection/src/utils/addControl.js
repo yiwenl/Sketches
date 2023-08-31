@@ -16,7 +16,6 @@ export default (scene) => {
   const gui = new dat.GUI({ width: 300 });
   window.gui = gui;
   gui.add(Settings, "reset").name("Reset Default");
-  scene.addDeviceList();
 
   if (GL.isMobile) {
     dat.GUI.toggleHide();
