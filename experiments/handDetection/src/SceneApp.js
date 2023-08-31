@@ -33,43 +33,17 @@ class SceneApp extends Scene {
   }
 
   _onVideoReady = ({ video }) => {
-    this.decivesList = [];
-    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-      console.log("enumerateDevices() not supported.");
-    } else {
-      // List cameras and microphones.
-      navigator.mediaDevices
-        .enumerateDevices()
-        .then((devices) => {
-          console.table(devices);
-          devices.forEach((device) => {
-            if (device.kind === "videoinput") {
-              this.decivesList.push({
-                label: device.label,
-                id: device.deviceId,
-              });
-            }
-          });
-          const names = this.decivesList.map((d) => d.label);
-          const ids = this.decivesList.map((d) => d.id);
+    const { deviceNames, deviceIds } = this._handDetection;
+    const deviceId = this._handDetection.deviceId;
 
-          const deviceId = video.srcObject
-            .getVideoTracks()[0]
-            .getSettings().deviceId;
-
-          this.deviceName = names[ids.indexOf(deviceId)];
-          gui
-            .add(this, "deviceName", names)
-            .name("Camera")
-            .onChange(() => {
-              const index = names.indexOf(this.deviceName);
-              this._handDetection.changeDevice(ids[index]);
-            });
-        })
-        .catch((err) => {
-          console.log(`${err.name}: ${err.message}`);
-        });
-    }
+    this.deviceName = deviceNames[deviceIds.indexOf(deviceId)];
+    gui
+      .add(this, "deviceName", deviceNames)
+      .name("Camera")
+      .onChange(() => {
+        const index = deviceNames.indexOf(this.deviceName);
+        this._handDetection.changeDevice(deviceIds[index]);
+      });
   };
 
   _initTextures() {

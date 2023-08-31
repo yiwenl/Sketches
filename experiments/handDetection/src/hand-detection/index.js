@@ -14,6 +14,24 @@ export default class HandPoseDetection extends Emitter {
     this.displayScale = mDisplayScale;
 
     this.initHandDetection();
+
+    // device list
+    this.decivesList = [];
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      console.log("enumerateDevices() not supported.");
+    } else {
+      // List cameras and microphones.
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+          this.devices = devices.filter((d) => d.kind === "videoinput");
+          this.deviceNames = this.devices.map((d) => d.label);
+          this.deviceIds = this.devices.map((d) => d.deviceId);
+        })
+        .catch((err) => {
+          console.log(`${err.name}: ${err.message}`);
+        });
+    }
   }
 
   async initHandDetection() {
@@ -58,7 +76,6 @@ export default class HandPoseDetection extends Emitter {
     };
 
     const stream = await navigator.mediaDevices.getUserMedia(videoConfig);
-    console.log("stream", stream.getVideoTracks()[0].getSettings().deviceId);
     this.video.srcObject = stream;
 
     await new Promise((resolve) => {
@@ -207,5 +224,11 @@ export default class HandPoseDetection extends Emitter {
     this.video.style.height = `${height * mValue}px`;
     this.canvas.style.width = `${width * mValue}px`;
     this.canvas.style.height = `${height * mValue}px`;
+  }
+
+  get deviceId() {
+    if (!this.video) return null;
+    if (!this.video.srcObject) return null;
+    return this.video.srcObject.getVideoTracks()[0].getSettings().deviceId;
   }
 }
