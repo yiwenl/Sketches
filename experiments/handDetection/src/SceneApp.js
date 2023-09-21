@@ -33,10 +33,10 @@ class SceneApp extends Scene {
   }
 
   _onVideoReady = ({ video }) => {
-    const { deviceNames, deviceIds } = this._handDetection;
-    const deviceId = this._handDetection.deviceId;
+    const { deviceNames, deviceIds, deviceName } = this._handDetection;
 
-    this.deviceName = deviceNames[deviceIds.indexOf(deviceId)];
+    this.deviceName = deviceName;
+
     gui
       .add(this, "deviceName", deviceNames)
       .name("Camera")

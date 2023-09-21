@@ -231,4 +231,10 @@ export default class HandPoseDetection extends Emitter {
     if (!this.video.srcObject) return null;
     return this.video.srcObject.getVideoTracks()[0].getSettings().deviceId;
   }
+
+  get deviceName() {
+    const id = this.deviceId;
+    if (id === null) return null;
+    return this.deviceNames[this.deviceIds.indexOf(id)];
+  }
 }

@@ -16,9 +16,9 @@ export default (scene) => {
   const gui = new dat.GUI({ width: 300 });
   window.gui = gui;
 
-  gui
-    .add(Config, "numParticles", [128, 144, 192, 256, 384, 512])
-    .onFinishChange(reload);
+gui
+  .add(Config, "numParticles", [128, 144, 192, 256, 384, 512])
+  .onFinishChange(reload);
 
   gui.add(Config, "handDetection").onFinishChange(reload);
   gui.add(Settings, "reset").name("Reset Default");
