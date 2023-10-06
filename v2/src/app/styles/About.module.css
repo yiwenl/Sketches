@@ -1,0 +1,34 @@
+.closeButton {
+  position: absolute;
+  padding: 25px;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+.closeButton svg {
+  width: 20px;
+  height: 20px;
+  fill: #ffffff;
+}
+
+.descContainer {
+  position: absolute;
+  width: 50%;
+  padding: 0px 0px 50px 35px;
+  bottom: 0;
+  left: 0;
+
+  /* font */
+  font-family: Verdana, Arial;
+  letter-spacing: 1.5px;
+  line-height: 18px;
+  font-size: 12px;
+}
+
+.linkTitle {
+  line-height: 16px;
+}
+
+.link {
+  color: rgb(150, 150, 138);
+}

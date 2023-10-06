@@ -1,0 +1,14 @@
+.aboutIcon {
+  position: fixed;
+  padding: 25px;
+  color: #ffffff;
+  font-family: Arial ffffff;
+  text-decoration: none;
+  z-index: 999;
+}
+
+.aboutIcon svg {
+  width: 20px;
+  height: 20px;
+  fill: #ffffff;
+}

@@ -1,0 +1,38 @@
+/*!***************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./src/app/styles/About.module.css ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************/
+.About_closeButton__2cb0K {
+  position: absolute;
+  padding: 25px;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+.About_closeButton__2cb0K svg {
+  width: 20px;
+  height: 20px;
+  fill: #ffffff;
+}
+
+.About_descContainer__Op5uD {
+  position: absolute;
+  width: 50%;
+  padding: 0px 0px 50px 35px;
+  bottom: 0;
+  left: 0;
+
+  /* font */
+  font-family: Verdana, Arial;
+  letter-spacing: 1.5px;
+  line-height: 18px;
+  font-size: 12px;
+}
+
+.About_linkTitle__XgjCK {
+  line-height: 16px;
+}
+
+.About_link__oTWhj {
+  color: rgb(150, 150, 138);
+}
+

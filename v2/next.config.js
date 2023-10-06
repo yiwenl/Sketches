@@ -1,10 +1,14 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+// next.config.js
+
+// const isDev = process.env.NODE_ENV === "development";
+// let assetPrefix = "";
+let basePath = process.env.NODE_ENV === "development" ? "" : `/Sketches`;
+
+module.exports = {
   output: "export",
-  reactStrictMode: true,
+  // assetPrefix,
+  basePath,
   images: {
     unoptimized: true,
   },
 };
-
-module.exports = nextConfig;
