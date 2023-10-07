@@ -57,9 +57,11 @@ class SceneApp extends Scene {
   constructor() {
     super();
 
+    this.frame = 0;
+
     this.orbitalControl.lock();
-    this.orbitalControl.radius.value = 12;
-    this.camera.setPerspective(33 * RAD, GL.aspectRatio, 0.1, 20);
+    this.orbitalControl.radius.value = 20;
+    this.camera.setPerspective(33 * RAD, GL.aspectRatio, 0.1, 40);
 
     this._pointNose = [0, 0, 0];
     this._pointCenter = [0, 0, 0];
@@ -138,7 +140,7 @@ class SceneApp extends Scene {
     vec3.sub(this._dir, this._pointNose, this._pointCenter);
     vec3.normalize(this._dir, this._dir);
 
-    const cameraMoveRange = 0.3;
+    const cameraMoveRange = 0.4;
     let ry = vec3.dot(this._dir, [1, 0, 0]);
     this.orbitalControl.ry.value = -ry * cameraMoveRange;
 
@@ -187,6 +189,17 @@ class SceneApp extends Scene {
 
     // bg
     this._textureBg = generateBg();
+
+    // ribbon
+    let numRibbons = 11;
+    this._fboRibbons = [];
+    while (numRibbons--) {
+      const fbo = new FrameBuffer(num, num, oSettings);
+      fbo.bind();
+      GL.clear(0, 0, 0, 0);
+      fbo.unbind();
+      this._fboRibbons.push(fbo);
+    }
   }
 
   _initViews() {
@@ -209,6 +222,8 @@ class SceneApp extends Scene {
     if (!this._hasFaceDetected) {
       return;
     }
+
+    this.frame++;
 
     // update fluid
     this._fluid.update();
@@ -240,6 +255,15 @@ class SceneApp extends Scene {
     this._fbo.swap();
 
     this._updateShadow();
+
+    if (this.frame % 2 === 0) {
+      const fbo = this._fboRibbons.shift();
+      fbo.bind();
+      GL.clear(0, 0, 0, 0);
+      this._dCopy.draw(this._fbo.read.getTexture(0));
+      fbo.unbind();
+      this._fboRibbons.push(fbo);
+    }
   }
 
   _updateShadow() {
@@ -268,6 +292,15 @@ class SceneApp extends Scene {
       .uniform("uColorHighlight", colorHighlight.map(toGlsl))
       .uniform("uColorShadow", colorShadow.map(toGlsl))
       .draw();
+  }
+
+  _renderRibbons() {
+    GL.disable(GL.CULL_FACE);
+    this._fboRibbons.forEach(({ texture }, i) => {
+      this._drawRibbon.bindTexture(`uPosMap${i}`, texture, i);
+    });
+    this._drawRibbon.draw();
+    GL.enable(GL.CULL_FACE);
   }
 
   render() {
@@ -304,7 +337,7 @@ class SceneApp extends Scene {
       .uniform("uViewport", [GL.width, GL.height])
       .draw();
 
-    // this._drawRibbon.draw();
+    this._renderRibbons();
 
     if (canSave && !hasSaved && Config.autoSave) {
       saveImage(GL.canvas, getDateString());

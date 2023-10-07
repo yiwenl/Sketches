@@ -6,7 +6,7 @@ import fs from "shaders/bg.frag";
 let draw, fbo;
 export default function () {
   if (!fbo) {
-    const fboSize = 1024;
+    const fboSize = 1024 * 2;
     fbo = new FrameBuffer(fboSize, fboSize, {
       minFilter: GL.LINEAR,
       magFilter: GL.LINEAR,

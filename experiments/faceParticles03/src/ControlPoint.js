@@ -51,8 +51,9 @@ export default class ControlPoint {
     vec2.sub(this.targetDir, this.posTarget, this.posTargetPre);
     vec2.normalize(this.targetDir, this.targetDir);
 
-    this.strength = this.baseStrength * mix(0, 4.0, t);
-    this.baseRadius = this.baseRadius * mix(0, 3.0, t);
+    const minScale = 0.5;
+    this.strength = this.baseStrength * mix(minScale, 4.0, t);
+    this.baseRadius = this.baseRadius * mix(minScale, 3.0, t);
 
     if (!this.isReady) {
       if (vec2.length(this.posTargetPre > 0)) {

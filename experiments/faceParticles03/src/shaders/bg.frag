@@ -19,5 +19,9 @@ void main(void) {
     float g = smoothstep(-1.0, 1.0, snoise(vec3(uv, uSeed) * 2.0));
     g = mix(0.7, 1.0, g);
 
-    gl_FragColor = vec4(uColor * d * g, 1.0);
+    float grainBase = smoothstep(-1.0, 1.0, snoise(vec3(uSeed, uv) * 5.0));
+    float grain = smoothstep(-1.0, 1.0, snoise(vec3(uv.x, uSeed, uv.y) * 1000.0 * mix(1.0, 2.0, grainBase)));
+    grain = mix(0.5, 1.0, grain);
+
+    gl_FragColor = vec4(uColor * d * g * grain, 1.0);
 }

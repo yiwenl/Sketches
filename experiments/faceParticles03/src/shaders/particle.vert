@@ -22,7 +22,7 @@ out vec4 vShadowCoord;
 
 #pragma glslify: particleSize    = require(./glsl-utils/particleSize.glsl)
 
-#define radius 0.012h
+#define radius 0.012
 
 void main(void) {
     vec3 pos = texture(uPosMap, aTextureCoord).xyz;
