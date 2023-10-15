@@ -19,7 +19,7 @@ export default (scene) => {
   window.gui = gui;
 
   gui
-    .add(Config, "numParticles", [128, 144, 192, 256, 384, 512])
+    .add(Config, "numParticles", [128, 144, 192, 256, 384, 512, 768])
     .onFinishChange(reload);
 
   gui.addColor(Config, "colorBg").onFinishChange(() => {
@@ -31,10 +31,12 @@ export default (scene) => {
 
   const fSystem = gui.addFolder("System");
 
-  fSystem.add(Config, "autoSave").onFinishChange(reload);
+  // fSystem.add(Config, "autoSave").onFinishChange(reload);
 
   fSystem.add(oControl, "save").name("Save Settings");
   fSystem.add(Settings, "reset").name("Reset Default");
 
   fSystem.open();
+
+  dat.GUI.toggleHide();
 };

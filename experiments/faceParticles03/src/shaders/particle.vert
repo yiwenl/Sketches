@@ -13,6 +13,7 @@ uniform mat4 uShadowMatrix;
 uniform sampler2D uPosMap;
 uniform sampler2D uVelMap;
 uniform sampler2D uDataMap;
+uniform sampler2D uColorMap;
 
 uniform vec2 uViewport;
 
@@ -35,11 +36,16 @@ void main(void) {
     float life = texture(uDataMap , aTextureCoord).x;
     float lifeScale = smoothstep(0.5, 0.4, abs(life - 0.5));
 
-    float scale = mix(0.5, 2.0, aVertexPosition.x) * lifeScale;
+    float scale = mix(0.5, 1.5, aVertexPosition.x) * lifeScale;
     gl_PointSize = particleSize(gl_Position, uProjectionMatrix, uViewport, radius) * scale;
 
     float g = mix(.75, 1.0, aVertexPosition.y);
-    vColor = vec3(g);
+
+
+    vec2 uv = fract(aVertexPosition.xy + aVertexPosition.yz);
+    vec3 color = texture(uColorMap, uv).xyz;
+    color = smoothstep(vec3(0.0), vec3(1.0), color);
+    vColor = color * g;
 
     vShadowCoord = uShadowMatrix * vWsPosition;
     vRandom = aVertexPosition;

@@ -79,7 +79,7 @@ class FluidSimulation {
       .useProgram(vs, fsAdvect)
       .setMesh(mesh)
       .setClearColor(0, 0, 0, 1)
-      .uniform("uTimestep", "float", 0.0005)
+      .uniform("uTimestep", "float", 0.0004)
       // .uniform("uTimestep", "float", 0.001)
       .uniform("uTexelSize", "vec2", this._texelSize);
 

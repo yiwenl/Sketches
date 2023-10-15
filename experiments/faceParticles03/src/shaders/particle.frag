@@ -9,7 +9,6 @@ uniform vec3 uColorHighlight;
 uniform vec3 uColorShadow;
 
 uniform sampler2D uDepthMap;
-uniform sampler2D uSplatMap;
 
 out vec4 oColor;
 
@@ -42,9 +41,8 @@ void main(void) {
     // shadow
     vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
 	float s             = samplePCF3x3(shadowCoord);
-    // s = mix(s, 1.0, 0.5);
+    s = mix(s, 1.0, .1);
+    vec3 color = vColor * s;
 
-    vec3 color = mix(uColorShadow, uColorHighlight, s);
-
-    oColor = vec4(vColor * color * 1.5, 1.0);
+    oColor = vec4(color, 1.0);
 }

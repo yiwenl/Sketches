@@ -6,6 +6,7 @@ const scale = 1;
 export const videoWidth = 640 * scale;
 export const videoHeight = 480 * scale;
 
+export const VIDEO_STARTED = "videoStarted";
 export const FACE_DETECTED = "faceDetected";
 
 export const STATE = {
@@ -24,6 +25,7 @@ export const MEDIAPIPE_FACE_CONFIG = {
 class FaceDetection extends EventDispatcher {
   async init() {
     await this._setupCamera();
+    this.emit(VIDEO_STARTED);
 
     const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
     const detectorConfig = {

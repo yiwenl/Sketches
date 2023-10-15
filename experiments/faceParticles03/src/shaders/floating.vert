@@ -13,13 +13,14 @@ uniform vec3 uColor0;
 uniform vec3 uColor1;
 uniform float uTime;
 uniform vec2 uViewport;
+uniform sampler2D uColorMap;
 
 varying vec3 vColor;
 
 #pragma glslify: curlNoise    = require(./glsl-utils/curlNoise.glsl)
 #pragma glslify: particleSize    = require(./glsl-utils/particleSize.glsl)
 
-#define radius 0.015
+#define radius 0.005
 
 void main(void) {
 
@@ -34,5 +35,9 @@ void main(void) {
     float scaleLife = smoothstep(0.5, .4, abs(time - 0.5));
     gl_PointSize = particleSize(gl_Position, uProjectionMatrix, uViewport, radius) * scale * scaleLife; 
 
-    vColor = mix(uColor0, uColor1, step(aTextureCoord.y, .5)) * mix(.5, 1.0, aNormal.z);
+    vec2 uv = fract(aTextureCoord + aNormal.xy);
+    vec3 color = texture2D(uColorMap, uv).rgb;
+
+    // vColor = mix(uColor0, uColor1, step(aTextureCoord.y, .5)) * mix(.5, 1.0, aNormal.z);
+    vColor = color * mix(.5, 1.0, aNormal.z);
 }

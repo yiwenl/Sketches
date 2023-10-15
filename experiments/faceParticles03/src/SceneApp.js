@@ -4,6 +4,7 @@ import {
   DrawAxis,
   DrawCopy,
   DrawCamera,
+  GLTexture,
   Scene,
   CameraOrtho,
   FboPingPong,
@@ -25,6 +26,7 @@ import FaceDetection, {
   videoWidth,
   videoHeight,
   FACE_DETECTED,
+  VIDEO_STARTED,
 } from "./FaceDetection";
 import { vec3, mat4 } from "gl-matrix";
 import Scheduler from "scheduling";
@@ -41,6 +43,10 @@ import DrawSim from "./DrawSim";
 import DrawParticles from "./DrawParticles";
 import DrawFloatingParticles from "./DrawFloatingParticles";
 import DrawRibbon from "./DrawRibbon";
+import DrawBg from "./DrawBg";
+import DrawVideo from "./DrawVideo";
+import DrawCompose from "./DrawCompose";
+import SubParticles from "./SubParticles";
 
 // fluid simulation
 import FluidSimulation from "./fluid-sim";
@@ -60,8 +66,10 @@ class SceneApp extends Scene {
     this.frame = 0;
 
     this.orbitalControl.lock();
-    this.orbitalControl.radius.value = 20;
-    this.camera.setPerspective(33 * RAD, GL.aspectRatio, 0.1, 40);
+    // this.orbitalControl.rx.value = -0.4;
+    this.orbitalControl.radius.value = 7;
+    this.camera.setPerspective(60 * RAD, GL.aspectRatio, 0.1, 40);
+    // this.camera.setPerspective(120 * RAD, GL.aspectRatio, 0.1, 40);
 
     this._pointNose = [0, 0, 0];
     this._pointCenter = [0, 0, 0];
@@ -85,8 +93,9 @@ class SceneApp extends Scene {
     });
 
     // face detection
-    FaceDetection.init();
     FaceDetection.on(FACE_DETECTED, this.onFaceDetected);
+    FaceDetection.on(VIDEO_STARTED, this.onVideoStarted);
+    FaceDetection.init();
 
     const pointIndices = [4, 159, 386, 200, 47, 176];
     let num = 15;
@@ -103,9 +112,9 @@ class SceneApp extends Scene {
 
   _setupLight() {
     const r = 6;
-    this._lightPos = [0, 5, 2];
+    this._lightPos = [1, 4, 2];
     this._cameraLight = new CameraOrtho();
-    this._cameraLight.ortho(-r, r, r, -r, 2, 9);
+    this._cameraLight.ortho(-r, r, r, -r, 1, 12);
     this._cameraLight.lookAt(this._lightPos, [0, 0, 0]);
 
     this._mtxShadow = mat4.clone(this._cameraLight.matrix);
@@ -115,6 +124,12 @@ class SceneApp extends Scene {
   updateBg() {
     this._textureBg = generateBg();
   }
+
+  onVideoStarted = () => {
+    FaceDetection.video.style.zIndex = 0;
+    FaceDetection.video.style.opacity = 0.5;
+    this._textureVideo = new GLTexture(FaceDetection.video);
+  };
 
   onFaceDetected = (mFace) => {
     const { keypoints } = mFace;
@@ -190,8 +205,11 @@ class SceneApp extends Scene {
     // bg
     this._textureBg = generateBg();
 
+    // render
+    this._fboRender = new FrameBuffer(GL.width, GL.height);
+
     // ribbon
-    let numRibbons = 11;
+    let numRibbons = 13;
     this._fboRibbons = [];
     while (numRibbons--) {
       const fbo = new FrameBuffer(num, num, oSettings);
@@ -200,6 +218,11 @@ class SceneApp extends Scene {
       fbo.unbind();
       this._fboRibbons.push(fbo);
     }
+
+    // lookup
+    this._textureLookup = Assets.get("colorMapAll");
+    this._textureLookup.minFilter = GL.NEAREST;
+    this._textureLookup.magFilter = GL.NEAREST;
   }
 
   _initViews() {
@@ -209,6 +232,9 @@ class SceneApp extends Scene {
     this._dCamera = new DrawCamera();
     this._drawFace = new DrawFace();
     this._drawLine = new DrawLine();
+    this._drawBg = new DrawBg();
+    this._drawVideo = new DrawVideo();
+    this._drawCompose = new DrawCompose();
 
     // particles
     new DrawSave().bindFrameBuffer(this._fbo.read).draw();
@@ -216,9 +242,15 @@ class SceneApp extends Scene {
     this._drawFloating = new DrawFloatingParticles();
     this._drawSim = new DrawSim();
     this._drawRibbon = new DrawRibbon();
+    this._subParticles = new SubParticles();
   }
 
   update() {
+    // update video feed
+    if (this._textureVideo) {
+      this._textureVideo.updateTexture(FaceDetection.video);
+    }
+
     if (!this._hasFaceDetected) {
       return;
     }
@@ -247,7 +279,6 @@ class SceneApp extends Scene {
       .bindTexture("uFaceMap", this._fboFront.texture, 5)
       .bindTexture("uFluidMap", this._fluid.velocity, 6)
       .bindTexture("uDensityMap", this._fluid.density, 7)
-      // .uniform("uCameraMatrix", this.camera.matrix)
       .uniform("uTime", Scheduler.getElapsedTime())
       .uniform("uBound", FLUID_BOUND)
       .draw();
@@ -264,6 +295,10 @@ class SceneApp extends Scene {
       fbo.unbind();
       this._fboRibbons.push(fbo);
     }
+
+    this._subParticles.update(this._fluid);
+
+    // this._staticFace.update(this._fboFront.texture, this._pointNose, this._dir);
   }
 
   _updateShadow() {
@@ -279,8 +314,6 @@ class SceneApp extends Scene {
       return;
     }
 
-    const { colorHighlight, colorShadow } = Config;
-
     const tDepth = mShadow ? this._fboShadow.depthTexture : this._fluid.density;
     this._drawParticles
       .uniform("uViewport", [GL.width, GL.height])
@@ -288,9 +321,8 @@ class SceneApp extends Scene {
       .bindTexture("uVelMap", this._fbo.read.getTexture(1), 1)
       .bindTexture("uDataMap", this._fbo.read.getTexture(3), 2)
       .bindTexture("uDepthMap", tDepth, 3)
+      .bindTexture("uColorMap", Assets.get("colorMap"), 4)
       .uniform("uShadowMatrix", this._mtxShadow)
-      .uniform("uColorHighlight", colorHighlight.map(toGlsl))
-      .uniform("uColorShadow", colorShadow.map(toGlsl))
       .draw();
   }
 
@@ -299,7 +331,13 @@ class SceneApp extends Scene {
     this._fboRibbons.forEach(({ texture }, i) => {
       this._drawRibbon.bindTexture(`uPosMap${i}`, texture, i);
     });
-    this._drawRibbon.draw();
+
+    const index = this._fboRibbons.length;
+    this._drawRibbon
+      .bindTexture("uDataMap", this._fbo.read.getTexture(3), index)
+      .bindTexture("uColorMap", Assets.get("floatingMap"), index + 1)
+      .uniform("uLight", this._lightPos)
+      .draw();
     GL.enable(GL.CULL_FACE);
   }
 
@@ -310,13 +348,32 @@ class SceneApp extends Scene {
     GL.clear(0, 0, 0, 1);
     GL.setMatrices(this.camera);
 
+    this._fboRender.bind();
+    GL.clear(0, 0, 0, 1);
+
     GL.disable(GL.DEPTH_TEST);
-    this._dCopy.draw(this._textureBg);
+    // this._dCopy.draw(this._textureBg);
+    this._drawBg
+      .bindTexture("uMap", this._textureBg, 0)
+      .bindTexture("uDensityMap", this._fluid.density, 1)
+      .uniform("uRatio", GL.aspectRatio)
+      .uniform("uTime", Scheduler.getElapsedTime())
+      .uniform("uColor0", colorHighlight.map(toGlsl))
+      .uniform("uColor1", colorShadow.map(toGlsl))
+      .draw();
+
+    if (this._textureVideo) {
+      this._drawVideo
+        .bindTexture("uMap", this._textureVideo, 1)
+        .uniform("uRatio", GL.aspectRatio)
+        .draw();
+    }
+    g = 4;
     GL.enable(GL.DEPTH_TEST);
 
     if (debug) {
       this._dAxis.draw();
-      this._dCamera.draw(this._cameraFront);
+      // this._dCamera.draw(this._cameraFront);
       this._dCamera.draw(this._cameraLight, [1, 0.5, 0]);
 
       g = 0.1;
@@ -330,14 +387,19 @@ class SceneApp extends Scene {
     }
 
     this._renderParticles(true);
+    this._subParticles.render();
 
-    this._drawFloating
-      .uniform("uColor0", colorHighlight.map(toGlsl))
-      .uniform("uColor1", colorShadow.map(toGlsl))
-      .uniform("uViewport", [GL.width, GL.height])
-      .draw();
+    // this._staticFace.render(this.camera);
 
+    this._drawFloating.uniform("uViewport", [GL.width, GL.height]).draw();
     this._renderRibbons();
+    this._fboRender.unbind();
+
+    // this._dCopy.draw(this._fboRender.texture);
+    this._drawCompose
+      .bindTexture("uMap", this._fboRender.texture, 0)
+      .bindTexture("uLookupMap", this._textureLookup, 1)
+      .draw();
 
     if (canSave && !hasSaved && Config.autoSave) {
       saveImage(GL.canvas, getDateString());
@@ -347,7 +409,7 @@ class SceneApp extends Scene {
 
   resize() {
     const { innerWidth, innerHeight } = window;
-    const pixelRatio = 1;
+    const pixelRatio = 2;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera.setAspectRatio(GL.aspectRatio);
     this._textureBg = generateBg();

@@ -1,4 +1,4 @@
-import { GL, Draw, Mesh } from "alfrid";
+import { Draw, Mesh } from "alfrid";
 import FaceMeshIndices from "./FaceMeshIndices";
 
 import vs from "shaders/face.vert";

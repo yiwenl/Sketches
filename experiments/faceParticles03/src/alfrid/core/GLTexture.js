@@ -87,7 +87,14 @@ class GLTexture {
    *
    * @param {object} mSource the texture source
    */
-  updateTexture(mSource) {
+  updateTexture(mSource, mGL) {
+    if (mGL !== undefined && this.GL !== undefined && mGL !== this.GL) {
+      LogError(Errors.TEXTURE_CONTEXT, this.GL.id);
+      return;
+    }
+
+    this.GL = mGL || GL;
+
     this._source = mSource;
     this._uploadTexture();
   }

@@ -53,20 +53,20 @@ void main(void) {
     // life
     float life = data.x;
     life -= mix(1.0, 3.0, data.z) * 0.005 * mix(1.0, 1.5, density);
+    if(fract(extra.x + extra.y) < 0.1) {
+        life -= 0.01;
+    }
 
     // movement
     vec3 acc = vec3(0.0);
     acc += fluid * density;
 
-    // vec3 noise = curlNoise(pos * 0.1 + uTime * 0.1) * 0.5 * length(fluid);
-    // acc += noise;
-
-    vel += acc * 0.005;
+    vel += acc * 0.004;
 
     float speed = mix(1.0, 2.0, extra.x);
-    float speedLife = smoothstep(.8, .5, life);
+    float speedLife = smoothstep(.9, .7, life);
     pos += vel * speed * speedLife;
-    vel *= .92;
+    vel *= .96;
 
 
     // respawn pos

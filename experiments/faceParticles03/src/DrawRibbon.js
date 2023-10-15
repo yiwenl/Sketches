@@ -1,5 +1,5 @@
 import { Mesh, Draw } from "alfrid";
-
+import { random } from "./utils";
 import vs from "shaders/ribbon.vert";
 import fs from "shaders/ribbon.frag";
 
@@ -14,7 +14,7 @@ export default class DrawRibbon extends Draw {
     let count = 0;
 
     const numSides = 4;
-    const numSeg = 10;
+    const numSeg = 12;
     for (let j = 0; j < numSeg; j++) {
       for (let i = 0; i < numSides; i++) {
         positions.push([i, j, 0]);
@@ -42,6 +42,17 @@ export default class DrawRibbon extends Draw {
       .bufferVertex(positions)
       .bufferTexCoord(uvs)
       .bufferIndex(indices);
+
+    // instancing
+    let num = 1000;
+    const uvOffsets = [];
+    const extras = [];
+    while (num--) {
+      uvOffsets.push([random(), random()]);
+      extras.push([random(), random(), random()]);
+    }
+    mesh.bufferInstance(uvOffsets, "aUVOffset");
+    mesh.bufferInstance(extras, "aExtra");
 
     this.setMesh(mesh).useProgram(vs, fs);
   }

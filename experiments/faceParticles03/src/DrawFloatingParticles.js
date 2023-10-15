@@ -1,6 +1,7 @@
 import { Mesh, GL, Draw } from "alfrid";
 import { random } from "./utils";
 import Scheduler from "scheduling";
+import Assets from "./Assets";
 
 import vs from "shaders/floating.vert";
 import fs from "shaders/floating.frag";
@@ -10,7 +11,7 @@ export default class DrawFloatingParticles extends Draw {
     super();
 
     let num = 1000;
-    const r = 10;
+    const r = 7;
     const getPos = () => [random(-r, r), random(-r, r), random(-r, r)];
 
     const positions = [];
@@ -31,7 +32,10 @@ export default class DrawFloatingParticles extends Draw {
       .bufferNormal(normals)
       .bufferIndex(indices);
 
-    this.setMesh(mesh).useProgram(vs, fs);
+    this.setMesh(mesh)
+      .useProgram(vs, fs)
+      // .bindTexture("uColorMap", Assets.get("colorMap"), 0);
+      .bindTexture("uColorMap", Assets.get("floatingMap"), 0);
   }
 
   draw() {

@@ -29,12 +29,15 @@ import { logError } from "./utils";
 import preload from "./utils/preload";
 import "./utils/Capture";
 
-import "./debug";
-import addControls from "./utils/addControl";
+const debug = true;
 
 let scene;
 let canvas;
 console.log("hash", fxhash);
+
+if (debug) {
+  import("./debug");
+}
 
 function _init3D() {
   if (process.env.NODE_ENV === "development") {
@@ -45,11 +48,16 @@ function _init3D() {
   document.body.appendChild(canvas);
 
   GL.init(canvas, { alpha: false, preserveDrawingBuffer: true });
+  if (`drawingBufferColorSpace` in GL.gl) {
+    GL.gl.drawingBufferColorSpace = "display-p3";
+  }
 
   scene = new Scene();
-  try {
-    addControls(scene);
-  } catch (e) {}
+  if (debug) {
+    import("./utils/addControl").then(({ default: addControls }) => {
+      addControls(scene);
+    });
+  }
 }
 
 preload().then(_init3D, logError);
