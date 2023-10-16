@@ -9,9 +9,11 @@ import {
   CameraOrtho,
   FboPingPong,
   FrameBuffer,
+  EaseNumber,
 } from "alfrid";
 import {
   RAD,
+  random,
   randomInt,
   iOS,
   toGlsl,
@@ -26,6 +28,7 @@ import FaceDetection, {
   videoWidth,
   videoHeight,
   FACE_DETECTED,
+  FACE_LOST,
   VIDEO_STARTED,
 } from "./FaceDetection";
 import { vec3, mat4 } from "gl-matrix";
@@ -45,7 +48,10 @@ import DrawFloatingParticles from "./DrawFloatingParticles";
 import DrawRibbon from "./DrawRibbon";
 import DrawBg from "./DrawBg";
 import DrawVideo from "./DrawVideo";
+import DrawFloor from "./DrawFloor";
 import DrawCompose from "./DrawCompose";
+import DrawStaticFace from "./DrawStaticFace";
+import DrawVignette from "./DrawVignette";
 import SubParticles from "./SubParticles";
 
 // fluid simulation
@@ -68,7 +74,7 @@ class SceneApp extends Scene {
     this.orbitalControl.lock();
     // this.orbitalControl.rx.value = -0.4;
     this.orbitalControl.radius.value = 7;
-    this.camera.setPerspective(60 * RAD, GL.aspectRatio, 0.1, 40);
+    this.camera.setPerspective(70 * RAD, GL.aspectRatio, 0.1, 40);
     // this.camera.setPerspective(120 * RAD, GL.aspectRatio, 0.1, 40);
 
     this._pointNose = [0, 0, 0];
@@ -96,6 +102,9 @@ class SceneApp extends Scene {
     FaceDetection.on(FACE_DETECTED, this.onFaceDetected);
     FaceDetection.on(VIDEO_STARTED, this.onVideoStarted);
     FaceDetection.init();
+    FaceDetection.on(FACE_LOST, () => {
+      this._offsetOpen.value = 0;
+    });
 
     const pointIndices = [4, 159, 386, 200, 47, 176];
     let num = 15;
@@ -105,6 +114,9 @@ class SceneApp extends Scene {
 
     this._controlPoints = pointIndices.map((index) => new ControlPoint(index));
 
+    // state
+    this._offsetOpen = new EaseNumber(0, 0.02);
+
     setTimeout(() => {
       canSave = true;
     }, 500);
@@ -112,7 +124,7 @@ class SceneApp extends Scene {
 
   _setupLight() {
     const r = 6;
-    this._lightPos = [1, 4, 2];
+    this._lightPos = [0, 4, 2];
     this._cameraLight = new CameraOrtho();
     this._cameraLight.ortho(-r, r, r, -r, 1, 12);
     this._cameraLight.lookAt(this._lightPos, [0, 0, 0]);
@@ -177,6 +189,7 @@ class SceneApp extends Scene {
     });
 
     this._hasFaceDetected = true;
+    this._offsetOpen.value = 1;
   };
 
   _initTextures() {
@@ -218,11 +231,6 @@ class SceneApp extends Scene {
       fbo.unbind();
       this._fboRibbons.push(fbo);
     }
-
-    // lookup
-    this._textureLookup = Assets.get("colorMapAll");
-    this._textureLookup.minFilter = GL.NEAREST;
-    this._textureLookup.magFilter = GL.NEAREST;
   }
 
   _initViews() {
@@ -234,12 +242,15 @@ class SceneApp extends Scene {
     this._drawLine = new DrawLine();
     this._drawBg = new DrawBg();
     this._drawVideo = new DrawVideo();
-    this._drawCompose = new DrawCompose();
+    this._drawCompose = new DrawCompose().uniform("uSeed", random(10));
+    this._drawVignette = new DrawVignette();
+    this._drawFloor = new DrawFloor();
 
     // particles
     new DrawSave().bindFrameBuffer(this._fbo.read).draw();
     this._drawParticles = new DrawParticles();
     this._drawFloating = new DrawFloatingParticles();
+    this._drawStaticFace = new DrawStaticFace();
     this._drawSim = new DrawSim();
     this._drawRibbon = new DrawRibbon();
     this._subParticles = new SubParticles();
@@ -247,7 +258,7 @@ class SceneApp extends Scene {
 
   update() {
     // update video feed
-    if (this._textureVideo) {
+    if (this._textureVideo && Config.showWebcam) {
       this._textureVideo.updateTexture(FaceDetection.video);
     }
 
@@ -314,6 +325,8 @@ class SceneApp extends Scene {
       return;
     }
 
+    const { particleScale } = Config;
+
     const tDepth = mShadow ? this._fboShadow.depthTexture : this._fluid.density;
     this._drawParticles
       .uniform("uViewport", [GL.width, GL.height])
@@ -323,6 +336,19 @@ class SceneApp extends Scene {
       .bindTexture("uDepthMap", tDepth, 3)
       .bindTexture("uColorMap", Assets.get("colorMap"), 4)
       .uniform("uShadowMatrix", this._mtxShadow)
+      .uniform("uOffsetOpen", this._offsetOpen.value)
+      .uniform("uParticleScale", particleScale)
+      .draw();
+
+    this._drawStaticFace
+      .uniform("uViewport", [GL.width, GL.height])
+      .bindTexture("uPosMap", this._fboFront.texture, 0)
+      .bindTexture("uColorMap", Assets.get("colorMap"), 1)
+      .bindTexture("uDepthMap", tDepth, 2)
+      .uniform("uShadowMatrix", this._mtxShadow)
+      .uniform("uTime", Scheduler.getElapsedTime())
+      .uniform("uOffsetOpen", this._offsetOpen.value)
+      .uniform("uParticleScale", particleScale)
       .draw();
   }
 
@@ -337,6 +363,8 @@ class SceneApp extends Scene {
       .bindTexture("uDataMap", this._fbo.read.getTexture(3), index)
       .bindTexture("uColorMap", Assets.get("floatingMap"), index + 1)
       .uniform("uLight", this._lightPos)
+      .uniform("uCenter", this._pointNose)
+      .uniform("uOffsetOpen", this._offsetOpen.value)
       .draw();
     GL.enable(GL.CULL_FACE);
   }
@@ -362,7 +390,7 @@ class SceneApp extends Scene {
       .uniform("uColor1", colorShadow.map(toGlsl))
       .draw();
 
-    if (this._textureVideo) {
+    if (this._textureVideo && Config.showWebcam) {
       this._drawVideo
         .bindTexture("uMap", this._textureVideo, 1)
         .uniform("uRatio", GL.aspectRatio)
@@ -389,16 +417,31 @@ class SceneApp extends Scene {
     this._renderParticles(true);
     this._subParticles.render();
 
-    // this._staticFace.render(this.camera);
-
     this._drawFloating.uniform("uViewport", [GL.width, GL.height]).draw();
     this._renderRibbons();
+
+    if (this._fboShadow.depthTexture) {
+      this._drawFloor
+        .bindTexture("uDepthMap", this._fboShadow.depthTexture, 0)
+        .uniform("uShadowMatrix", this._mtxShadow)
+        .uniform("uColor", Config.colorBg.map(toGlsl))
+        .draw();
+    }
+
+    GL.disable(GL.DEPTH_TEST);
+    this._drawVignette
+      .uniform("uColor", Config.colorBg.map(toGlsl))
+      .uniform("uRatio", GL.aspectRatio)
+      .draw();
+    GL.enable(GL.DEPTH_TEST);
+
     this._fboRender.unbind();
 
     // this._dCopy.draw(this._fboRender.texture);
     this._drawCompose
       .bindTexture("uMap", this._fboRender.texture, 0)
-      .bindTexture("uLookupMap", this._textureLookup, 1)
+      .uniform("uTime", Scheduler.getElapsedTime())
+      .uniform("uRatio", GL.aspectRatio)
       .draw();
 
     if (canSave && !hasSaved && Config.autoSave) {
@@ -413,6 +456,7 @@ class SceneApp extends Scene {
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera.setAspectRatio(GL.aspectRatio);
     this._textureBg = generateBg();
+    this._fboRender = new FrameBuffer(GL.width, GL.height);
   }
 }
 

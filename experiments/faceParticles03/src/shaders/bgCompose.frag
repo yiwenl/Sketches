@@ -22,14 +22,15 @@ void main(void) {
 
     vec2 uv = vTextureCoord - .5;
     uv.y /= uRatio;
+
+    float d = length(uv);
+    d = smoothstep(0.5, 0.0, d);
     uv *= .4;
     uv += .5;
 
-    float density = smoothstep(0.0, 3.0, texture2D(uDensityMap, uv).r);
-    float noise = snoise(vec3(uv, uSeed + uTime * 0.1));
-    density += noise * 0.3;
-
-    color *= mix(uColor0, uColor1, density * 0.3);
+    float noise = snoise(vec3(uv * 3.0, uSeed + uTime * 0.2));
+    noise *= d * 0.2;
+    color += noise;
 
     gl_FragColor = vec4(color, 1.0);
     // gl_FragColor = vec4(vec3(density), 1.0);

@@ -27,6 +27,8 @@ uniform sampler2D uPosMap12;
 
 uniform sampler2D uDataMap;
 uniform sampler2D uColorMap;
+uniform vec3 uCenter;
+uniform float uOffsetOpen;
 
 out vec2 vTextureCoord;
 out vec3 vNormal;
@@ -75,14 +77,24 @@ vec3 getPos(float index, vec2 uv) {
 #define xAxis vec3(1.0, 0.0, 0.0)
 
 void main(void) {
-    float r = sin(aTextureCoord.y * PI) * 0.02 * mix(0.5, 1.5, aExtra.z);
+    float r = sin(aTextureCoord.y * PI);
+    r = mix(r, 1.0, .5);
+
+    float offset = clamp(uOffsetOpen * 2.0 - fract(aExtra.x + aExtra.y), 0.0, 1.0);
+    r *= offset;
+
+    r *= 0.005 * aExtra.z;
     float life = texture(uDataMap, aUVOffset).x;
     float lifeScale = abs(life - 0.5);
     lifeScale = smoothstep(0.3, 0.1, lifeScale);
     // vSkip = 1.0 - lifeScale;
-    // r *= lifeScale;
+    r *= lifeScale;
 
     float skip = 0.0;
+
+    if(life > .8) {
+        skip = 1.0;
+    }
 
     float iCurr = aVertexPosition.y;
     float iNext = aVertexPosition.y + 1.0;
@@ -122,6 +134,5 @@ void main(void) {
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 
     vec3 color = texture(uColorMap, aExtra.xy).xyz;
-    color = smoothstep(vec3(0.0), vec3(1.0), color);
-    vColor = color;
+    vColor = color * 1.2;
 }

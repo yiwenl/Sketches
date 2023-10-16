@@ -12,8 +12,8 @@ void main(void) {
 
     // vignette
     float d = length(uv);
-    d = smoothstep(0.5, 0.0, d);
-    d = mix(0.2, 1.0, d);
+    d = smoothstep(0.4, 0.0, d);
+    d = mix(0.1, 1.0, d);
 
     // noise
     float g = smoothstep(-1.0, 1.0, snoise(vec3(uv, uSeed) * 2.0));

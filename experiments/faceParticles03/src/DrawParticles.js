@@ -17,7 +17,11 @@ export default class DrawParticles extends Draw {
 
     for (let j = 0; j < num; j++) {
       for (let i = 0; i < num; i++) {
-        positions.push([random(), random(), random(0)]);
+        let scale = random(0.5, 1.5);
+        if (random() < 0.03) {
+          scale *= random(2, 3);
+        }
+        positions.push([random(), random(), scale]);
         uvs.push([i / num, j / num]);
         indices.push(i + j * num);
       }

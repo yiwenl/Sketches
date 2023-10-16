@@ -28,7 +28,7 @@ import Settings from "./Settings";
 import { logError } from "./utils";
 import preload from "./utils/preload";
 import "./utils/Capture";
-
+import Config from "./Config";
 const debug = true;
 
 let scene;
@@ -57,6 +57,10 @@ function _init3D() {
     import("./utils/addControl").then(({ default: addControls }) => {
       addControls(scene);
     });
+  }
+
+  if (Config.audio) {
+    import("./AudioManager");
   }
 }
 

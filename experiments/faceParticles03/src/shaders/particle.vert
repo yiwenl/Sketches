@@ -16,14 +16,17 @@ uniform sampler2D uDataMap;
 uniform sampler2D uColorMap;
 
 uniform vec2 uViewport;
+uniform float uOffsetOpen;
+uniform float uParticleScale;
 
 out vec3 vColor;
 out vec3 vRandom;
 out vec4 vShadowCoord;
+out float vSkip;
+out float vCross;
 
 #pragma glslify: particleSize    = require(./glsl-utils/particleSize.glsl)
-
-#define radius 0.012
+#define radius 0.012 * 0.5
 
 void main(void) {
     vec3 pos = texture(uPosMap, aTextureCoord).xyz;
@@ -36,7 +39,15 @@ void main(void) {
     float life = texture(uDataMap , aTextureCoord).x;
     float lifeScale = smoothstep(0.5, 0.4, abs(life - 0.5));
 
-    float scale = mix(0.5, 1.5, aVertexPosition.x) * lifeScale;
+    float offset = clamp(uOffsetOpen * 2.0 - fract(aVertexPosition.x + aVertexPosition.y), 0.0, 1.0);
+    vSkip = offset <= 0.01 ? 1.0 : 0.0;
+    float scale = aVertexPosition.z * lifeScale * offset * uParticleScale;
+    float cross = 0.0;
+    if(fract(aVertexPosition.x + aVertexPosition.z) < 0.01) {
+        scale *= 5.0;
+        cross = 1.0;
+    }
+    vCross = cross;
     gl_PointSize = particleSize(gl_Position, uProjectionMatrix, uViewport, radius) * scale;
 
     float g = mix(.75, 1.0, aVertexPosition.y);

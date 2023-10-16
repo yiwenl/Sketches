@@ -61,20 +61,20 @@ void main(void) {
     vec3 acc = vec3(0.0);
     acc += fluid * density;
 
-    vel += acc * 0.004;
+    vel += acc * 0.003;
 
     float speed = mix(1.0, 2.0, extra.x);
     float speedLife = smoothstep(.9, .7, life);
     pos += vel * speed * speedLife;
-    vel *= .96;
+    vel *= .98;
 
 
     // respawn pos
-    vec3 posNoise = curlNoise(extra + uTime);
-    posNoise.xy = posNoise.xy * FACE_BOUND;
-    posNoise.z = 0.0;
 
     vec2 uvFace = fract(extra.xy + uTime * mix(1.0, 5.0, extra.z));
+    // float a = extra.x * PI * 2.0;
+    // float r = pow(fract(extra.y) * 0.5, mix(1.0, 1.3, extra.z));
+    // uvFace = vec2(cos(a) * r + 0.5, sin(a) * r + 0.5);
     vec4 colorMap = texture(uFaceMap, uvFace);
     posOrg = colorMap.xyz;
 

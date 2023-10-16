@@ -1,13 +1,18 @@
 #version 300 es
 
 precision highp float;
-in float vDiscard;
 in vec3 vColor;
+in vec3 vRandom;
 in vec4 vShadowCoord;
+in float vSkip;
 
 uniform sampler2D uDepthMap;
 
 out vec4 oColor;
+
+#pragma glslify: rotate    = require(./glsl-utils/rotate.glsl)
+#define PI 3.141592653
+
 
 float samplePCF3x3( vec4 sc )
 {
@@ -28,14 +33,20 @@ float samplePCF3x3( vec4 sc )
     return shadow/9.0;
 }
 
-
 void main(void) {
-    if(vDiscard > 0.5) {    discard;    }
-    if(distance(gl_PointCoord, vec2(0.5, 0.5)) > 0.5) { discard;    }
+    if(vSkip > .5) discard;
+    if(distance(gl_PointCoord, vec2(.5)) > .5) discard;
+    
 
-    // // shadow
-    // vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
-	// float s             = samplePCF3x3(shadowCoord);
+    vec2 uv = gl_PointCoord;
+    uv.x *= 0.25;
+    uv.x += floor(vRandom.z * 4.0) * 0.25;
 
-    oColor = vec4(vColor, 1.0) * .3;
+    // shadow
+    vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
+	float s             = samplePCF3x3(shadowCoord);
+    // s = mix(s, 1.0, .1);
+    vec3 color = vColor * s;
+
+    oColor = vec4(color, 1.0);
 }

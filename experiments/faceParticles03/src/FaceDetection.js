@@ -8,6 +8,7 @@ export const videoHeight = 480 * scale;
 
 export const VIDEO_STARTED = "videoStarted";
 export const FACE_DETECTED = "faceDetected";
+export const FACE_LOST = "faceLost";
 
 export const STATE = {
   camera: { targetFPS: 60, sizeOption: "640 X 480" },
@@ -121,6 +122,8 @@ class FaceDetection extends EventDispatcher {
     );
     if (faces.length > 0) {
       this.emit(FACE_DETECTED, faces[0]);
+    } else {
+      this.emit(FACE_LOST);
     }
 
     requestAnimationFrame(() => this.checkFace());

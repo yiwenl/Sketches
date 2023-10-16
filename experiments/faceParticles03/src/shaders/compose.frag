@@ -1,58 +1,85 @@
-// copy.frag
+#version 300 es
 #define LUT_FLIP_Y 1
 
 precision highp float;
-varying vec2 vTextureCoord;
+
+in vec2 vTextureCoord;
 uniform sampler2D uMap;
-uniform sampler2D uLookupMap;
+uniform float uSeed;
+uniform float uTime;
+uniform float uRatio;
 
-vec4 lookup(in vec4 textureColor, in sampler2D lookupTable, float strength) {
-    #ifndef LUT_NO_CLAMP
-        textureColor = clamp(textureColor, 0.0, 1.0);
-    #endif
-
-    mediump float blueColor = textureColor.b * 63.0;
-
-    mediump vec2 quad1;
-    quad1.y = floor(floor(blueColor) / 8.0);
-    quad1.x = floor(blueColor) - (quad1.y * 8.0);
-
-    mediump vec2 quad2;
-    quad2.y = floor(ceil(blueColor) / 8.0);
-    quad2.x = ceil(blueColor) - (quad2.y * 8.0);
-
-    highp vec2 texPos1;
-    texPos1.x = (quad1.x * 0.125) + 0.5/512.0 + ((0.125 - 1.0/512.0) * textureColor.r);
-    texPos1.y = (quad1.y * 0.125) + 0.5/512.0 + ((0.125 - 1.0/512.0) * textureColor.g);
-
-    #ifdef LUT_FLIP_Y
-        texPos1.y = 1.0-texPos1.y;
-    #endif
-
-    highp vec2 texPos2;
-    texPos2.x = (quad2.x * 0.125) + 0.5/512.0 + ((0.125 - 1.0/512.0) * textureColor.r);
-    texPos2.y = (quad2.y * 0.125) + 0.5/512.0 + ((0.125 - 1.0/512.0) * textureColor.g);
-
-    #ifdef LUT_FLIP_Y
-        texPos2.y = 1.0-texPos2.y;
-    #endif
-
-    lowp vec4 newColor1 = texture2D(lookupTable, texPos1);
-    lowp vec4 newColor2 = texture2D(lookupTable, texPos2);
-
-    lowp vec4 newColor = mix(newColor1, newColor2, fract(blueColor));
-    return mix(textureColor, newColor, strength);
+#pragma glslify: rotate    = require(./glsl-utils/rotate.glsl)
+#pragma glslify: fbm    = require(./glsl-utils/fbm/3d.glsl)
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-vec4 lookup(in vec4 textureColor, in sampler2D lookupTable) {
-    return lookup(textureColor, lookupTable, 1.0);
+vec3 greyscale(vec3 color, float str) {
+    float g = dot(color, vec3(0.299, 0.587, 0.114));
+    return mix(color, vec3(g), str);
 }
 
+vec3 greyscale(vec3 color) {
+    return greyscale(color, 1.0);
+}
+
+#define PI 3.1415926535897932384626433832795
+
+out vec4 oColor;
+
+#define NUM 2
 
 void main(void) {
-    vec4 color = texture2D(uMap, vTextureCoord);
+    vec4 color = texture(uMap, vTextureCoord);
+    vec3 colorInverted = greyscale(1.0 - color.rgb);
+    colorInverted = smoothstep(vec3(0.0), vec3(1.0), colorInverted);
+    colorInverted *= vec3(1.0, .975, .94) * 1.2;
 
-    color = lookup(color, uLookupMap, .2) * 1.2;
-    gl_FragColor = color;
+    float offset = step(vTextureCoord.y, .5) * 100.0;
+
+    float globalScale = 0.15;
+
+    float tt = 0.0;
+    float theta = atan(1.0/uRatio) * 0.0;
+    for(int i=0; i<NUM; i++) {
+        float mul = pow(4.0, float(i));
+
+        float gap = 0.1 / globalScale / mul;
+        vec2 uv = vTextureCoord - 0.5;
+        uv = rotate(uv, theta);
+        uv.y /= uRatio;
+
+        uv = floor(uv / gap) * gap;
+
+
+        float r = rand(uv.yx + 100.0);
+        r = step(r, 0.02);
+
+        vec2 _uv = rotate(vTextureCoord, theta);
+        _uv = rotate(_uv - 0.5, r * PI * 0.5) + 0.5;
+
+        offset = rand(uv) * 100.0;
+
+        float m = 0.65 + float(i) * 0.04;
+        float s = 20.0 * globalScale;
+        float _s = 200.0;
+        float _x = floor(_uv.x * _s)/_s;
+        float t = fbm(vec3(_uv.xx * s + offset, uTime)) + rand(vec2(_x)) * .02;
+        // tt += smoothstep(m, m + 0.001, t);
+        tt += step(m, t);
+    }
+
+    tt = step(0.5, tt);
+
+    color.rgb = mix(color.rgb, colorInverted, tt);
+    
+
+    vec2 uv = vTextureCoord - 0.5;
+    uv.y /= uRatio;
+    float t = smoothstep(0.5, 0.3, length(uv));
+    color.rgb *= mix(.5, 1.0, t);
+
+    oColor = color;
     
 }

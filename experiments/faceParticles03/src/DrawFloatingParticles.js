@@ -10,7 +10,7 @@ export default class DrawFloatingParticles extends Draw {
   constructor() {
     super();
 
-    let num = 1000;
+    let num = 2000;
     const r = 7;
     const getPos = () => [random(-r, r), random(-r, r), random(-r, r)];
 
