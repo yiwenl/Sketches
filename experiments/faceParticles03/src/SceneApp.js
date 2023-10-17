@@ -376,8 +376,8 @@ class SceneApp extends Scene {
     GL.clear(0, 0, 0, 1);
     GL.setMatrices(this.camera);
 
-    this._fboRender.bind();
-    GL.clear(0, 0, 0, 1);
+    // this._fboRender.bind();
+    // GL.clear(0, 0, 0, 1);
 
     GL.disable(GL.DEPTH_TEST);
     // this._dCopy.draw(this._textureBg);
@@ -435,14 +435,14 @@ class SceneApp extends Scene {
       .draw();
     GL.enable(GL.DEPTH_TEST);
 
-    this._fboRender.unbind();
+    // this._fboRender.unbind();
 
     // this._dCopy.draw(this._fboRender.texture);
-    this._drawCompose
-      .bindTexture("uMap", this._fboRender.texture, 0)
-      .uniform("uTime", Scheduler.getElapsedTime())
-      .uniform("uRatio", GL.aspectRatio)
-      .draw();
+    // this._drawCompose
+    //   .bindTexture("uMap", this._fboRender.texture, 0)
+    //   .uniform("uTime", Scheduler.getElapsedTime())
+    //   .uniform("uRatio", GL.aspectRatio)
+    //   .draw();
 
     if (canSave && !hasSaved && Config.autoSave) {
       saveImage(GL.canvas, getDateString());
@@ -456,7 +456,7 @@ class SceneApp extends Scene {
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera.setAspectRatio(GL.aspectRatio);
     this._textureBg = generateBg();
-    this._fboRender = new FrameBuffer(GL.width, GL.height);
+    // this._fboRender = new FrameBuffer(GL.width, GL.height);
   }
 }
 
