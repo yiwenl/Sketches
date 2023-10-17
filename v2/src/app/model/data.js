@@ -329,4 +329,9 @@ export default [
     url: "//yiwenl.github.io/Sketches/experiments/blocks4_hands/dist/index.html",
     title: "Blocks - Hands",
   },
+  {
+    cover: "assets/img/coverDisintegrate.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/faceParticles03/dist/index.html",
+    title: "Disintegrate",
+  },
 ];
