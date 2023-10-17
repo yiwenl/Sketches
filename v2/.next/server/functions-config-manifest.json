@@ -2,7 +2,7 @@
   "version": 1,
   "functions": {
     "/about": {},
-    "/exps/[id]": {},
-    "/": {}
+    "/": {},
+    "/exps/[id]": {}
   }
 }

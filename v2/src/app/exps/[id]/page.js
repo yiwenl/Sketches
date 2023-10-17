@@ -7,6 +7,8 @@ export async function generateMetadata({ params }) {
   const index = parseInt(params.id);
   const { url, title, cover } = SiteData[index];
 
+  const _url = `https:` + url;
+
   return {
     title: `Sketches | ${title}`,
     description: "WebGL Sketches by Yi-Wen Lin",
@@ -15,7 +17,7 @@ export async function generateMetadata({ params }) {
       title: `Sketches | ${title}`,
       type: "website",
       description: "WebGL Sketches by Yi-Wen Lin",
-      url,
+      url: _url,
       image: `https://yiwenl.github.io/Sketches/${cover}`,
       images: [
         {
@@ -28,7 +30,7 @@ export async function generateMetadata({ params }) {
       creator: "@yiwenl",
       title: `Sketches | ${title}`,
       description: "WebGL Sketches by Yi-Wen Lin",
-      url,
+      url: _url,
       image: `https://yiwenl.github.io/Sketches/${cover}`,
     },
     viewport: {
