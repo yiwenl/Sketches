@@ -22,25 +22,23 @@ export default (scene) => {
     .add(Config, "numParticles", [128, 144, 192, 256, 384, 512, 768])
     .onFinishChange(reload);
 
-  gui.add(Config, "particleScale", 0.2, 5).onFinishChange(refresh);
+  // gui.add(Config, "particleScale", 0.2, 5).onFinishChange(refresh);
   gui.add(Config, "showWebcam").onFinishChange(refresh);
 
-  gui.addColor(Config, "colorBg").onFinishChange(() => {
-    scene.updateBg();
-    refresh();
-  });
-  gui.addColor(Config, "colorHighlight").onFinishChange(refresh);
-  gui.addColor(Config, "colorShadow").onFinishChange(refresh);
-  gui.add(Config, "audio").onFinishChange(reload);
+  // gui.addColor(Config, "colorBg").onFinishChange(() => {
+  //   scene.updateBg();
+  //   refresh();
+  // });
+  // gui.addColor(Config, "colorHighlight").onFinishChange(refresh);
+  // gui.addColor(Config, "colorShadow").onFinishChange(refresh);
+  // gui.add(Config, "audio").onFinishChange(reload);
 
-  const fSystem = gui.addFolder("System");
-
+  // const fSystem = gui.addFolder("System");
   // fSystem.add(Config, "autoSave").onFinishChange(reload);
+  // fSystem.add(oControl, "save").name("Save Settings");
+  // fSystem.add(Settings, "reset").name("Reset Default");
 
-  fSystem.add(oControl, "save").name("Save Settings");
-  fSystem.add(Settings, "reset").name("Reset Default");
-
-  fSystem.open();
+  // fSystem.open();
 
   // dat.GUI.toggleHide();
 };
