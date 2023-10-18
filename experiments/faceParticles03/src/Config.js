@@ -11,4 +11,5 @@ export default {
   particleScale: 1.4,
   showWebcam: false,
   audio: false,
+  postEffect: false,
 };

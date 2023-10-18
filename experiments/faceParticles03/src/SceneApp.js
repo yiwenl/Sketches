@@ -52,12 +52,14 @@ import DrawFloor from "./DrawFloor";
 import DrawCompose from "./DrawCompose";
 import DrawStaticFace from "./DrawStaticFace";
 import DrawVignette from "./DrawVignette";
+import DrawGlare from "./DrawGlare";
 import SubParticles from "./SubParticles";
 
 // fluid simulation
 import FluidSimulation from "./fluid-sim";
 
 import generateBg from "./generateBg";
+import applyBlur from "./applyBlur";
 
 const faceMeshScale = 0.03;
 const FLUID_BOUND = 4;
@@ -79,6 +81,8 @@ class SceneApp extends Scene {
 
     this._pointNose = [0, 0, 0];
     this._pointCenter = [0, 0, 0];
+    this._pointGlare = [0, 0, 0];
+    this._pointGlareTarget = [0, 0, 0];
 
     this._dir = [0, 0, 5];
     this._hasFaceDetected = false;
@@ -124,7 +128,7 @@ class SceneApp extends Scene {
 
   _setupLight() {
     const r = 6;
-    this._lightPos = [0, 4, 2];
+    this._lightPos = [1, 4, 2];
     this._cameraLight = new CameraOrtho();
     this._cameraLight.ortho(-r, r, r, -r, 1, 12);
     this._cameraLight.lookAt(this._lightPos, [0, 0, 0]);
@@ -155,6 +159,9 @@ class SceneApp extends Scene {
     const getAdjustedPointByIndex = (index) => {
       return getAdjustedPoint(keypoints[index]);
     };
+
+    // this._pointGlareTarget = getAdjustedPointByIndex(337);
+    this._pointGlareTarget = getAdjustedPointByIndex(299);
 
     const noseIndex = 4;
     this._pointNose = getAdjustedPointByIndex(noseIndex);
@@ -245,6 +252,7 @@ class SceneApp extends Scene {
     this._drawCompose = new DrawCompose().uniform("uSeed", random(10));
     this._drawVignette = new DrawVignette();
     this._drawFloor = new DrawFloor();
+    this._drawGlare = new DrawGlare();
 
     // particles
     new DrawSave().bindFrameBuffer(this._fbo.read).draw();
@@ -310,6 +318,13 @@ class SceneApp extends Scene {
     this._subParticles.update(this._fluid);
 
     // this._staticFace.update(this._fboFront.texture, this._pointNose, this._dir);
+
+    // update glare
+    this._pointGlare = this._pointGlare.map((v, i) => {
+      const target = this._pointGlareTarget[i];
+      v += (target - v) * 0.1;
+      return v;
+    });
   }
 
   _updateShadow() {
@@ -370,14 +385,16 @@ class SceneApp extends Scene {
   }
 
   render() {
-    const { colorHighlight, colorShadow } = Config;
+    const { colorHighlight, colorShadow, postEffect } = Config;
     const debug = false;
     let g = 1;
     GL.clear(0, 0, 0, 1);
     GL.setMatrices(this.camera);
 
-    // this._fboRender.bind();
-    // GL.clear(0, 0, 0, 1);
+    if (postEffect) {
+      this._fboRender.bind();
+      GL.clear(0, 0, 0, 1);
+    }
 
     GL.disable(GL.DEPTH_TEST);
     // this._dCopy.draw(this._textureBg);
@@ -429,20 +446,28 @@ class SceneApp extends Scene {
     }
 
     GL.disable(GL.DEPTH_TEST);
-    this._drawVignette
-      .uniform("uColor", Config.colorBg.map(toGlsl))
-      .uniform("uRatio", GL.aspectRatio)
-      .draw();
+    GL.enableAdditiveBlending();
+    this._drawGlare.uniform("uPosition", this._pointGlare).draw();
+    GL.enableAlphaBlending();
+
+    if (!postEffect) {
+      this._drawVignette
+        .uniform("uColor", Config.colorBg.map(toGlsl))
+        .uniform("uRatio", GL.aspectRatio)
+        .draw();
+    }
     GL.enable(GL.DEPTH_TEST);
 
-    // this._fboRender.unbind();
-
-    // this._dCopy.draw(this._fboRender.texture);
-    // this._drawCompose
-    //   .bindTexture("uMap", this._fboRender.texture, 0)
-    //   .uniform("uTime", Scheduler.getElapsedTime())
-    //   .uniform("uRatio", GL.aspectRatio)
-    //   .draw();
+    if (postEffect) {
+      this._fboRender.unbind();
+      this._textureBlur = applyBlur(this._fboRender.texture);
+      this._drawCompose
+        .bindTexture("uMap", this._fboRender.texture, 0)
+        .bindTexture("uBlurMap", this._textureBlur, 1)
+        .uniform("uTime", Scheduler.getElapsedTime())
+        .uniform("uRatio", GL.aspectRatio)
+        .draw();
+    }
 
     if (canSave && !hasSaved && Config.autoSave) {
       saveImage(GL.canvas, getDateString());
@@ -456,7 +481,7 @@ class SceneApp extends Scene {
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera.setAspectRatio(GL.aspectRatio);
     this._textureBg = generateBg();
-    // this._fboRender = new FrameBuffer(GL.width, GL.height);
+    this._fboRender = new FrameBuffer(GL.width, GL.height);
   }
 }
 
