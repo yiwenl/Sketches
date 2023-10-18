@@ -12,16 +12,16 @@ export async function generateMetadata({ params }) {
   return {
     title: `Sketches | ${title}`,
     description: "WebGL Sketches by Yi-Wen Lin",
-    metadataBase: new URL("http://yiwenl.github.io/Sketches"),
+    metadataBase: new URL("https://yiwenl.github.io/Sketches"),
     openGraph: {
       title: `Sketches | ${title}`,
       type: "website",
       description: "WebGL Sketches by Yi-Wen Lin",
       url: _url,
-      image: `http://yiwenl.github.io/Sketches/${cover}`,
+      image: `https://yiwenl.github.io/Sketches/${cover}`,
       images: [
         {
-          url: `http://yiwenl.github.io/Sketches/${cover}`,
+          url: `https://yiwenl.github.io/Sketches/${cover}`,
         },
       ],
     },
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }) {
       title: `Sketches | ${title}`,
       description: "WebGL Sketches by Yi-Wen Lin",
       url: _url,
-      image: `http://yiwenl.github.io/Sketches/${cover}`,
+      image: `https://yiwenl.github.io/Sketches/${cover}`,
     },
     viewport: {
       width: "device-width",
