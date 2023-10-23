@@ -19,13 +19,13 @@ export default (scene) => {
   window.gui = gui;
 
   gui
-    .add(Config, "numParticles", [128, 144, 192, 256, 384, 512, 768])
+    .add(Config, "numParticles", [128, 144, 192, 256, 384, 512, 768, 1024])
     .onFinishChange(reload);
 
   gui.add(Config, "postEffect").onFinishChange(refresh);
 
   // gui.add(Config, "particleScale", 0.2, 5).onFinishChange(refresh);
-  gui.add(Config, "showWebcam").onFinishChange(refresh);
+  // gui.add(Config, "showWebcam").onFinishChange(refresh);
 
   // gui.addColor(Config, "colorBg").onFinishChange(() => {
   //   scene.updateBg();
