@@ -80,7 +80,8 @@ void main(void) {
     uv.y /= uRatio;
     float d = length(uv);
 
-    t = smoothstep(0.4, 0.06, d);
+    t = smoothstep(0.4, 0.1, d);
+    // t = smoothstep(0.5, 0.2, d);
     color = mix(colorBlur, color, t);
 
     t = smoothstep(0.5, 0.3, d);

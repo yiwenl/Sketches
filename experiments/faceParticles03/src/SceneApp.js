@@ -142,8 +142,11 @@ class SceneApp extends Scene {
   }
 
   onVideoStarted = () => {
-    FaceDetection.video.style.zIndex = 0;
-    FaceDetection.video.style.opacity = 0.5;
+    // FaceDetection.video.style.zIndex = 0;
+    FaceDetection.video.style.opacity = 0.85;
+    const t = 2;
+    FaceDetection.video.style.width = `${640 / t}px`;
+    FaceDetection.video.style.height = `${480 / t}px`;
     this._textureVideo = new GLTexture(FaceDetection.video);
   };
 
@@ -447,7 +450,10 @@ class SceneApp extends Scene {
 
     GL.disable(GL.DEPTH_TEST);
     GL.enableAdditiveBlending();
-    this._drawGlare.uniform("uPosition", this._pointGlare).draw();
+    this._drawGlare
+      .uniform("uPosition", this._pointGlare)
+      .uniform("uTime", Scheduler.getElapsedTime())
+      .draw();
     GL.enableAlphaBlending();
 
     if (!postEffect) {

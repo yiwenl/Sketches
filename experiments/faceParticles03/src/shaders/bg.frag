@@ -12,7 +12,7 @@ void main(void) {
 
     // vignette
     float d = length(uv);
-    d = smoothstep(0.4, 0.0, d);
+    d = smoothstep(0.4, 0.1, d);
     d = mix(0.1, 1.0, d);
 
     // noise

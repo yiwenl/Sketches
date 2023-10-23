@@ -22,9 +22,10 @@ void main(void) {
     vec3 vel = texture2D(uVelMap, aTextureCoord).xyz;
     float speed = length(vel);  
     speed = smoothstep(0.0, 0.01, speed);
+    float speedScale = mix(0.2, 1.0, speed);
     gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
 
-    gl_PointSize = mix(1.0, 3.0, aVertexPosition.x) * speed * 2.5;
+    gl_PointSize = mix(1.0, 3.0, aVertexPosition.x) * speedScale * 2.5;
 
     float start = fract(aVertexPosition.x + aVertexPosition.y) * 10.0;
     float t = mix(1.0, 2.0, fract(aVertexPosition.z + aVertexPosition.y)) * 10.0;

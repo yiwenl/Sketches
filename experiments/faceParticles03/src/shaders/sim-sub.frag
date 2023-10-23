@@ -50,7 +50,7 @@ void main(void) {
     float speed = mix(1.0, 1.2, extra.x);
     float speedLife = smoothstep(.9, .7, life);
     pos += vel * speed * speedLife;
-    vel *= .98;
+    vel *= .95;
 
 
     if(life <= 0.0) {
