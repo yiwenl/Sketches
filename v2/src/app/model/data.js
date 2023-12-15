@@ -334,4 +334,9 @@ export default [
     url: "//yiwenl.github.io/Sketches/experiments/faceParticles03/dist/index.html",
     title: "Disintegrate",
   },
+  {
+    cover: "assets/img/coverInscript.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/inscript/dist/index.html",
+    title: "Inscript",
+  },
 ];
