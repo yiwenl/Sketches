@@ -19,6 +19,7 @@ import {
   randomInt,
   getMonoColor,
   biasMatrix,
+  smoothstep,
   pick,
 } from "./utils";
 import Config from "./Config";
@@ -47,7 +48,8 @@ class SceneApp extends Scene {
     // this.orbitalControl.lock();
 
     this.orbitalControl.radius.value = 7.5;
-    this.orbitalControl.radius.limit(5, 12);
+    this.orbitalControl.radius.value = 4.5;
+    this.orbitalControl.radius.limit(4.5, 10);
     this.camera.setPerspective(90 * RAD, GL.aspectRatio, 0.1, 100);
 
     // shadow
@@ -63,7 +65,7 @@ class SceneApp extends Scene {
     this._cameraFloorShadow = new CameraOrtho();
     this._cameraFloorShadow.ortho(-r, r, r, -r, 4, 17);
     const posLight = [0, 10, 0];
-    vec3.rotateX(posLight, posLight, [0, 0, 0], 0.3);
+    vec3.rotateX(posLight, posLight, [0, 0, 0], 0.2);
     this._cameraFloorShadow.lookAt(posLight, [0, 0, 0]);
 
     this.mtxShadow = mat4.create();
@@ -111,10 +113,14 @@ class SceneApp extends Scene {
     const prevCenter = [this._center[0], this._center[1]];
     let x, y;
     let numTries = 0;
+    let d;
     do {
       x = random(-1, 1) * radius;
       y = ((random(-1, 1) * radius) / GL.aspectRatio) * 0.5 + 0.2;
-    } while (vec2.distance([x, y], prevCenter) < minDist && numTries++ < 50);
+      d = vec2.distance([x, y], prevCenter);
+    } while (d < minDist && numTries++ < 50);
+
+    d = smoothstep(minDist, minDist * 2, d);
 
     this._center[0] = x;
     this._center[1] = y;
@@ -125,9 +131,9 @@ class SceneApp extends Scene {
     do {
       ns = randomInt(2, 6) * 0.3;
     } while (ns === this.noiseScale);
-    this.noiseScale = ns;
+    this.noiseScale = ns + d * 1.5;
 
-    const delay = pick([0, 250, 500]);
+    const delay = pick([0, 250]);
 
     setTimeout(() => {
       this.lengthScale.easing = 0.02;
@@ -136,7 +142,7 @@ class SceneApp extends Scene {
     }, 1500);
 
     setTimeout(() => {
-      this.speed.value = 0.2;
+      this.speed.value = 0.1;
     }, 300 + delay);
 
     setTimeout(() => {
@@ -297,8 +303,6 @@ class SceneApp extends Scene {
       .draw();
     GL.enable(GL.DEPTH_TEST);
     g = 0.2;
-    this._dBall.draw(this._center, [g, g, g], [1, 0, 0]);
-    this._dBall.draw(this._lightPosition, [g, g, g], [1, 0.5, 0]);
 
     this._drawFloor
       .bindTexture("uDepthMap", this._fboShadowFloor.depthTexture, 0)
@@ -306,6 +310,12 @@ class SceneApp extends Scene {
       .draw();
 
     this._renderRibbon(true);
+
+    this._drawParticles
+      .bindTexture("uPosMap", this._fbo.read.getTexture(0), 0)
+      .bindTexture("uColorMap", this._textureColor, 1)
+      .uniform("uViewport", [GL.width, GL.height])
+      .draw();
 
     GL.disable(GL.DEPTH_TEST);
     this._drawCover

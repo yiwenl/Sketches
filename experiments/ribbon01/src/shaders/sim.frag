@@ -43,7 +43,7 @@ void main(void) {
     vec3 data = texture(uDataMap, vTextureCoord).xyz;
 
     float posOffset = snoise(vec3(pos + uTime * 5.5)) * .5 + .5;
-    posOffset = mix(2.5, 2.0, posOffset) * 0.12 * uNoiseScale;
+    posOffset = mix(2.2, 2.0, posOffset) * 0.12 * uNoiseScale;
 
     vec3 acc = vec3(0.0);
     vec3 noise = curlNoise(pos * posOffset - uTime * 0.3);
@@ -52,8 +52,9 @@ void main(void) {
     vec3 dir;
     float f;
 
-    float maxRadius = mix(2.0, 2.2, extra.z);
-    maxRadius += step(2.0, uSpeed) * 0.5;
+    f = 0.25;
+    float maxRadius = mix(2.0, 2.2, extra.z) - f;
+    maxRadius += step(2.0, uSpeed) * (0.5 + f);
     float d = distance(pos, uCenter);
 
     // pulling force
@@ -68,8 +69,8 @@ void main(void) {
     dir = normalize(pos - uTouch);
     acc -= dir * f * mix(1.5, 1.0, extra.y);
     
-    // float speed = mix(2.0, 3.0, extra.x);
-    float speed = mix(2.0, 4.0, extra.x);
+    float speed = mix(2.0, 3.0, extra.x);
+    // float speed = mix(2.0, 4.0, extra.x);
 
     float t = fract(extra.x + extra.y );
     if( t < 0.01) speed *= mix(4.0, 8.0, t);
