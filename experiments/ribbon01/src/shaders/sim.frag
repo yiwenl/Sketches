@@ -71,7 +71,8 @@ void main(void) {
     // float speed = mix(2.0, 3.0, extra.x);
     float speed = mix(2.0, 4.0, extra.x);
 
-    if(fract(extra.x + extra.y ) < 0.01) speed *= 4.0;
+    float t = fract(extra.x + extra.y );
+    if( t < 0.01) speed *= mix(4.0, 8.0, t);
     vel += acc * speed * 0.0002 * uSpeed;
 
     pos += vel;

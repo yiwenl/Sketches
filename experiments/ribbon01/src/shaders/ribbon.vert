@@ -25,6 +25,7 @@ out vec2 vTextureCoord;
 out vec3 vNormal;
 out vec3 vColor;
 out vec4 vShadowCoord;
+out float vSkip;
 
 #pragma glslify: rotate    = require(./glsl-utils/rotate.glsl)
 
@@ -46,13 +47,10 @@ void main(void) {
     vec2 uv = aUVOffset;
     
 
-    float s = aVertexPosition.x / uTotal;
-    float t = mix(0.0, 0.5, uLengthOffset);
-    s = smoothstep(t, t + 0.1, s);
-    // s = step(t, s);
+    float s = 1.0 - aVertexPosition.x / uTotal;
+    vSkip = step(uLengthOffset, s);
 
-
-    vec3 pos = aVertexPosition * vec3(0.0, 1.0, 1.0) * s;
+    vec3 pos = aVertexPosition * vec3(0.0, 1.0, 1.0);
     pos.yz *= mix(0.25, 1.0, aExtra.x);
 
 

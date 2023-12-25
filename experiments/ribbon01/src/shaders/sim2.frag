@@ -42,40 +42,8 @@ void main(void) {
     vec3 extra = texture(uExtraMap, vTextureCoord).xyz;
     vec3 data = texture(uDataMap, vTextureCoord).xyz;
 
-    float posOffset = snoise(vec3(pos + uTime * 5.5)) * .5 + .5;
-    posOffset = mix(2.5, 2.0, posOffset) * 0.12 * uNoiseScale;
 
-    vec3 acc = vec3(0.0);
-    vec3 noise = curlNoise(pos * posOffset - uTime * 0.3);
-    acc += noise;
-
-    vec3 dir;
-    float f;
-
-    float maxRadius = mix(2.0, 2.2, extra.z);
-    maxRadius += step(2.0, uSpeed) * 0.5;
-    float d = distance(pos, uCenter);
-
-    // pulling force
-    dir = -normalize(pos - uCenter);
-    f = smoothstep(maxRadius - 1.0, maxRadius, d);
-    acc += dir * f * 2.0;
-    
-
-    // repel to touch
-    d = distance(pos, uTouch);
-    f = smoothstep(3.0, 0.0, d);
-    dir = normalize(pos - uTouch);
-    acc -= dir * f * mix(1.5, 1.0, extra.y);
-    
-    // float speed = mix(2.0, 3.0, extra.x);
-    float speed = mix(2.0, 4.0, extra.x);
-
-    if(fract(extra.x + extra.y ) < 0.01) speed *= 4.0;
-    vel += acc * speed * 0.0002 * uSpeed;
-
-    pos += vel;
-    vel *= .96;
+    pos.xz = rotate(pos.xz, 0.08);
 
 
     oFragColor0 = vec4(pos, 1.0);

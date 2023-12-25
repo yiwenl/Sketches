@@ -2,17 +2,12 @@
 
 precision highp float;
 in vec2 vTextureCoord;
-in vec3 vNormal;
-in vec3 vColor;
 in vec4 vShadowCoord;
-in float vSkip;
 
+uniform sampler2D uMap;
 uniform sampler2D uDepthMap;
-uniform vec3 uLight;
-
 out vec4 oColor;
 
-#pragma glslify: diffuse    = require(./glsl-utils/diffuse.glsl)
 float samplePCF3x3( vec4 sc )
 {
     const int s = 2;
@@ -35,14 +30,19 @@ float samplePCF3x3( vec4 sc )
 }
 
 void main(void) {
-    if(vSkip > 0.5) discard;
     // shadow
     vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
-	float s             = samplePCF3x3(shadowCoord);
-    s = mix(s, 1.0, .6);
 
-    float d = diffuse(vNormal, uLight, .25);
-    vec3 color = vColor * d * s;
-    color = smoothstep(vec3(0.0), vec3(1.0), color) * 1.2;
-    oColor = vec4(color, 1.0);
+	float s             = 1.0 -samplePCF3x3(shadowCoord);
+
+    if(shadowCoord.x < 0.0 ||shadowCoord.x > 1.0 ||
+    shadowCoord.y < 0.0 ||shadowCoord.y > 1.0) {
+        s = 0.0;
+    }
+
+    if(shadowCoord.z > 1.0) {
+        s = 0.0;
+    }
+
+    oColor = vec4(vec3(0.0), s * 0.05);
 }
