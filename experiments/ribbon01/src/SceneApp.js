@@ -35,12 +35,11 @@ import DrawRibbon from "./DrawRibbon";
 import DrawCover from "./DrawCover";
 import DrawBackground from "./DrawBackground";
 import DrawFloor from "./DrawFloor";
+import DrawCompose from "./DrawCompose";
 
 import generateBlueNoise from "./generateBlueNoise";
 import generateBg from "./generateBg";
-
-let hasSaved = false;
-let canSave = false;
+import applyBlur from "./applyBlur";
 
 class SceneApp extends Scene {
   constructor() {
@@ -49,7 +48,7 @@ class SceneApp extends Scene {
 
     this.orbitalControl.radius.value = 7.5;
     this.orbitalControl.radius.value = 4.5;
-    this.orbitalControl.radius.limit(4.5, 10);
+    this.orbitalControl.radius.limit(4.5, 7);
     this.camera.setPerspective(90 * RAD, GL.aspectRatio, 0.1, 100);
 
     // shadow
@@ -95,13 +94,6 @@ class SceneApp extends Scene {
     this.pulse();
 
     this._length = 0;
-    // window.addEventListener("mousemove", (e) => {
-    //   this._length = e.clientX / window.innerWidth;
-    // });
-
-    setTimeout(() => {
-      canSave = true;
-    }, 500);
   }
 
   pulse() {
@@ -169,6 +161,7 @@ class SceneApp extends Scene {
     };
 
     this._fbo = new FboPingPong(num, num, oSettings, 4);
+    this._fboRender = new FrameBuffer(GL.width, GL.height);
 
     let fboSize = num * numSets;
     this._fboPos = new FrameBuffer(fboSize, fboSize, oSettings);
@@ -201,6 +194,7 @@ class SceneApp extends Scene {
     this._drawCover = new DrawCover();
     this._drawBackground = new DrawBackground();
     this._drawFloor = new DrawFloor();
+    this._drawCompose = new DrawCompose();
 
     // init particles
     new DrawSave().bindFrameBuffer(this._fbo.read).draw();
@@ -292,10 +286,17 @@ class SceneApp extends Scene {
   }
 
   render() {
+    let applyPost =
+      this.orbitalControl.radius.value < 6 && Config.usePostEffect;
     let g = 0.91;
     GL.clear(...getMonoColor(g), 1);
     GL.setMatrices(this.camera);
     GL.disable(GL.DEPTH_TEST);
+
+    if (applyPost) {
+      this._fboRender.bind();
+      GL.clear(0, 0, 0, 0);
+    }
     // this._dCopy.draw(this._textureBg);
     this._drawBackground
       .bindTexture("uMap", this._textureBg, 0)
@@ -316,6 +317,16 @@ class SceneApp extends Scene {
       .bindTexture("uColorMap", this._textureColor, 1)
       .uniform("uViewport", [GL.width, GL.height])
       .draw();
+
+    if (applyPost) {
+      this._fboRender.unbind();
+      this._textureBlurredRender = applyBlur(this._fboRender.texture);
+      this._drawCompose
+        .bindTexture("uMap", this._fboRender.texture, 0)
+        .bindTexture("uBlurMap", this._textureBlurredRender, 1)
+        .uniform("uRatio", GL.aspectRatio)
+        .draw();
+    }
 
     GL.disable(GL.DEPTH_TEST);
     this._drawCover

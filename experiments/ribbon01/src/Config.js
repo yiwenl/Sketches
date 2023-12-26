@@ -1,4 +1,5 @@
 export default {
+  usePostEffect: true,
   colorIndex: 1,
   numSets: 8,
   numParticles: 128,

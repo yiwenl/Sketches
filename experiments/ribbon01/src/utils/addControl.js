@@ -22,6 +22,7 @@ export default (scene) => {
   gui.add(Config, "numParticles", [2, 128, 144, 256]).onChange(reload);
   gui.add(Config, "numSets", [4, 6, 8, 10, 12, 16]).onFinishChange(reload);
   gui.add(Config, "colorIndex", [0, 1, 2, 3, 4, 5]).onFinishChange(reload);
+  gui.add(Config, "usePostEffect").onFinishChange(refresh);
 
   const fSystem = gui.addFolder("System");
   const updateBackgroundColor = () => {
