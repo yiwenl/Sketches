@@ -55,7 +55,7 @@ function GLTool() {
    *
    * @param {undefined|Canvas|WebGLRenderingContext|WebGL2RenderingContext} mSource the source element
    */
-  this.init = function(mSource, mParameters = {}) {
+  this.init = function (mSource, mParameters = {}) {
     const params = objectAssign({}, defaultGLParameters, mParameters);
 
     if (mSource === undefined) {
@@ -123,7 +123,7 @@ function GLTool() {
    * @param {number} b the blue value
    * @param {number} a the alpha value
    */
-  this.clear = function(r = 0, g = 0, b = 0, a = 0) {
+  this.clear = function (r = 0, g = 0, b = 0, a = 0) {
     const { gl } = this;
     gl.clearColor(r, g, b, a);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -135,7 +135,7 @@ function GLTool() {
    * @param {number} mWidth the width
    * @param {number} mHeight the height
    */
-  this.setSize = function(mWidth, mHeight) {
+  this.setSize = function (mWidth, mHeight) {
     _width = Math.floor(mWidth);
     _height = Math.floor(mHeight);
     this.canvas.width = _width;
@@ -153,7 +153,7 @@ function GLTool() {
    * @param {number} w the width
    * @param {number} h the height
    */
-  this.viewport = function(x, y, w, h) {
+  this.viewport = function (x, y, w, h) {
     if (!equals(_viewport, [x, y, w, h])) {
       _viewport = [x, y, w, h];
       this.gl.viewport(x, y, w, h);
@@ -165,7 +165,7 @@ function GLTool() {
    *
    * @returns {vec4} the WebGL viewport
    */
-  this.getViewport = function() {
+  this.getViewport = function () {
     return _viewport;
   };
 
@@ -174,7 +174,7 @@ function GLTool() {
    *
    * @returns {number} the aspect ratio
    */
-  this.getAspectRatio = function() {
+  this.getAspectRatio = function () {
     return _aspectRatio;
   };
 
@@ -182,7 +182,7 @@ function GLTool() {
    * enable specific WebGL capabilities for this context.
    * @param {GLenum} the GLenum value of the capability
    */
-  this.enable = function(mParameter) {
+  this.enable = function (mParameter) {
     this.gl.enable(mParameter);
   };
 
@@ -190,7 +190,7 @@ function GLTool() {
    * disable specific WebGL capabilities for this context.
    * @param {GLenum} mParameter the GLenum value of the capability
    */
-  this.disable = function(mParameter) {
+  this.disable = function (mParameter) {
     this.gl.disable(mParameter);
   };
 
@@ -198,7 +198,7 @@ function GLTool() {
    * Set the culling of the WebGL Context
    * @param {GLenum} mValue the GLenum value of the culling
    */
-  this.cullFace = function(mValue) {
+  this.cullFace = function (mValue) {
     this.gl.cullFace(mValue);
   };
 
@@ -206,7 +206,7 @@ function GLTool() {
    * Set WebGL blending to Alpha blending
    *
    */
-  this.enableAlphaBlending = function() {
+  this.enableAlphaBlending = function () {
     const { gl } = this;
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   };
@@ -215,7 +215,7 @@ function GLTool() {
    * Set WebGL blending to Additive blending
    *
    */
-  this.enableAdditiveBlending = function() {
+  this.enableAdditiveBlending = function () {
     const { gl } = this;
     gl.blendFunc(gl.ONE, gl.ONE);
   };
@@ -225,7 +225,7 @@ function GLTool() {
    *
    * @param {Camera} mCamera the camera going to be used
    */
-  this.setMatrices = function(mCamera) {
+  this.setMatrices = function (mCamera) {
     _camera = mCamera;
     this.setModelMatrix(_identityMatrix);
   };
@@ -235,7 +235,7 @@ function GLTool() {
    *
    * @param {mat4} mModelMatrix the model matrix
    */
-  this.setModelMatrix = function(mModelMatrix) {
+  this.setModelMatrix = function (mModelMatrix) {
     mat4.copy(_modelMatrix, mModelMatrix);
     if (_camera !== undefined) {
       mat4.multiply(_matrix, _camera.viewMatrix, _modelMatrix);
@@ -254,7 +254,7 @@ function GLTool() {
    *
    * @param {GLShader} mShader the shader going to be use
    */
-  this.useShader = function(mShader) {
+  this.useShader = function (mShader) {
     _shader = mShader;
     this.shaderProgram = mShader.shaderProgram;
     this.gl.useProgram(this.shaderProgram);
@@ -265,7 +265,7 @@ function GLTool() {
    *
    * @param {Mesh|[Mesh]} mMesh the meshes that is going to be drawn
    */
-  this.draw = function(mMesh) {
+  this.draw = function (mMesh) {
     if (mMesh.length) {
       mMesh.forEach((m) => this.draw(m));
       return;
@@ -304,7 +304,7 @@ function GLTool() {
    *
    * @returns {Camera} the camera that is using now
    */
-  this.getCamera = function() {
+  this.getCamera = function () {
     return _camera;
   };
 
@@ -312,7 +312,7 @@ function GLTool() {
    * Destroy WebGL Context
    *
    */
-  this.destroy = function(mRemove = true) {
+  this.destroy = function (mRemove = true) {
     this.gl.getExtension("WEBGL_lose_context").loseContext();
     if (mRemove && this.canvas.parentNode !== undefined) {
       this.canvas.parentNode.removeChild(this.canvas);
@@ -326,7 +326,7 @@ function GLTool() {
    *
    * @returns {number} the width
    */
-  this.__defineGetter__("width", function() {
+  this.__defineGetter__("width", function () {
     return _width;
   });
 
@@ -335,7 +335,7 @@ function GLTool() {
    *
    * @returns {number} the height
    */
-  this.__defineGetter__("height", function() {
+  this.__defineGetter__("height", function () {
     return _height;
   });
 
@@ -344,7 +344,7 @@ function GLTool() {
    *
    * @returns {bool} if context is WebGL 2
    */
-  this.__defineGetter__("webgl2", function() {
+  this.__defineGetter__("webgl2", function () {
     return _webgl2;
   });
 
@@ -353,7 +353,7 @@ function GLTool() {
    *
    * @returns {bool} if is mobile browser
    */
-  this.__defineGetter__("isMobile", function() {
+  this.__defineGetter__("isMobile", function () {
     return _isMobile;
   });
 
@@ -362,7 +362,7 @@ function GLTool() {
    *
    * @returns {number} the aspect ratio
    */
-  this.__defineGetter__("aspectRatio", function() {
+  this.__defineGetter__("aspectRatio", function () {
     return _aspectRatio;
   });
 

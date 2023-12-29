@@ -13,6 +13,10 @@ export const logError = (e) => {
   console.error(e);
 };
 
+export const clamp = (v, min, max) => {
+  return Math.max(min, Math.min(max, v));
+};
+
 export const random = (a, b) => {
   if (a === undefined) {
     return fxrand();

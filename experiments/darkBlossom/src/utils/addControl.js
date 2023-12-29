@@ -18,6 +18,14 @@ export default (scene) => {
 
   const gui = new dat.GUI({ width: 300 });
   window.gui = gui;
+  gui
+    .add(Config, "numParticles", [128, 144, 192, 256, 384, 512])
+    .onFinishChange(reload);
+  gui.add(Config, "floorLevel", 0, -2).onFinishChange(reload);
+  gui.addColor(Config, "colorBg").onChange(refresh);
+  gui.addColor(Config, "colorCover").onChange(refresh);
+  gui.addColor(Config, "colorShadow").onChange(refresh);
+  gui.addColor(Config, "colorPetal").onChange(refresh);
 
   const fSystem = gui.addFolder("System");
   const updateBackgroundColor = () => {
@@ -59,4 +67,6 @@ export default (scene) => {
   if (Config.showThumbnail) {
     addPreview(GL.canvas);
   }
+
+  // dat.GUI.toggleHide();
 };

@@ -55,6 +55,7 @@ class HitTestor extends EventDispatcher {
   }
 
   _checkHit(mType = "onHit") {
+    this.resolution = [window.innerWidth, window.innerHeight];
     const camera = this._camera;
     if (!camera) {
       return;
