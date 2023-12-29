@@ -11,6 +11,7 @@ import {
   HitTestor,
 } from "alfrid";
 import {
+  RAD,
   mix,
   random,
   randomInt,
@@ -21,6 +22,7 @@ import {
   getDateString,
 } from "./utils";
 import Config from "./Config";
+import Assets from "./Assets";
 import Scheduler from "scheduling";
 import { vec2, vec3, mat4 } from "gl-matrix";
 
@@ -35,11 +37,13 @@ import DrawSim from "./DrawSim";
 import DrawReflection from "./DrawReflection";
 import DrawChroma from "./DrawChroma";
 import DrawCover from "./DrawCover";
+import DrawBg from "./DrawBg";
 
 // utils
 import generateNormalMap from "./generateNormalMap";
 import generateAOMap from "./generateAOMap";
 import generateBlueNoise from "./generateBlueNoise";
+import generatePaperTexture from "./generatePaperTexture";
 
 let hasSaved = false;
 let canSave = false;
@@ -49,14 +53,15 @@ class SceneApp extends Scene {
     super();
 
     this.orbitalControl.lock();
-    this.camera.setPerspective((45 * Math.PI) / 180, GL.aspectRatio, 6, 15);
+    // this.camera.setPerspective((45 * Math.PI) / 180, GL.aspectRatio, 6, 15);
+    this.camera.setPerspective(45 * RAD, GL.aspectRatio, 6, 15);
 
     // fluid
-    const DISSIPATION = 0.985;
+    const DISSIPATION = 0.995;
     this._fluid = new FluidSimulation({
-      DENSITY_DISSIPATION: DISSIPATION,
-      VELOCITY_DISSIPATION: DISSIPATION,
-      PRESSURE_DISSIPATION: DISSIPATION,
+      DENSITY_DISSIPATION: 0.99,
+      VELOCITY_DISSIPATION: 0.98,
+      PRESSURE_DISSIPATION: 0.98,
     });
 
     // shadow
@@ -83,6 +88,11 @@ class SceneApp extends Scene {
     this._rotation = 0;
     this._numEmit = 6;
     this._rotateDir = 1;
+    this._rotateOffsets = [];
+
+    for (let i = 0; i < this._numEmit; i++) {
+      this._rotateOffsets.push(random(-1, 1) * 0.75);
+    }
     this.pulse();
 
     // interaction
@@ -99,14 +109,26 @@ class SceneApp extends Scene {
     this._offset.setTo(0);
     this._offset.value = 1;
     this._theta = random(Math.PI * 2);
-    this._numEmit = randomInt(4, 9);
     this._rotation = randomInt(3) * 0.25;
+
+    this._numEmit = randomInt(3, 9);
+    this._rotateOffsets = [];
+    const rotateLimit = random();
+    for (let i = 0; i < this._numEmit; i++) {
+      this._rotateOffsets.push(random(-1, 1) * rotateLimit);
+    }
 
     setTimeout(() => this.pulse(), 3000);
   }
 
   _initTextures() {
     this.resize();
+
+    this._texturePaper = generatePaperTexture();
+    this._textureLookup = Assets.get("lookup");
+    this._textureLookup.minFilter = GL.NEAREST;
+    this._textureLookup.magFilter = GL.NEAREST;
+
     const { numParticles: num } = Config;
     const oSettings = {
       minFilter: GL.NEAREST,
@@ -136,6 +158,7 @@ class SceneApp extends Scene {
     this._dCopy = new DrawCopy();
     this._dBall = new DrawBall();
     this._drawCover = new DrawCover();
+    this._drawBg = new DrawBg();
 
     this._drawFluid = new DrawFluid().bindFrameBuffer(this._fboFluid);
 
@@ -159,7 +182,7 @@ class SceneApp extends Scene {
       vec3.copy(this._hit, e.hit);
 
       const d = vec3.distance(this._preHit, this._hit);
-      const f = smoothstep(0.02, 0.3, d);
+      const f = smoothstep(0.01, 0.1, d);
       const pos = [
         (this._hit[0] / s) * 0.5 + 0.5,
         (this._hit[1] / s) * 0.5 + 0.5,
@@ -169,9 +192,9 @@ class SceneApp extends Scene {
         this._hit[1] - this._preHit[1],
       ];
 
-      const strength = mix(2.0, 20.0, Math.pow(f, 2.0));
+      const strength = mix(5.0, 10.0, f) * 2;
       const radius = mix(1.0, 2.0, f);
-      this._fluid.updateFlow(pos, dir, strength, radius, 0.1);
+      this._fluid.updateFlow(pos, dir, strength, radius, 0.81);
     });
   }
 
@@ -210,6 +233,13 @@ class SceneApp extends Scene {
     let g = 0.95;
     GL.clear(g, g, g, 1);
     GL.setMatrices(this.camera);
+    GL.disable(GL.DEPTH_TEST);
+    // this._dCopy.draw(this._texturePaper);
+    this._drawBg
+      .bindTexture("uMap", this._texturePaper, 0)
+      .uniform("uRatio", GL.aspectRatio)
+      .draw();
+    GL.enable(GL.DEPTH_TEST);
     this._renderBlocks(true);
     this._fboRender.unbind();
 
@@ -224,12 +254,13 @@ class SceneApp extends Scene {
     const time = this._theta;
     let f = sin(this._offset.value * PI);
     f = smoothstep(0.0, 0.8, f);
-    f = Math.pow(f, 2) * 1.5;
+    f = Math.pow(f, 2) * 0.5;
     const noise = 1;
     const angle = this._rotation * f;
 
     for (let i = 0; i < num; i++) {
-      const a = (i / num) * PI * 2 + time;
+      const rotateOffset = this._rotateOffsets[i] || 0;
+      const a = (i / num) * PI * 2 + time + rotateOffset;
       let pos = [r, 0];
       let dir = [1, 0];
       pos = vec2.rotate(pos, pos, [0, 0], a);
@@ -237,14 +268,15 @@ class SceneApp extends Scene {
       vec2.rotate(dir, dir, [0, 0], a + angle * this._rotateDir);
 
       const radius = random(1.5, 2);
-      const strength = random(0.5, 1) * f;
+      const strength = random(0.75, 1) * f;
       this._fluid.updateFlow(pos, dir, strength, radius, noise);
     }
 
     r = 0.2;
     // num = 8;
     for (let i = 0; i < num; i++) {
-      const a = ((i + 0.5) / num) * PI * 2 - time;
+      const rotateOffset = this._rotateOffsets[i] || 0;
+      const a = ((i + 0.5) / num) * PI * 2 - time + rotateOffset;
       let pos = [r + random(-1, 1) * 0.1, 0];
       let dir = [-1, 0];
       pos = vec2.rotate(pos, pos, [0, 0], a);
@@ -252,7 +284,7 @@ class SceneApp extends Scene {
       vec2.rotate(dir, dir, [0, 0], a + angle * this._rotateDir);
 
       const radius = random(1, 1.5);
-      const strength = random(0.5, 1) * f;
+      const strength = random(0.75, 1) * f;
       this._fluid.updateFlow(pos, dir, strength, radius, noise);
     }
 
@@ -298,12 +330,12 @@ class SceneApp extends Scene {
     GL.setMatrices(this.camera);
 
     GL.disable(GL.DEPTH_TEST);
-    // this._dCopy.draw(this._fboRender.texture);
 
     this._drawChroma
       .bindTexture("uMap", this._fboRender.texture, 0)
       .bindTexture("uNormalMap", this._textureNormal, 1)
       .bindTexture("uAOMap", this._textureAO, 2)
+      .bindTexture("uLookupMap", this._textureLookup, 3)
       .uniform("uColorAO", Config.colorAO.map(toGlsl))
       .draw();
     // this._dCopy.draw(this._textureNormal);
@@ -326,6 +358,7 @@ class SceneApp extends Scene {
 
     this._drawCover
       .bindTexture("uMap", this._textureNoise, 0)
+      .bindTexture("uLookupMap", this._textureLookup, 1)
       .uniform("uRatio", GL.aspectRatio)
       .draw();
 
@@ -342,6 +375,7 @@ class SceneApp extends Scene {
     const { innerWidth, innerHeight } = window;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);
+    console.log(GL.aspectRatio, 9 / 16);
   }
 }
 

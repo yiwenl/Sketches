@@ -83,6 +83,7 @@ vTextureCoord = aPosition * .5 + .5;
       .setClearColor(0, 0, 0, 1)
       // .uniform("uTimestep", "float", 0.0005)
       .uniform("uTimestep", "float", 0.001)
+      .uniform("uTimestep", "float", 0.0003)
       .uniform("uTexelSize", "vec2", this._texelSize);
 
     this._drawDivergence = new Draw()

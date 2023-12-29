@@ -25,16 +25,18 @@ out vec4 vShadowCoord;
 #pragma glslify: rotate = require(./glsl-utils/rotate.glsl)
 
 #define axisX vec3(1.0, 0.0, 0.0)
+#define PI 3.141592653589793
 
 void main(void) {
 
     vec3 vel = texture(uVelMap, aPosOffset.xy).xyz;
-    float scaleSpeed = length(vel);
-    scaleSpeed = smoothstep(0.0, 0.1, scaleSpeed);
-    scaleSpeed = mix(0.2, 1.0, scaleSpeed) * 2.0;
+    float speed = length(vel);
+    float scaleSpeed = smoothstep(0.0, 0.1, speed);
+    scaleSpeed = mix(0.2, 1.5, scaleSpeed);
 
     vec3 dir = normalize(vel);
-    float life = texture(uDataMap, aPosOffset.xy).x;
+    vec3 data = texture(uDataMap, aPosOffset.xy).xyz;
+    float life = data.x;
     float scaleLife = abs(life - 0.5);
     scaleLife = smoothstep(0.5, 0.4, scaleLife);
 
@@ -45,6 +47,7 @@ void main(void) {
     vec3 pos = aVertexPosition * aPosOffset.z * scaleLife * scaleSpeed;
     // vec3 pos = aVertexPosition * aPosOffset.z;
     pos.x *= mix(2.0, 4.0, aExtra.y);
+    pos.yz = rotate(pos.yz, data.z);
 
     pos = rotate(pos, axis, angle);
 
@@ -59,9 +62,11 @@ void main(void) {
 
     float g = mix(0.95, 1.0, aExtra.x);
     vec3 color = vec3(g);
-    // if(fract(aExtra.x + aExtra.y + aExtra.z) < .01) {
-    //     color *= .5;
-    // }
+    float t = fract(aExtra.x + aExtra.y + aExtra.z);
+    float colMul = mix(.8, 1.2, t);
+    float threshold = mix(0.1, 0.25, t);
+    t = smoothstep(threshold * .9, threshold, speed);
+    color *= mix(vec3(1.0), vec3(colMul, 0.1, 0.0), t);
 
     vColor = color;
 

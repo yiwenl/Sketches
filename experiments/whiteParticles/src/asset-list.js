@@ -1,6 +1,6 @@
 
 const assetsToLoad = [
-	
+	{"id":"lookup","url":"assets/lookup.png","type":"png"}
 ];
 
 

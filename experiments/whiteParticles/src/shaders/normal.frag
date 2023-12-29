@@ -14,7 +14,7 @@ out vec4 oColor;
 
 
 const vec2 size = vec2(0.05, 0.0);
-const vec3 off = vec3(-1.0, 0.0, 1.0) * 0.05;
+const vec3 off = vec3(-1.0, 0.0, 1.0) * 0.001;
 
 float luma(vec3 color) {
   return dot(color, vec3(0.299, 0.587, 0.114));

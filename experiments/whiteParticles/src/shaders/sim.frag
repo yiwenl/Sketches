@@ -47,6 +47,9 @@ void main(void) {
     vec3 data = texture(uDataMap, vTextureCoord).xyz;
     vec3 posOrg = texture(uPosOrgMap, vTextureCoord).xyz;
 
+    // data.z = mod(data.z + 0.01, PI * 2.0);
+    data.z += 0.1;
+
     float life = data.x;
     life -= mix(1.0, 4.0, data.y) * 0.003 * mix(1.0, 2.0, uLifeDecrease);
 
