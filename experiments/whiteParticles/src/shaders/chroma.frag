@@ -74,7 +74,7 @@ void main(void) {
     float ao = texture(uAOMap, vTextureCoord).r;
     vec3 colorAO = mix(uColorAO, vec3(1.0), ao);
 
-    vec2 off = n.rb * 0.005;
+    vec2 off = n.rb * 0.0025;
     off *= 2.0;
 
     vec3 color0 = texture(uMap, uv-off).rgb * colorAO * vec3(1.0, 0.0, 0.0);
@@ -90,7 +90,7 @@ void main(void) {
     // vec3 colorAdj = mix(vec3(1.0), vec3(1.0, .97, .94) * 0.85, d);
     vec3 colorAdj = mix(vec3(1.0), vec3(.5), d);
     // color *= colorAdj;
-    color -= d * 0.35;
+    color -= d * 0.4;
 
     oColor = lookup(vec4(color, 1.0), uLookupMap, .5);
     // oColor = vec4(n.rb, 0.0, 1.0);

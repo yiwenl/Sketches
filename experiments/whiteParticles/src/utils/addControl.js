@@ -30,11 +30,5 @@ export default (scene) => {
     gui.add(Config, "showReflection").onChange(refresh);
   }
 
-  const fSystem = gui.addFolder("System");
-  const updateBackgroundColor = () => {
-    refresh();
-    document.body.style.backgroundColor = rgb(Config.background);
-  };
-
-  dat.GUI.toggleHide();
+  // dat.GUI.toggleHide();
 };

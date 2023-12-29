@@ -40,6 +40,11 @@ const initScene = () => {
   document.body.appendChild(canvas);
 
   GL.init(canvas, { alpha: false, preserveDrawingBuffer: true });
+  const { gl } = GL;
+  if (`drawingBufferColorSpace` in gl) {
+    gl.drawingBufferColorSpace = "display-p3";
+    console.log(gl.drawingBufferColorSpace);
+  }
 
   scene = new Scene();
 };

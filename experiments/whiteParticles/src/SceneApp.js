@@ -38,6 +38,7 @@ import DrawReflection from "./DrawReflection";
 import DrawChroma from "./DrawChroma";
 import DrawCover from "./DrawCover";
 import DrawBg from "./DrawBg";
+import DrawDirection from "./DrawDirection";
 
 // utils
 import generateNormalMap from "./generateNormalMap";
@@ -53,7 +54,6 @@ class SceneApp extends Scene {
     super();
 
     this.orbitalControl.lock();
-    // this.camera.setPerspective((45 * Math.PI) / 180, GL.aspectRatio, 6, 15);
     this.camera.setPerspective(45 * RAD, GL.aspectRatio, 6, 15);
 
     // fluid
@@ -172,6 +172,7 @@ class SceneApp extends Scene {
     this._drawSim = new DrawSim();
     this._drawReflection = new DrawReflection();
     this._drawChroma = new DrawChroma();
+    this._drawDirection = new DrawDirection();
 
     // hitTestor
     const { meshSize } = this._drawFluid;
@@ -340,6 +341,12 @@ class SceneApp extends Scene {
       .draw();
     // this._dCopy.draw(this._textureNormal);
 
+    this._drawDirection
+      .bindTexture("uMap", this._fluid.velocity, 0)
+      .bindTexture("uDensityMap", this._fluid.density, 1)
+      .uniform("uTime", Scheduler.getElapsedTime())
+      .draw();
+
     if (Config.showReflection) {
       this._drawReflection
         .bindTexture("uNormalMap", this._textureNormal, 0)
@@ -375,7 +382,7 @@ class SceneApp extends Scene {
     const { innerWidth, innerHeight } = window;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);
-    console.log(GL.aspectRatio, 9 / 16);
+    // console.log(GL.aspectRatio, 9 / 16);
   }
 }
 

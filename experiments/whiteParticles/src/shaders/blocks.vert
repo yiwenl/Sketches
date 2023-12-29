@@ -32,7 +32,7 @@ void main(void) {
     vec3 vel = texture(uVelMap, aPosOffset.xy).xyz;
     float speed = length(vel);
     float scaleSpeed = smoothstep(0.0, 0.1, speed);
-    scaleSpeed = mix(0.2, 1.5, scaleSpeed);
+    scaleSpeed = mix(0.2, 1.05, scaleSpeed);
 
     vec3 dir = normalize(vel);
     vec3 data = texture(uDataMap, aPosOffset.xy).xyz;
@@ -45,8 +45,7 @@ void main(void) {
 
     vec3 posOffset = texture(uPosMap, aPosOffset.xy).xyz;
     vec3 pos = aVertexPosition * aPosOffset.z * scaleLife * scaleSpeed;
-    // vec3 pos = aVertexPosition * aPosOffset.z;
-    pos.x *= mix(2.0, 4.0, aExtra.y);
+    pos.x *= mix(2.0, 6.0, aExtra.y);
     pos.yz = rotate(pos.yz, data.z);
 
     pos = rotate(pos, axis, angle);
