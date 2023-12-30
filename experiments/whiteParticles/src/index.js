@@ -43,7 +43,7 @@ const initScene = () => {
   const { gl } = GL;
   if (`drawingBufferColorSpace` in gl) {
     gl.drawingBufferColorSpace = "display-p3";
-    console.log(gl.drawingBufferColorSpace);
+    console.log("Drawing Buffer Color Space:", gl.drawingBufferColorSpace);
   }
 
   scene = new Scene();

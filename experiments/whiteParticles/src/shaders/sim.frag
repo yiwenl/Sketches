@@ -62,7 +62,9 @@ void main(void) {
     density = mix(0.5, 1.0, density);
 
     // depth noise
-    float noise = snoise(vec3(pos * 0.75 + uTime * 0.5 + extra * 0.1));
+    vec3 noisePos = vec3(pos.xy * 0.75, uTime * 0.5)+ extra * 0.1;
+    float noise = snoise(noisePos);
+    // float noise = snoise(vec3(pos * 0.75 + uTime * 0.5 + extra * 0.1));
     acc.z += noise * 30.0 * density;
 
     acc += fluid * 0.03 * density;

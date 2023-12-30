@@ -1,4 +1,5 @@
 export default {
+  usePoseDetection: true,
   colorShadow: [203, 205, 227],
   colorDiffuse: [247, 243, 238],
   colorAO: [198, 198, 215],

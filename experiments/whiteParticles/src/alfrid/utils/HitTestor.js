@@ -59,6 +59,7 @@ class HitTestor extends EventDispatcher {
     if (!camera) {
       return;
     }
+    this.resolution = [window.innerWidth, window.innerHeight];
 
     const mx = (this._lastPos.x / this.resolution[0]) * 2.0 - 1.0;
     const my = -(this._lastPos.y / this.resolution[1]) * 2.0 + 1.0;

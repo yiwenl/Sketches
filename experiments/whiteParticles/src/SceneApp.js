@@ -26,6 +26,9 @@ import Assets from "./Assets";
 import Scheduler from "scheduling";
 import { vec2, vec3, mat4 } from "gl-matrix";
 
+// pose detection
+import PoseDetection, { POSE_FOUND, POSE_LOST } from "./PoseDetection";
+
 // fluid simulation
 import FluidSimulation from "./fluid-sim";
 
@@ -69,7 +72,6 @@ class SceneApp extends Scene {
     const r = 8;
     this._lightPosition = [0, 7, 3];
     vec3.rotateX(this._lightPosition, this._lightPosition, [0, 0, 0], 0.3);
-    console.log(this._lightPosition);
     this._cameraLight.ortho(-r, r, r, -r, 1, 15);
     this._cameraLight.lookAt(this._lightPosition, [0, 0, 0]);
     this._startTime = random(100);
@@ -99,6 +101,10 @@ class SceneApp extends Scene {
     this._hit = [0, 0, 0];
     this._preHit = [0, 0, 0];
 
+    if (Config.usePoseDetection) {
+      this._initPoseDetection();
+    }
+
     setTimeout(() => {
       canSave = true;
     }, 500);
@@ -120,6 +126,35 @@ class SceneApp extends Scene {
 
     setTimeout(() => this.pulse(), 3000);
   }
+
+  _initPoseDetection() {
+    this._poseDetection = new PoseDetection();
+    this._poseDetection.on(POSE_FOUND, this._onPoseFound);
+    this._poseDetection.on(POSE_LOST, () => {
+      // this._flowForce.value = 1;
+    });
+  }
+
+  _onPoseFound = (mPoints) => {
+    if (!this._posePoints || this._posePoints.length !== mPoints.length) {
+      this._posePoints = mPoints.map(({ pos }) => pos);
+    } else {
+      const threshold = 0.5;
+      mPoints.forEach(({ pos, score }, i) => {
+        const dir = vec2.sub([0, 0], pos, this._posePoints[i]);
+        let speed = vec2.length(dir);
+        let f = smoothstep(0.01, 0.03, speed);
+        vec2.normalize(dir, dir);
+
+        if (score > threshold && f > 0) {
+          const radius = mix(2, 2.5, f);
+          const force = mix(2, 20, f);
+          this._fluid.updateFlow(pos, dir, force, radius, 0.5);
+        }
+        vec2.copy(this._posePoints[i], pos);
+      });
+    }
+  };
 
   _initTextures() {
     this.resize();
@@ -255,7 +290,7 @@ class SceneApp extends Scene {
     const time = this._theta;
     let f = sin(this._offset.value * PI);
     f = smoothstep(0.0, 0.8, f);
-    f = Math.pow(f, 2) * 0.5;
+    f = Math.pow(f, 2) * 0.1;
     const noise = 1;
     const angle = this._rotation * f;
 
@@ -351,6 +386,7 @@ class SceneApp extends Scene {
       this._drawReflection
         .bindTexture("uNormalMap", this._textureNormal, 0)
         .bindTexture("uNoiseMap", this._textureNoise, 1)
+        .bindTexture("uLookupMap", this._textureLookup, 2)
         .uniform("uColor", Config.colorReflection0.map(toGlsl))
         .uniform("uLight", [0.3, 0.1, 1.0])
         .draw();
@@ -358,6 +394,7 @@ class SceneApp extends Scene {
       this._drawReflection
         .bindTexture("uNormalMap", this._textureNormal, 0)
         .bindTexture("uNoiseMap", this._textureNoise, 1)
+        .bindTexture("uLookupMap", this._textureLookup, 2)
         .uniform("uColor", Config.colorReflection1.map(toGlsl))
         .uniform("uLight", [-0.3, 0.0, 1.0])
         .draw();
@@ -382,7 +419,6 @@ class SceneApp extends Scene {
     const { innerWidth, innerHeight } = window;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);
-    // console.log(GL.aspectRatio, 9 / 16);
   }
 }
 

@@ -26,5 +26,5 @@ void main(void) {
 
     g = pow(g, .75);
 
-    oColor = vec4(uColor, g * 0.4);
+    oColor = vec4(uColor, g * 0.5);
 }
