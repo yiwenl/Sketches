@@ -7,8 +7,29 @@ body {
   padding: 0;
 }
 
+video {
+  position: absolute;
+  z-index: 9;
+  width: 320px;
+  height: 240px;
+  right: 0;
+  bottom: 0;
+  transform: scale(-1, 1);
+  /* display: none; */
+}
+
 .dg {
   z-index: 99999 !important;
+}
+
+.hidden {
+  transform: translate(-100%, 0);
+  color: white;
+  z-index: 99999;
+  top: 0;
+  left: 0;
+  position: absolute;
+  font-size: 30px;
 }
 
 #main-canvas {

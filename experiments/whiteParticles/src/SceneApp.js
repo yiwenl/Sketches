@@ -39,9 +39,9 @@ import DrawBlocks from "./DrawBlocks";
 import DrawSim from "./DrawSim";
 import DrawReflection from "./DrawReflection";
 import DrawChroma from "./DrawChroma";
-import DrawCover from "./DrawCover";
 import DrawBg from "./DrawBg";
 import DrawDirection from "./DrawDirection";
+import DrawCompose from "./DrawCompose";
 
 // utils
 import generateNormalMap from "./generateNormalMap";
@@ -175,7 +175,7 @@ class SceneApp extends Scene {
     this._fboPosOrg = new FrameBuffer(num, num, oSettings);
 
     this._fboRender = new FrameBuffer(GL.width, GL.height);
-    this._fboPost = new FboPingPong(GL.width, GL.height);
+    this._fboPost = new FrameBuffer(GL.width, GL.height);
 
     this._fboFluid = new FrameBuffer(
       GL.width,
@@ -192,8 +192,8 @@ class SceneApp extends Scene {
     this._dAxis = new DrawAxis();
     this._dCopy = new DrawCopy();
     this._dBall = new DrawBall();
-    this._drawCover = new DrawCover();
     this._drawBg = new DrawBg();
+    this._drawCompose = new DrawCompose();
 
     this._drawFluid = new DrawFluid().bindFrameBuffer(this._fboFluid);
 
@@ -290,7 +290,7 @@ class SceneApp extends Scene {
     const time = this._theta;
     let f = sin(this._offset.value * PI);
     f = smoothstep(0.0, 0.8, f);
-    f = Math.pow(f, 2) * 0.1;
+    f = Math.pow(f, 2) * 0.2;
     const noise = 1;
     const angle = this._rotation * f;
 
@@ -365,6 +365,8 @@ class SceneApp extends Scene {
     GL.clear(g, g, g, 1);
     GL.setMatrices(this.camera);
 
+    this._fboPost.bind();
+    GL.clear(0, 0, 0, 1);
     GL.disable(GL.DEPTH_TEST);
 
     this._drawChroma
@@ -382,27 +384,27 @@ class SceneApp extends Scene {
       .uniform("uTime", Scheduler.getElapsedTime())
       .draw();
 
-    if (Config.showReflection) {
-      this._drawReflection
-        .bindTexture("uNormalMap", this._textureNormal, 0)
-        .bindTexture("uNoiseMap", this._textureNoise, 1)
-        .bindTexture("uLookupMap", this._textureLookup, 2)
-        .uniform("uColor", Config.colorReflection0.map(toGlsl))
-        .uniform("uLight", [0.3, 0.1, 1.0])
-        .draw();
+    GL.enableAdditiveBlending();
+    this._drawReflection
+      .bindTexture("uNormalMap", this._textureNormal, 0)
 
-      this._drawReflection
-        .bindTexture("uNormalMap", this._textureNormal, 0)
-        .bindTexture("uNoiseMap", this._textureNoise, 1)
-        .bindTexture("uLookupMap", this._textureLookup, 2)
-        .uniform("uColor", Config.colorReflection1.map(toGlsl))
-        .uniform("uLight", [-0.3, 0.0, 1.0])
-        .draw();
-    }
+      .uniform("uColor", Config.colorReflection0.map(toGlsl))
+      .uniform("uLight", [0.3, 0.1, 1.0])
+      .draw();
 
-    this._drawCover
-      .bindTexture("uMap", this._textureNoise, 0)
+    this._drawReflection
+      .bindTexture("uNormalMap", this._textureNormal, 0)
+      .uniform("uColor", Config.colorReflection1.map(toGlsl))
+      .uniform("uLight", [-0.3, 0.0, 1.0])
+      .draw();
+    GL.enableAlphaBlending();
+
+    this._fboPost.unbind();
+
+    this._drawCompose
+      .bindTexture("uMap", this._fboPost.texture, 0)
       .bindTexture("uLookupMap", this._textureLookup, 1)
+      .bindTexture("uNoiseMap", this._textureNoise, 2)
       .uniform("uRatio", GL.aspectRatio)
       .draw();
 
@@ -419,6 +421,9 @@ class SceneApp extends Scene {
     const { innerWidth, innerHeight } = window;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);
+
+    this._fboRender = new FrameBuffer(GL.width, GL.height);
+    this._fboPost = new FrameBuffer(GL.width, GL.height);
   }
 }
 
