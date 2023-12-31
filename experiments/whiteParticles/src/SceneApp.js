@@ -375,6 +375,7 @@ class SceneApp extends Scene {
       .bindTexture("uAOMap", this._textureAO, 2)
       .bindTexture("uLookupMap", this._textureLookup, 3)
       .uniform("uColorAO", Config.colorAO.map(toGlsl))
+      .uniform("uRatio", GL.aspectRatio)
       .draw();
     // this._dCopy.draw(this._textureNormal);
 

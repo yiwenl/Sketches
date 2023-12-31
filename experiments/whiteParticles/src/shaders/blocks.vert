@@ -62,7 +62,7 @@ void main(void) {
     float g = mix(0.95, 1.0, aExtra.x);
     vec3 color = vec3(g);
     float t = fract(aExtra.x + aExtra.y + aExtra.z);
-    float colMul = mix(.8, 1.2, t);
+    float colMul = mix(.6, .9, t);
     float threshold = mix(0.1, 0.25, t);
     t = smoothstep(threshold * .9, threshold, speed);
     color *= mix(vec3(1.0), vec3(colMul, 0.1, 0.0), t);
