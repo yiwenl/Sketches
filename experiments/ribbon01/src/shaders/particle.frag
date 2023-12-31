@@ -16,7 +16,7 @@ void main(void) {
 
     vec2 uv = gl_PointCoord.xy - 0.5;
     uv = abs(rotate(uv, PI / 4.0 * step(vRandom.z, 0.5)));
-    float t = 0.05;
+    float t = 0.1;
     float tx = smoothstep(t + 0.01, t, uv.x);
     float ty = smoothstep(t + 0.01, t, uv.y);
 

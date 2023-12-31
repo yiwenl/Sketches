@@ -36,6 +36,7 @@ import DrawCover from "./DrawCover";
 import DrawBackground from "./DrawBackground";
 import DrawFloor from "./DrawFloor";
 import DrawCompose from "./DrawCompose";
+import DrawGrid from "./DrawGrid";
 
 import generateBlueNoise from "./generateBlueNoise";
 import generateBg from "./generateBg";
@@ -60,7 +61,7 @@ class SceneApp extends Scene {
     this._cameraLight.ortho(-r, r, r, -r, 2, 20);
     this._cameraLight.lookAt(this._lightPosition, [0, 0, 0]);
 
-    r = 8;
+    r = 10;
     this._cameraFloorShadow = new CameraOrtho();
     this._cameraFloorShadow.ortho(-r, r, r, -r, 4, 17);
     const posLight = [0, 10, 0];
@@ -169,9 +170,9 @@ class SceneApp extends Scene {
     GL.clear(0, 0, 0, 1);
     this._fboPos.unbind();
 
-    fboSize = 1024;
+    fboSize = 1024 * 2;
     this._fboShadow = new FrameBuffer(fboSize, fboSize, oSettingsShadow);
-    fboSize = 1024 / 2;
+    // fboSize = 1024;
     this._fboShadowFloor = new FrameBuffer(fboSize, fboSize, oSettingsShadow);
 
     // blue noise
@@ -195,6 +196,7 @@ class SceneApp extends Scene {
     this._drawBackground = new DrawBackground();
     this._drawFloor = new DrawFloor();
     this._drawCompose = new DrawCompose();
+    this._drawGrid = new DrawGrid();
 
     // init particles
     new DrawSave().bindFrameBuffer(this._fbo.read).draw();
@@ -261,7 +263,7 @@ class SceneApp extends Scene {
 
     this._fboShadowFloor.bind();
     GL.clear(0, 0, 0, 1);
-    GL.setMatrices(this._cameraLightShadow);
+    GL.setMatrices(this._cameraFloorShadow);
     this._renderRibbon(false);
     this._fboShadowFloor.unbind();
   }
@@ -304,6 +306,8 @@ class SceneApp extends Scene {
       .draw();
     GL.enable(GL.DEPTH_TEST);
     g = 0.2;
+
+    this._drawGrid.draw();
 
     this._drawFloor
       .bindTexture("uDepthMap", this._fboShadowFloor.depthTexture, 0)

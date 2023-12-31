@@ -44,5 +44,8 @@ void main(void) {
         s = 0.0;
     }
 
-    oColor = vec4(vec3(0.0), s * 0.05);
+    oColor = vec4(vec3(0.0), s * 0.2);
+
+    oColor = vec4(vTextureCoord, 0.0, 1.0);
+    oColor.rgb *= s;
 }

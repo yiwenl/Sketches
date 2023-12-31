@@ -65,5 +65,5 @@ export default (scene) => {
     addPreview(GL.canvas);
   }
 
-  dat.GUI.toggleHide();
+  // dat.GUI.toggleHide();
 };

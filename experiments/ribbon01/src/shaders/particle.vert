@@ -17,7 +17,7 @@ out vec3 vColor;
 
 #pragma glslify: particleSize    = require(./glsl-utils/particleSize.glsl)
 
-#define radius 0.02
+#define radius 0.025
 
 void main(void) {
     vec3 pos = texture(uPosMap, aTextureCoord).xyz;
