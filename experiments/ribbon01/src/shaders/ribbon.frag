@@ -44,5 +44,7 @@ void main(void) {
     float d = diffuse(vNormal, uLight, .3);
     vec3 color = vColor * d * s;
     color = smoothstep(vec3(0.0), vec3(1.0), color) * 1.2;
+
+
     oColor = vec4(color, 1.0);
 }

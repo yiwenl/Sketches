@@ -64,4 +64,6 @@ export default (scene) => {
   if (Config.showThumbnail) {
     addPreview(GL.canvas);
   }
+
+  dat.GUI.toggleHide();
 };

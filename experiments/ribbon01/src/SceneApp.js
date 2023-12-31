@@ -46,8 +46,8 @@ class SceneApp extends Scene {
     super();
     // this.orbitalControl.lock();
 
-    this.orbitalControl.radius.value = 7.5;
-    this.orbitalControl.radius.value = 4.5;
+    this.orbitalControl.radius.value = 6.5;
+    // this.orbitalControl.radius.value = 4.5;
     this.orbitalControl.radius.limit(4.5, 7);
     this.camera.setPerspective(90 * RAD, GL.aspectRatio, 0.1, 100);
 
@@ -344,6 +344,7 @@ class SceneApp extends Scene {
     const { innerWidth, innerHeight } = window;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);
+    this._fboRender = new FrameBuffer(GL.width, GL.height);
   }
 }
 

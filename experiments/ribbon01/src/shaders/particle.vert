@@ -12,12 +12,12 @@ uniform mat4 uProjectionMatrix;
 uniform vec2 uViewport;
 uniform sampler2D uPosMap;
 uniform sampler2D uColorMap;
-
+out vec3 vRandom;
 out vec3 vColor;
 
 #pragma glslify: particleSize    = require(./glsl-utils/particleSize.glsl)
 
-#define radius 0.015
+#define radius 0.02
 
 void main(void) {
     vec3 pos = texture(uPosMap, aTextureCoord).xyz;
@@ -30,4 +30,5 @@ void main(void) {
     float g = mix(0.8, 1.0, aVertexPosition.y);
     vec3 color = texture(uColorMap, aVertexPosition.yz).xyz;
     vColor = color * g;
+    vRandom = aVertexPosition;
 }
