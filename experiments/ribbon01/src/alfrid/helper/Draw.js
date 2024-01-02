@@ -125,6 +125,7 @@ class Draw {
         texture,
       };
     } else {
+      console.log("no index", name);
       this._uniformTextures.push({
         name,
         texture,

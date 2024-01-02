@@ -37,6 +37,8 @@ import DrawBackground from "./DrawBackground";
 import DrawFloor from "./DrawFloor";
 import DrawCompose from "./DrawCompose";
 import DrawGrid from "./DrawGrid";
+import DrawFxaa from "./DrawFxaa";
+import DrawFlowParticles from "./DrawFlowParticles";
 
 import generateBlueNoise from "./generateBlueNoise";
 import generateBg from "./generateBg";
@@ -48,7 +50,6 @@ class SceneApp extends Scene {
     // this.orbitalControl.lock();
 
     this.orbitalControl.radius.value = 6.5;
-    // this.orbitalControl.radius.value = 4.5;
     this.orbitalControl.radius.limit(4.5, 7);
     this.camera.setPerspective(90 * RAD, GL.aspectRatio, 0.1, 100);
 
@@ -87,7 +88,7 @@ class SceneApp extends Scene {
     this._seedTime = random(1000);
     this._hit = [999, 999, 999];
     this._center = [0, 0, 0];
-    // this._initHit();
+    this._initHit();
 
     this.speed = new EaseNumber(1, 0.08);
     this.lengthScale = new EaseNumber(1, 0.1);
@@ -150,6 +151,8 @@ class SceneApp extends Scene {
   _initTextures() {
     this.resize();
 
+    Config.colorIndex = randomInt(6);
+
     const { numParticles: num, numSets } = Config;
     const oSettings = {
       minFilter: GL.NEAREST,
@@ -163,6 +166,7 @@ class SceneApp extends Scene {
 
     this._fbo = new FboPingPong(num, num, oSettings, 4);
     this._fboRender = new FrameBuffer(GL.width, GL.height);
+    this._fboCompose = new FrameBuffer(GL.width, GL.height);
 
     let fboSize = num * numSets;
     this._fboPos = new FrameBuffer(fboSize, fboSize, oSettings);
@@ -195,8 +199,12 @@ class SceneApp extends Scene {
     this._drawCover = new DrawCover();
     this._drawBackground = new DrawBackground();
     this._drawFloor = new DrawFloor();
-    this._drawCompose = new DrawCompose();
     this._drawGrid = new DrawGrid();
+    this._drawFlowParticles = new DrawFlowParticles();
+    this._drawFxaa = new DrawFxaa();
+    this._drawCompose = new DrawCompose()
+      .setClearColor(0, 0, 0, 0)
+      .bindFrameBuffer(this._fboCompose);
 
     // init particles
     new DrawSave().bindFrameBuffer(this._fbo.read).draw();
@@ -206,7 +214,10 @@ class SceneApp extends Scene {
   }
 
   _initHit() {
-    this._hitTestor = new HitTestor(Geom.sphere(3, 24), this.camera);
+    const r = 20;
+    const mesh = Geom.plane(r, r / GL.aspectRatio, 1);
+    // this._hitTestor = new HitTestor(Geom.sphere(3, 24), this.camera);
+    this._hitTestor = new HitTestor(mesh, this.camera);
     this._hitTestor.on("onHit", (e) => {
       vec3.copy(this._hit, e.hit);
     });
@@ -288,8 +299,7 @@ class SceneApp extends Scene {
   }
 
   render() {
-    let applyPost =
-      this.orbitalControl.radius.value < 6 && Config.usePostEffect;
+    let applyPost = Config.usePostEffect;
     let g = 0.91;
     GL.clear(...getMonoColor(g), 1);
     GL.setMatrices(this.camera);
@@ -305,6 +315,9 @@ class SceneApp extends Scene {
       .uniform("uRatio", GL.aspectRatio)
       .draw();
     GL.enable(GL.DEPTH_TEST);
+
+    // g = 0.1;
+    // this._dBall.draw(this._hit, [g, g, g], [1, 0, 0]);
     g = 0.2;
 
     this._drawGrid.draw();
@@ -322,6 +335,11 @@ class SceneApp extends Scene {
       .uniform("uViewport", [GL.width, GL.height])
       .draw();
 
+    this._drawFlowParticles
+      .uniform("uViewport", [GL.width, GL.height])
+      .uniform("uTime", Scheduler.getElapsedTime())
+      .draw();
+
     if (applyPost) {
       this._fboRender.unbind();
       this._textureBlurredRender = applyBlur(this._fboRender.texture);
@@ -329,6 +347,12 @@ class SceneApp extends Scene {
         .bindTexture("uMap", this._fboRender.texture, 0)
         .bindTexture("uBlurMap", this._textureBlurredRender, 1)
         .uniform("uRatio", GL.aspectRatio)
+        .draw();
+
+      this._drawFxaa
+        .bindTexture("uMap", this._fboCompose.texture, 0)
+        .uniform("rtWidth", GL.width)
+        .uniform("rtHeight", GL.height)
         .draw();
     }
 
@@ -349,6 +373,7 @@ class SceneApp extends Scene {
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);
     this._fboRender = new FrameBuffer(GL.width, GL.height);
+    this._fboCompose = new FrameBuffer(GL.width, GL.height);
   }
 }
 

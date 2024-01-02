@@ -65,9 +65,9 @@ void main(void) {
 
     // repel to touch
     d = distance(pos, uTouch);
-    f = smoothstep(3.0, 0.0, d);
+    f = smoothstep(5.0, 3.0, d);
     dir = normalize(pos - uTouch);
-    acc -= dir * f * mix(1.5, 1.0, extra.y);
+    acc -= dir * f * 5.0/uSpeed;
     
     float speed = mix(2.0, 3.0, extra.x);
     // float speed = mix(2.0, 4.0, extra.x);

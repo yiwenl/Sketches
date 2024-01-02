@@ -11,11 +11,11 @@ export default class DrawGrid extends Draw {
     const mesh = Geom.cube(s, s, s);
 
     const r = 2;
-    const num = 5;
+    const num = 3;
     const posOffsets = [];
     const scales = [];
 
-    s = 0.01;
+    s = 0.02;
 
     for (let k = -num; k <= num; k++) {
       for (let j = -num; j <= num; j++) {
@@ -28,6 +28,8 @@ export default class DrawGrid extends Draw {
         }
       }
     }
+
+    console.log(posOffsets.length);
 
     mesh
       .bufferInstance(posOffsets, "aPosOffset")

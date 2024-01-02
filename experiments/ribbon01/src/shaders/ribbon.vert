@@ -52,8 +52,6 @@ void main(void) {
 
     vec3 pos = aVertexPosition * vec3(0.0, 1.0, 1.0);
     pos.yz *= mix(0.25, 1.0, aExtra.x);
-    // pos.yz *= mix(0.5, 0.3, aExtra.x) * 2.0;
-
 
     float index = aVertexPosition.x;
     vec3 curr = getPos(index, uv);

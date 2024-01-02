@@ -22,6 +22,8 @@ void main(void) {
 
     float alpha = max(tx, ty);
 
+    if(alpha < 0.9) discard;
 
-    oColor = vec4(vColor, alpha);
+
+    oColor = vec4(vColor, 1.0);
 }
