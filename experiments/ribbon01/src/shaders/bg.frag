@@ -2,8 +2,10 @@
 
 precision highp float;
 in vec2 vTextureCoord;
-uniform sampler2D uMap;
+uniform sampler2D uMapCurr;
+uniform sampler2D uMapPrev;
 uniform float uRatio;
+uniform float uColorOffset;
 
 out vec4 oColor;
 
@@ -19,7 +21,10 @@ void main(void) {
     d = smoothstep(0.6, 0.2, d);
 
     uv += 0.5;
-    vec4 color = texture(uMap, uv);
+    // vec4 color = texture(uMap, uv);
+    vec4 colorCurr = texture( uMapCurr, uv );
+    vec4 colorPrev = texture( uMapPrev, uv );
+    vec4 color = mix(colorPrev, colorCurr, uColorOffset);
 
     color.rgb *= mix(0.7, 1.0, d);
 

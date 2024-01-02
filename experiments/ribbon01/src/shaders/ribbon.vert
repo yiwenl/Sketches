@@ -13,13 +13,14 @@ uniform mat4 uProjectionMatrix;
 uniform mat4 uShadowMatrix;
 
 uniform sampler2D uPosMap;
-uniform sampler2D uColorMap;
+uniform sampler2D uColorMapCurr;
+uniform sampler2D uColorMapPrev;
 uniform float uTotal;
 uniform float uNumSets;
 uniform float uIndex;
 uniform float uTime;
 uniform float uLengthOffset;
-uniform vec3 uColor;
+uniform float uColorOffset;
 
 out vec2 vTextureCoord;
 out vec3 vNormal;
@@ -74,7 +75,10 @@ void main(void) {
     vNormal = n;
 
     float g = mix(.8, 1.0, aExtra.y);
-    vec3 color = texture(uColorMap, aExtra.yz).rgb;
+    float offset = clamp(uColorOffset * 2.0 - aExtra.z, 0.0, 1.0);
+    vec3 colorCurr = texture(uColorMapCurr, aExtra.yz).rgb;
+    vec3 colorPrev = texture(uColorMapPrev, aExtra.yz).rgb;
+    vec3 color = mix(colorPrev, colorCurr, offset);
     vColor = color * g;
     // vColor = uColor * g;
     vShadowCoord = uShadowMatrix * wsPos;

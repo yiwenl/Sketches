@@ -41,7 +41,7 @@ import DrawFxaa from "./DrawFxaa";
 import DrawFlowParticles from "./DrawFlowParticles";
 
 import generateBlueNoise from "./generateBlueNoise";
-import generateBg from "./generateBg";
+import generateBg, { fbos } from "./generateBg";
 import applyBlur from "./applyBlur";
 
 class SceneApp extends Scene {
@@ -90,6 +90,12 @@ class SceneApp extends Scene {
     this._center = [0, 0, 0];
     this._initHit();
 
+    // color
+    this._currColorIndex = Config.colorIndex;
+    this._prevColorIndex = Config.colorIndex;
+    this._colorOffset = new EaseNumber(0, 0.15);
+    this.switchColor();
+
     this.speed = new EaseNumber(1, 0.08);
     this.lengthScale = new EaseNumber(1, 0.1);
     this.noiseScale = 1;
@@ -100,6 +106,7 @@ class SceneApp extends Scene {
 
   pulse() {
     this.speed.setTo(20);
+    // this.switchColor();
 
     this._seedTime += random(500, 1000);
     const radius = 1.5;
@@ -185,9 +192,6 @@ class SceneApp extends Scene {
     this._textureColor = Assets.get(`color${Config.colorIndex}`);
     this._textureColor.minFilter = this._textureColor.magFilter = GL.NEAREST;
 
-    // blur bg
-    this._textureBg = generateBg(this._textureColor);
-
     this._index = 0;
   }
 
@@ -211,6 +215,33 @@ class SceneApp extends Scene {
     this._drawSim = new DrawSim();
     this._drawParticles = new DrawParticles();
     this._drawRibbon = new DrawRibbon();
+  }
+
+  switchColor() {
+    let index;
+    do {
+      index = randomInt(6);
+    } while (index === this._currColorIndex);
+    this._prevColorIndex = this._currColorIndex;
+    this._currColorIndex = index;
+
+    // console.log("Switching color", this._currColorIndex);
+
+    this._texColorCurr = Assets.get(`color${this._currColorIndex}`);
+    this._texColorPrev = Assets.get(`color${this._prevColorIndex}`);
+
+    this._bgCurr = generateBg(
+      this._texColorCurr,
+      `color${this._currColorIndex}`
+    );
+    this._bgPrev = generateBg(
+      this._texColorCurr,
+      `color${this._prevColorIndex}`
+    );
+
+    this._colorOffset.setTo(0);
+    this._colorOffset.value = 1;
+    // setTimeout(() => this.switchColor(), 3000);
   }
 
   _initHit() {
@@ -287,7 +318,9 @@ class SceneApp extends Scene {
     this._drawRibbon
       .bindTexture("uPosMap", this._fboPos.texture, 0)
       .bindTexture("uDepthMap", tDepth, 1)
-      .bindTexture("uColorMap", this._textureColor, 2)
+      .bindTexture("uColorMapCurr", this._texColorCurr, 2)
+      .bindTexture("uColorMapPrev", this._texColorPrev, 3)
+      .uniform("uColorOffset", this._colorOffset.value)
       .uniform("uIndex", this._index)
       .uniform("uLight", this._lightPosition)
       .uniform("uShadowMatrix", this.mtxShadow)
@@ -309,10 +342,11 @@ class SceneApp extends Scene {
       this._fboRender.bind();
       GL.clear(0, 0, 0, 0);
     }
-    // this._dCopy.draw(this._textureBg);
     this._drawBackground
-      .bindTexture("uMap", this._textureBg, 0)
+      .bindTexture("uMapCurr", this._bgCurr, 0)
+      .bindTexture("uMapPrev", this._bgPrev, 1)
       .uniform("uRatio", GL.aspectRatio)
+      .uniform("uColorOffset", this._colorOffset.value)
       .draw();
     GL.enable(GL.DEPTH_TEST);
 
@@ -331,7 +365,9 @@ class SceneApp extends Scene {
 
     this._drawParticles
       .bindTexture("uPosMap", this._fbo.read.getTexture(0), 0)
-      .bindTexture("uColorMap", this._textureColor, 1)
+      .bindTexture("uColorMapCurr", this._texColorCurr, 2)
+      .bindTexture("uColorMapPrev", this._texColorPrev, 3)
+      .uniform("uColorOffset", this._colorOffset.value)
       .uniform("uViewport", [GL.width, GL.height])
       .draw();
 
@@ -344,6 +380,7 @@ class SceneApp extends Scene {
       this._fboRender.unbind();
       this._textureBlurredRender = applyBlur(this._fboRender.texture);
       this._drawCompose
+        .bindFrameBuffer(this._fboCompose)
         .bindTexture("uMap", this._fboRender.texture, 0)
         .bindTexture("uBlurMap", this._textureBlurredRender, 1)
         .uniform("uRatio", GL.aspectRatio)
@@ -362,6 +399,14 @@ class SceneApp extends Scene {
       .uniform("uRatio", GL.aspectRatio)
       .draw();
 
+    // console.log(fbos);
+
+    g = 300;
+    for (let s in fbos) {
+      const index = parseInt(s.split("color")[1]);
+      GL.viewport(index * g, 0, g, g);
+      this._dCopy.draw(fbos[s].read.texture);
+    }
     // debug
     // g = 1024 / 2;
     // GL.enable(GL.DEPTH_TEST);

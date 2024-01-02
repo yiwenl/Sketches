@@ -3,7 +3,6 @@
 precision highp float;
 in vec3 aVertexPosition;
 in vec2 aTextureCoord;
-in vec3 aNormal;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
@@ -11,7 +10,10 @@ uniform mat4 uProjectionMatrix;
 
 uniform vec2 uViewport;
 uniform sampler2D uPosMap;
-uniform sampler2D uColorMap;
+uniform sampler2D uColorMapCurr;
+uniform sampler2D uColorMapPrev;
+uniform float uColorOffset;
+
 out vec3 vRandom;
 out vec3 vColor;
 
@@ -28,7 +30,13 @@ void main(void) {
     gl_PointSize = particleSize(gl_Position, uProjectionMatrix, uViewport, radius * scale);
 
     float g = mix(0.8, 1.0, aVertexPosition.y);
-    vec3 color = texture(uColorMap, aVertexPosition.yz).xyz;
+
+    float offset = clamp(uColorOffset * 2.0 - aVertexPosition.z, 0.0, 1.0);
+
+    vec3 colorCurr = texture(uColorMapCurr, aVertexPosition.yz).xyz;
+    vec3 colorPrev = texture(uColorMapPrev, aVertexPosition.yz).xyz;
+    vec3 color = mix(colorPrev, colorCurr, offset);
+
     vColor = color * g;
     vRandom = aVertexPosition;
 }

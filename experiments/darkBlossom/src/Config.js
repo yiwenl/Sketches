@@ -1,8 +1,8 @@
 export default {
-  colorBg: [210, 208, 202],
-  colorCover: [180, 179, 179],
-  colorShadow: [204, 210, 215],
-  colorPetal: [255, 255, 255],
+  colorBg: [205, 48, 0],
+  colorCover: [63, 57, 52],
+  colorShadow: [24, 35, 29],
+  colorPetal: [3, 97.5, 70],
   numParticles: 512,
   floorLevel: -2,
   autoSave: false,
