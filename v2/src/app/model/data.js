@@ -344,4 +344,9 @@ export default [
     url: "//yiwenl.github.io/Sketches/experiments/whiteParticles/dist/index.html",
     title: "White Particles",
   },
+  {
+    cover: "assets/img/coverSketchRibbon01.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/ribbon01/dist/index.html",
+    title: "Pulsing Ribbon",
+  },
 ];
