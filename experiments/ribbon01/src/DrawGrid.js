@@ -29,8 +29,6 @@ export default class DrawGrid extends Draw {
       }
     }
 
-    console.log(posOffsets.length);
-
     mesh
       .bufferInstance(posOffsets, "aPosOffset")
       .bufferInstance(scales, "aScale");

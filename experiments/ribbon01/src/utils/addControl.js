@@ -19,51 +19,15 @@ export default (scene) => {
   const gui = new dat.GUI({ width: 300 });
   window.gui = gui;
 
-  gui.add(Config, "numParticles", [2, 128, 144, 256]).onChange(reload);
-  gui.add(Config, "numSets", [4, 6, 8, 10, 12, 16]).onFinishChange(reload);
-  gui.add(Config, "colorIndex", [0, 1, 2, 3, 4, 5]).onFinishChange(reload);
+  gui.add(Config, "numParticles", [64, 96, 128, 144]).onChange(reload);
+  gui
+    .add(Config, "numSets", [4, 6, 8, 10])
+    .name("Ribbon length")
+    .onFinishChange(reload);
+
+  // gui.add(Config, "colorIndex", [0, 1, 2, 3, 4, 5]).onFinishChange(reload);
   gui.add(Config, "usePostEffect").onFinishChange(refresh);
-
-  const fSystem = gui.addFolder("System");
-  const updateBackgroundColor = () => {
-    refresh();
-    document.body.style.backgroundColor = rgb(Config.background);
-  };
-
-  const updateThumbnail = () => {
-    refresh();
-    resizeThumbnail();
-  };
-
-  fSystem
-    .add(Config, "margin", 0, 500)
-    .step(1)
-    .onChange(function () {
-      refresh();
-      resizeUpdate();
-    });
-
-  fSystem.addColor(Config, "background").onChange(updateBackgroundColor);
-  fSystem.add(Config, "showThumbnail").onFinishChange(reload);
-  if (Config.showThumbnail) {
-    fSystem
-      .add(Config, "thumbnailSize", 0, 500)
-      .step(1)
-      .onFinishChange(updateThumbnail);
-  }
-  fSystem.add(Config, "autoSave").onFinishChange(reload);
-
-  fSystem.add(oControl, "save").name("Save Settings");
-  fSystem.add(Settings, "reset").name("Reset Default");
-
-  fSystem.open();
-
-  resizeUpdate();
-  updateBackgroundColor();
-
-  if (Config.showThumbnail) {
-    addPreview(GL.canvas);
-  }
+  gui.add(Settings, "reset").name("Reset Default");
 
   // dat.GUI.toggleHide();
 };

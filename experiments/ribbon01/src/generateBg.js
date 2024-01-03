@@ -13,7 +13,7 @@ export default function (mSource, mId = "default") {
       magFilter: GL.LINEAR,
     });
     fbos[mId] = fbo;
-    console.log("Creating FBO", mId);
+    // console.log("Creating FBO", mId);
 
     const draw = new Draw()
       .setMesh(Geom.bigTriangle())

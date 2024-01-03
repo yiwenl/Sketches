@@ -51,7 +51,7 @@ class SceneApp extends Scene {
 
     this.orbitalControl.radius.value = 6.5;
     this.orbitalControl.radius.limit(4.5, 7);
-    this.camera.setPerspective(90 * RAD, GL.aspectRatio, 0.1, 100);
+    this.camera.setPerspective(90 * RAD, GL.aspectRatio, 2, 20);
 
     // shadow
     let r = 5;
@@ -106,7 +106,7 @@ class SceneApp extends Scene {
 
   pulse() {
     this.speed.setTo(20);
-    // this.switchColor();
+    this.switchColor();
 
     this._seedTime += random(500, 1000);
     const radius = 1.5;
@@ -130,11 +130,14 @@ class SceneApp extends Scene {
     // this._center[1] = (random(-1, 1) * radius) / GL.aspectRatio;
     let ns;
     do {
-      ns = randomInt(2, 6) * 0.3;
+      ns = randomInt(2, 6) * 0.4;
     } while (ns === this.noiseScale);
     this.noiseScale = ns + d * 1.5;
 
-    const delay = pick([0, 250]);
+    let delay = pick([0, 250]);
+    if (Config.numSets > 8) {
+      delay = 250;
+    }
 
     setTimeout(() => {
       this.lengthScale.easing = 0.02;
@@ -158,7 +161,7 @@ class SceneApp extends Scene {
   _initTextures() {
     this.resize();
 
-    Config.colorIndex = randomInt(6);
+    Config.colorIndex = 0;
 
     const { numParticles: num, numSets } = Config;
     const oSettings = {
@@ -225,8 +228,6 @@ class SceneApp extends Scene {
     this._prevColorIndex = this._currColorIndex;
     this._currColorIndex = index;
 
-    // console.log("Switching color", this._currColorIndex);
-
     this._texColorCurr = Assets.get(`color${this._currColorIndex}`);
     this._texColorPrev = Assets.get(`color${this._prevColorIndex}`);
 
@@ -235,17 +236,16 @@ class SceneApp extends Scene {
       `color${this._currColorIndex}`
     );
     this._bgPrev = generateBg(
-      this._texColorCurr,
+      this._texColorPrev,
       `color${this._prevColorIndex}`
     );
 
     this._colorOffset.setTo(0);
     this._colorOffset.value = 1;
-    // setTimeout(() => this.switchColor(), 3000);
   }
 
   _initHit() {
-    const r = 20;
+    const r = 12;
     const mesh = Geom.plane(r, r / GL.aspectRatio, 1);
     // this._hitTestor = new HitTestor(Geom.sphere(3, 24), this.camera);
     this._hitTestor = new HitTestor(mesh, this.camera);
@@ -327,6 +327,7 @@ class SceneApp extends Scene {
       .uniform("uColor", getMonoColor(1))
       .uniform("uTime", Scheduler.getElapsedTime())
       .uniform("uLengthOffset", this.lengthScale.value)
+      .uniform("uTouch", this._hit)
       // .uniform("uLengthOffset", this._length)
       .draw();
   }
@@ -377,13 +378,22 @@ class SceneApp extends Scene {
       .draw();
 
     if (applyPost) {
+      // console.log(this.camera.near, this.camera.far);
       this._fboRender.unbind();
       this._textureBlurredRender = applyBlur(this._fboRender.texture);
+      const { near, far } = this.camera;
+
+      let focus =
+        (this.orbitalControl.radius.value + 4.0 - near) / (far - near);
       this._drawCompose
         .bindFrameBuffer(this._fboCompose)
         .bindTexture("uMap", this._fboRender.texture, 0)
         .bindTexture("uBlurMap", this._textureBlurredRender, 1)
+        .bindTexture("uDepthMap", this._fboRender.depthTexture, 2)
+        .uniform("uFocus", focus)
         .uniform("uRatio", GL.aspectRatio)
+        .uniform("uNear", this.camera.near)
+        .uniform("uFar", this.camera.far)
         .draw();
 
       this._drawFxaa
@@ -398,18 +408,6 @@ class SceneApp extends Scene {
       .bindTexture("uMap", this._textureNoise, 0)
       .uniform("uRatio", GL.aspectRatio)
       .draw();
-
-    // console.log(fbos);
-
-    g = 300;
-    for (let s in fbos) {
-      const index = parseInt(s.split("color")[1]);
-      GL.viewport(index * g, 0, g, g);
-      this._dCopy.draw(fbos[s].read.texture);
-    }
-    // debug
-    // g = 1024 / 2;
-    // GL.enable(GL.DEPTH_TEST);
   }
 
   resize() {

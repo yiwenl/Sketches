@@ -43,7 +43,7 @@ void main(void) {
     vec3 data = texture(uDataMap, vTextureCoord).xyz;
 
     float posOffset = snoise(vec3(pos + uTime * 5.5)) * .5 + .5;
-    posOffset = mix(2.2, 2.0, posOffset) * 0.12 * uNoiseScale;
+    posOffset = mix(2.2, 2.0, posOffset) * 0.1 * uNoiseScale;
 
     vec3 acc = vec3(0.0);
     vec3 noise = curlNoise(pos * posOffset - uTime * 0.3);

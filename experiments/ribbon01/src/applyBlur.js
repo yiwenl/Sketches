@@ -19,9 +19,9 @@ export default function (mSource) {
       .setClearColor(0, 0, 0, 1);
   }
 
-  const numLevels = 2;
+  const numLevels = 3;
   for (let i = 0; i < numLevels; i++) {
-    const mul = 1 / Math.pow(2, i);
+    const mul = 1 / Math.pow(1.5, i);
     const tSource = i === 0 ? mSource : fbo.read.texture;
 
     draw

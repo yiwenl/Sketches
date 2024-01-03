@@ -21,6 +21,7 @@ uniform float uIndex;
 uniform float uTime;
 uniform float uLengthOffset;
 uniform float uColorOffset;
+uniform vec3 uTouch;
 
 out vec2 vTextureCoord;
 out vec3 vNormal;
@@ -28,6 +29,7 @@ out vec3 vColor;
 out vec4 vShadowCoord;
 out float vSkip;
 
+// #pragma glslify: curlNoise    = require(./glsl-utils/curlNoise.glsl)
 #pragma glslify: rotate    = require(./glsl-utils/rotate.glsl)
 
 vec3 getPos(float mIndex, vec2 mUV) {
@@ -65,6 +67,9 @@ void main(void) {
     pos = rotate(pos, axis, angle);
     vec3 n = aNormal;
     n = rotate(n, axis, angle);
+
+    // vec3 noise = curlNoise(curr * 0.2 + uTime * 0.1);
+    // curr += noise;
 
     pos += curr;
 

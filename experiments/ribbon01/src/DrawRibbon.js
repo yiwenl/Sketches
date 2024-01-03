@@ -24,7 +24,7 @@ export default class DrawRibbon extends Draw {
       const a = ((Math.PI * 2) / numSides) * j;
       const z = Math.cos(a);
       const y = Math.sin(a);
-      const r = 0.01;
+      const r = 0.015;
 
       const pos = [i, y * r, z * r];
       const normal = [0, y, z];
