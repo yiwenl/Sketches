@@ -22,6 +22,8 @@ export default class PoseDetection extends EventDispatcher {
     this.canvas = canvas;
     this.ctx = ctx;
     document.body.appendChild(canvas);
+    canvas.id = "pose-canvas";
+    console.log(width, height);
     canvas.style.cssText = `
       position: absolute;
       right: 0;
@@ -147,9 +149,10 @@ export default class PoseDetection extends EventDispatcher {
 
     keypoints.forEach(({ x, y, score }, i) => {
       if (score > 0.5) {
+        const g = 255;
         ctx.fillStyle =
-          trackedIndices.indexOf(i) > -1 ? rgb(255, 128, 0) : rgb(220);
-        dot(width - x, y, trackedIndices.indexOf(i) > -1 ? 5 : 2);
+          trackedIndices.indexOf(i) > -1 ? rgb(200, 10, 0) : rgba(g, g, g, 0.5);
+        dot(width - x, y, trackedIndices.indexOf(i) > -1 ? 8 : 4);
       }
     });
   }
