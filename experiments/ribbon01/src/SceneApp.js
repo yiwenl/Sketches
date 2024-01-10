@@ -36,7 +36,6 @@ import DrawCover from "./DrawCover";
 import DrawBackground from "./DrawBackground";
 import DrawFloor from "./DrawFloor";
 import DrawCompose from "./DrawCompose";
-import DrawGrid from "./DrawGrid";
 import DrawFxaa from "./DrawFxaa";
 import DrawFlowParticles from "./DrawFlowParticles";
 
@@ -50,8 +49,8 @@ class SceneApp extends Scene {
     // this.orbitalControl.lock();
 
     this.orbitalControl.radius.value = 6.5;
-    this.orbitalControl.radius.limit(4.5, 7);
-    this.camera.setPerspective(90 * RAD, GL.aspectRatio, 2, 20);
+    this.orbitalControl.radius.limit(6, 8);
+    this.camera.setPerspective(90 * RAD, GL.aspectRatio, 1, 20);
 
     // shadow
     let r = 5;
@@ -193,6 +192,9 @@ class SceneApp extends Scene {
     this._textureColor = Assets.get(`color${Config.colorIndex}`);
     this._textureColor.minFilter = this._textureColor.magFilter = GL.NEAREST;
 
+    this._textureLookup = Assets.get("lookup");
+    this._textureLookup.minFilter = this._textureLookup.magFilter = GL.NEAREST;
+
     this._index = 0;
   }
 
@@ -204,7 +206,6 @@ class SceneApp extends Scene {
     this._drawCover = new DrawCover();
     this._drawBackground = new DrawBackground();
     this._drawFloor = new DrawFloor();
-    this._drawGrid = new DrawGrid();
     this._drawFlowParticles = new DrawFlowParticles();
     this._drawFxaa = new DrawFxaa();
     this._drawCompose = new DrawCompose()
@@ -308,8 +309,6 @@ class SceneApp extends Scene {
   }
 
   _renderRibbon(mShadow = false) {
-    this._drawGrid.draw();
-
     const tDepth = mShadow
       ? this._fboShadow.depthTexture
       : this._fbo.read.getTexture(0);
@@ -387,6 +386,8 @@ class SceneApp extends Scene {
         .bindTexture("uMap", this._fboRender.texture, 0)
         .bindTexture("uBlurMap", this._textureBlurredRender, 1)
         .bindTexture("uDepthMap", this._fboRender.depthTexture, 2)
+        .bindTexture("uNoiseMap", this._textureNoise, 3)
+        .bindTexture("uLookupMap", this._textureLookup, 4)
         .uniform("uFocus", focus)
         .uniform("uRatio", GL.aspectRatio)
         .uniform("uNear", this.camera.near)
@@ -401,10 +402,10 @@ class SceneApp extends Scene {
     }
 
     GL.disable(GL.DEPTH_TEST);
-    this._drawCover
-      .bindTexture("uMap", this._textureNoise, 0)
-      .uniform("uRatio", GL.aspectRatio)
-      .draw();
+    // this._drawCover
+    //   .bindTexture("uMap", this._textureNoise, 0)
+    //   .uniform("uRatio", GL.aspectRatio)
+    //   .draw();
   }
 
   resize() {

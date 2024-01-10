@@ -7,6 +7,7 @@ uniform float uRatio;
 out vec4 oColor;
 
 void main(void) {
+    if(vTextureCoord.x > .5) discard;
     float n = texture(uMap, vTextureCoord * 4.0).r; 
 
     vec2 uv = vTextureCoord - .5;
@@ -29,6 +30,7 @@ void main(void) {
     t = smoothstep(1.0, 2.5, t);
 
     d += t * 1.5;
+    
 
     oColor = vec4(vec3(n), d * .3);
     // oColor = vec4(vec3(t), 1.0);

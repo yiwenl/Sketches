@@ -7,7 +7,7 @@ export default class DrawGrid extends Draw {
   constructor() {
     super();
 
-    let s = 0.1;
+    let s = 0.15;
     const mesh = Geom.cube(s, s, s);
 
     const r = 3;

@@ -10,5 +10,5 @@ out vec4 oColor;
 
 void main(void) {
     float g = diffuse(vNormal, LIGHT, .5) * 2.0;
-    oColor = vec4(vec3(g), 1.0);
+    oColor = vec4(vec3(g), 1.0) * 0.2;
 }

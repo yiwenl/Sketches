@@ -25,5 +25,5 @@ void main(void) {
     if(alpha < 0.9) discard;
 
 
-    oColor = vec4(vColor, 1.0);
+    oColor = vec4(vColor, 1.0) * 0.15;
 }
