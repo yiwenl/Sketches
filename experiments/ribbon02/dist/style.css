@@ -10,3 +10,8 @@ body {
 .dg {
   z-index: 99999 !important;
 }
+
+#main-canvas {
+  width: 100%;
+  height: 100%;
+}

@@ -53,7 +53,7 @@ function _init3D() {
 
       import("./utils/addControl").then(({ default: addControls }) => {
         addControls(scene);
-        import("./debug");
+        // import("./debug");
       });
     });
   } else {
