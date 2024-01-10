@@ -1,36 +1,27 @@
-// basic.vert
+#version 300 es
 
 precision highp float;
-attribute vec3 aVertexPosition;
-attribute vec2 aTextureCoord;
-attribute vec3 aNormal;
-attribute vec3 aPosOffset;
+in vec3 aVertexPosition;
+in vec2 aTextureCoord;
+in vec3 aNormal;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
-uniform mat4 uTopMatrix;
 
-uniform sampler2D textureHeight;
+uniform sampler2D uHeightMap;
 
-varying vec2 vTextureCoord;
-varying vec3 vNormal;
-varying vec3 vDebug;
+out vec2 vTextureCoord;
+out vec3 vNormal;
+
+#pragma glslify: rotate    = require(./glsl-utils/rotate.glsl)
 
 void main(void) {
     vec3 pos = aVertexPosition;
-    pos += aPosOffset;
-
-    vec4 wsPos = uModelMatrix * vec4(pos, 1.0);
-    vec4 topPos = uTopMatrix * wsPos;
-    vec2 uv = topPos.xy / topPos.w * .5 + .5;
-
-    float h = texture2D(textureHeight, uv).r;
-    vDebug = vec3(uv, h);
+    float h = texture(uHeightMap, aTextureCoord).r;
     pos.y = h;
-    wsPos = uModelMatrix * vec4(pos, 1.0);
-
-    gl_Position = uProjectionMatrix * uViewMatrix * wsPos;
+    
+    gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
     vTextureCoord = aTextureCoord;
     vNormal = aNormal;
 }
