@@ -1,5 +1,5 @@
 export default {
-  numParticles: 32,
+  numParticles: 64,
   numSets: 16,
   autoSave: false,
   showThumbnail: false,

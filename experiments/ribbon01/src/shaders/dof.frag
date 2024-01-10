@@ -27,6 +27,9 @@ void main() {
     blurAmount = smoothstep(0.2, 0.4, blurAmount);
     // blurAmount = smoothstep(0.0, 0.7, blurAmount);
 
+    float t = 0.05;
+    blurAmount = smoothstep(uFocus - t, uFocus + t, normalizedDepth);
+
     vec2 uv = vTextureCoord - .5;
     if(uRatio < 1.0) {
         uv.x *= uRatio;
@@ -49,5 +52,10 @@ void main() {
     vec4 color = mix(sharpColor, blurredColor, blurAmount);
     color.rgb *= v;
 
+    // color = mix(color, blurredColor, step(vTextureCoord.x, 0.5));
+
     oColor = color;
+
+    // oColor = blurredColor;
+    // oColor = vec4(vec3(blurAmount), 1.0);
 }

@@ -10,12 +10,12 @@ export default class DrawGrid extends Draw {
     let s = 0.1;
     const mesh = Geom.cube(s, s, s);
 
-    const r = 2;
-    const num = 3;
+    const r = 3;
+    const num = 2;
     const posOffsets = [];
     const scales = [];
 
-    s = 0.02;
+    s = 0.05;
 
     for (let k = -num; k <= num; k++) {
       for (let j = -num; j <= num; j++) {

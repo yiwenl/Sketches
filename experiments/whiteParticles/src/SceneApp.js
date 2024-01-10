@@ -145,11 +145,15 @@ class SceneApp extends Scene {
         let speed = vec2.length(dir);
         let f = smoothstep(0.01, 0.03, speed);
         vec2.normalize(dir, dir);
+        let _pos = vec2.clone(pos);
+        if (Config.mirrored) {
+          _pos[0] = 1 - _pos[0];
+        }
 
         if (score > threshold && f > 0) {
           const radius = mix(2, 2.5, f);
           const force = mix(2, 20, f);
-          this._fluid.updateFlow(pos, dir, force, radius, 0.5);
+          this._fluid.updateFlow(_pos, dir, force, radius, 0.5);
         }
         vec2.copy(this._posePoints[i], pos);
       });

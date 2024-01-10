@@ -11,10 +11,10 @@ import {
   CameraOrtho,
   Scene,
 } from "alfrid";
-import { RAD, random, biasMatrix } from "./utils";
+import { RAD, mix, random, smoothstep, biasMatrix } from "./utils";
 import Config from "./Config";
 import Assets from "./Assets";
-import { vec3, mat4 } from "gl-matrix";
+import { vec2, vec3, mat4 } from "gl-matrix";
 import Scheduler from "scheduling";
 
 // draw calls
@@ -24,11 +24,17 @@ import DrawSim from "./DrawSim";
 import DrawRibbon from "./DrawRibbon";
 import DrawFloor from "./DrawFloor";
 import DrawCompose from "./DrawCompose";
+import DrawScramble from "./DrawScramble";
 
 // textures
 import generatePaperTexture from "./generatePaperTexture";
 import generateAOMap from "./generateAOMap";
 import generateBlueNoise from "./generateBlueNoise";
+
+// fluid simulation
+import FluidSimulation from "./fluid-sim";
+
+const bound = 4;
 
 class SceneApp extends Scene {
   constructor() {
@@ -51,6 +57,14 @@ class SceneApp extends Scene {
       }
     }
     this._fboPos.unbind();
+
+    // fluid
+    const DISSIPATION = 0.99;
+    this._fluid = new FluidSimulation({
+      DENSITY_DISSIPATION: DISSIPATION,
+      VELOCITY_DISSIPATION: DISSIPATION,
+      PRESSURE_DISSIPATION: DISSIPATION,
+    });
   }
 
   _init() {
@@ -61,13 +75,33 @@ class SceneApp extends Scene {
     this._index = 0;
 
     this._hit = [999, 999, 999];
-    const mesh = Geom.sphere(3, 24);
+    this._preHit = [999, 999, 999];
+    // const mesh = Geom.sphere(4, 24);
+    const mesh = Geom.plane(bound * 2, bound * 2, 1);
     const hitTestor = new HitTestor(mesh, this.camera);
     hitTestor.on("onHit", (e) => {
+      if (this._preHit[0] === 999) {
+        vec3.copy(this._preHit, e.hit);
+      } else {
+        vec3.copy(this._preHit, this._hit);
+      }
       vec3.copy(this._hit, e.hit);
+
+      let x = (this._hit[0] / bound) * 0.5 + 0.5;
+      let y = (this._hit[1] / bound) * 0.5 + 0.5;
+      const dir = vec3.sub([], this._hit, this._preHit);
+      const _dir = [dir[0], dir[1]];
+      const d = vec2.length(_dir);
+      let f = smoothstep(0, 0.3, d);
+      f = mix(0.5, 1.0, f) * 0.5;
+      let radius = mix(1, 3, f) * 2;
+      // console.log(d, f);
+      vec2.normalize(_dir, _dir);
+      this._fluid.updateFlow([x, y], _dir, f, radius, 1);
     });
     hitTestor.on("onUp", (e) => {
       this._hit = [999, 999, 999];
+      this._preHit = [999, 999, 999];
     });
 
     this._seedTime = random(1000);
@@ -110,6 +144,7 @@ class SceneApp extends Scene {
     // position array
     let fboSize = num * numSets;
     this._fboPos = new FrameBuffer(fboSize, fboSize, oSettings);
+    this._fboScrambled = new FrameBuffer(fboSize, fboSize, oSettings);
 
     this._fboRender = new FrameBuffer(GL.width, GL.height);
 
@@ -134,9 +169,12 @@ class SceneApp extends Scene {
     new DrawSave().bindFrameBuffer(this._fbo.read).draw();
     this._drawSim = new DrawSim();
     this._drawRibbon = new DrawRibbon();
+    this._drawScramble = new DrawScramble().bindFrameBuffer(this._fboScrambled);
   }
 
   update() {
+    this._updateFluid();
+
     this._drawSim
       .bindFrameBuffer(this._fbo.write)
       .bindTexture("uPosMap", this._fbo.read.getTexture(0), 0)
@@ -145,7 +183,8 @@ class SceneApp extends Scene {
       .bindTexture("uDataMap", this._fbo.read.getTexture(3), 3)
       .uniform("uTime", Scheduler.getElapsedTime() + this._seedTime)
       .uniform("uSpeed", 1)
-      .uniform("uTouch", this._hit)
+      // .uniform("uTouch", this._hit)
+      .uniform("uTouch", [999, 999, 999])
       .uniform("uNoiseScale", 1)
       .uniform("uCenter", [0, 0.5, 0])
       .draw();
@@ -166,6 +205,16 @@ class SceneApp extends Scene {
     GL.viewport(tx * num, ty * num, num, num);
     this._dCopy.draw(this._fbo.read.getTexture(0));
     this._fboPos.unbind();
+
+    this._drawScramble
+      .bindFrameBuffer(this._fboScrambled)
+      .bindTexture("uPosMap", this._fboPos.texture, 0)
+      .bindTexture("uFluidMap", this._fluid.velocity, 1)
+      .bindTexture("uDensityMap", this._fluid.density, 2)
+      .uniform("uTime", Scheduler.getElapsedTime() + this._seedTime)
+      .uniform("uBound", bound)
+      .draw();
+
     GL.enable(GL.DEPTH_TEST);
 
     this._updateShadowMap();
@@ -192,6 +241,10 @@ class SceneApp extends Scene {
     this._textureAO = generateAOMap(this._fboRender.depthTexture);
   }
 
+  _updateFluid() {
+    this._fluid.update();
+  }
+
   _updateShadowMap() {
     this._fboShadow.bind();
     GL.setMatrices(this._cameraLight);
@@ -206,7 +259,7 @@ class SceneApp extends Scene {
       : this._fbo.read.getTexture(0);
 
     this._drawRibbon
-      .bindTexture("uPosMap", this._fboPos.texture, 0)
+      .bindTexture("uPosMap", this._fboScrambled.texture, 0)
       .bindTexture("uDepthMap", tDepth, 1)
       .uniform("uIndex", this._index)
       .uniform("uLight", this._lightPosition)
@@ -230,6 +283,18 @@ class SceneApp extends Scene {
       .bindTexture("uLookupMap", this._textureLookup, 3)
       .uniform("uRatio", GL.aspectRatio)
       .draw();
+
+    const r = bound;
+    this._dBall.draw([-r, -r, 0], [g, g, g], [0.9, 0, 0]);
+    this._dBall.draw([-r, r, 0], [g, g, g], [0.9, 0, 0]);
+    this._dBall.draw([r, -r, 0], [g, g, g], [0.9, 0, 0]);
+    this._dBall.draw([r, r, 0], [g, g, g], [0.9, 0, 0]);
+
+    g = 400;
+    GL.viewport(0, 0, g, g);
+    this._dCopy.draw(this._fluid.density);
+    GL.viewport(g, 0, g, g);
+    this._dCopy.draw(this._fluid.velocity);
   }
 
   resize() {

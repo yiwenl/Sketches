@@ -25,7 +25,10 @@ export default (scene) => {
     .name("Ribbon length")
     .onFinishChange(reload);
 
-  // gui.add(Config, "colorIndex", [0, 1, 2, 3, 4, 5]).onFinishChange(reload);
+  gui.add(Config, "colorIndex", [0, 1, 2, 3, 4, 5]).onFinishChange(() => {
+    refresh();
+    scene.updateColor();
+  });
   gui.add(Config, "usePostEffect").onFinishChange(refresh);
   gui.add(Settings, "reset").name("Reset Default");
 

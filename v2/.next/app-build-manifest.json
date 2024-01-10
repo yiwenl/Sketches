@@ -11,12 +11,6 @@
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
-    ],
-    "/exps/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/exps/[id]/page.css",
-      "static/chunks/app/exps/[id]/page.js"
     ]
   }
 }

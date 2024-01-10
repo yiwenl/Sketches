@@ -67,12 +67,16 @@ void main(void) {
     d = distance(pos, uTouch);
     f = smoothstep(5.0, 3.0, d);
     dir = normalize(pos - uTouch);
-    acc -= dir * f * 5.0/uSpeed;
+
+    float t = extra.z + mix(1.0, 3.0, extra.x) * uTime * 0.1;
+    t = sin(t * PI);
+    t = smoothstep(-0.5, 1.0, t);
+    acc -= dir * f * 4.0/uSpeed * t;
     
     float speed = mix(2.0, 3.0, extra.x);
     // float speed = mix(2.0, 4.0, extra.x);
 
-    float t = fract(extra.x + extra.y );
+    t = fract(extra.x + extra.y );
     if( t < 0.01) speed *= mix(4.0, 8.0, t);
     vel += acc * speed * 0.0002 * uSpeed;
 

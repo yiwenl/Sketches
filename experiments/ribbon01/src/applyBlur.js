@@ -8,7 +8,8 @@ export default function (mSource) {
   const { width, height } = GL;
   // const fboSize = 2048;
   if (!fbo) {
-    fbo = new FboPingPong(width, height, {
+    const s = 0.5;
+    fbo = new FboPingPong(width * s, height * s, {
       minFilter: GL.LINEAR,
       magFilter: GL.LINEAR,
     });
@@ -21,7 +22,7 @@ export default function (mSource) {
 
   const numLevels = 3;
   for (let i = 0; i < numLevels; i++) {
-    const mul = 1 / Math.pow(1.5, i);
+    const mul = 1 / Math.pow(1.25, i);
     const tSource = i === 0 ? mSource : fbo.read.texture;
 
     draw

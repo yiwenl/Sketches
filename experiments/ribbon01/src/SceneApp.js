@@ -41,7 +41,7 @@ import DrawFxaa from "./DrawFxaa";
 import DrawFlowParticles from "./DrawFlowParticles";
 
 import generateBlueNoise from "./generateBlueNoise";
-import generateBg, { fbos } from "./generateBg";
+import generateBg from "./generateBg";
 import applyBlur from "./applyBlur";
 
 class SceneApp extends Scene {
@@ -93,7 +93,7 @@ class SceneApp extends Scene {
     // color
     this._currColorIndex = Config.colorIndex;
     this._prevColorIndex = Config.colorIndex;
-    this._colorOffset = new EaseNumber(0, 0.15);
+    this._colorOffset = new EaseNumber(0, 0.05);
     this.switchColor();
 
     this.speed = new EaseNumber(1, 0.08);
@@ -106,7 +106,7 @@ class SceneApp extends Scene {
 
   pulse() {
     this.speed.setTo(20);
-    this.switchColor();
+    // this.switchColor();
 
     this._seedTime += random(500, 1000);
     const radius = 1.5;
@@ -160,8 +160,6 @@ class SceneApp extends Scene {
 
   _initTextures() {
     this.resize();
-
-    Config.colorIndex = 0;
 
     const { numParticles: num, numSets } = Config;
     const oSettings = {
@@ -220,14 +218,13 @@ class SceneApp extends Scene {
     this._drawRibbon = new DrawRibbon();
   }
 
-  switchColor() {
-    let index;
-    do {
-      index = randomInt(6);
-    } while (index === this._currColorIndex);
+  updateColor() {
     this._prevColorIndex = this._currColorIndex;
-    this._currColorIndex = index;
+    this._currColorIndex = Config.colorIndex;
+    this.switchColor();
+  }
 
+  switchColor() {
     this._texColorCurr = Assets.get(`color${this._currColorIndex}`);
     this._texColorPrev = Assets.get(`color${this._prevColorIndex}`);
 
@@ -245,7 +242,7 @@ class SceneApp extends Scene {
   }
 
   _initHit() {
-    const r = 12;
+    const r = 12.5;
     const mesh = Geom.plane(r, r / GL.aspectRatio, 1);
     // this._hitTestor = new HitTestor(Geom.sphere(3, 24), this.camera);
     this._hitTestor = new HitTestor(mesh, this.camera);
@@ -311,6 +308,8 @@ class SceneApp extends Scene {
   }
 
   _renderRibbon(mShadow = false) {
+    this._drawGrid.draw();
+
     const tDepth = mShadow
       ? this._fboShadow.depthTexture
       : this._fbo.read.getTexture(0);
@@ -329,6 +328,14 @@ class SceneApp extends Scene {
       .uniform("uLengthOffset", this.lengthScale.value)
       .uniform("uTouch", this._hit)
       // .uniform("uLengthOffset", this._length)
+      .draw();
+
+    this._drawParticles
+      .bindTexture("uPosMap", this._fbo.read.getTexture(0), 0)
+      .bindTexture("uColorMapCurr", this._texColorCurr, 2)
+      .bindTexture("uColorMapPrev", this._texColorPrev, 3)
+      .uniform("uColorOffset", this._colorOffset.value)
+      .uniform("uViewport", [GL.width, GL.height])
       .draw();
   }
 
@@ -355,22 +362,12 @@ class SceneApp extends Scene {
     // this._dBall.draw(this._hit, [g, g, g], [1, 0, 0]);
     g = 0.2;
 
-    this._drawGrid.draw();
-
     this._drawFloor
       .bindTexture("uDepthMap", this._fboShadowFloor.depthTexture, 0)
       .uniform("uShadowMatrix", this.mtxShadowFloor)
       .draw();
 
     this._renderRibbon(true);
-
-    this._drawParticles
-      .bindTexture("uPosMap", this._fbo.read.getTexture(0), 0)
-      .bindTexture("uColorMapCurr", this._texColorCurr, 2)
-      .bindTexture("uColorMapPrev", this._texColorPrev, 3)
-      .uniform("uColorOffset", this._colorOffset.value)
-      .uniform("uViewport", [GL.width, GL.height])
-      .draw();
 
     this._drawFlowParticles
       .uniform("uViewport", [GL.width, GL.height])
@@ -384,7 +381,7 @@ class SceneApp extends Scene {
       const { near, far } = this.camera;
 
       let focus =
-        (this.orbitalControl.radius.value + 4.0 - near) / (far - near);
+        (this.orbitalControl.radius.value + 3.8 - near) / (far - near);
       this._drawCompose
         .bindFrameBuffer(this._fboCompose)
         .bindTexture("uMap", this._fboRender.texture, 0)

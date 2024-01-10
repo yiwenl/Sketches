@@ -13,7 +13,6 @@ void main(void) {
     vec4 blurColor = texture(uBlurMap, vTextureCoord);
     vec2 uv = vTextureCoord - .5;
     
-
     if(uRatio < 1.0) {
         uv.x *= uRatio;
     } else {

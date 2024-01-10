@@ -21,6 +21,7 @@ export default (scene) => {
 
   gui.add(Config, "numParticles", [128, 256, 384, 512]).onChange(reload);
   gui.add(Config, "usePoseDetection").onChange(reload);
+  // gui.add(Config, "mirrored").onChange(reload);
 
   if (showColorControls) {
     gui.addColor(Config, "colorShadow").onChange(refresh);
