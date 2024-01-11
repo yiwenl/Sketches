@@ -20,8 +20,8 @@ import DrawFloor from "./DrawFloor";
 import DrawSave from "./DrawSave.js";
 import DrawPetals from "./DrawPetals.js";
 import DrawSim from "./DrawSim.js";
-import DrawCover from "./DrawCover.js";
 import DrawFloatingParticles from "./DrawFloatingParticles.js";
+import DrawCompose from "./DrawCompose.js";
 
 // textures
 import generateBlueNoise from "./generateBlueNoise.js";
@@ -102,7 +102,7 @@ class SceneApp extends Scene {
     this._dCamera = new DrawCamera();
     this._drawFloor = new DrawFloor();
     this._drawPetals = new DrawPetals();
-    this._drawCover = new DrawCover();
+    this._drawCompose = new DrawCompose();
 
     this._drawFloat = new DrawFloatingParticles();
 
@@ -159,7 +159,6 @@ class SceneApp extends Scene {
 
     this._fbo.swap();
 
-    GL.disable(GL.CULL_FACE);
     this._updateShadowMap();
   }
 
@@ -172,6 +171,8 @@ class SceneApp extends Scene {
   }
 
   _renderPetals(mShadow = false) {
+    GL.disable(GL.CULL_FACE);
+
     const tDepth = mShadow
       ? this._fboShadow.depthTexture
       : this._fboPosOrg.texture;
@@ -197,6 +198,8 @@ class SceneApp extends Scene {
       .uniform("uColor", _colorPetal)
       .uniform("uColorShadow", _colorShadow)
       .draw();
+
+    GL.enable(GL.CULL_FACE);
   }
 
   render() {
@@ -207,8 +210,11 @@ class SceneApp extends Scene {
     GL.clear(...colorBg, 1);
     GL.setMatrices(this.camera);
 
+    this._fboRender.bind();
+    GL.clear(...colorBg, 1);
+
     this._renderPetals(true);
-    GL.enable(GL.CULL_FACE);
+
     this._drawFloor
       .bindTexture("uDepthMap", this._fboShadow.depthTexture, 0)
       .uniform("uShadowMatrix", this.mtxShadow)
@@ -216,12 +222,15 @@ class SceneApp extends Scene {
       .uniform("uColorShadow", colorShadow)
       .draw();
 
+    this._fboRender.unbind();
+
     GL.disable(GL.DEPTH_TEST);
-    this._drawCover
-      .bindTexture("uMap", this._textureNoise, 0)
+    this._drawCompose
+      .bindTexture("uMap", this._fboRender.texture, 0)
+      .bindTexture("uNoiseMap", this._textureNoise, 1)
       .uniform("uRatio", GL.aspectRatio)
-      .uniform("uColor", colorCover)
       .draw();
+
     GL.enable(GL.DEPTH_TEST);
   }
 
