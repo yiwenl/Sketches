@@ -9,6 +9,7 @@ import {
   DrawCopy,
   DrawCamera,
   CameraOrtho,
+  EaseNumber,
   Scene,
 } from "alfrid";
 import { RAD, mix, random, smoothstep, biasMatrix } from "./utils";
@@ -25,16 +26,22 @@ import DrawRibbon from "./DrawRibbon";
 import DrawFloor from "./DrawFloor";
 import DrawCompose from "./DrawCompose";
 import DrawScramble from "./DrawScramble";
+import DrawFlowUpdate from "./DrawFlowUpdate";
 
 // textures
 import generatePaperTexture from "./generatePaperTexture";
 import generateAOMap from "./generateAOMap";
 import generateBlueNoise from "./generateBlueNoise";
+import applyBlur from "./applyBlur";
+
+// pose detection
+import PoseDetection, { POSE_FOUND, POSE_LOST } from "./PoseDetection";
 
 // fluid simulation
 import FluidSimulation from "./fluid-sim";
 
-const bound = 4;
+const bound = 6;
+const debug = false;
 
 class SceneApp extends Scene {
   constructor() {
@@ -45,6 +52,8 @@ class SceneApp extends Scene {
     this.orbitalControl.radius.value = 10;
     this.orbitalControl.radius.limit(8, 11);
     this.orbitalControl.rx.limit(0.2, -1.0);
+    const a = 1.5;
+    this.orbitalControl.ry.limit(-a, a);
 
     const { numParticles: s, numSets: t } = Config;
 
@@ -65,6 +74,11 @@ class SceneApp extends Scene {
       VELOCITY_DISSIPATION: DISSIPATION,
       PRESSURE_DISSIPATION: DISSIPATION,
     });
+
+    // pose detection
+    if (Config.usePoseDetection) {
+      this._initPoseDetection();
+    }
   }
 
   _init() {
@@ -76,8 +90,9 @@ class SceneApp extends Scene {
 
     this._hit = [999, 999, 999];
     this._preHit = [999, 999, 999];
-    // const mesh = Geom.sphere(4, 24);
+
     const mesh = Geom.plane(bound * 2, bound * 2, 1);
+    // const mesh = Geom.sphere(3, 24);
     const hitTestor = new HitTestor(mesh, this.camera);
     hitTestor.on("onHit", (e) => {
       if (this._preHit[0] === 999) {
@@ -93,12 +108,11 @@ class SceneApp extends Scene {
       const _dir = [dir[0], dir[1]];
       const d = vec2.length(_dir);
       let f = smoothstep(0, 0.3, d);
-      f = mix(0.5, 1.0, f) * 0.5;
-      let radius = mix(1, 3, f) * 2;
-      // console.log(d, f);
       vec2.normalize(_dir, _dir);
-      this._fluid.updateFlow([x, y], _dir, f, radius, 1);
+      let radius = mix(1.0, 3.0, f) * Config.extreme ? 1 : 2;
+      this._fluid.updateFlow([x, y], _dir, f * 0.2, radius, 1);
     });
+
     hitTestor.on("onUp", (e) => {
       this._hit = [999, 999, 999];
       this._preHit = [999, 999, 999];
@@ -153,6 +167,17 @@ class SceneApp extends Scene {
       minFilter: GL.LINEAR,
       magFilter: GL.LINEAR,
     });
+
+    fboSize = 1024;
+    this._fboFlow = new FboPingPong(fboSize, fboSize, {
+      type: GL.FLOAT,
+      minFilter: GL.LINEAR,
+      magFilter: GL.LINEAR,
+    });
+
+    this._fboFlow.read.bind();
+    GL.clear(0, 0, 0, 1);
+    this._fboFlow.read.unbind();
   }
 
   _initViews() {
@@ -170,10 +195,49 @@ class SceneApp extends Scene {
     this._drawSim = new DrawSim();
     this._drawRibbon = new DrawRibbon();
     this._drawScramble = new DrawScramble().bindFrameBuffer(this._fboScrambled);
+    this._drawFlowUpdate = new DrawFlowUpdate();
   }
 
+  _initPoseDetection() {
+    this._poseDetection = new PoseDetection();
+    this._poseDetection.on(POSE_FOUND, this._onPoseFound);
+    this._poseDetection.on(POSE_LOST, () => {
+      // this._flowForce.value = 1;
+    });
+  }
+
+  _onPoseFound = (mPoints) => {
+    let a = mPoints[0].pos[0] - 0.5;
+    this.orbitalControl.ry.value = a * 2.0;
+    // if (!this._posePoints || this._posePoints.length !== mPoints.length) {
+    //   this._posePoints = mPoints.map(({ pos }) => pos);
+    //   console.log("mPoints", mPoints);
+    // } else {
+    //   const threshold = 0.5;
+    //   mPoints.forEach(({ pos, score }, i) => {
+    //     const dir = vec2.sub([0, 0], pos, this._posePoints[i]);
+    //     let speed = vec2.length(dir);
+    //     let f = smoothstep(0.02, 0.05, speed);
+    //     vec2.normalize(dir, dir);
+    //     let _pos = vec2.clone(pos);
+    //     if (Config.mirrored) {
+    //       _pos[0] = 1 - _pos[0];
+    //     }
+
+    //     if (score > threshold && f > 0) {
+    //       let radius = mix(1.0, 3.0, f) * Config.extreme ? 1 : 3;
+    //       // const force = mix(2, 20, f);
+    //       const force = f * Config.extreme ? 1 : 2;
+    //       this._fluid.updateFlow(_pos, dir, force, radius, 0.5);
+    //     }
+    //     vec2.copy(this._posePoints[i], pos);
+    //   });
+    // }
+  };
+
   update() {
-    this._updateFluid();
+    this._fluid.update();
+    this._updateFlow();
 
     this._drawSim
       .bindFrameBuffer(this._fbo.write)
@@ -209,11 +273,18 @@ class SceneApp extends Scene {
     this._drawScramble
       .bindFrameBuffer(this._fboScrambled)
       .bindTexture("uPosMap", this._fboPos.texture, 0)
+      // .bindTexture("uFluidMap", this._fboFlow.read.texture, 1)
       .bindTexture("uFluidMap", this._fluid.velocity, 1)
       .bindTexture("uDensityMap", this._fluid.density, 2)
       .uniform("uTime", Scheduler.getElapsedTime() + this._seedTime)
       .uniform("uBound", bound)
+      .uniform("uStrength", Config.extreme ? 10 : 1)
       .draw();
+
+    this._fboPos.bind();
+    GL.clear(0, 0, 0, 0);
+    this._dCopy.draw(this._fboScrambled.texture);
+    this._fboPos.unbind();
 
     GL.enable(GL.DEPTH_TEST);
 
@@ -239,10 +310,18 @@ class SceneApp extends Scene {
 
     // generate ao map
     this._textureAO = generateAOMap(this._fboRender.depthTexture);
+
+    // generate blurred map
+    this._textureBlurredRender = applyBlur(this._fboRender.texture);
   }
 
-  _updateFluid() {
-    this._fluid.update();
+  _updateFlow() {
+    this._drawFlowUpdate
+      .bindFrameBuffer(this._fboFlow.write)
+      .bindTexture("uMap", this._fboFlow.read.texture, 0)
+      .draw();
+
+    this._fboFlow.swap();
   }
 
   _updateShadowMap() {
@@ -275,26 +354,30 @@ class SceneApp extends Scene {
     GL.setMatrices(this.camera);
 
     GL.disable(GL.DEPTH_TEST);
+    const { near, far } = this.camera;
+    let focus = (this.orbitalControl.radius.value + 3.2 - near) / (far - near);
+
     // this._dCopy.draw(this._fboRender.getTexture());
     this._drawCompose
       .bindTexture("uMap", this._fboRender.texture, 0)
       .bindTexture("uAOMap", this._textureAO, 1)
       .bindTexture("uNoiseMap", this._textureNoise, 2)
       .bindTexture("uLookupMap", this._textureLookup, 3)
+      .bindTexture("uBlurMap", this._textureBlurredRender, 4)
+      .bindTexture("uDepthMap", this._fboRender.depthTexture, 5)
+      .uniform("uFocus", focus)
       .uniform("uRatio", GL.aspectRatio)
+      .uniform("uNear", near)
+      .uniform("uFar", far)
       .draw();
 
-    const r = bound;
-    this._dBall.draw([-r, -r, 0], [g, g, g], [0.9, 0, 0]);
-    this._dBall.draw([-r, r, 0], [g, g, g], [0.9, 0, 0]);
-    this._dBall.draw([r, -r, 0], [g, g, g], [0.9, 0, 0]);
-    this._dBall.draw([r, r, 0], [g, g, g], [0.9, 0, 0]);
-
-    g = 400;
-    GL.viewport(0, 0, g, g);
-    this._dCopy.draw(this._fluid.density);
-    GL.viewport(g, 0, g, g);
-    this._dCopy.draw(this._fluid.velocity);
+    if (debug) {
+      g = 400;
+      GL.viewport(0, 0, g, g);
+      this._dCopy.draw(this._fluid.velocity);
+      GL.viewport(g, 0, g, g);
+      this._dCopy.draw(this._fluid.density);
+    }
   }
 
   resize() {
@@ -306,7 +389,7 @@ class SceneApp extends Scene {
     // resize fbos
     this._fboRender = new FrameBuffer(GL.width, GL.height);
 
-    // console.log(GL.aspectRatio, 9/16)
+    // console.log(GL.aspectRatio, 9 / 16);
   }
 }
 

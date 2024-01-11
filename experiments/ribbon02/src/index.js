@@ -50,14 +50,16 @@ const initScene = () => {
 };
 
 function _init3D() {
-  if (isDev) {
+  if (isDev || 1) {
     import("./Settings").then(({ default: Settings }) => {
       Settings.init();
       initScene();
 
       import("./utils/addControl").then(({ default: addControls }) => {
         addControls(scene);
-        // import("./debug");
+        if (isDev) {
+          import("./debug");
+        }
       });
     });
   } else {

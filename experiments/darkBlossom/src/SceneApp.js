@@ -21,6 +21,7 @@ import DrawSave from "./DrawSave.js";
 import DrawPetals from "./DrawPetals.js";
 import DrawSim from "./DrawSim.js";
 import DrawCover from "./DrawCover.js";
+import DrawFloatingParticles from "./DrawFloatingParticles.js";
 
 // textures
 import generateBlueNoise from "./generateBlueNoise.js";
@@ -32,10 +33,10 @@ class SceneApp extends Scene {
     this._seedTime = random(100);
     this.camera.setPerspective(70 * RAD, GL.aspectRatio, 0.1, 100);
     const radiusLimit = 12;
-    this.orbitalControl.radius.limit(radiusLimit, radiusLimit);
-    this.orbitalControl.radius.setTo(radiusLimit);
+    // this.orbitalControl.radius.limit(radiusLimit, radiusLimit);
+    // this.orbitalControl.radius.setTo(radiusLimit);
 
-    this.orbitalControl.rx.limit(0.1, -Math.PI / 2 + 0.1);
+    // this.orbitalControl.rx.limit(0.1, -Math.PI / 2 + 0.1);
 
     // shadow
     let r = 10;
@@ -90,6 +91,8 @@ class SceneApp extends Scene {
 
     // textures
     this._textureNoise = generateBlueNoise();
+
+    this._fboRender = new FrameBuffer(GL.width, GL.height);
   }
 
   _initViews() {
@@ -100,6 +103,8 @@ class SceneApp extends Scene {
     this._drawFloor = new DrawFloor();
     this._drawPetals = new DrawPetals();
     this._drawCover = new DrawCover();
+
+    this._drawFloat = new DrawFloatingParticles();
 
     // init particles
     this._drawSim = new DrawSim();
@@ -172,6 +177,8 @@ class SceneApp extends Scene {
       : this._fboPosOrg.texture;
 
     const { colorShadow, colorPetal } = Config;
+    const _colorShadow = colorShadow.map(toGlsl);
+    const _colorPetal = colorPetal.map(toGlsl);
 
     this._drawPetals
       .bindTexture("uPosMap", this._fbo.read.getTexture(0), 0)
@@ -179,8 +186,16 @@ class SceneApp extends Scene {
       .bindTexture("uDepthMap", tDepth, 2)
       .uniform("uShadowMatrix", this.mtxShadow)
       .uniform("uLight", this._lightPosition)
-      .uniform("uColor", colorPetal.map(toGlsl))
-      .uniform("uColorShadow", colorShadow.map(toGlsl))
+      .uniform("uColor", _colorPetal)
+      .uniform("uColorShadow", _colorShadow)
+      .draw();
+
+    const time = Scheduler.getElapsedTime() + this._seedTime;
+    this._drawFloat
+      .uniform("uLight", this._lightPosition)
+      .uniform("uTime", time)
+      .uniform("uColor", _colorPetal)
+      .uniform("uColorShadow", _colorShadow)
       .draw();
   }
 
@@ -215,6 +230,8 @@ class SceneApp extends Scene {
     const { innerWidth, innerHeight } = window;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);
+
+    this._fboRender = new FrameBuffer(GL.width, GL.height);
   }
 }
 

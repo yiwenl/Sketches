@@ -43,7 +43,8 @@ export const pick = (elms) => {
 };
 
 export const rgba = (r, g, b, a = 1) => {
-  let _g, _b;
+  let _g = g,
+    _b = b;
   if (g === undefined) {
     _g = r;
   }

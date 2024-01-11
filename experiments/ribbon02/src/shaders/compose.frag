@@ -9,7 +9,13 @@ uniform sampler2D uMap;
 uniform sampler2D uAOMap;
 uniform sampler2D uNoiseMap;
 uniform sampler2D uLookupMap;
+uniform sampler2D uBlurMap;
+uniform sampler2D uDepthMap;
 uniform float uRatio;
+
+uniform float uFocus;         // Focus distance
+uniform float uNear;          // Camera near plane
+uniform float uFar;           // Camera far plane
 
 out vec4 oColor;
 
@@ -55,11 +61,26 @@ vec4 lookup(in vec4 textureColor, in sampler2D lookupTable) {
     return lookup(textureColor, lookupTable, 1.0);
 }
 
+
+float normalizeDepth(float depth) {
+    return (2.0 * uNear) / (uFar + uNear - depth * (uFar - uNear));
+}
+
+
 void main(void) {
+    float depth = texture(uDepthMap, vTextureCoord).r;
+    float normalizedDepth = normalizeDepth(depth);
+    vec4 color = texture(uMap, vTextureCoord);
+    vec4 blurredColor = texture(uBlurMap, vTextureCoord);
+
+    float t = 0.05;
+    // Calculate blur amount based on depth difference
+    float blurAmount = smoothstep(uFocus - t, uFocus + t, normalizedDepth);
+    color = mix(color, blurredColor, blurAmount);
+
     float ao = texture(uAOMap, vTextureCoord).r;
     ao = mix(ao, 1.0, .2);
     
-    vec4 color = texture(uMap, vTextureCoord);
     color.rgb *= ao;
 
     vec2 uv = vTextureCoord - .5;
@@ -86,7 +107,10 @@ void main(void) {
     d = smoothstep(0.4, 1.2, d);
     color.rgb -= d * 0.4;
 
-    oColor = lookup(color, uLookupMap, 0.5);
+    oColor = lookup(color, uLookupMap, 0.35);
     oColor.rgb *= mix(1.1, 0.5, v);
     // oColor = vec4(vec3(ao), 1.0);
+    // oColor = vec4(vec3(blurAmount), 1.0);
+
+    // oColor = mix(oColor, blurredColor, step(vTextureCoord.x, .5));
 }

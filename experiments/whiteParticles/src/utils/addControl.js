@@ -30,6 +30,7 @@ export default (scene) => {
     gui.addColor(Config, "colorReflection0").onChange(refresh);
     gui.addColor(Config, "colorReflection1").onChange(refresh);
     gui.add(Config, "showReflection").onChange(refresh);
+    gui.add(Settings, "reset").name("Reset Default Settings");
   }
 
   // dat.GUI.toggleHide();
