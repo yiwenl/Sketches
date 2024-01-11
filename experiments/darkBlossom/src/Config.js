@@ -1,4 +1,5 @@
 export default {
+  usePoseDetection: false,
   colorBg: [205, 48, 0],
   colorCover: [63, 57, 52],
   colorShadow: [24, 35, 29],

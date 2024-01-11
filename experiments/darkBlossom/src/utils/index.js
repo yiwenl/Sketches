@@ -13,10 +13,6 @@ export const logError = (e) => {
   console.error(e);
 };
 
-export const clamp = (v, min, max) => {
-  return Math.max(min, Math.min(max, v));
-};
-
 export const random = (a, b) => {
   if (a === undefined) {
     return fxrand();
@@ -47,7 +43,8 @@ export const pick = (elms) => {
 };
 
 export const rgba = (r, g, b, a = 1) => {
-  let _g, _b;
+  let _g = g,
+    _b = b;
   if (g === undefined) {
     _g = r;
   }

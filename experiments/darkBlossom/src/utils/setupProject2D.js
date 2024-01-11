@@ -6,7 +6,7 @@ export const createCanvas = (width, height) => {
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
-  return { canvas, ctx };
+  return { canvas, ctx, width, height };
 };
 
 const setupProject = (width, height) => {

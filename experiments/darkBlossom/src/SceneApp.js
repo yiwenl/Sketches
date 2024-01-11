@@ -12,6 +12,7 @@ import {
 } from "alfrid";
 import { RAD, toGlsl, random, smoothstep, biasMatrix } from "./utils";
 import Config from "./Config";
+import Assets from "./Assets";
 
 import { vec3, mat4, vec2 } from "gl-matrix";
 import Scheduler from "scheduling";
@@ -23,20 +24,25 @@ import DrawSim from "./DrawSim.js";
 import DrawFloatingParticles from "./DrawFloatingParticles.js";
 import DrawCompose from "./DrawCompose.js";
 
+// pose detection
+import PoseDetection, { POSE_FOUND, POSE_LOST } from "./PoseDetection";
+
 // textures
+import applyBlur from "./applyBlur";
 import generateBlueNoise from "./generateBlueNoise.js";
+import generateAOMap from "./generateAOMap";
 
 class SceneApp extends Scene {
   constructor() {
     super();
 
     this._seedTime = random(100);
-    this.camera.setPerspective(70 * RAD, GL.aspectRatio, 0.1, 100);
+    this.camera.setPerspective(70 * RAD, GL.aspectRatio, 1, 28);
     const radiusLimit = 12;
-    // this.orbitalControl.radius.limit(radiusLimit, radiusLimit);
-    // this.orbitalControl.radius.setTo(radiusLimit);
+    this.orbitalControl.radius.limit(radiusLimit, radiusLimit);
+    this.orbitalControl.radius.setTo(radiusLimit);
 
-    // this.orbitalControl.rx.limit(0.1, -Math.PI / 2 + 0.1);
+    this.orbitalControl.rx.limit(0.1, -Math.PI / 2 + 0.1);
 
     // shadow
     let r = 10;
@@ -66,7 +72,21 @@ class SceneApp extends Scene {
       this._hit = [999, 999, 999];
       this._preHit = [999, 999, 999];
     });
+
+    if (Config.usePoseDetection) {
+      this._initPoseDetection();
+    }
   }
+
+  _initPoseDetection() {
+    this._poseDetection = new PoseDetection();
+    this._poseDetection.on(POSE_FOUND, this._onPoseFound);
+    this._poseDetection.on(POSE_LOST, () => {
+      // this._flowForce.value = 1;
+    });
+  }
+
+  _onPoseFound = (mPoints) => {};
 
   _initTextures() {
     this.resize();
@@ -93,6 +113,10 @@ class SceneApp extends Scene {
     this._textureNoise = generateBlueNoise();
 
     this._fboRender = new FrameBuffer(GL.width, GL.height);
+
+    this._textureLookup = Assets.get("lookup");
+    this._textureLookup.minFilter = GL.NEAREST;
+    this._textureLookup.magFilter = GL.NEAREST;
   }
 
   _initViews() {
@@ -205,7 +229,6 @@ class SceneApp extends Scene {
   render() {
     let g = 0.1;
     const colorBg = Config.colorBg.map(toGlsl);
-    const colorCover = Config.colorCover.map(toGlsl);
     const colorShadow = Config.colorShadow.map(toGlsl);
     GL.clear(...colorBg, 1);
     GL.setMatrices(this.camera);
@@ -224,18 +247,34 @@ class SceneApp extends Scene {
 
     this._fboRender.unbind();
 
+    // render ao map
+    this._textureAO = generateAOMap(this._fboRender.depthTexture);
+
+    // generate blurred map
+    this._textureBlurredRender = applyBlur(this._fboRender.texture);
+
+    const { near, far } = this.camera;
+    let focus = (this.orbitalControl.radius.value + 3.2 - near) / (far - near);
+
     GL.disable(GL.DEPTH_TEST);
     this._drawCompose
       .bindTexture("uMap", this._fboRender.texture, 0)
-      .bindTexture("uNoiseMap", this._textureNoise, 1)
+      .bindTexture("uAOMap", this._textureAO, 1)
+      .bindTexture("uNoiseMap", this._textureNoise, 2)
+      .bindTexture("uBlurMap", this._textureBlurredRender, 3)
+      .bindTexture("uDepthMap", this._fboRender.depthTexture, 4)
+      .bindTexture("uLookupMap", this._textureLookup, 5)
       .uniform("uRatio", GL.aspectRatio)
+      .uniform("uFocus", focus)
+      .uniform("uNear", near)
+      .uniform("uFar", far)
       .draw();
 
     GL.enable(GL.DEPTH_TEST);
   }
 
   resize() {
-    const pixelRatio = 2;
+    const pixelRatio = 1.5;
     const { innerWidth, innerHeight } = window;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);

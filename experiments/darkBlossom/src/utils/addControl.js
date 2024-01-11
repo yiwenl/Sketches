@@ -21,6 +21,7 @@ export default (scene) => {
   gui
     .add(Config, "numParticles", [128, 144, 192, 256, 384, 512])
     .onFinishChange(reload);
+  gui.add(Config, "usePoseDetection").onFinishChange(reload);
   gui.add(Config, "floorLevel", 0, -2).onFinishChange(reload);
   gui.addColor(Config, "colorBg").onChange(refresh);
   gui.addColor(Config, "colorCover").onChange(refresh);
