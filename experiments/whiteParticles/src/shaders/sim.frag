@@ -17,6 +17,7 @@ uniform sampler2D uFluidMap;
 uniform sampler2D uDensityMap;
 
 uniform float uTime;
+uniform float uSpeed;
 uniform float uOffset;
 uniform float uLifeDecrease;
 
@@ -51,7 +52,7 @@ void main(void) {
     data.z += 0.1;
 
     float life = data.x;
-    life -= mix(1.0, 4.0, data.y) * 0.003 * mix(1.0, 2.0, uLifeDecrease);
+    life -= mix(1.0, 4.0, data.y) * 0.003 * mix(1.0, 2.0, uLifeDecrease)/uSpeed;
 
     vec3 acc = vec3(0.0);
 
@@ -67,14 +68,14 @@ void main(void) {
     // float noise = snoise(vec3(pos * 0.75 + uTime * 0.5 + extra * 0.1));
     acc.z += noise * 30.0 * density;
 
-    acc += fluid * 0.03 * density;
+    acc += fluid * 0.03 * density * uSpeed;
 
 
     // apply velocity
     float speed = mix(1.0, 2.0, extra.x);
 
     float t = pow(uOffset , 3.0);
-    vel += acc * speed * 0.0001 * mix(1.0, 1.5, t);
+    vel += acc * speed * 0.0001 * mix(1.0, 1.5, t) * uSpeed;
     vel *= 0.9 + uOffset * 0.02;
 
     pos += vel;

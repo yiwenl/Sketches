@@ -28,6 +28,7 @@ import Scene from "./SceneApp";
 import { logError } from "./utils";
 import preload from "./utils/preload";
 import "./utils/Capture";
+import Config from "./Config.js";
 
 const isDev = process.env.NODE_ENV === "development" || 1;
 
@@ -53,11 +54,15 @@ function _init3D() {
   if (isDev) {
     import("./Settings").then(({ default: Settings }) => {
       Settings.init();
+      if (GL.isMobile) {
+        Config.numParticles = 128;
+        Config.usePoseDetection = false;
+      }
       initScene();
 
       import("./utils/addControl").then(({ default: addControls }) => {
         addControls(scene);
-        // import("./debug");
+        import("./debug");
       });
     });
   } else {

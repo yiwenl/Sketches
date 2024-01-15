@@ -105,8 +105,8 @@ void main(void) {
     // color.rgb -= noiseAmount * 0.2;
 
     // highlight / shadow
-    float highlight = distance(uv, vec2(-0.2, 0.2));
-    highlight = smoothstep(0.8, 0.2, highlight);
+    float highlight = distance(uv, vec2(-0.3, 0.4));
+    highlight = smoothstep(0.9, 0.3, highlight);
     highlight = mix(0.7, 1.5, highlight);
     color.rgb *= highlight;
 

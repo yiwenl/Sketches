@@ -75,6 +75,7 @@ class SceneApp extends Scene {
 
     if (Config.usePoseDetection) {
       this._initPoseDetection();
+      this.orbitalControl.lock();
     }
   }
 

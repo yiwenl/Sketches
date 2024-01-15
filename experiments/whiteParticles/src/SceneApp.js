@@ -261,6 +261,7 @@ class SceneApp extends Scene {
       .uniform("uTime", Scheduler.getElapsedTime())
       .uniform("uOffset", f)
       .uniform("uLifeDecrease", this._offset.value < 1 ? 0 : 1)
+      .uniform("uSpeed", GL.isMobile ? 0.25 : 1.0)
       .draw();
 
     this._fbo.swap();
@@ -295,6 +296,7 @@ class SceneApp extends Scene {
     let f = sin(this._offset.value * PI);
     f = smoothstep(0.0, 0.8, f);
     f = Math.pow(f, 2) * 0.2;
+    if (GL.isMobile) f *= 0.25;
     const noise = 1;
     const angle = this._rotation * f;
 
@@ -392,7 +394,6 @@ class SceneApp extends Scene {
     GL.enableAdditiveBlending();
     this._drawReflection
       .bindTexture("uNormalMap", this._textureNormal, 0)
-
       .uniform("uColor", Config.colorReflection0.map(toGlsl))
       .uniform("uLight", [0.3, 0.1, 1.0])
       .draw();
@@ -422,7 +423,7 @@ class SceneApp extends Scene {
   }
 
   resize() {
-    const pixelRatio = 1.5;
+    const pixelRatio = GL.isMobile ? 1 : 1.5;
     const { innerWidth, innerHeight } = window;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);
