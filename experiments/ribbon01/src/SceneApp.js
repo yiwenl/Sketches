@@ -156,7 +156,7 @@ class SceneApp extends Scene {
       this.lengthScale.value = 1.0;
     }, 2200 + delay);
 
-    setTimeout(() => this.pulse(), 2500 + delay);
+    setTimeout(() => this.pulse(), 3000 + delay);
   }
 
   _initTextures() {
@@ -245,7 +245,7 @@ class SceneApp extends Scene {
   }
 
   _initHit() {
-    const r = 12.5;
+    const r = 15;
     const mesh = Geom.plane(r, r / GL.aspectRatio, 1);
     // this._hitTestor = new HitTestor(Geom.sphere(3, 24), this.camera);
     this._hitTestor = new HitTestor(mesh, this.camera);
