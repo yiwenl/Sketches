@@ -9,6 +9,7 @@ module.exports = {
     // https://webpack.js.org/concepts/hot-module-replacement/
     hot: false,
     open: true,
+    https: true,
     client: {
       overlay: {
         errors: true,

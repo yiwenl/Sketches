@@ -25,6 +25,7 @@
 import "./hash.js";
 import { GL } from "alfrid";
 import Scene from "./SceneApp";
+import Config from "./Config.js";
 import { logError } from "./utils";
 import preload from "./utils/preload";
 import "./utils/Capture";
@@ -48,11 +49,18 @@ function _init3D() {
   if (isDev) {
     import("./Settings").then(({ default: Settings }) => {
       Settings.init();
+
+      if (GL.isMobile) {
+        Config.numParticles = 384;
+        Config.usePostEffect = true;
+        Settings.refresh();
+      }
+
       initScene();
 
       import("./utils/addControl").then(({ default: addControls }) => {
         addControls(scene);
-        import("./debug");
+        // import("./debug");
       });
     });
   } else {

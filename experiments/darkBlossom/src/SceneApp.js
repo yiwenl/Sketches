@@ -10,7 +10,14 @@ import {
   Scene,
   HitTestor,
 } from "alfrid";
-import { RAD, toGlsl, random, smoothstep, biasMatrix } from "./utils";
+import {
+  RAD,
+  toGlsl,
+  random,
+  randomInt,
+  smoothstep,
+  biasMatrix,
+} from "./utils";
 import Config from "./Config";
 import Assets from "./Assets";
 
@@ -32,6 +39,11 @@ import applyBlur from "./applyBlur";
 import generateBlueNoise from "./generateBlueNoise.js";
 import generateAOMap from "./generateAOMap";
 
+// socket
+import { io } from "socket.io-client";
+
+const HIT_RADIUS_LIMIT = 5;
+
 class SceneApp extends Scene {
   constructor() {
     super();
@@ -43,6 +55,10 @@ class SceneApp extends Scene {
     this.orbitalControl.radius.setTo(radiusLimit);
 
     this.orbitalControl.rx.limit(0.1, -Math.PI / 2 + 0.1);
+    if (GL.isMobile) {
+      this.orbitalControl.lock();
+      this.orbitalControl.rx.value = -0.2;
+    }
 
     // shadow
     let r = 10;
@@ -68,15 +84,61 @@ class SceneApp extends Scene {
       }
     });
 
+    this._hit = [999, 999, 999];
+    this._preHit = [999, 999, 999];
+
+    if (Config.useSocket) this._initSocket();
+    else this._initHitTest();
+
     addEventListener("blur", (event) => {
       this._hit = [999, 999, 999];
       this._preHit = [999, 999, 999];
     });
 
+    if (Config.emitRandomBurst) {
+      this.randomBurst();
+    }
+
     if (Config.usePoseDetection) {
       this._initPoseDetection();
       this.orbitalControl.lock();
     }
+  }
+
+  _initSocket() {
+    this.socket = io("https://192.168.1.209:8888", {
+      secure: true,
+      rejectUnauthorized: false,
+    });
+
+    this._isEmitLocked = false;
+
+    this.socket.on("broadcastCameraData", (data) => {
+      // const { cameraPos, cameraFov } = data;
+
+      // if (!this._isEmitLocked) {
+      vec3.copy(this._preHit, this._hit);
+      vec3.copy(this._hit, data.cameraPosOrg);
+      vec3.scale(this._hit, this._hit, 4);
+      this._hit[1] = Config.floorLevel;
+      // const d = vec3.distance(this._hit, this._preHit);
+      // console.log(d, this._hit, this._preHit);
+
+      //   setTimeout(() => {
+      //     vec3.copy(this._preHit, this._hit);
+      //   }, 1000 / 60);
+
+      //   setTimeout(() => {
+      //     this._isEmitLocked = false;
+      //   }, 2000);
+      // }
+
+      // Process the received data as needed
+      if (Math.random() < 10.05) {
+        // console.log("Received broadcasted camera data:", data);
+        // console.log(cameraPos, data.pointZero, data.cameraPosOrg);
+      }
+    });
   }
 
   _initPoseDetection() {
@@ -88,6 +150,50 @@ class SceneApp extends Scene {
   }
 
   _onPoseFound = (mPoints) => {};
+
+  _initHitTest() {
+    // hit test
+
+    this._hitTestor = new HitTestor(this._drawFloor.mesh, this.camera);
+    this._hitTestor.on("onHit", (e) => {
+      if (this._preHit[0] > 100) {
+        vec3.copy(this._preHit, e.hit);
+      } else {
+        vec3.copy(this._preHit, this._hit);
+      }
+      vec3.copy(this._hit, e.hit);
+      const r = HIT_RADIUS_LIMIT;
+      const pxz = [this._hit[0], this._hit[2]];
+      if (vec2.length(pxz) > r) {
+        vec2.normalize(pxz, pxz);
+        vec2.scale(pxz, pxz, r);
+        this._hit[0] = pxz[0];
+        this._hit[2] = pxz[1];
+      }
+    });
+
+    this._hitTestor.on("onUp", () => {
+      this._hit = [999, 999, 999];
+      this._preHit = [999, 999, 999];
+    });
+  }
+
+  randomBurst() {
+    const { sin, cos, sqrt, PI } = Math;
+    const a = random(PI * 2);
+    const r = sqrt(random()) * HIT_RADIUS_LIMIT;
+    const x = r * cos(a);
+    const z = r * sin(a);
+    this._hit = [x, Config.floorLevel, z];
+    this._preHit = [x, Config.floorLevel, z + random(0.2, 1)];
+
+    const f = 1000 / 60;
+    const delay = randomInt(10, 100) * f;
+    setTimeout(() => {
+      vec3.copy(this._preHit, this._hit);
+    }, f);
+    setTimeout(() => this.randomBurst(), delay);
+  }
 
   _initTextures() {
     this.resize();
@@ -138,37 +244,17 @@ class SceneApp extends Scene {
     GL.clear(0, 0, 0, 1);
     this._dCopy.draw(this._fbo.read.getTexture(0));
     this._fboPosOrg.unbind();
-
-    // hit test
-    this._hit = [999, 999, 999];
-    this._preHit = [999, 999, 999];
-    this._hitTestor = new HitTestor(this._drawFloor.mesh, this.camera);
-    this._hitTestor.on("onHit", (e) => {
-      if (this._preHit[0] > 100) {
-        vec3.copy(this._preHit, e.hit);
-      } else {
-        vec3.copy(this._preHit, this._hit);
-      }
-      vec3.copy(this._hit, e.hit);
-      const r = 5;
-      const pxz = [this._hit[0], this._hit[2]];
-      if (vec2.length(pxz) > r) {
-        vec2.normalize(pxz, pxz);
-        vec2.scale(pxz, pxz, r);
-        this._hit[0] = pxz[0];
-        this._hit[2] = pxz[1];
-      }
-    });
-
-    this._hitTestor.on("onUp", () => {
-      this._hit = [999, 999, 999];
-      this._preHit = [999, 999, 999];
-    });
   }
 
   update() {
     let d = vec3.distance(this._hit, this._preHit);
-    d = smoothstep(0, 0.4, d);
+    const minRadius = Config.useSocket ? 0.1 : 0.4;
+    d = smoothstep(0, minRadius, d);
+    let resetSpeed = 2;
+    if (Config.useSocket) {
+      resetSpeed = 5;
+    }
+
     this._drawSim
       .bindFrameBuffer(this._fbo.write)
       .bindTexture("uPosMap", this._fbo.read.getTexture(0), 0)
@@ -180,6 +266,7 @@ class SceneApp extends Scene {
       .uniform("uTouch", this._hit)
       .uniform("uFloor", Config.floorLevel)
       .uniform("uEmitStrength", d)
+      .uniform("uResetSpeed", GL.isMobile ? 5 : resetSpeed)
       .draw();
 
     this._fbo.swap();
@@ -228,6 +315,7 @@ class SceneApp extends Scene {
   }
 
   render() {
+    const { usePostEffect } = Config;
     let g = 0.1;
     const colorBg = Config.colorBg.map(toGlsl);
     const colorShadow = Config.colorShadow.map(toGlsl);
@@ -248,34 +336,40 @@ class SceneApp extends Scene {
 
     this._fboRender.unbind();
 
-    // render ao map
-    this._textureAO = generateAOMap(this._fboRender.depthTexture);
+    if (usePostEffect) {
+      // render ao map
+      this._textureAO = generateAOMap(this._fboRender.depthTexture);
 
-    // generate blurred map
-    this._textureBlurredRender = applyBlur(this._fboRender.texture);
+      // generate blurred map
+      this._textureBlurredRender = applyBlur(this._fboRender.texture);
+    }
 
     const { near, far } = this.camera;
     let focus = (this.orbitalControl.radius.value + 3.2 - near) / (far - near);
 
     GL.disable(GL.DEPTH_TEST);
-    this._drawCompose
-      .bindTexture("uMap", this._fboRender.texture, 0)
-      .bindTexture("uAOMap", this._textureAO, 1)
-      .bindTexture("uNoiseMap", this._textureNoise, 2)
-      .bindTexture("uBlurMap", this._textureBlurredRender, 3)
-      .bindTexture("uDepthMap", this._fboRender.depthTexture, 4)
-      .bindTexture("uLookupMap", this._textureLookup, 5)
-      .uniform("uRatio", GL.aspectRatio)
-      .uniform("uFocus", focus)
-      .uniform("uNear", near)
-      .uniform("uFar", far)
-      .draw();
+    if (Config.usePostEffect) {
+      this._drawCompose
+        .bindTexture("uMap", this._fboRender.texture, 0)
+        .bindTexture("uAOMap", this._textureAO, 1)
+        .bindTexture("uNoiseMap", this._textureNoise, 2)
+        .bindTexture("uBlurMap", this._textureBlurredRender, 3)
+        .bindTexture("uDepthMap", this._fboRender.depthTexture, 4)
+        .bindTexture("uLookupMap", this._textureLookup, 5)
+        .uniform("uRatio", GL.aspectRatio)
+        .uniform("uFocus", focus)
+        .uniform("uNear", near)
+        .uniform("uFar", far)
+        .draw();
+    } else {
+      this._dCopy.draw(this._fboRender.texture);
+    }
 
     GL.enable(GL.DEPTH_TEST);
   }
 
   resize() {
-    const pixelRatio = 1.5;
+    const pixelRatio = GL.isMobile ? 1 : 1.5;
     const { innerWidth, innerHeight } = window;
     GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
     this.camera?.setAspectRatio?.(GL.aspectRatio);

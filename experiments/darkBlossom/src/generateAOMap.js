@@ -4,8 +4,9 @@ let draw, fbo;
 
 export default function (mDepthMap) {
   if (!fbo) {
-    const s = 1.0;
-    fbo = new FrameBuffer(mDepthMap.width, mDepthMap.height);
+    let s = 1;
+    fbo = new FrameBuffer(mDepthMap.width * s, mDepthMap.height * s);
+    s = 1;
     draw = new Draw()
       .setMesh(Geom.bigTriangle())
       .useProgram(ShaderLibs.bigTriangleVert, fs)

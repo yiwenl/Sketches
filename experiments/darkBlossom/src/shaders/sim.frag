@@ -16,6 +16,7 @@ uniform sampler2D uPosOrgMap;
 uniform float uTime;
 uniform float uFloor;
 uniform float uEmitStrength;
+uniform float uResetSpeed;
 uniform vec3 uTouch;
 
 
@@ -92,7 +93,7 @@ void main(void) {
 
     if(isFlying < 0.5) {
         resetCount += 1.0;
-        if(resetCount > mix(6000.0, 10000.0, extra.z)) {
+        if(resetCount > mix(6000.0, 10000.0, extra.z)/uResetSpeed) {
             resetCount = 0.0;
             pos = posOrg;
         }

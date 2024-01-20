@@ -1,4 +1,4 @@
-import { Draw, Geom } from "alfrid";
+import { GL, Draw, Geom } from "alfrid";
 
 import Config from "./Config";
 import { random } from "./utils";
@@ -14,7 +14,7 @@ export default class DrawFloatingParticles extends Draw {
     const s = 0.05;
     const mesh = Geom.plane(s, s, 1, "xz");
 
-    let num = 6000;
+    let num = GL.isMobile ? 3000 : 6000;
 
     const posOffset = [];
     const axis = [];

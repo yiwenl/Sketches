@@ -2,6 +2,7 @@ import EventDispatcher from "events";
 import { Ray } from "../math/Ray";
 import { getMouse } from "../utils";
 import { mat4, vec3 } from "gl-matrix";
+import Scheduler from "scheduling";
 
 function distance(a, b) {
   const dx = a.x - b.x;
@@ -34,10 +35,13 @@ class HitTestor extends EventDispatcher {
 
     this._listenerTarget = mListenerTarget;
     this._skippingMove = mSkipMoveCheck;
+    this._isMouseDown = false;
 
     this._onMoveBind = (e) => this._onMove(e);
     this._onDownBind = (e) => this._onDown(e);
     this._onUpBind = () => this._onUp();
+    // this._loopBind = () => this._loop();
+    Scheduler.addEF(() => this._loop());
 
     this.connect();
   }
@@ -46,12 +50,23 @@ class HitTestor extends EventDispatcher {
     this._listenerTarget.addEventListener("mousedown", this._onDownBind);
     this._listenerTarget.addEventListener("mousemove", this._onMoveBind);
     this._listenerTarget.addEventListener("mouseup", this._onUpBind);
+
+    this._listenerTarget.addEventListener("touchstart", this._onDownBind);
+    this._listenerTarget.addEventListener("touchmove", this._onMoveBind);
+    this._listenerTarget.addEventListener("touchend", this._onUpBind);
   }
 
   disconnect() {
     this._listenerTarget.removeEventListener("mousedown", this._onDownBind);
     this._listenerTarget.removeEventListener("mousemove", this._onMoveBind);
     this._listenerTarget.removeEventListener("mouseup", this._onUpBind);
+  }
+
+  _loop() {
+    if (!this._lastPos) {
+      return;
+    }
+    this._checkHit();
   }
 
   _checkHit(mType = "onHit") {
@@ -109,20 +124,24 @@ class HitTestor extends EventDispatcher {
     this._firstPos = getMouse(e);
     this._lastPos = getMouse(e);
     this._checkHit("onDown");
+    this._isMouseDown = true;
   }
 
   _onMove(e) {
     this._lastPos = getMouse(e);
     if (!this._skippingMove) {
-      this._checkHit();
+      // this._checkHit();
     }
   }
 
   _onUp() {
     const dist = distance(this._firstPos, this._lastPos);
-    if (dist < this.clickTolerance) {
+    if (dist < this.clickTolerance && this._isMouseDown) {
       this._checkHit();
+    } else {
+      this.emit("onUp");
     }
+    this._isMouseDown = false;
   }
 }
 

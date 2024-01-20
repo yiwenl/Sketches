@@ -107,7 +107,7 @@ void main(void) {
     // highlight / shadow
     float highlight = distance(uv, vec2(-0.3, 0.4));
     highlight = smoothstep(0.9, 0.3, highlight);
-    highlight = mix(0.7, 1.5, highlight);
+    highlight = mix(0.7, 1.25, highlight);
     color.rgb *= highlight;
 
     oColor = lookup(color, uLookupMap, .5);
