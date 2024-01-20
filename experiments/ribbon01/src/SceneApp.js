@@ -87,7 +87,9 @@ class SceneApp extends Scene {
     this._seedTime = random(1000);
     this._hit = [999, 999, 999];
     this._center = [0, 0, 0];
-    this._initHit();
+    if (!GL.isMobile) {
+      this._initHit();
+    }
 
     // color
     this._currColorIndex = Config.colorIndex;

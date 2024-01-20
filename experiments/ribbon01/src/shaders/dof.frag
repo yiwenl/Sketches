@@ -73,6 +73,7 @@ void main() {
     float blurAmount = abs(normalizedDepth - uFocus);
     // blurAmount = clamp(blurAmount, 0.0, 1.0);
     blurAmount = smoothstep(0.2, 0.4, blurAmount);
+    blurAmount = pow(blurAmount, 1.5);
     // blurAmount = smoothstep(0.0, 0.7, blurAmount);
 
     float t = 0.05;
@@ -110,6 +111,8 @@ void main() {
     t = smoothstep(0.25, 0.8, t);
     color.rgb *= mix(1.0, 0.5, t);
 
-    color = lookup(color, uLookupMap, .5);
+    color.rgb = pow(color.rgb, vec3(0.75));
+    // color.rgb = pow(color.rgb + 0.2, vec3(1.75));
+    color = lookup(color, uLookupMap, 0.25);
     oColor = color;
 }

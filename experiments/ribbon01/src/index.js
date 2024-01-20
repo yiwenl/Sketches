@@ -22,6 +22,7 @@
 
 // import "./sketch01.js";
 
+import Config from "./Config.js";
 import "./hash.js";
 import { GL } from "alfrid";
 import Scene from "./SceneApp";
@@ -42,6 +43,24 @@ const initScene = () => {
 
   GL.init(canvas, { alpha: false, preserveDrawingBuffer: true });
 
+  // fullscreen
+
+  // Function to toggle fullscreen mode
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      canvas.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  // Add event listener for keydown event on the whole document
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "f") {
+      toggleFullScreen();
+    }
+  });
+
   scene = new Scene();
 };
 
@@ -49,6 +68,12 @@ function _init3D() {
   if (isDev) {
     import("./Settings").then(({ default: Settings }) => {
       Settings.init();
+      if (GL.isMobile) {
+        Config.numParticles = 64;
+        Config.numSets = 4;
+        Config.usePostEffect = true;
+        Settings.refresh();
+      }
       initScene();
 
       import("./utils/addControl").then(({ default: addControls }) => {
