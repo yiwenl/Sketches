@@ -346,7 +346,7 @@ export default [
   },
   {
     cover: "assets/img/coverSketchRibbon01.jpg",
-    url: "//yiwenl.github.io/Sketches/experiments/ribbon01/dist/index.html",
-    title: "Pulsing Ribbon",
+    url: "//yiwenl.github.io/Sketches/experiments/ribbon03/dist/index.html",
+    title: "Ribbons",
   },
 ];
