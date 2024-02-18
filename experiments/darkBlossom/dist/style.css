@@ -16,3 +16,14 @@ body {
   height: 100%;
   overflow: hidden;
 }
+
+video {
+  position: absolute;
+  z-index: 9;
+  width: 320px;
+  height: 240px;
+  right: 0;
+  bottom: 0;
+  transform: scale(-1, 1);
+  /* display: none; */
+}

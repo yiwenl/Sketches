@@ -8,7 +8,7 @@ import Color from "../utils/Color";
 import ColorThemes from "../ColorThemes";
 
 const showRGBControl = 1;
-const showColorControl = true;
+const showColorControl = false;
 
 export default (scene) => {
   const { refresh, reload } = Settings;
@@ -86,7 +86,7 @@ export default (scene) => {
   }
 
   // system
-  gui.add(oControl, "save").name("Save settings");
+  // gui.add(oControl, "save").name("Save settings");
   // gui.add(Settings, "reset").name("Reset default settings");
 
   // dat.GUI.toggleHide();

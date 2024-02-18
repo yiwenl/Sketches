@@ -1,5 +1,5 @@
 export default {
-  colorTheme: "red",
+  colorTheme: "green",
   usePoseDetection: false,
   usePostEffect: true,
   useSocket: false,
