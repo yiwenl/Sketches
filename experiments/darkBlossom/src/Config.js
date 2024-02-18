@@ -1,10 +1,11 @@
 export default {
+  colorTheme: "red",
   usePoseDetection: false,
   usePostEffect: true,
   useSocket: false,
   emitRandomBurst: false,
-  colorBg: [205, 48, 0],
   colorCover: [63, 57, 52],
+  colorBg: [205, 48, 0],
   colorShadow: [24, 35, 29],
   colorPetal: [3, 97.5, 70],
   numParticles: 512,

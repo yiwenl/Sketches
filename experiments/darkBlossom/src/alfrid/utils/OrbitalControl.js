@@ -86,6 +86,10 @@ class OrbitalControl {
     this.#isRotationLocked = mValue;
   }
 
+  updateShiftMatrix(mMtx) {
+    mat4.mul(this.#mtxShiftSaved, this.#mtxShiftSaved, mMtx);
+  }
+
   update() {
     vec3.set(this.#position, 0, 0, this.radius.value);
     vec3.rotateX(this.#position, this.#position, [0, 0, 0], this.rx.value);

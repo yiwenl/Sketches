@@ -1,0 +1,58 @@
+{
+  "extends": [
+    "../../.eslintrc.json",
+    "react-app",
+    "next/core-web-vitals",
+    "plugin:@next/next/recommended",
+    "plugin:storybook/recommended",
+    "plugin:@tanstack/eslint-plugin-query/recommended"
+  ],
+  "plugins": ["jam3", "promise", "@tanstack/query"],
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "import/resolver": {
+      "alias": {
+        "map": [["@", "./src"]]
+      }
+    }
+  },
+  "rules": {
+    "jsx-a11y/anchor-has-content": "off",
+    "jsx-a11y/heading-has-content": "off",
+    "import/no-webpack-loader-syntax": "off",
+    "import/no-anonymous-default-export": "off",
+    "import/no-unresolved": ["error", { "ignore": ["svg-inline-loader", "@"] }],
+    "import/named": "error",
+    "import/default": "error",
+    "import/first": "error",
+    "simple-import-sort/exports": "warn",
+    "curly": [2, "multi-line", "consistent"],
+    "no-var": "error",
+    "prettier/prettier": "warn",
+    "promise/param-names": "error",
+    "promise/no-return-wrap": "error",
+    "jsx-a11y/href-no-hash": "off",
+    "jam3/no-sanitizer-with-danger": [
+      2,
+      {
+        "wrapperName": ["sanitizer"]
+      }
+    ],
+    "jam3/forbid-methods": 2,
+    "no-console": "off",
+    "jsx-a11y/anchor-is-valid": [
+      "error",
+      {
+        "components": ["Link"],
+        "specialLink": ["hrefLeft", "hrefRight"],
+        "aspects": ["invalidHref", "preferButton"]
+      }
+    ],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
+    "@next/next/no-img-element": "off",
+    "@typescript-eslint/no-explicit-any": ["error"]
+  }
+}

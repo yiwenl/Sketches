@@ -43,6 +43,7 @@ import generateAOMap from "./generateAOMap";
 import { io } from "socket.io-client";
 
 const HIT_RADIUS_LIMIT = 5;
+const MAX_IDLE_TIME = 10000;
 
 class SceneApp extends Scene {
   constructor() {
@@ -50,9 +51,13 @@ class SceneApp extends Scene {
 
     this._seedTime = random(100);
     this.camera.setPerspective(70 * RAD, GL.aspectRatio, 1, 28);
-    const radiusLimit = 12;
+    const radiusLimit = 14;
     this.orbitalControl.radius.limit(radiusLimit, radiusLimit);
-    this.orbitalControl.radius.setTo(radiusLimit);
+    const mtxShift = mat4.create();
+    mat4.translate(mtxShift, mtxShift, [0, -0.7, 0]);
+    this.orbitalControl.updateShiftMatrix(mtxShift);
+    // this.orbitalControl.radius.value = radiusLimit;
+    // this.orbitalControl.radius.setTo(radiusLimit);
 
     this.orbitalControl.rx.limit(0.1, -Math.PI / 2 + 0.1);
     if (GL.isMobile) {
@@ -61,7 +66,7 @@ class SceneApp extends Scene {
     }
 
     // shadow
-    let r = 10;
+    let r = 15;
     this._lightPosition = [0.1, 20, 0.1];
     this._cameraLight = new CameraOrtho();
     this._cameraLight.ortho(-r, r, r, -r, 7, 23);
@@ -103,6 +108,13 @@ class SceneApp extends Scene {
       this._initPoseDetection();
       this.orbitalControl.lock();
     }
+
+    window.addEventListener("mousemove", this.onMouseMove);
+    this._timeoutBurst = null;
+    this._timeoutStartBurst = setTimeout(
+      () => this.randomBurst(),
+      MAX_IDLE_TIME
+    );
   }
 
   _initSocket() {
@@ -114,30 +126,10 @@ class SceneApp extends Scene {
     this._isEmitLocked = false;
 
     this.socket.on("broadcastCameraData", (data) => {
-      // const { cameraPos, cameraFov } = data;
-
-      // if (!this._isEmitLocked) {
       vec3.copy(this._preHit, this._hit);
       vec3.copy(this._hit, data.cameraPosOrg);
       vec3.scale(this._hit, this._hit, 4);
       this._hit[1] = Config.floorLevel;
-      // const d = vec3.distance(this._hit, this._preHit);
-      // console.log(d, this._hit, this._preHit);
-
-      //   setTimeout(() => {
-      //     vec3.copy(this._preHit, this._hit);
-      //   }, 1000 / 60);
-
-      //   setTimeout(() => {
-      //     this._isEmitLocked = false;
-      //   }, 2000);
-      // }
-
-      // Process the received data as needed
-      if (Math.random() < 10.05) {
-        // console.log("Received broadcasted camera data:", data);
-        // console.log(cameraPos, data.pointZero, data.cameraPosOrg);
-      }
     });
   }
 
@@ -149,11 +141,7 @@ class SceneApp extends Scene {
     });
   }
 
-  _onPoseFound = (mPoints) => {};
-
   _initHitTest() {
-    // hit test
-
     this._hitTestor = new HitTestor(this._drawFloor.mesh, this.camera);
     this._hitTestor.on("onHit", (e) => {
       if (this._preHit[0] > 100) {
@@ -178,6 +166,22 @@ class SceneApp extends Scene {
     });
   }
 
+  onMouseMove = () => {
+    this.stopRandomBurst();
+  };
+
+  stopRandomBurst() {
+    // if (!this._timeoutBurst) return;
+    // console.log("stop random burst");
+    clearTimeout(this._timeoutBurst);
+    clearTimeout(this._timeoutStartBurst);
+    this._timeoutBurst = null;
+    this._timeoutStartBurst = setTimeout(
+      () => this.randomBurst(),
+      MAX_IDLE_TIME
+    );
+  }
+
   randomBurst() {
     const { sin, cos, sqrt, PI } = Math;
     const a = random(PI * 2);
@@ -192,7 +196,7 @@ class SceneApp extends Scene {
     setTimeout(() => {
       vec3.copy(this._preHit, this._hit);
     }, f);
-    setTimeout(() => this.randomBurst(), delay);
+    this._timeoutBurst = setTimeout(() => this.randomBurst(), delay);
   }
 
   _initTextures() {
