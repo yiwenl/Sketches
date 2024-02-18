@@ -30,6 +30,7 @@ import DrawPetals from "./DrawPetals.js";
 import DrawSim from "./DrawSim.js";
 import DrawFloatingParticles from "./DrawFloatingParticles.js";
 import DrawCompose from "./DrawCompose.js";
+import ColorThemes from "./ColorThemes";
 
 // pose detection
 import PoseDetection, { POSE_FOUND, POSE_LOST } from "./PoseDetection";
@@ -58,6 +59,12 @@ class SceneApp extends Scene {
     this.orbitalControl.updateShiftMatrix(mtxShift);
     // this.orbitalControl.radius.value = radiusLimit;
     // this.orbitalControl.radius.setTo(radiusLimit);
+
+    const theme = ColorThemes[Config.colorTheme];
+    console.log(theme);
+    for (const key in theme) {
+      Config[key] = theme[key];
+    }
 
     this.orbitalControl.rx.limit(0.1, -Math.PI / 2 + 0.1);
     if (GL.isMobile) {
