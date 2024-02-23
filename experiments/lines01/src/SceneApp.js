@@ -11,7 +11,7 @@ import {
 import { targetWidth, targetHeight } from "./features";
 import resize from "./utils/resize";
 import { random, toGlsl, biasMatrix } from "./utils";
-import { mat4 } from "gl-matrix";
+import { vec3, mat4 } from "gl-matrix";
 import Config from "./Config";
 import DrawRender from "./DrawRender";
 import DrawPlane from "./DrawPlane";
@@ -22,12 +22,13 @@ import DrawShadow from "./DrawShadow";
 import FluidSimulation from "./fluid-sim";
 
 // particle simulation
-import ParticleSystem from "./ParticleSystem";
+import ParticleSystem, { centers } from "./ParticleSystem";
 
 import NoiseMap from "./utils/NoiseMap";
 import Assets from "./Assets";
 
-const numSets = 24;
+const numSets = 32;
+const numLines = 24;
 
 class SceneApp extends Scene {
   constructor() {
@@ -40,7 +41,7 @@ class SceneApp extends Scene {
     }
 
     // this.orbitalControl.lock();
-    this.orbitalControl.radius.setTo(14);
+    this.orbitalControl.radius.setTo(19);
 
     // fluid
     const DISSIPATION = 0.97;
@@ -62,9 +63,10 @@ class SceneApp extends Scene {
     // shadow
     this.cameraLight = new CameraOrtho();
     this._lightPos = [5, 8, 6];
-    const r = 5.5;
-    const ratio = 0.7;
-    this.cameraLight.ortho(-r * ratio, r * ratio, r, -r, 5, 20);
+    vec3.rotateX(this._lightPos, this._lightPos, [0, 0, 0], 0.3);
+    const r = 6;
+    const ratio = 1;
+    this.cameraLight.ortho(-r * ratio, r * ratio, r, -r, 5, 16);
     this.cameraLight.lookAt(this._lightPos, [0, 0, 0]);
 
     this.mtxShadow = mat4.create();
@@ -105,23 +107,24 @@ class SceneApp extends Scene {
     this._drawShadow = new DrawShadow();
 
     // particles
-    let num = Math.floor(Config.numParticles);
-    let num2 = Math.floor(num * 0.01);
+    let num = Config.numParticles;
+    let num2 = 32;
+
+    console.log(num, num2);
 
     this._particlesSystems = [
-      // {
-      //   system: new ParticleSystem(num),
-      //   draw: new DrawRender(num),
-      // },
-      // {
-      //   system: new ParticleSystem(num2),
-      //   draw: new DrawPlane(num2),
-      // },
+      {
+        system: new ParticleSystem(num),
+        draw: new DrawRender(num),
+      },
+      {
+        system: new ParticleSystem(num2),
+        draw: new DrawPlane(num2),
+      },
     ];
 
-    num = 32;
-    this._systemRibbon = new ParticleSystem(num);
-    this._drawRibbon = new DrawRibbon(num, numSets);
+    this._systemRibbon = new ParticleSystem(numLines);
+    this._drawRibbon = new DrawRibbon(numLines, numSets);
 
     // position
     const oSettings = {
@@ -130,25 +133,10 @@ class SceneApp extends Scene {
       magFilter: GL.NEAREST,
     };
 
-    const size = numSets * num;
+    const size = numSets * numLines;
     console.log("Size : ", size);
     this._fboPosRibbon = new FrameBuffer(size, size, oSettings);
     this._index = 0;
-
-    // // init ribbon position
-    // GL.disable(GL.DEPTH_TEST);
-    // this._fboPosRibbon.bind();
-    // for (let j = 0; j < numSets; j++) {
-    //   for (let i = 0; i < numSets; i++) {
-    //     let tx = i * num;
-    //     let ty = j * num;
-    //     const { fbo } = this._systemRibbon;
-    //     GL.viewport(tx * num, ty * num, num, num);
-    //     this._dCopy.draw(fbo.getTexture(0));
-    //   }
-    // }
-    // this._fboPosRibbon.unbind();
-    // GL.enable(GL.DEPTH_TEST);
   }
 
   update(mUpdateShadow = true) {
@@ -232,16 +220,30 @@ class SceneApp extends Scene {
   render() {
     let g = 0.8;
     GL.clear(...Config.colorBg.map(toGlsl), 1);
+    GL.clear(0, 0, 0, 0);
     // GL.clear(g, g, g * 0.95, 1);
     GL.setMatrices(this.camera);
 
-    // this._dCamera.draw(this.cameraLight, [1, 0.5, 0]);
+    // this._dCamera.draw(this.cameraLight, [1, 1, 1]);
     this._renderParticles(true);
 
     this._drawShadow
       .bindTexture("uDepthMap", this._fboShadow.depthTexture, 0)
       .uniform("uShadowMatrix", this.mtxShadow)
+      .uniform("uSeed", random())
       .draw();
+
+    // const { centers } = this._systemRibbon;
+    // console.log(centers);
+    if (Config.debugAvoidCenters) {
+      for (let i = 0; i < 2; i++) {
+        let x = centers[i * 3];
+        let y = centers[i * 3 + 1];
+        let r = centers[i * 3 + 2];
+
+        this._dBall.draw([x, y, 0], [r, r, r], [1, 1, 1], 0.1);
+      }
+    }
 
     // g = 512;
     // GL.viewport(0, 0, g, g);

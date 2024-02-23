@@ -2,12 +2,30 @@ import { GL, DrawCopy, FboPingPong, FrameBuffer } from "alfrid";
 import Scheduler from "scheduling";
 import DrawSave from "./DrawSave";
 import DrawSim from "./DrawSim";
+import { random } from "./utils";
+
+export let centers = [];
 
 export default class ParticleSystem {
   constructor(numParticles) {
     this.numParticles = numParticles;
 
     const num = this.numParticles;
+
+    const getCenter = () => {
+      const rx = 3;
+      const ry = 4;
+      return [random(-rx, rx), random(-ry, ry), random(0.5, 2)];
+    };
+
+    if (centers.length === 0) {
+      centers.push(getCenter());
+      centers.push(getCenter());
+      console.table(centers);
+      centers = centers.flat();
+    }
+
+    this.seed = random(1);
 
     // init textures
     const oSettings = {
@@ -45,7 +63,8 @@ export default class ParticleSystem {
       .bindTexture("uDensityMap", mDensityMap, 6)
       .bindTexture("uPosOrgMap", this._fboPos.texture, 7)
       .uniform("uBound", this._drawSave.bound)
-      .uniform("uTime", Scheduler.getElapsedTime())
+      .uniform("uTime", Scheduler.getElapsedTime() + this.seed)
+      .uniform("uCenters", "vec3", centers)
       .draw();
 
     this._fbo.swap();

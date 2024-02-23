@@ -1,5 +1,7 @@
+#version 300 es
+
 precision highp float;
-attribute vec3 aVertexPosition;
+in vec3 aVertexPosition;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;

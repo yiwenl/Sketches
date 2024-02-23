@@ -26,16 +26,19 @@ export default class NoiseMap extends FrameBuffer {
         .setClearColor(0, 0, 0, 0);
     }
 
+    this.time = random(10);
+
     this.update();
   }
 
   update() {
-    this.seed += this.speed * 0.0005;
+    this.time += 0.001;
+    this.seed += this.speed * 0.0003;
 
     draw
       .bindFrameBuffer(this)
       .uniform("uSeed", this.seed)
-      .uniform("uNoiseScale", this.noiseScale)
+      .uniform("uNoiseScale", this.noiseScale + Math.sin(this.time) * 0.2)
       .uniform("uMono", this.mono ? 1 : 0)
       .uniform("uNormalize", this.normalize ? 1 : 0)
       .draw();

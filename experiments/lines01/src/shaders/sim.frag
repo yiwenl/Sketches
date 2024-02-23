@@ -13,6 +13,7 @@ uniform sampler2D uPosOrgMap;
 uniform sampler2D uFluidMap;
 uniform sampler2D uDensityMap;
 
+uniform vec3 uCenters[2];
 uniform vec2 uBound;
 uniform float uTime;
 
@@ -48,28 +49,37 @@ void main(void) {
     density = mix(0.75, 1.0, density);
 
     // noise
-    vec3 noise = curlNoise(pos * 1.5 + uTime * 0.1) * 0.01;
-    noise.xy *= 0.01;
-    noise.z *= 2.0;
+    vec3 noise = curlNoise(pos * 2.1 + uTime * 0.1) * 0.02;
+    noise.z *= 5.0;
 
 
     vec3 acc = fluid * 0.0004 * density + noise;
-    acc.z -= normalize(pos.z) * 0.0002;
+    acc.z -= normalize(pos.z) * 0.01;
 
+    float ratio = uBound.x / uBound.y;
     vec3 dir = normalize(pos * vec3(1.0, 1.0, 0.0));
-    float f = length(pos.xy);
-    f = smoothstep(3.5, 4.0, f);
-    acc -= dir * f * 0.5;
+    vec2 p = abs(pos.xy);
+    p.y *= ratio;
+    float f = length(p);
+    f = smoothstep(3.5, 4.5, f);
+    acc -= dir * f * 2.0;
 
     // avoidance
-    f = length(pos.xy);
-    f = smoothstep(1.5, 0.0, f);
-    acc += dir * f * 1.5;
+    for(int i=0; i<2; i++) {
+        vec3 oCenter = uCenters[i];
+        vec2 center = oCenter.xy + (extra.xy -0.5) * 0.1;
+        f = distance(pos.xy, center);
+        vec2 dir2 = normalize(pos.xy - center);
+        f = smoothstep(oCenter.z + 2.0, oCenter.z, f);
+        acc.xy += dir2 * f * mix(0.4, 1.0, extra.z);
+    }
 
+
+    // apply force
     float speed = mix(1.0, 4.0, extra.x);
     vel += acc * 0.003;
     pos += vel * speed;
-    vel *= .95;
+    vel *= .9;
 
 
     // check bound

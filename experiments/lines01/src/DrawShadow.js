@@ -5,7 +5,7 @@ import fs from "shaders/shadow.frag";
 
 export default class DrawShadow extends Draw {
   constructor() {
-    const s = 12;
+    const s = 14;
     super()
       .setMesh(Geom.plane(s, s * 1.2, 1))
       .useProgram(vs, fs);

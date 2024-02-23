@@ -21,7 +21,7 @@ export default class DrawRibbon extends Draw {
       const a = ((Math.PI * 2) / numSides) * j;
       const z = Math.cos(a);
       const y = Math.sin(a);
-      const r = 0.015;
+      const r = 0.01;
 
       const pos = [i, y * r, z * r];
       const normal = [0, y, z];
@@ -73,7 +73,7 @@ export default class DrawRibbon extends Draw {
       for (let j = 0; j < num; j++) {
         uvOffsets.push([(i + 0.5) / num / numSets, (j + 0.5) / num / numSets]);
 
-        let scale = random(0.25, 1);
+        let scale = random(0.5, 1);
         if (random() < 0.05) scale = random(1, 2);
         extras.push([scale, random(), random()]);
       }

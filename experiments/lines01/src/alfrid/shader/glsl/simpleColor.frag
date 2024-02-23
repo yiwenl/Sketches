@@ -7,5 +7,5 @@ uniform float uOpacity;
 out vec4 fragColor;
 
 void main(void) {
-    fragColor = vec4(uColor, uOpacity);
+    fragColor = vec4(uColor, 1.0) * uOpacity;
 }

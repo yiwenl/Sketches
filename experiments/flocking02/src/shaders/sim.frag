@@ -105,7 +105,7 @@ void main(void) {
     acc += velAverage;
 
     // Noise
-    vec3 noise = curlNoise(pos * 0.2 + uTime * 0.1);
+    vec3 noise = curlNoise(pos * 0.04 + uTime * 0.1);
     acc += noise * 0.001 * mix(1.0, 2.0, extra.z);
 
     // Boundary

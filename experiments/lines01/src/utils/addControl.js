@@ -24,6 +24,7 @@ export default (scene) => {
 
   gui.add(Config, "numParticles", [256, 512, 768, 1024]).onFinishChange(reload);
   gui.add(Config, "particleScale", 0.1, 4).onFinishChange(refresh);
+  gui.add(Config, "debugAvoidCenters").onFinishChange(refresh);
 
   // color
   const addColorControl = (mFolder, mAttr, mName, mOpen = true) => {

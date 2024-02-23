@@ -83,7 +83,7 @@ class FluidSimulation {
       .setMesh(mesh)
       .setClearColor(0, 0, 0, 1)
       .uniform("uTimestep", "float", 0.0005)
-      .uniform("uTimestep", "float", 0.001)
+      // .uniform("uTimestep", "float", 0.001)
       .uniform("uTexelSize", "vec2", this._texelSize);
 
     this._drawDivergence = new Draw()
