@@ -28,6 +28,7 @@ import Scene from "./SceneApp";
 import { logError } from "./utils";
 import preload from "./utils/preload";
 import "./utils/Capture";
+import addFullscreen from "./utils/fullscreen";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -47,6 +48,7 @@ const initScene = () => {
   }
 
   scene = new Scene();
+  addFullscreen();
 };
 
 function _init3D() {

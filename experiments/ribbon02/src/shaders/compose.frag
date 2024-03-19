@@ -108,6 +108,10 @@ void main(void) {
     color.rgb -= d * 0.4;
 
     oColor = lookup(color, uLookupMap, 0.35);
+
+    vec3 colorAdj = smoothstep(vec3(0.0), vec3(1.0), oColor.rgb);
+    oColor.rgb = mix(oColor.rgb, colorAdj, .5);
+
     oColor.rgb *= mix(1.1, 0.5, v);
     // oColor = vec4(vec3(ao), 1.0);
     // oColor = vec4(vec3(blurAmount), 1.0);

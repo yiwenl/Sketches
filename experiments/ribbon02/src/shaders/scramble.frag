@@ -24,6 +24,7 @@ vec2 _normalize(vec2 v) {
 }
 
 #define PI 3.1415926535897932384626433832795
+#define minY -3.0
 
 void main(void) {
     vec3 pos = texture(uPosMap, vTextureCoord).xyz;
@@ -45,6 +46,10 @@ void main(void) {
     float maxRadius = 8.0;
     if(d > maxRadius) {
         pos = normalize(pos) * maxRadius;
+    }
+
+    if(pos.y < minY) {
+        pos.y += (minY - pos.y) * 0.1;
     }
 
     oColor = vec4(pos, 1.0);

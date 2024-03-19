@@ -1,5 +1,3 @@
-import { GL } from "alfrid";
-
 import * as dat from "dat.gui";
 import Config from "../Config";
 import Settings from "../Settings";
@@ -22,8 +20,8 @@ export default (scene) => {
     .name("Ribbon length")
     .onFinishChange(reload);
 
-  gui.add(Config, "extreme").onChange(refresh);
-  gui.add(Config, "usePoseDetection").onChange(reload);
+  // gui.add(Config, "extreme").onChange(refresh);
+  gui.add(Config, "useHandDetection").onChange(reload);
   gui.add(Settings, "reset").name("Reset Default Settings");
 
   // dat.GUI.toggleHide();

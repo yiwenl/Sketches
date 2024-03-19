@@ -354,4 +354,9 @@ export default [
     url: "//yiwenl.github.io/Sketches/experiments/darkBlossom/dist/index.html",
     title: "Blossom",
   },
+  {
+    cover: "assets/img/coverSketchribbon.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/ribbon02/dist/index.html",
+    title: "Floating Ribbons",
+  },
 ];

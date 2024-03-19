@@ -33,6 +33,7 @@ layout (location = 3) out vec4 oFragColor3;
 #pragma glslify: curlNoise = require(./glsl-utils/curlNoise.glsl)
 
 #define PI 3.1415926535897932384626433832795
+#define minY -3.5
 
 void main(void) {
     vec3 pos = texture(uPosMap, vTextureCoord).xyz;
@@ -60,6 +61,11 @@ void main(void) {
     dir = -normalize(posAdj - uCenter);
     f = smoothstep(maxRadius - 1.0, maxRadius, d);
     acc += dir * f * 2.0;
+
+    if(pos.y < minY) {
+        acc.y += (minY - pos.y) * 0.1;
+    }
+
     
 
     // repel to touch
@@ -81,6 +87,8 @@ void main(void) {
 
     pos += vel;
     vel *= .96;
+
+    pos.y = max(pos.y, minY);
 
 
     oFragColor0 = vec4(pos, 1.0);

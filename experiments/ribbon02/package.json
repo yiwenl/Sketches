@@ -12,6 +12,11 @@
     "shader": " node ./tasks/shader-watcher.js"
   },
   "dependencies": {
+    "@mediapipe/hands": "^0.4.1675469240",
+    "@tensorflow-models/hand-pose-detection": "^2.0.1",
+    "@tensorflow/tfjs-backend-webgl": "^4.10.0",
+    "@tensorflow/tfjs-converter": "^4.10.0",
+    "@tensorflow/tfjs-core": "^4.10.0",
     "assets-loader": "github:madclem/assets-loader",
     "gl-matrix": "^3.4.3",
     "glslify-loader": "^2.0.0",

@@ -220,7 +220,7 @@ class SceneApp extends Scene {
   render() {
     let g = 0.8;
     GL.clear(...Config.colorBg.map(toGlsl), 1);
-    GL.clear(0, 0, 0, 0);
+    // GL.clear(0, 0, 0, 0);
     // GL.clear(g, g, g * 0.95, 1);
     GL.setMatrices(this.camera);
 
@@ -245,8 +245,8 @@ class SceneApp extends Scene {
       }
     }
 
-    // g = 512;
-    // GL.viewport(0, 0, g, g);
+    g = 512 * 3;
+    GL.viewport(0, 0, g, g);
     // this._dCopy.draw(this._fboPosRibbon.texture);
   }
 

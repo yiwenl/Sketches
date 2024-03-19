@@ -34,14 +34,18 @@ import generateAOMap from "./generateAOMap";
 import generateBlueNoise from "./generateBlueNoise";
 import applyBlur from "./applyBlur";
 
-// pose detection
-import PoseDetection, { POSE_FOUND, POSE_LOST } from "./PoseDetection";
+// hand detection
+import HandPoseDetection, {
+  ON_VIDEO_READY,
+  ON_HANDS_LOST,
+  ON_HANDS_DETECTED,
+} from "./hand-detection";
 
 // fluid simulation
 import FluidSimulation from "./fluid-sim";
 
-const bound = 6;
-const debug = false;
+const bound = 8;
+const debug = true;
 
 class SceneApp extends Scene {
   constructor() {
@@ -76,16 +80,81 @@ class SceneApp extends Scene {
     });
 
     // pose detection
-    if (Config.usePoseDetection) {
-      this._initPoseDetection();
+    if (Config.useHandDetection) {
+      this._initHandDetection();
     }
   }
+
+  _initHandDetection() {
+    console.log("Init hand detection");
+
+    const videoScale = 1;
+    const targetWidth = 360 * videoScale;
+    const targetHeight = 240 * videoScale;
+
+    this._handLeft = [999, 999];
+    this._handLeftPrev = [999, 999];
+    this._handRight = [999, 999];
+    this._handRightPrev = [999, 999];
+
+    this._handDetection = new HandPoseDetection(targetWidth, targetHeight, 1);
+    this._handDetection.on(ON_VIDEO_READY, this._onVideoReady);
+    this._handDetection.on(ON_HANDS_DETECTED, this._onHandsDetected);
+    this._handDetection.on(ON_HANDS_LOST, this._onHandsLost);
+
+    this._handDetection.displayScale = 0.75;
+  }
+
+  _onVideoReady = () => {};
+
+  _onHandsDetected = (hands) => {
+    const { width, height } = this._handDetection;
+
+    hands.forEach((handTrack) => {
+      const { keypoints, handedness, score } = handTrack;
+
+      if (score > 0.8) {
+        const hand = this[`_hand${handedness}`];
+        const handPrev = this[`_hand${handedness}Prev`];
+        const wrist = keypoints.find((k) => k.name === "wrist");
+        const x = 1 - wrist.x / width;
+        const y = 1 - wrist.y / height;
+
+        if (hand[0] > 900) {
+          hand[0] = x;
+          hand[1] = y;
+          handPrev[0] = x;
+          handPrev[1] = y;
+        } else {
+          vec2.copy(handPrev, hand);
+          hand[0] = x;
+          hand[1] = y;
+
+          const dir = vec2.sub([], hand, handPrev);
+          let f = vec2.distance(hand, handPrev);
+          if (f < 0.05) {
+            f = smoothstep(0, 0.02, f);
+            f = Math.pow(f, 1.5);
+
+            this._fluid.updateFlow(hand, dir, 6 * f, 2, 1);
+          }
+        }
+      }
+    });
+  };
+
+  _onHandsLost = () => {
+    this._handLeft = [999, 999];
+    this._handLeftPrev = [999, 999];
+    this._handRight = [999, 999];
+    this._handRightPrev = [999, 999];
+  };
 
   _init() {
     this.resize();
 
     // camera settings
-    this.camera.setPerspective(60 * RAD, GL.aspectRatio, 2, 20);
+    this.camera.setPerspective(80 * RAD, GL.aspectRatio, 2, 20);
     this._index = 0;
 
     this._hit = [999, 999, 999];
@@ -198,42 +267,7 @@ class SceneApp extends Scene {
     this._drawFlowUpdate = new DrawFlowUpdate();
   }
 
-  _initPoseDetection() {
-    this._poseDetection = new PoseDetection();
-    this._poseDetection.on(POSE_FOUND, this._onPoseFound);
-    this._poseDetection.on(POSE_LOST, () => {
-      // this._flowForce.value = 1;
-    });
-  }
-
-  _onPoseFound = (mPoints) => {
-    let a = mPoints[0].pos[0] - 0.5;
-    this.orbitalControl.ry.value = a * 2.0;
-    // if (!this._posePoints || this._posePoints.length !== mPoints.length) {
-    //   this._posePoints = mPoints.map(({ pos }) => pos);
-    //   console.log("mPoints", mPoints);
-    // } else {
-    //   const threshold = 0.5;
-    //   mPoints.forEach(({ pos, score }, i) => {
-    //     const dir = vec2.sub([0, 0], pos, this._posePoints[i]);
-    //     let speed = vec2.length(dir);
-    //     let f = smoothstep(0.02, 0.05, speed);
-    //     vec2.normalize(dir, dir);
-    //     let _pos = vec2.clone(pos);
-    //     if (Config.mirrored) {
-    //       _pos[0] = 1 - _pos[0];
-    //     }
-
-    //     if (score > threshold && f > 0) {
-    //       let radius = mix(1.0, 3.0, f) * Config.extreme ? 1 : 3;
-    //       // const force = mix(2, 20, f);
-    //       const force = f * Config.extreme ? 1 : 2;
-    //       this._fluid.updateFlow(_pos, dir, force, radius, 0.5);
-    //     }
-    //     vec2.copy(this._posePoints[i], pos);
-    //   });
-    // }
-  };
+  _initPoseDetection() {}
 
   update() {
     this._fluid.update();
@@ -371,12 +405,23 @@ class SceneApp extends Scene {
       .uniform("uFar", far)
       .draw();
 
-    if (debug) {
-      g = 400;
-      GL.viewport(0, 0, g, g);
-      this._dCopy.draw(this._fluid.velocity);
-      GL.viewport(g, 0, g, g);
-      this._dCopy.draw(this._fluid.density);
+    if (debug && this._handLeft) {
+      g = 0.05;
+      let x = this._handLeft[0] * 2 - 1;
+      let y = this._handLeft[1] * 2 - 1;
+
+      this._dBall.draw([x * bound, y * bound, 0], [g, g, g], [1, 0, 0]);
+
+      x = this._handRight[0] * 2 - 1;
+      y = this._handRight[1] * 2 - 1;
+
+      this._dBall.draw([x * bound, y * bound, 0], [g, g, g], [1, 0, 0]);
+
+      // g = 400;
+      // GL.viewport(0, 0, g, g);
+      // this._dCopy.draw(this._fluid.velocity);
+      // GL.viewport(g, 0, g, g);
+      // this._dCopy.draw(this._fluid.density);
     }
   }
 
@@ -390,6 +435,7 @@ class SceneApp extends Scene {
     this._fboRender = new FrameBuffer(GL.width, GL.height);
 
     // console.log(GL.aspectRatio, 9 / 16);
+    console.log(GL.aspectRatio, 4 / 5);
   }
 }
 
