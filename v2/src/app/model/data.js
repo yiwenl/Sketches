@@ -355,8 +355,13 @@ export default [
     title: "Blossom",
   },
   {
-    cover: "assets/img/coverSketchribbon.jpg",
-    url: "//yiwenl.github.io/Sketches/experiments/ribbon02/dist/index.html",
-    title: "Floating Ribbons",
+    cover: "assets/img/coverSketchMultibody.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/orbit01/dist/index.html",
+    title: "Multi-body Chaos",
   },
+  // {
+  //   cover: "assets/img/coverSketchribbon.jpg",
+  //   url: "//yiwenl.github.io/Sketches/experiments/ribbon02/dist/index.html",
+  //   title: "Floating Ribbons",
+  // },
 ];
