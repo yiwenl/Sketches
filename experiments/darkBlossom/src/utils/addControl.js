@@ -47,7 +47,7 @@ export default (scene) => {
   gui
     .add(Config, "numParticles", [128, 144, 192, 256, 384, 512])
     .onFinishChange(reload);
-  // gui.add(Config, "usePoseDetection").onFinishChange(reload);
+  gui.add(Config, "usePoseDetection").onFinishChange(reload);
   // gui.add(Config, "usePostEffect").onFinishChange(refresh);
   // gui.add(Config, "emitRandomBurst").onFinishChange(reload);
   // gui.add(Config, "useSocket").onFinishChange(reload);

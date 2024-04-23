@@ -1,0 +1,35 @@
+body {
+  background-color: rgb(33, 33, 33);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.dg {
+  z-index: 99999 !important;
+}
+
+#main-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+p {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+#text {
+  position: absolute;
+  /* z-index: 9999; */
+  color: white;
+  font-size: 4px;
+  opacity: 0.1;
+  pointer-events: none;
+}
