@@ -30,7 +30,7 @@ import preload from "./utils/preload";
 import "./utils/Capture";
 import addFullscreen from "./utils/fullscreen";
 
-const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === "development" || 1;
 
 let scene;
 let canvas;

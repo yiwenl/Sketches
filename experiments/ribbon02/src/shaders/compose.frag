@@ -75,7 +75,7 @@ void main(void) {
 
     float t = 0.05;
     // Calculate blur amount based on depth difference
-    float blurAmount = smoothstep(uFocus - t, uFocus + t, normalizedDepth);
+    float blurAmount = smoothstep(uFocus - t, uFocus + t, normalizedDepth) * .8;
     color = mix(color, blurredColor, blurAmount);
 
     float ao = texture(uAOMap, vTextureCoord).r;

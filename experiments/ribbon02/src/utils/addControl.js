@@ -24,5 +24,5 @@ export default (scene) => {
   gui.add(Config, "usePoseDetection").onChange(reload);
   gui.add(Settings, "reset").name("Reset Default Settings");
 
-  dat.GUI.toggleHide();
+  // dat.GUI.toggleHide();
 };

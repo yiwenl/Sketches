@@ -17,7 +17,6 @@ uniform float uTotal;
 uniform float uNumSets;
 uniform float uIndex;
 uniform float uTime;
-uniform vec3 uTouch;
 
 out vec2 vTextureCoord;
 out vec3 vNormal;

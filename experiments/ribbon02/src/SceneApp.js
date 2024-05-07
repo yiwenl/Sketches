@@ -34,35 +34,24 @@ import generateAOMap from "./generateAOMap";
 import generateBlueNoise from "./generateBlueNoise";
 import applyBlur from "./applyBlur";
 
-// hand detection
-// import HandPoseDetection, {
-//   ON_VIDEO_READY,
-//   ON_HANDS_LOST,
-//   ON_HANDS_DETECTED,
-// } from "./hand-detection";
-
 // pose detection
 import PoseDetection, { POSE_FOUND, POSE_LOST } from "./PoseDetection";
 
 // fluid simulation
 import FluidSimulation from "./fluid-sim";
-import TrackPoint from "./TrackPoint2D";
+import TrackPoint2D from "./TrackPoint2D";
+import TrackPoint3D from "./TrackPoint3D";
 
 const bound = 8;
-const debug = true;
 
 class SceneApp extends Scene {
   constructor() {
     super();
 
-    // this.orbitalControl.lock();
-    // this.orbitalControl.lockZoom(true);
     const minRadius = 8;
     this.orbitalControl.radius.value = Config.usePoseDetection ? minRadius : 10;
     this.orbitalControl.radius.limit(minRadius, 11);
     this.orbitalControl.rx.limit(0.2, -1.0);
-    const a = 1.2;
-    // this.orbitalControl.ry.limit(-a, a);
 
     const { numParticles: s, numSets: t } = Config;
 
@@ -93,9 +82,9 @@ class SceneApp extends Scene {
   _initPoseDetection() {
     const ratio = GL.aspectRatio;
     this._trackedPoints = [
-      new TrackPoint(),
-      new TrackPoint(),
-      new TrackPoint(),
+      new TrackPoint2D(),
+      new TrackPoint2D(),
+      new TrackPoint2D(),
     ];
 
     this._poseDetection = new PoseDetection();
@@ -105,7 +94,6 @@ class SceneApp extends Scene {
           this._trackedPoints[i].update(p.pos);
           const { pos, dir, speed } = this._trackedPoints[i];
           let f = smoothstep(0.01, 0.1, speed);
-          // this._fluid.updateFlow
           const adjPos = [pos[0], pos[1]];
           adjPos[0] = (adjPos[0] - 0.5) / ratio + 0.5;
           this._fluid.updateFlow(adjPos, dir, mix(2, 6, f), mix(2, 4, f), 1);
@@ -124,71 +112,6 @@ class SceneApp extends Scene {
     });
   }
 
-  _initHandDetection() {
-    console.log("Init hand detection");
-
-    const videoScale = 1;
-    const targetWidth = 360 * videoScale;
-    const targetHeight = 240 * videoScale;
-
-    this._handLeft = [999, 999];
-    this._handLeftPrev = [999, 999];
-    this._handRight = [999, 999];
-    this._handRightPrev = [999, 999];
-
-    this._handDetection = new HandPoseDetection(targetWidth, targetHeight, 1);
-    this._handDetection.on(ON_VIDEO_READY, this._onVideoReady);
-    this._handDetection.on(ON_HANDS_DETECTED, this._onHandsDetected);
-    this._handDetection.on(ON_HANDS_LOST, this._onHandsLost);
-
-    this._handDetection.displayScale = 0.75;
-  }
-
-  _onVideoReady = () => {};
-
-  _onHandsDetected = (hands) => {
-    const { width, height } = this._handDetection;
-
-    hands.forEach((handTrack) => {
-      const { keypoints, handedness, score } = handTrack;
-
-      if (score > 0.8) {
-        const hand = this[`_hand${handedness}`];
-        const handPrev = this[`_hand${handedness}Prev`];
-        const wrist = keypoints.find((k) => k.name === "wrist");
-        const x = 1 - wrist.x / width;
-        const y = 1 - wrist.y / height;
-
-        if (hand[0] > 900) {
-          hand[0] = x;
-          hand[1] = y;
-          handPrev[0] = x;
-          handPrev[1] = y;
-        } else {
-          vec2.copy(handPrev, hand);
-          hand[0] = x;
-          hand[1] = y;
-
-          const dir = vec2.sub([], hand, handPrev);
-          let f = vec2.distance(hand, handPrev);
-          f = smoothstep(0, 0.03, f);
-
-          const r = mix(1, 4, f);
-          const _f = mix(2, 5, f);
-
-          this._fluid.updateFlow(hand, dir, _f, r, 1);
-        }
-      }
-    });
-  };
-
-  _onHandsLost = () => {
-    this._handLeft = [999, 999];
-    this._handLeftPrev = [999, 999];
-    this._handRight = [999, 999];
-    this._handRightPrev = [999, 999];
-  };
-
   _init() {
     this.resize();
 
@@ -197,24 +120,16 @@ class SceneApp extends Scene {
     this.camera.setPerspective(FOV * RAD, GL.aspectRatio, 2, 20);
     this._index = 0;
 
-    this._hit = [999, 999, 999];
-    this._preHit = [999, 999, 999];
+    this._hit = new TrackPoint3D();
 
     const mesh = Geom.plane(bound * 2, bound * 2, 1);
     this._drawDebugFluid = new DrawDebugFluid(mesh);
-    // const mesh = Geom.sphere(3, 24);
     this._hitTestor = new HitTestor(mesh, this.camera);
 
     this._hitTestor.on("onHit", (e) => {
-      if (this._preHit[0] > 100) {
-        vec3.copy(this._preHit, e.hit);
-      } else {
-        vec3.copy(this._preHit, this._hit);
-      }
-      vec3.copy(this._hit, e.hit);
-
-      let d = vec3.distance(this._preHit, this._hit);
-      let f = smoothstep(0, 1, d);
+      this._hit.update(e.hit);
+      const { pos, prevPos, speed } = this._hit;
+      let f = smoothstep(0, 1, speed);
       let r = bound;
 
       if (f > 0) {
@@ -222,33 +137,20 @@ class SceneApp extends Scene {
           mat4.create(),
           this._hitTestor.modelMatrix
         );
-        const pInverted = vec3.transformMat4(
-          vec3.create(),
-          this._hit,
-          mtxInvert
-        );
-        const pInvertedPrev = vec3.transformMat4(
-          vec3.create(),
-          this._preHit,
-          mtxInvert
-        );
+        const pInv = vec3.transformMat4(vec3.create(), pos, mtxInvert);
+        const pInvPrev = vec3.transformMat4(vec3.create(), prevPos, mtxInvert);
 
-        let x = (pInverted[0] / r) * 0.5 + 0.5;
-        let y = (pInverted[1] / r) * 0.5 + 0.5;
-
-        const dir = [
-          pInverted[0] - pInvertedPrev[0],
-          pInverted[1] - pInvertedPrev[1],
-        ];
+        const _posMapped = pInv.map((v) => (v / r) * 0.5 + 0.5);
+        const _pos = [_posMapped[0], _posMapped[1]];
+        const dir = [pInv[0] - pInvPrev[0], pInv[1] - pInvPrev[1]];
         vec2.normalize(dir, dir);
 
-        this._fluid.updateFlow([x, y], dir, mix(1, 4, f), mix(1, 3, f) * 2, 1);
+        this._fluid.updateFlow(_pos, dir, mix(1, 4, f), mix(1, 3, f) * 2, 1);
       }
     });
 
     this._hitTestor.on("onUp", (e) => {
-      this._hit = [999, 999, 999];
-      this._preHit = [999, 999, 999];
+      this._hit.reset();
     });
 
     this._seedTime = random(1000);
@@ -300,17 +202,6 @@ class SceneApp extends Scene {
       minFilter: GL.LINEAR,
       magFilter: GL.LINEAR,
     });
-
-    fboSize = 1024;
-    this._fboFlow = new FboPingPong(fboSize, fboSize, {
-      type: GL.FLOAT,
-      minFilter: GL.LINEAR,
-      magFilter: GL.LINEAR,
-    });
-
-    this._fboFlow.read.bind();
-    GL.clear(0, 0, 0, 1);
-    this._fboFlow.read.unbind();
   }
 
   _initViews() {
@@ -333,8 +224,8 @@ class SceneApp extends Scene {
 
   update() {
     this._fluid.update();
-    this._updateFlow();
 
+    // update particles
     this._drawSim
       .bindFrameBuffer(this._fbo.write)
       .bindTexture("uPosMap", this._fbo.read.getTexture(0), 0)
@@ -343,7 +234,6 @@ class SceneApp extends Scene {
       .bindTexture("uDataMap", this._fbo.read.getTexture(3), 3)
       .uniform("uTime", Scheduler.getElapsedTime() + this._seedTime)
       .uniform("uSpeed", 1)
-      // .uniform("uTouch", this._hit)
       .uniform("uTouch", [999, 999, 999])
       .uniform("uNoiseScale", 1)
       .uniform("uCenter", [0, 0.5, 0])
@@ -351,6 +241,7 @@ class SceneApp extends Scene {
 
     this._fbo.swap();
 
+    // update ribbon pos map
     const { numParticles: num, numSets: numSetsStr } = Config;
     const numSets = parseInt(numSetsStr);
     const tx = this._index % numSets;
@@ -368,10 +259,10 @@ class SceneApp extends Scene {
 
     const mtxInvert = mat4.invert(mat4.create(), this._hitTestor.modelMatrix);
 
+    // disturb particles
     this._drawScramble
       .bindFrameBuffer(this._fboScrambled)
       .bindTexture("uPosMap", this._fboPos.texture, 0)
-      // .bindTexture("uFluidMap", this._fboFlow.read.texture, 1)
       .bindTexture("uFluidMap", this._fluid.velocity, 1)
       .bindTexture("uDensityMap", this._fluid.density, 2)
       .uniform("uCameraMatrix", this._hitTestor.modelMatrix)
@@ -395,7 +286,6 @@ class SceneApp extends Scene {
 
     GL.setMatrices(this.camera);
     this._fboRender.bind();
-    // GL.clear(1, 1, 1, 1);
     GL.clear(0, 0, 0, 0);
     this._drawBg.bindTexture("uMap", this._texturePaper, 0).draw();
     this._drawFloor
@@ -404,7 +294,7 @@ class SceneApp extends Scene {
       .draw();
 
     const g = 0.05;
-    this._dBall.draw(this._hit, [g, g, g], [0.6, 0.05, 0]);
+    this._dBall.draw(this._hit.pos, [g, g, g], [0.6, 0.05, 0]);
     this._renderRibbon(true);
 
     this._fboRender.unbind();
@@ -419,17 +309,7 @@ class SceneApp extends Scene {
     const mtx = mat4.create();
     mat4.rotateY(mtx, mtx, this.orbitalControl.ry.value);
     mat4.rotateX(mtx, mtx, this.orbitalControl.rx.value);
-    // mat4.invert(mtx, mtx);
     mat4.copy(this._hitTestor.modelMatrix, mtx);
-  }
-
-  _updateFlow() {
-    this._drawFlowUpdate
-      .bindFrameBuffer(this._fboFlow.write)
-      .bindTexture("uMap", this._fboFlow.read.texture, 0)
-      .draw();
-
-    this._fboFlow.swap();
   }
 
   _updateShadowMap() {
@@ -452,7 +332,6 @@ class SceneApp extends Scene {
       .uniform("uLight", this._lightPosition)
       .uniform("uShadowMatrix", this.mtxShadow)
       .uniform("uTime", Scheduler.getElapsedTime())
-      .uniform("uTouch", this._hit)
       .draw();
   }
 
@@ -478,31 +357,6 @@ class SceneApp extends Scene {
       .uniform("uNear", near)
       .uniform("uFar", far)
       .draw();
-
-    // this._drawDebugFluid
-    //   .bindTexture("uMap", this._fluid.density, 0)
-    //   .uniform("uInvertMatrix", this._hitTestor.modelMatrix)
-    //   .uniform("uTime", Scheduler.getElapsedTime())
-    // .draw();
-
-    if (debug && this._handLeft) {
-      g = 0.05;
-      let x = this._handLeft[0] * 2 - 1;
-      let y = this._handLeft[1] * 2 - 1;
-
-      this._dBall.draw([x * bound, y * bound, 0], [g, g, g], [1, 0, 0]);
-
-      x = this._handRight[0] * 2 - 1;
-      y = this._handRight[1] * 2 - 1;
-
-      this._dBall.draw([x * bound, y * bound, 0], [g, g, g], [1, 0, 0]);
-
-      // g = 400;
-      // GL.viewport(0, 0, g, g);
-      // this._dCopy.draw(this._fluid.velocity);
-      // GL.viewport(g, 0, g, g);
-      // this._dCopy.draw(this._fluid.density);
-    }
   }
 
   resize() {

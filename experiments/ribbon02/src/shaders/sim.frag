@@ -66,7 +66,6 @@ void main(void) {
         acc.y += (minY - pos.y) * 0.1;
     }
 
-    
 
     // repel to touch
     d = distance(pos, uTouch);
