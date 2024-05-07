@@ -1,9 +1,10 @@
 export default {
   numParticles: 64,
-  numSets: 16,
+  numSets: 12,
   extreme: true,
   autoSave: false,
   useHandDetection: false,
+  usePoseDetection: false,
   showThumbnail: false,
   margin: 100,
   thumbnailSize: 256,

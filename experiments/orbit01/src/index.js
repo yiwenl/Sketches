@@ -67,7 +67,7 @@ function _init3D() {
 
     import("./utils/addControl").then(({ default: addControls }) => {
       if (isDev) {
-        import("./debug");
+        // import("./debug");
       }
       !GL.isMobile && addControls(scene);
     });

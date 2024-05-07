@@ -8,7 +8,7 @@ export default class DrawFloor extends Draw {
     super();
 
     const s = 50;
-    const mesh = Geom.plane(s, s, 1, "xz");
+    const mesh = Geom.plane(s * 2, s, 1, "xz");
     this.setMesh(mesh).useProgram(vs, fs);
   }
 }

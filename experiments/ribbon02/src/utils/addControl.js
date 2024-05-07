@@ -21,8 +21,8 @@ export default (scene) => {
     .onFinishChange(reload);
 
   // gui.add(Config, "extreme").onChange(refresh);
-  gui.add(Config, "useHandDetection").onChange(reload);
+  gui.add(Config, "usePoseDetection").onChange(reload);
   gui.add(Settings, "reset").name("Reset Default Settings");
 
-  // dat.GUI.toggleHide();
+  dat.GUI.toggleHide();
 };

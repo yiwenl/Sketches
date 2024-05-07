@@ -6,9 +6,12 @@ in vec2 vTextureCoord;
 uniform sampler2D uPosMap;
 uniform sampler2D uFluidMap;
 uniform sampler2D uDensityMap;
+uniform mat4 uInvertMatrix;
+uniform mat4 uCameraMatrix;
 uniform float uTime;
 uniform float uStrength;
 uniform float uBound;
+uniform float uMaxRadius;
 
 out vec4 oColor;
 
@@ -31,21 +34,20 @@ void main(void) {
     vec3 noise = curlNoise(pos * 0.5 + uTime * 0.15);
     pos += noise * 0.002;
 
-    vec2 uv = pos.xy / uBound * .5 + .5;
-    vec2 vel = texture(uFluidMap, uv).xy;
+    // fluid
+    vec3 projectedPos = (uInvertMatrix * vec4(pos, 1.0)).xyz;
+    vec2 uv = (projectedPos.xy/uBound) * 0.5 + 0.5;
+    vec3 fluid = texture(uFluidMap, uv).xyz;
+    fluid = (uCameraMatrix * vec4(fluid, 1.0)).xyz;
     float density = texture(uDensityMap, uv).x;
     density = smoothstep(0.0, 1.0, density);
     density = mix(0.25, 1.0, density);
 
-    float dz = abs(pos.z - 2.0);
-    dz = smoothstep(3.0, 0.0, dz);
-
-    pos.xy += vel * 0.0002 * density * dz * uStrength;
+    pos += fluid * 0.00001 * density * uStrength;
 
     float d = length(pos);
-    float maxRadius = 8.0;
-    if(d > maxRadius) {
-        pos = normalize(pos) * maxRadius;
+    if(d > uMaxRadius) {
+        pos = normalize(pos) * uMaxRadius;
     }
 
     if(pos.y < minY) {

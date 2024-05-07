@@ -6,11 +6,11 @@ import { createCanvas } from "./utils/setupProject2D";
 const scale = 1;
 const videoWidth = 640 * scale;
 const videoHeight = 480 * scale;
-// const trackedIndices = [0, 9, 10];
-const trackedIndices = [0];
+const trackedIndices = [0, 9, 10];
 
 export const POSE_FOUND = "poseFound";
 export const POSE_LOST = "poseLost";
+export const VIDEO_READY = "videoReady";
 
 export default class PoseDetection extends EventDispatcher {
   constructor() {
@@ -55,7 +55,7 @@ export default class PoseDetection extends EventDispatcher {
       const video = document.createElement("video");
       document.body.appendChild(video);
       video.className = "webcam";
-      video.id = "video";
+      video.id = "pose-video";
       video.setAttribute("playsinline", "");
 
       video.width = videoWidth;
@@ -149,7 +149,7 @@ export default class PoseDetection extends EventDispatcher {
     };
 
     keypoints.forEach(({ x, y, score }, i) => {
-      if (score > 0.5) {
+      if (score > 0.4) {
         const g = 255;
         ctx.fillStyle =
           trackedIndices.indexOf(i) > -1 ? rgb(200, 10, 0) : rgba(g, g, g, 0.5);

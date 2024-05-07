@@ -32,7 +32,8 @@ void main(void) {
     light = pow(light, 3.0);
     light = mix(1.7, .8, light);
 
-    d = smoothstep(0.5, 0.1, d);
+    // d = smoothstep(0.5, 0.1, d);
+    d = smoothstep(0.4, 0.0, d);
     d = pow(d, 2.0);
 
     vec4 color = texture(uMap, vTextureCoord);

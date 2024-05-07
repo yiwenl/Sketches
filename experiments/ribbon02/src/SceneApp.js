@@ -9,7 +9,6 @@ import {
   DrawCopy,
   DrawCamera,
   CameraOrtho,
-  EaseNumber,
   Scene,
 } from "alfrid";
 import { RAD, mix, random, smoothstep, biasMatrix } from "./utils";
@@ -27,6 +26,7 @@ import DrawFloor from "./DrawFloor";
 import DrawCompose from "./DrawCompose";
 import DrawScramble from "./DrawScramble";
 import DrawFlowUpdate from "./DrawFlowUpdate";
+import DrawDebugFluid from "./DrawDebugFluid";
 
 // textures
 import generatePaperTexture from "./generatePaperTexture";
@@ -35,14 +35,18 @@ import generateBlueNoise from "./generateBlueNoise";
 import applyBlur from "./applyBlur";
 
 // hand detection
-import HandPoseDetection, {
-  ON_VIDEO_READY,
-  ON_HANDS_LOST,
-  ON_HANDS_DETECTED,
-} from "./hand-detection";
+// import HandPoseDetection, {
+//   ON_VIDEO_READY,
+//   ON_HANDS_LOST,
+//   ON_HANDS_DETECTED,
+// } from "./hand-detection";
+
+// pose detection
+import PoseDetection, { POSE_FOUND, POSE_LOST } from "./PoseDetection";
 
 // fluid simulation
 import FluidSimulation from "./fluid-sim";
+import TrackPoint from "./TrackPoint2D";
 
 const bound = 8;
 const debug = true;
@@ -53,11 +57,12 @@ class SceneApp extends Scene {
 
     // this.orbitalControl.lock();
     // this.orbitalControl.lockZoom(true);
-    this.orbitalControl.radius.value = 10;
-    this.orbitalControl.radius.limit(8, 11);
+    const minRadius = 8;
+    this.orbitalControl.radius.value = Config.usePoseDetection ? minRadius : 10;
+    this.orbitalControl.radius.limit(minRadius, 11);
     this.orbitalControl.rx.limit(0.2, -1.0);
-    const a = 1.5;
-    this.orbitalControl.ry.limit(-a, a);
+    const a = 1.2;
+    // this.orbitalControl.ry.limit(-a, a);
 
     const { numParticles: s, numSets: t } = Config;
 
@@ -72,7 +77,7 @@ class SceneApp extends Scene {
     this._fboPos.unbind();
 
     // fluid
-    const DISSIPATION = 0.99;
+    const DISSIPATION = 0.98;
     this._fluid = new FluidSimulation({
       DENSITY_DISSIPATION: DISSIPATION,
       VELOCITY_DISSIPATION: DISSIPATION,
@@ -80,9 +85,43 @@ class SceneApp extends Scene {
     });
 
     // pose detection
-    if (Config.useHandDetection) {
-      this._initHandDetection();
+    if (Config.usePoseDetection) {
+      this._initPoseDetection();
     }
+  }
+
+  _initPoseDetection() {
+    const ratio = GL.aspectRatio;
+    this._trackedPoints = [
+      new TrackPoint(),
+      new TrackPoint(),
+      new TrackPoint(),
+    ];
+
+    this._poseDetection = new PoseDetection();
+    this._poseDetection.on(POSE_FOUND, (o) => {
+      o.forEach((p, i) => {
+        if (p.score > 0.4 && i > 0) {
+          this._trackedPoints[i].update(p.pos);
+          const { pos, dir, speed } = this._trackedPoints[i];
+          let f = smoothstep(0.01, 0.1, speed);
+          // this._fluid.updateFlow
+          const adjPos = [pos[0], pos[1]];
+          adjPos[0] = (adjPos[0] - 0.5) / ratio + 0.5;
+          this._fluid.updateFlow(adjPos, dir, mix(2, 6, f), mix(2, 4, f), 1);
+        }
+      });
+
+      const { canvas, video } = this._poseDetection;
+      if (!canvas.classList.contains("ready")) {
+        canvas.classList.add("ready");
+        video.classList.add("ready");
+      }
+    });
+
+    this._poseDetection.on(POSE_LOST, () => {
+      this._trackedPoints.forEach((p) => p.reset());
+    });
   }
 
   _initHandDetection() {
@@ -132,12 +171,12 @@ class SceneApp extends Scene {
 
           const dir = vec2.sub([], hand, handPrev);
           let f = vec2.distance(hand, handPrev);
-          if (f < 0.05) {
-            f = smoothstep(0, 0.02, f);
-            f = Math.pow(f, 1.5);
+          f = smoothstep(0, 0.03, f);
 
-            this._fluid.updateFlow(hand, dir, 6 * f, 2, 1);
-          }
+          const r = mix(1, 4, f);
+          const _f = mix(2, 5, f);
+
+          this._fluid.updateFlow(hand, dir, _f, r, 1);
         }
       }
     });
@@ -154,35 +193,60 @@ class SceneApp extends Scene {
     this.resize();
 
     // camera settings
-    this.camera.setPerspective(80 * RAD, GL.aspectRatio, 2, 20);
+    const FOV = Config.usePoseDetection ? 70 : 80;
+    this.camera.setPerspective(FOV * RAD, GL.aspectRatio, 2, 20);
     this._index = 0;
 
     this._hit = [999, 999, 999];
     this._preHit = [999, 999, 999];
 
     const mesh = Geom.plane(bound * 2, bound * 2, 1);
+    this._drawDebugFluid = new DrawDebugFluid(mesh);
     // const mesh = Geom.sphere(3, 24);
-    const hitTestor = new HitTestor(mesh, this.camera);
-    hitTestor.on("onHit", (e) => {
-      if (this._preHit[0] === 999) {
+    this._hitTestor = new HitTestor(mesh, this.camera);
+
+    this._hitTestor.on("onHit", (e) => {
+      if (this._preHit[0] > 100) {
         vec3.copy(this._preHit, e.hit);
       } else {
         vec3.copy(this._preHit, this._hit);
       }
       vec3.copy(this._hit, e.hit);
 
-      let x = (this._hit[0] / bound) * 0.5 + 0.5;
-      let y = (this._hit[1] / bound) * 0.5 + 0.5;
-      const dir = vec3.sub([], this._hit, this._preHit);
-      const _dir = [dir[0], dir[1]];
-      const d = vec2.length(_dir);
-      let f = smoothstep(0, 0.3, d);
-      vec2.normalize(_dir, _dir);
-      let radius = mix(1.0, 3.0, f) * Config.extreme ? 1 : 2;
-      this._fluid.updateFlow([x, y], _dir, f * 0.2, radius, 1);
+      let d = vec3.distance(this._preHit, this._hit);
+      let f = smoothstep(0, 1, d);
+      let r = bound;
+
+      if (f > 0) {
+        const mtxInvert = mat4.invert(
+          mat4.create(),
+          this._hitTestor.modelMatrix
+        );
+        const pInverted = vec3.transformMat4(
+          vec3.create(),
+          this._hit,
+          mtxInvert
+        );
+        const pInvertedPrev = vec3.transformMat4(
+          vec3.create(),
+          this._preHit,
+          mtxInvert
+        );
+
+        let x = (pInverted[0] / r) * 0.5 + 0.5;
+        let y = (pInverted[1] / r) * 0.5 + 0.5;
+
+        const dir = [
+          pInverted[0] - pInvertedPrev[0],
+          pInverted[1] - pInvertedPrev[1],
+        ];
+        vec2.normalize(dir, dir);
+
+        this._fluid.updateFlow([x, y], dir, mix(1, 4, f), mix(1, 3, f) * 2, 1);
+      }
     });
 
-    hitTestor.on("onUp", (e) => {
+    this._hitTestor.on("onUp", (e) => {
       this._hit = [999, 999, 999];
       this._preHit = [999, 999, 999];
     });
@@ -267,8 +331,6 @@ class SceneApp extends Scene {
     this._drawFlowUpdate = new DrawFlowUpdate();
   }
 
-  _initPoseDetection() {}
-
   update() {
     this._fluid.update();
     this._updateFlow();
@@ -304,15 +366,20 @@ class SceneApp extends Scene {
     this._dCopy.draw(this._fbo.read.getTexture(0));
     this._fboPos.unbind();
 
+    const mtxInvert = mat4.invert(mat4.create(), this._hitTestor.modelMatrix);
+
     this._drawScramble
       .bindFrameBuffer(this._fboScrambled)
       .bindTexture("uPosMap", this._fboPos.texture, 0)
       // .bindTexture("uFluidMap", this._fboFlow.read.texture, 1)
       .bindTexture("uFluidMap", this._fluid.velocity, 1)
       .bindTexture("uDensityMap", this._fluid.density, 2)
+      .uniform("uCameraMatrix", this._hitTestor.modelMatrix)
+      .uniform("uInvertMatrix", mtxInvert)
       .uniform("uTime", Scheduler.getElapsedTime() + this._seedTime)
       .uniform("uBound", bound)
       .uniform("uStrength", Config.extreme ? 10 : 1)
+      .uniform("uMaxRadius", Config.usePoseDetection ? 8 : 8)
       .draw();
 
     this._fboPos.bind();
@@ -336,7 +403,7 @@ class SceneApp extends Scene {
       .uniform("uShadowMatrix", this.mtxShadow)
       .draw();
 
-    const g = 0.02;
+    const g = 0.05;
     this._dBall.draw(this._hit, [g, g, g], [0.6, 0.05, 0]);
     this._renderRibbon(true);
 
@@ -347,6 +414,13 @@ class SceneApp extends Scene {
 
     // generate blurred map
     this._textureBlurredRender = applyBlur(this._fboRender.texture);
+
+    // update hit test
+    const mtx = mat4.create();
+    mat4.rotateY(mtx, mtx, this.orbitalControl.ry.value);
+    mat4.rotateX(mtx, mtx, this.orbitalControl.rx.value);
+    // mat4.invert(mtx, mtx);
+    mat4.copy(this._hitTestor.modelMatrix, mtx);
   }
 
   _updateFlow() {
@@ -404,6 +478,12 @@ class SceneApp extends Scene {
       .uniform("uNear", near)
       .uniform("uFar", far)
       .draw();
+
+    // this._drawDebugFluid
+    //   .bindTexture("uMap", this._fluid.density, 0)
+    //   .uniform("uInvertMatrix", this._hitTestor.modelMatrix)
+    //   .uniform("uTime", Scheduler.getElapsedTime())
+    // .draw();
 
     if (debug && this._handLeft) {
       g = 0.05;
