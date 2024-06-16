@@ -5,3 +5,5 @@ build
 experiments/TextureProj/npm-debug.log
 illum
 experiments/inscript/src  
+
+*.mp4
