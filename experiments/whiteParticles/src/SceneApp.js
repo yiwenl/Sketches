@@ -105,6 +105,8 @@ class SceneApp extends Scene {
       this._initPoseDetection();
     }
 
+    this.frame = 0;
+
     setTimeout(() => {
       canSave = true;
     }, 500);
@@ -239,6 +241,19 @@ class SceneApp extends Scene {
   }
 
   update() {
+    this.frame++;
+
+    if (random() < 0.05) {
+      console.log("launch wave");
+      const pos = [random(0.1, 0.3), 0];
+      const dir = [0, 1];
+      const a = this.frame * 0.1;
+      vec2.rotate(pos, pos, [0, 0], a);
+      // vec2.rotate(dir, dir, [0, 0], a + random(-1, 1) * 0.5);
+      vec2.rotate(dir, dir, [0, 0], random(Math.PI * 2));
+      vec2.add(pos, pos, [0.5, 0.5]);
+      this._fluid.updateFlow(pos, dir, random(10, 30), random(3, 5), 1);
+    }
     this._updateFluid();
 
     // blue noise

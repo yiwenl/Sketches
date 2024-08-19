@@ -1,0 +1,12 @@
+body {
+  background-color: rgb(33, 33, 33);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.dg {
+  z-index: 99999 !important;
+}

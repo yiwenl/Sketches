@@ -1,0 +1,29 @@
+float pcfShadow( vec4 sc, sampler2D depthMap, float strength )
+{
+    const int s = 2;
+    float shadow = 0.0;
+
+    float bias = 0.005;
+    float threshold = sc.z - bias;
+
+
+    shadow += step(threshold, textureProjOffset( depthMap, sc, ivec2(-s,-s) ).r);
+    shadow += step(threshold, textureProjOffset( depthMap, sc, ivec2(-s, 0) ).r);
+    shadow += step(threshold, textureProjOffset( depthMap, sc, ivec2(-s, s) ).r);
+    shadow += step(threshold, textureProjOffset( depthMap, sc, ivec2( 0,-s) ).r);
+    shadow += step(threshold, textureProjOffset( depthMap, sc, ivec2( 0, 0) ).r);
+    shadow += step(threshold, textureProjOffset( depthMap, sc, ivec2( 0, s) ).r);
+    shadow += step(threshold, textureProjOffset( depthMap, sc, ivec2( s,-s) ).r);
+    shadow += step(threshold, textureProjOffset( depthMap, sc, ivec2( s, 0) ).r);
+    shadow += step(threshold, textureProjOffset( depthMap, sc, ivec2( s, s) ).r);
+
+    shadow /= 9.0;
+
+    return mix(1.0, shadow, strength);
+}
+
+float pcfShadow( vec4 sc, sampler2D depthMap ) {
+    return pcfShadow(sc, depthMap, 1.0);
+}
+
+#pragma glslify: export(pcfShadow)
