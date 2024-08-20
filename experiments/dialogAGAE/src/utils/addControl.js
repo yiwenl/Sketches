@@ -77,5 +77,5 @@ export default (scene) => {
 
   fColor.open();
 
-  // dat.GUI.toggleHide();
+  dat.GUI.toggleHide();
 };

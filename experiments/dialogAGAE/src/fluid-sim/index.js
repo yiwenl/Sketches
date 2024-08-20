@@ -28,7 +28,8 @@ class FluidSimulation {
   }
 
   _initTextures() {
-    const { TEXTURE_SIZE: size } = this.settings;
+    let { TEXTURE_SIZE: size } = this.settings;
+    if (GL.isMobile) size /= 2;
     this._texelSize = [1 / size, 1 / size];
 
     const type = iOS ? GL.HALF_FLOAT : GL.FLOAT;

@@ -87,5 +87,4 @@ void main(void) {
     color -= d * 0.5;
 
     oColor = vec4(color, 1.0);
-    // oColor = vec4(colorAO, 1.0);
 }

@@ -1,10 +1,10 @@
 export default {
   ratio: "16:9",
-  useTargetRatio: true,
+  useTargetRatio: false,
   pixelRatio: 2,
   colorSeparation: 1,
   lutStrength: 0.5,
-  randomMovements: false,
+  randomMovements: true,
   mirrored: false,
   usePoseDetection: false,
   colorHighlight: [155, 155, 155],

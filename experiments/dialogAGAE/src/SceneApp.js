@@ -49,6 +49,8 @@ import generateBlueNoise from "./generateBlueNoise";
 import generatePaperTexture from "./generatePaperTexture";
 import { availableRatio } from "./features";
 
+let isMobile = false;
+
 class SceneApp extends Scene {
   constructor() {
     super();
@@ -58,8 +60,12 @@ class SceneApp extends Scene {
 
     const ratioIndex = availableRatio.indexOf(Config.ratio);
     const zoom = [10, 15, 12];
-    // console.log(zoom[ratioIndex]);
-    this.orbitalControl.radius.setTo(zoom[ratioIndex]);
+    let _zoom = zoom[ratioIndex];
+    if (!Config.useTargetRatio) {
+      _zoom = 10;
+    }
+    console.log("zoom", _zoom);
+    this.orbitalControl.radius.setTo(_zoom);
 
     // fluid
     this._fluid = new FluidSimulation({
@@ -116,7 +122,7 @@ class SceneApp extends Scene {
     this._theta = random(Math.PI * 2);
     this._rotation = randomInt(3) * 0.25;
 
-    this._numEmit = randomInt(3, 9);
+    this._numEmit = isMobile ? randomInt(3, 6) : randomInt(3, 9);
     this._rotateOffsets = [];
     const rotateLimit = random();
     for (let i = 0; i < this._numEmit; i++) {
@@ -160,6 +166,8 @@ class SceneApp extends Scene {
   };
 
   _initTextures() {
+    isMobile = GL.isMobile;
+
     this.resize();
 
     this._texturePaper = generatePaperTexture();
@@ -168,6 +176,7 @@ class SceneApp extends Scene {
     this._textureLookup.magFilter = GL.NEAREST;
 
     const { numParticles: num } = Config;
+    // alert("Num Particles: " + num);
     const oSettings = {
       minFilter: GL.NEAREST,
       magFilter: GL.NEAREST,
@@ -187,8 +196,22 @@ class SceneApp extends Scene {
       2
     );
 
-    let fboSize = 2048;
+    let fboSize = isMobile ? 1024 : 2048;
     this._fboShadow = new FrameBuffer(fboSize, fboSize);
+    this._fboShadow.bind();
+    GL.clear(0, 0, 0, 0);
+    this._fboShadow.unbind();
+
+    // blue noise
+    this._textureNoise = generateBlueNoise();
+
+    if (isMobile) {
+      const fbo = new FrameBuffer(2, 2);
+      fbo.bind();
+      GL.clear(1, 1, 1, 1);
+      fbo.unbind();
+      this._textureAO = fbo.texture;
+    }
   }
 
   _initViews() {
@@ -216,48 +239,62 @@ class SceneApp extends Scene {
     const { meshSize } = this._drawFluid;
     const s = meshSize / 2;
     this._hitTestor = new HitTestor(this._drawFluid.mesh, this.camera);
-    this._hitTestor.on("onHit", (e) => {
-      vec3.copy(this._preHit, this._hit);
-      vec3.copy(this._hit, e.hit);
+    if (!isMobile) {
+      console.log("isMobile", isMobile);
+      this._hitTestor.on("onHit", (e) => {
+        // console.log("onHit", isMobile);
+        vec3.copy(this._preHit, this._hit);
+        vec3.copy(this._hit, e.hit);
 
-      const d = vec3.distance(this._preHit, this._hit);
-      const f = smoothstep(0.01, 0.1, d);
-      const pos = [
-        (this._hit[0] / s) * 0.5 + 0.5,
-        (this._hit[1] / s) * 0.5 + 0.5,
-      ];
-      const dir = [
-        this._hit[0] - this._preHit[0],
-        this._hit[1] - this._preHit[1],
-      ];
+        const d = vec3.distance(this._preHit, this._hit);
+        const f = smoothstep(0.01, 0.1, d);
+        const pos = [
+          (this._hit[0] / s) * 0.5 + 0.5,
+          (this._hit[1] / s) * 0.5 + 0.5,
+        ];
+        const dir = [
+          this._hit[0] - this._preHit[0],
+          this._hit[1] - this._preHit[1],
+        ];
 
-      const strength = mix(5.0, 10.0, f) * 2;
-      const radius = mix(1.0, 2.0, f);
-      this._fluid.updateFlow(pos, dir, strength, radius, 0.81);
-    });
+        const strength = mix(5.0, 10.0, f) * 2;
+        const radius = mix(1.0, 2.0, f);
+        this._fluid.updateFlow(pos, dir, strength, radius, 0.81);
+      });
+    }
   }
 
   update() {
     this.frame++;
 
+    let updateMaps = false;
+    if (isMobile) {
+      if (this.frame % 2 === 1) {
+        updateMaps = true;
+      }
+    } else {
+      updateMaps = true;
+    }
+
+    GL.setMatrices(this.camera);
+
     if (random() < 0.05 && Config.randomMovements) {
+      // console.log("random movement");
       const pos = [random(0.1, 0.3), 0];
       const dir = [0, 1];
       const a = this.frame * 0.1;
       vec2.rotate(pos, pos, [0, 0], a);
       vec2.rotate(dir, dir, [0, 0], random(Math.PI * 2));
       vec2.add(pos, pos, [0.5, 0.5]);
-      this._fluid.updateFlow(pos, dir, random(10, 30), random(3, 5), 1);
+      let str = random(10, 30) * isMobile ? 0.7 : 1;
+      this._fluid.updateFlow(pos, dir, str, random(3, 5), 1);
     }
     this._updateFluid();
 
-    // blue noise
-    this._textureNoise = generateBlueNoise();
-
     // update normal map
-    this._textureNormal = generateNormalMap(this._fboFluid.getTexture(1));
 
     // update particles
+
     let f = Math.sin(this._offset.value * Math.PI);
     this._drawSim
       .bindFrameBuffer(this._fbo.write)
@@ -271,13 +308,16 @@ class SceneApp extends Scene {
       .uniform("uTime", Scheduler.getElapsedTime())
       .uniform("uOffset", f)
       .uniform("uLifeDecrease", this._offset.value < 1 ? 0 : 1)
-      .uniform("uSpeed", GL.isMobile ? 0.25 : 1.0)
+      .uniform("uSpeed", GL.isMobile ? 0.4 : 1.0)
       .draw();
 
     this._fbo.swap();
 
     // render shadow map
-    this._updateShadowMap();
+    if (updateMaps) {
+      this._updateShadowMap();
+      this._textureNormal = generateNormalMap(this._fboFluid.getTexture(1));
+    }
 
     // render
     this._fboRender.bind();
@@ -286,16 +326,25 @@ class SceneApp extends Scene {
     GL.setMatrices(this.camera);
     GL.disable(GL.DEPTH_TEST);
     // this._dCopy.draw(this._texturePaper);
-    this._drawBg
-      .bindTexture("uMap", this._texturePaper, 0)
-      .uniform("uRatio", GL.aspectRatio)
-      .draw();
+    if (isMobile) {
+      GL.clear(1, 1, 1, 1);
+    } else {
+      this._drawBg
+        .bindTexture("uMap", this._texturePaper, 0)
+        .uniform("uRatio", GL.aspectRatio)
+        .draw();
+    }
     GL.enable(GL.DEPTH_TEST);
     this._renderBlocks(true);
     this._fboRender.unbind();
 
     // render ao map
-    this._textureAO = generateAOMap(this._fboRender.depthTexture, this.camera);
+    if (!isMobile) {
+      this._textureAO = generateAOMap(
+        this._fboRender.depthTexture,
+        this.camera
+      );
+    }
   }
 
   _updateFluid() {
@@ -381,6 +430,18 @@ class SceneApp extends Scene {
     let g = 0.1;
     GL.clear(g, g, g, 1);
     GL.setMatrices(this.camera);
+    if (isMobile) {
+      GL.disable(GL.DEPTH_TEST);
+      this._dCopy.draw(this._fboRender.texture);
+      this._drawDirection
+        .bindTexture("uMap", this._fluid.velocity, 0)
+        .bindTexture("uDensityMap", this._fluid.density, 1)
+        .uniform("uTime", Scheduler.getElapsedTime())
+        .draw();
+
+      GL.enable(GL.DEPTH_TEST);
+      return;
+    }
 
     this._fboPost.bind();
     GL.clear(0, 0, 0, 1);
@@ -396,36 +457,41 @@ class SceneApp extends Scene {
       .uniform("uSeparation", Config.colorSeparation)
       .draw();
     // this._dCopy.draw(this._textureNormal);
-
     this._drawDirection
       .bindTexture("uMap", this._fluid.velocity, 0)
       .bindTexture("uDensityMap", this._fluid.density, 1)
       .uniform("uTime", Scheduler.getElapsedTime())
       .draw();
 
-    GL.enableAdditiveBlending();
-    this._drawReflection
-      .bindTexture("uNormalMap", this._textureNormal, 0)
-      .uniform("uColor", Config.colorReflection0.map(toGlsl))
-      .uniform("uLight", [0.3, 0.1, 1.0])
-      .draw();
+    if (!isMobile) {
+      GL.enableAdditiveBlending();
+      this._drawReflection
+        .bindTexture("uNormalMap", this._textureNormal, 0)
+        .uniform("uColor", Config.colorReflection0.map(toGlsl))
+        .uniform("uLight", [0.3, 0.1, 1.0])
+        .draw();
 
-    this._drawReflection
-      .bindTexture("uNormalMap", this._textureNormal, 0)
-      .uniform("uColor", Config.colorReflection1.map(toGlsl))
-      .uniform("uLight", [-0.3, 0.0, 1.0])
-      .draw();
-    GL.enableAlphaBlending();
+      this._drawReflection
+        .bindTexture("uNormalMap", this._textureNormal, 0)
+        .uniform("uColor", Config.colorReflection1.map(toGlsl))
+        .uniform("uLight", [-0.3, 0.0, 1.0])
+        .draw();
+      GL.enableAlphaBlending();
+    }
 
     this._fboPost.unbind();
 
-    this._drawCompose
-      .bindTexture("uMap", this._fboPost.texture, 0)
-      .bindTexture("uLookupMap", this._textureLookup, 1)
-      .bindTexture("uNoiseMap", this._textureNoise, 2)
-      .uniform("uRatio", GL.aspectRatio)
-      .uniform("uLutStrength", Config.lutStrength)
-      .draw();
+    if (isMobile) {
+      this._dCopy.draw(this._fboPost.texture);
+    } else {
+      this._drawCompose
+        .bindTexture("uMap", this._fboPost.texture, 0)
+        .bindTexture("uLookupMap", this._textureLookup, 1)
+        .bindTexture("uNoiseMap", this._textureNoise, 2)
+        .uniform("uRatio", GL.aspectRatio)
+        .uniform("uLutStrength", Config.lutStrength)
+        .draw();
+    }
 
     GL.enable(GL.DEPTH_TEST);
   }

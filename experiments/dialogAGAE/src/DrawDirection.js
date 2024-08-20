@@ -1,4 +1,4 @@
-import { Draw, Geom } from "alfrid";
+import { GL, Draw, Geom } from "alfrid";
 import vs from "shaders/direction.vert";
 import fs from "shaders/direction.frag";
 
@@ -8,11 +8,16 @@ export default class DrawDirection extends Draw {
 
     const s = 0.15;
     const mesh = Geom.plane(s, s, 1);
-    const num = Math.floor(7 / s);
+    let numX = Math.floor(7 / s);
+    let numY = numX;
+    if (GL.isMobile) {
+      numX = Math.floor(2.5 / s);
+      numY = Math.floor(numX / GL.aspectRatio);
+    }
 
     const posOffsets = [];
-    for (let j = -num; j <= num; j++) {
-      for (let i = -num; i <= num; i++) {
+    for (let j = -numY; j <= numY; j++) {
+      for (let i = -numX; i <= numX; i++) {
         posOffsets.push([i * s, j * s, 0]);
         posOffsets.push([i * s, j * s, 1]);
       }
