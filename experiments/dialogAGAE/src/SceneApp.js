@@ -11,6 +11,7 @@ import {
   HitTestor,
 } from "alfrid";
 import {
+  iOS,
   RAD,
   mix,
   random,
@@ -177,10 +178,11 @@ class SceneApp extends Scene {
 
     const { numParticles: num } = Config;
     // alert("Num Particles: " + num);
+    const type = iOS() ? GL.HALF_FLOAT_OES : GL.FLOAT;
     const oSettings = {
       minFilter: GL.NEAREST,
       magFilter: GL.NEAREST,
-      type: GL.FLOAT,
+      type,
     };
 
     this._fbo = new FboPingPong(num, num, oSettings, 4);
@@ -192,7 +194,7 @@ class SceneApp extends Scene {
     this._fboFluid = new FrameBuffer(
       GL.width,
       GL.height,
-      { type: GL.FLOAT, minFilter: GL.LINEAR, magFilter: GL.LINEAR },
+      { type, minFilter: GL.LINEAR, magFilter: GL.LINEAR },
       2
     );
 
@@ -240,7 +242,6 @@ class SceneApp extends Scene {
     const s = meshSize / 2;
     this._hitTestor = new HitTestor(this._drawFluid.mesh, this.camera);
     if (!isMobile) {
-      console.log("isMobile", isMobile);
       this._hitTestor.on("onHit", (e) => {
         // console.log("onHit", isMobile);
         vec3.copy(this._preHit, this._hit);
@@ -326,25 +327,18 @@ class SceneApp extends Scene {
     GL.setMatrices(this.camera);
     GL.disable(GL.DEPTH_TEST);
     // this._dCopy.draw(this._texturePaper);
-    if (isMobile) {
-      GL.clear(1, 1, 1, 1);
-    } else {
-      this._drawBg
-        .bindTexture("uMap", this._texturePaper, 0)
-        .uniform("uRatio", GL.aspectRatio)
-        .draw();
-    }
+    this._drawBg
+      .bindTexture("uMap", this._texturePaper, 0)
+      .uniform("uRatio", GL.aspectRatio)
+      .draw();
     GL.enable(GL.DEPTH_TEST);
     this._renderBlocks(true);
     this._fboRender.unbind();
 
     // render ao map
-    if (!isMobile) {
-      this._textureAO = generateAOMap(
-        this._fboRender.depthTexture,
-        this.camera
-      );
-    }
+    // if (!isMobile) {
+    this._textureAO = generateAOMap(this._fboRender.depthTexture, this.camera);
+    // }
   }
 
   _updateFluid() {
@@ -430,14 +424,14 @@ class SceneApp extends Scene {
     let g = 0.1;
     GL.clear(g, g, g, 1);
     GL.setMatrices(this.camera);
-    if (isMobile) {
+    if (isMobile && 0) {
       GL.disable(GL.DEPTH_TEST);
       this._dCopy.draw(this._fboRender.texture);
-      this._drawDirection
-        .bindTexture("uMap", this._fluid.velocity, 0)
-        .bindTexture("uDensityMap", this._fluid.density, 1)
-        .uniform("uTime", Scheduler.getElapsedTime())
-        .draw();
+      // this._drawDirection
+      //   .bindTexture("uMap", this._fluid.velocity, 0)
+      //   .bindTexture("uDensityMap", this._fluid.density, 1)
+      //   .uniform("uTime", Scheduler.getElapsedTime())
+      //   .draw();
 
       GL.enable(GL.DEPTH_TEST);
       return;
@@ -481,7 +475,7 @@ class SceneApp extends Scene {
 
     this._fboPost.unbind();
 
-    if (isMobile) {
+    if (isMobile && 0) {
       this._dCopy.draw(this._fboPost.texture);
     } else {
       this._drawCompose

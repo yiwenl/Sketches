@@ -38,7 +38,8 @@ export default class ParticleSystem {
       .bindTexture("uExtraMap", this._fbo.read.getTexture(2), 2)
       .bindTexture("uDataMap", this._fbo.read.getTexture(3), 3)
       .bindTexture("uBgMap", mTexBg, 4)
-      .uniform("uTime", Scheduler.getElapsedTime())
+      .uniform("uTime", Scheduler.getTime() / 1000)
+      .uniform("uBound", 6)
       .draw();
 
     this._fbo.swap();

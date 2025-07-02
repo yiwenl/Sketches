@@ -36,15 +36,16 @@ void main(void) {
 
 
     vec3 acc = vec3(0.0);
-    float posOffset = snoise(pos * 0.1 + uTime * 0.2 + uSeed) * .5 + .5;
+    float ns = 2.0;
+    float posOffset = snoise(pos * 0.1 - uTime * 0.2 * ns + uSeed) * .5 + .5;
     posOffset = mix(0.1, 0.5, posOffset);
 
-    vec3 noise = curlNoise(pos * posOffset + uTime * 0.1 + uSeed);
+    vec3 noise = curlNoise(pos * posOffset + uTime * 0.1 * ns + uSeed);
     noise.z *= 0.4;
     acc += noise;
 
     // float speed = mix(1.0, 1.5, extra.y) * 0.0008;
-    float speed = mix(1.0, 1.5, extra.y) * 0.002;
+    float speed = mix(1.0, 2.5, extra.y) * 0.002;
     vel += acc * speed;
     pos += vel;
     vel *= 0.92;

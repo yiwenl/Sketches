@@ -30,6 +30,7 @@ import { logError } from "./utils";
 import preload from "./utils/preload";
 import "./utils/Capture";
 import addFullscreen from "./utils/fullscreen";
+import Scheduler from "scheduling";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -71,4 +72,5 @@ function _init3D() {
   }
 }
 
+Scheduler.setFrameRate(60);
 preload().then(_init3D, logError);

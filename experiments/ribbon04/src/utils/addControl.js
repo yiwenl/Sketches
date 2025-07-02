@@ -23,7 +23,7 @@ export default (scene) => {
   window.gui = gui;
 
   gui.add(Config, "numParticles", [64, 128, 192, 256]).onFinishChange(reload);
-  gui.add(Config, "numSets", [4, 8, 12, 16]).onFinishChange(reload);
+  gui.add(Config, "numSets", [4, 6, 8, 12, 16]).onFinishChange(reload);
 
   // color
   const addColorControl = (mFolder, mAttr, mName, mOpen = true) => {

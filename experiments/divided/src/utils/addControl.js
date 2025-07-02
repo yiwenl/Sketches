@@ -22,6 +22,23 @@ export default (scene) => {
   const gui = new dat.GUI({ width: 300 });
   window.gui = gui;
 
+  const onUpdateCam = () => {
+    scene.updateCamera();
+    refresh();
+  };
+  const fCamera = gui.addFolder("Camera");
+  fCamera.add(Config, "cameraNear", 0.1, 10).step(0.1).onChange(onUpdateCam);
+  fCamera.add(Config, "cameraFar", 5, 10).step(0.1).onChange(onUpdateCam);
+  fCamera.open();
+
+  gui
+    .add(Config, "depthThreshold", 0.01, 0.2)
+    .step(0.01)
+    .onFinishChange(refresh);
+
+  gui.add(Config, "aoStrength", 0, 1).step(0.01).onFinishChange(refresh);
+  gui.add(Config, "aoRange", 0, 2).onFinishChange(refresh);
+
   // color
   const addColorControl = (mFolder, mAttr, mName, mOpen = true) => {
     const oColor = new Color(Config[mAttr]);

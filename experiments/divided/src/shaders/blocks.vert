@@ -15,6 +15,7 @@ uniform mat4 uShadowMatrix;
 uniform sampler2D uPosMap;
 uniform sampler2D uVelMap;
 uniform sampler2D uDataMap;
+uniform sampler2D uBgMap;
 uniform sampler2D uColorMap;
 
 out vec2 vTextureCoord;
@@ -61,11 +62,17 @@ void main(void) {
     // color
     vec4 screenPos = uProjectionMatrix * uViewMatrix * vec4(posOffset, 1.0);
     vec2 uv = (screenPos.xy / screenPos.w) * 0.5 + 0.5;
-    float g = texture(uColorMap, uv).x;
+    float g = texture(uBgMap, uv).x;
 
-    
+
+    uv = fract(aRandom.xy + aRandom.zy);
+    vec3 color = texture(uColorMap, uv).xyz;
+    if(g < 0.5) {
+        color = vec3(1.0) - color;
+    }
 
     // vColor = vec3(mix(1.0, .2, g) * mix(0.1, 1.0, pSpeed));
-    vColor = vec3(mix(1.0, .2, g));
+    // vColor = vec3(mix(1.0, .2, g));
+    vColor = color;
 
 }

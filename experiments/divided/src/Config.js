@@ -1,4 +1,9 @@
 export default {
+  cameraNear: 1.5,
+  cameraFar: 7.4,
+  depthThreshold: 0.17,
+  aoRange: 0.1,
+  aoStrength: 0.29,
   colorBg: [25, 25, 25],
   useTargetSize: false,
   autoSave: false,

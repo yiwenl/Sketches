@@ -13,6 +13,7 @@ uniform mat4 uProjectionMatrix;
 uniform mat4 uShadowMatrix;
 
 uniform sampler2D uPosMap;
+uniform sampler2D uBgMap;
 uniform sampler2D uColorMap;
 
 uniform float uTotal;
@@ -66,11 +67,18 @@ void main(void) {
     vec3 dir = normalize(next - curr);
     vec3 axis = normalize(cross(dir, xAxis));
     float angle = acos(dot(dir, xAxis));
-    pos = rotate(pos, axis, angle);
-    vec3 n = aNormal;
-    n = rotate(n, axis, angle);
 
+
+    vec4 screenPos = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(curr, 1.0);
+    uv = screenPos.xy/screenPos.w * .5 + .5;
+    float g = texture(uBgMap, uv).x;
+    pos *= 1.0 + (1.0 - g) * 1.0;
+
+    vec3 n = aNormal;
+    pos = rotate(pos, axis, angle);
+    n = rotate(n, axis, angle);
     pos += curr;
+    
 
 
     vec4 wsPos = vec4(pos, 1.0);
@@ -85,6 +93,14 @@ void main(void) {
 
     // color
     uv = gl_Position.xy/gl_Position.w * .5 + .5;
-    float g = texture(uColorMap, uv).x;
-    vColor = vec3(mix(1.0, .2, g));
+    g = texture(uBgMap, uv).x;
+
+    uv = fract(aExtra.xy + aExtra.zy);
+    vec3 color = texture(uColorMap, uv).xyz;
+    if(g < 0.5) {
+        color = vec3(1.0) - color;
+    }
+
+    // vColor = vec3(mix(1.0, .2, g));
+    vColor = color;
 }

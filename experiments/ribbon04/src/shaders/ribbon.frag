@@ -13,7 +13,7 @@ out vec4 oColor;
 
 #pragma glslify: diffuse    = require(./glsl-utils/diffuse.glsl)
 #define LIGHT vec3(1.0, 0.8, 0.6)
-#define MONOCOLOR vec3(1.0, .97, .94)
+#define MONOCOLOR vec3(1.0, .97, .92)
 
 float samplePCF3x3( vec4 sc )
 {
@@ -44,7 +44,9 @@ void main(void) {
     // shadow
     vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
 	float s             = samplePCF3x3(shadowCoord);
-    s = mix(s, 1.0, .24);
 
-    oColor = vec4(MONOCOLOR * vColor * g * s * 1.5, 1.0);
+    vec3 colorShadow = mix(vec3(0.6, 0.61, 0.68) * 0.5, vec3(1.0), s);
+    // s = mix(s, 1.0, .24);
+
+    oColor = vec4(MONOCOLOR * vColor * g * colorShadow * 1.5, 1.0);
 }
