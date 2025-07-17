@@ -1,22 +1,24 @@
 import { GL, Scene, DrawAxis, DrawCopy, DrawBall } from "@experiments2/alfrid";
 import Config from "./Config";
-import { targetWidth, targetHeight, pixelRatio } from "./features";
-import { resize } from "@experiments2/utils";
+import {
+  TargetSizeStrategy,
+  FullscreenStrategy,
+} from "./strategies/RenderStrategy";
 
 export default class SceneApp extends Scene {
   constructor() {
     super();
 
-    if (Config.useTargetSize) {
-      GL.setSize(targetWidth, targetHeight);
-      this.camera.setAspectRatio(GL.aspectRatio);
-      resize(GL.canvas, targetWidth, targetHeight, Config.margin);
-    }
+    // Choose strategy based on configuration
+    this.renderStrategy = Config.useTargetSize
+      ? new TargetSizeStrategy()
+      : new FullscreenStrategy();
+
+    // Initialize with the chosen strategy
+    this.renderStrategy.init(GL.canvas);
   }
 
-  _init() {
-    this.resize();
-  }
+  _init() {}
 
   _initTextures() {}
 
@@ -29,7 +31,6 @@ export default class SceneApp extends Scene {
   update() {}
 
   render() {
-    let g = 0.1;
     GL.clear(...Config.background, 1);
     GL.setMatrices(this.camera);
 
@@ -37,10 +38,6 @@ export default class SceneApp extends Scene {
   }
 
   resize() {
-    if (!Config.useTargetSize) {
-      const { innerWidth, innerHeight } = window;
-      GL.setSize(innerWidth * pixelRatio, innerHeight * pixelRatio);
-      this.camera?.setAspectRatio(GL.aspectRatio);
-    }
+    this.renderStrategy?.resize(this.camera);
   }
 }

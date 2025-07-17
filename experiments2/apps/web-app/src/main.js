@@ -1,8 +1,7 @@
 import { GL } from "@experiments2/alfrid";
-import { addFullscreenToggle, addCapture } from "@experiments2/utils";
+import { addCapture } from "@experiments2/utils";
 
 import Assets from "./Assets";
-import Config from "./Config";
 import Settings from "./Settings";
 import SceneApp from "./SceneApp";
 
@@ -25,10 +24,6 @@ function init() {
   new SceneApp();
 
   initGui();
-
-  if (!Config.useTargetSize) {
-    addFullscreenToggle();
-  }
   addCapture();
 }
 
