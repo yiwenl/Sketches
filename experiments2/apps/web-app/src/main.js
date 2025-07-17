@@ -4,13 +4,14 @@ import { addCapture } from "@utils";
 import Assets from "./Assets";
 import Settings from "./Settings";
 import SceneApp from "./SceneApp";
+import { pixelRatio } from "./features";
 
 const isDev = process.env.NODE_ENV === "development";
 const keepGui = isDev;
 
-const pixelRatio = 2;
-
-Settings.init();
+if (isDev) {
+  Settings.init();
+}
 
 Assets.load().then(init);
 
