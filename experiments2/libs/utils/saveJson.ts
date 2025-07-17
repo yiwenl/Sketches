@@ -10,24 +10,11 @@ export const saveJson = (obj: any, mName = "data", mPretty = true) => {
   var link = document.createElement("a");
   link.setAttribute("href", url);
   link.setAttribute("download", `${mName}.json`);
-  var event = document.createEvent("MouseEvents");
-  event.initMouseEvent(
-    "click",
-    true,
-    true,
-    window,
-    1,
-    0,
-    0,
-    0,
-    0,
-    false,
-    false,
-    false,
-    false,
-    0,
-    null
-  );
+  var event = new MouseEvent("click", {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  });
   link.dispatchEvent(event);
 };
 
