@@ -41,24 +41,14 @@ importers:
         specifier: ^5.0.0
         version: 5.8.3
 
-  apps/cli-app:
-    dependencies:
-      '@experiments2/utils':
-        specifier: workspace:*
-        version: link:../../libs/utils
-    devDependencies:
-      '@types/node':
-        specifier: ^20.0.0
-        version: 20.19.8
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
-
   apps/web-app:
     dependencies:
       '@experiments2/alfrid':
         specifier: workspace:*
         version: link:../../libs/alfrid
+      '@experiments2/asset-loader':
+        specifier: workspace:*
+        version: link:../../libs/asset-loader
       '@experiments2/utils':
         specifier: workspace:*
         version: link:../../libs/utils
@@ -77,6 +67,12 @@ importers:
         version: 1.2.3(vite@5.4.19)
 
   libs/alfrid: {}
+
+  libs/asset-loader:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
 
   libs/utils:
     devDependencies:

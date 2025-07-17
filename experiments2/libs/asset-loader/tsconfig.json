@@ -4,22 +4,15 @@
     "module": "commonjs",
     "lib": ["ES2020", "DOM"],
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "@experiments2/utils": ["../../libs/utils/index.ts"],
-      "gl-matrix": ["../../node_modules/gl-matrix"],
-      "scheduling": ["../../node_modules/scheduling"],
-      "object-assign": ["../../node_modules/object-assign"]
-    }
+    "sourceMap": true
   },
-  "include": ["src/**/*"],
+  "include": ["*.ts"],
   "exclude": ["node_modules", "dist"]
 }

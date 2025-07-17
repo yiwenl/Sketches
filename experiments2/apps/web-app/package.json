@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@experiments2/alfrid": "workspace:*",
+    "@experiments2/asset-loader": "workspace:*",
     "@experiments2/utils": "workspace:*"
   },
   "devDependencies": {
