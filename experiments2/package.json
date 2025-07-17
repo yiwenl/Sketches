@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A monorepo with pnpm workspaces",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "pnpm -r run dev",
     "build": "pnpm -r run build",
@@ -18,10 +19,12 @@
     "scheduling": "^1.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "@types/gl-matrix": "^2.4.5",
     "@types/node": "^20.0.0",
     "@types/object-assign": "^4.0.33",
-    "eslint": "^8.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
     "prettier": "^3.0.0",
     "typescript": "^5.0.0"
   },

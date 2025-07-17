@@ -47,7 +47,7 @@ function init() {
 function initGui() {
   gui = new GUI();
   gui.title("Experiment Controls");
-  const { refresh, reset } = Settings;
+  const { refresh } = Settings;
 
   gui.addColor(Config, "background").onChange(refresh);
   gui.add(Settings, "saveConfig").name("Save Config");
