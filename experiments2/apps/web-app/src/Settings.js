@@ -1,4 +1,5 @@
 import Config from "./Config";
+import { saveJson } from "@experiments2/utils";
 
 export default class Settings {
   static init() {
@@ -32,5 +33,9 @@ export default class Settings {
 
   static reset() {
     window.location.href = window.location.origin + window.location.pathname;
+  }
+
+  static saveConfig() {
+    saveJson(Config, "config");
   }
 }

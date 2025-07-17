@@ -50,6 +50,7 @@ function initGui() {
   const { refresh, reset } = Settings;
 
   gui.addColor(Config, "background").onChange(refresh);
+  gui.add(Settings, "saveConfig").name("Save Config");
   gui.add(Settings, "reset").name("Reset Defaults");
 }
 

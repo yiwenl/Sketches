@@ -1,3 +1,6 @@
+import { saveJson } from "./saveJson";
+export { saveJson };
+
 export const random = (min?: number, max?: number): number => {
   if (min === undefined) {
     return Math.random();
