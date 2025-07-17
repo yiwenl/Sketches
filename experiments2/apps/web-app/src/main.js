@@ -1,5 +1,5 @@
-import { GL } from "@experiments2/alfrid";
-import { addCapture } from "@experiments2/utils";
+import { GL } from "@alfrid";
+import { addCapture } from "@utils";
 
 import Assets from "./Assets";
 import Settings from "./Settings";

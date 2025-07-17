@@ -18,8 +18,8 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@experiments2/utils": ["../../libs/utils/index.ts"],
-      "@experiments2/alfrid": ["../../libs/alfrid/index.js"],
+      "@utils": ["../../libs/utils/index.ts"],
+      "@alfrid": ["../../libs/alfrid/index.js"],
       "gl-matrix": ["../../node_modules/gl-matrix"],
       "scheduling": ["../../node_modules/scheduling"],
       "object-assign": ["../../node_modules/object-assign"]

@@ -1,5 +1,5 @@
 {
-  "name": "@experiments2/asset-loader",
+  "name": "@asset-loader",
   "version": "1.0.0",
   "description": "Asset loading utilities for experiments2",
   "main": "dist/index.js",

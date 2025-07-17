@@ -80,7 +80,7 @@ Each package has its own scripts:
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@experiments2/utils": "workspace:*"
+    "@utils": "workspace:*"
   }
 }
 ```

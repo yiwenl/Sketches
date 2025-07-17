@@ -12,9 +12,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@experiments2/alfrid": "workspace:*",
-    "@experiments2/asset-loader": "workspace:*",
-    "@experiments2/utils": "workspace:*",
+    "@alfrid": "workspace:*",
+    "@asset-loader": "workspace:*",
+    "@utils": "workspace:*",
     "lil-gui": "^0.19.1",
     "stats.js": "^0.17.0"
   },

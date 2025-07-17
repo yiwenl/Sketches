@@ -1,5 +1,5 @@
 {
-  "name": "@experiments2/utils",
+  "name": "@utils",
   "version": "1.0.0",
   "description": "Common utilities for experiments2",
   "main": "dist/index.js",

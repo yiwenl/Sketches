@@ -1,5 +1,5 @@
 {
-  "name": "@experiments2/alfrid",
+  "name": "@alfrid",
   "version": "1.0.0",
   "description": "Alfrid WebGL library",
   "type": "module",

@@ -1,5 +1,5 @@
-import { GLTexture, parseObj } from "@experiments2/alfrid";
-import AssetManager from "@experiments2/asset-loader";
+import { GLTexture, parseObj } from "@alfrid";
+import AssetManager from "@asset-loader";
 import assetsList from "./assets-list";
 
 export default class Assets {

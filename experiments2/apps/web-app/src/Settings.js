@@ -1,5 +1,5 @@
 import Config from "./Config";
-import { saveJson } from "@experiments2/utils";
+import { saveJson } from "@utils";
 
 export default class Settings {
   static init() {

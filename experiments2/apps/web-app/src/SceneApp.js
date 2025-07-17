@@ -1,4 +1,4 @@
-import { GL, Scene, DrawAxis, DrawCopy, DrawBall } from "@experiments2/alfrid";
+import { GL, Scene, DrawAxis, DrawCopy, DrawBall } from "@alfrid";
 import Config from "./Config";
 import {
   TargetSizeStrategy,

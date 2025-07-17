@@ -16,12 +16,9 @@ export default defineConfig({
   resolve: {
     extensions: [".ts", ".js", ".json"],
     alias: {
-      "@experiments2/utils": resolve(__dirname, "../../libs/utils/index.ts"),
-      "@experiments2/alfrid": resolve(__dirname, "../../libs/alfrid/index.js"),
-      "@experiments2/asset-loader": resolve(
-        __dirname,
-        "../../libs/asset-loader/index.ts"
-      ),
+      "@utils": resolve(__dirname, "../../libs/utils/index.ts"),
+      "@alfrid": resolve(__dirname, "../../libs/alfrid/index.js"),
+      "@asset-loader": resolve(__dirname, "../../libs/asset-loader/index.ts"),
       "gl-matrix": resolve(__dirname, "../../node_modules/gl-matrix"),
       scheduling: resolve(__dirname, "../../node_modules/scheduling"),
       "object-assign": resolve(__dirname, "../../node_modules/object-assign"),

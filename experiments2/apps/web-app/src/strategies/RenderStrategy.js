@@ -1,5 +1,5 @@
-import { GL } from "@experiments2/alfrid";
-import { resize, addFullscreenToggle } from "@experiments2/utils";
+import { GL } from "@alfrid";
+import { resize, addFullscreenToggle } from "@utils";
 import { targetWidth, targetHeight, pixelRatio } from "../features";
 import Config from "../Config";
 
