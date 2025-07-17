@@ -10,7 +10,6 @@ const _resize = (
   margin: number = 0
 ) => {
   const { innerWidth, innerHeight } = window;
-  console.log("resize", innerWidth, innerHeight, margin);
 
   w = w || innerWidth;
   h = h || innerHeight;
@@ -45,12 +44,6 @@ const _resize = (
   canvas.style.cssText = style;
 };
 
-export const resizeUpdate = () => {
-  if (_canvas) {
-    _resize(_canvas, _w, _h);
-  }
-};
-
 export const resize = (
   canvas: HTMLCanvasElement,
   w: number,
@@ -65,6 +58,8 @@ export const resize = (
   _w = w;
   _h = h;
   _margin = margin;
-  window.addEventListener("resize", resizeUpdate);
+  window.addEventListener("resize", () => {
+    _resize(canvas, w, h, margin);
+  });
   _resize(canvas, w, h, margin);
 };
