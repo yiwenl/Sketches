@@ -1,6 +1,5 @@
 export const addFullscreenToggle = (id = "main-canvas") => {
   const canvas = document.getElementById(id);
-  console.log(canvas);
   if (!canvas) return;
 
   function toggleFullScreen() {

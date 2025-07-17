@@ -13,6 +13,9 @@ import Assets from "./Assets";
 import Config from "./Config";
 import Settings from "./Settings";
 
+const isDev = process.env.NODE_ENV === "development";
+console.log("isDev", isDev);
+
 let camera, control, dAxis, dCopy, gui;
 const pixelRatio = 2;
 
