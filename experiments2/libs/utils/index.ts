@@ -1,7 +1,8 @@
 import { saveJson } from "./saveJson";
 import { addFullscreenToggle } from "./fullscreen";
 import { addCapture } from "./capture";
-export { saveJson, addFullscreenToggle, addCapture };
+import { resize } from "./resize";
+export { saveJson, addFullscreenToggle, addCapture, resize };
 
 export const random = (min?: number, max?: number): number => {
   if (min === undefined) {
