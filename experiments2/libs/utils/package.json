@@ -1,0 +1,15 @@
+{
+  "name": "@experiments2/utils",
+  "version": "1.0.0",
+  "description": "Common utilities for experiments2",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

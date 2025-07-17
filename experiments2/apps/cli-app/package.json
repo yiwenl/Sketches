@@ -1,0 +1,23 @@
+{
+  "name": "@experiments2/cli-app",
+  "version": "1.0.0",
+  "description": "CLI application",
+  "main": "dist/index.js",
+  "bin": {
+    "cli-app": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "test": "echo \"No tests specified\"",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@experiments2/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
