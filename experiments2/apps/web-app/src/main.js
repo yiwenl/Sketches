@@ -13,6 +13,7 @@ import Config from "./Config";
 import Settings from "./Settings";
 
 const isDev = process.env.NODE_ENV === "development";
+const keepGui = isDev;
 
 let camera, control, dAxis, dCopy, gui;
 const pixelRatio = 2;
@@ -51,8 +52,10 @@ function init() {
 }
 
 function initGui() {
-  if (isDev) {
+  if (keepGui) {
     import("./development/init-gui");
+  }
+  if (isDev) {
     import("./development/stats");
   }
 }
