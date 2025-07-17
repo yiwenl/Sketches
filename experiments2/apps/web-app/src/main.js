@@ -5,7 +5,7 @@ import {
   CameraPerspective,
   OrbitalControl,
 } from "@experiments2/alfrid";
-import { random } from "@experiments2/utils";
+import { random, addFullscreenToggle } from "@experiments2/utils";
 import GUI from "lil-gui";
 
 import Scheduler from "scheduling";
@@ -40,6 +40,8 @@ function init() {
   control.ry.value = -0.5;
 
   initGui();
+
+  addFullscreenToggle();
 
   Scheduler.addEF(loop);
 }
