@@ -5,7 +5,7 @@ import {
   CameraPerspective,
   OrbitalControl,
 } from "@experiments2/alfrid";
-import { random, addFullscreenToggle } from "@experiments2/utils";
+import { random, addFullscreenToggle, addCapture } from "@experiments2/utils";
 import GUI from "lil-gui";
 
 import Scheduler from "scheduling";
@@ -21,11 +21,13 @@ Settings.init();
 Assets.load().then(init);
 
 function init() {
-  GL.init();
+  const canvas = document.createElement("canvas");
+  canvas.id = "main-canvas";
+  document.body.appendChild(canvas);
+
+  GL.init(canvas, { alpha: false, preserveDrawingBuffer: true });
 
   GL.setSize(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio);
-  document.body.appendChild(GL.canvas);
-  GL.canvas.id = "main-canvas";
 
   GL.clear(random(), random(), random(), 1);
   dAxis = new DrawAxis();
@@ -42,6 +44,7 @@ function init() {
   initGui();
 
   addFullscreenToggle();
+  addCapture();
 
   Scheduler.addEF(loop);
 }
