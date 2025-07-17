@@ -15,6 +15,9 @@ importers:
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.3
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
       object-assign:
         specifier: ^4.1.1
         version: 4.1.1
@@ -52,6 +55,9 @@ importers:
       '@experiments2/utils':
         specifier: workspace:*
         version: link:../../libs/utils
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -989,6 +995,10 @@ packages:
       prelude-ls: 1.2.1
       type-check: 0.4.0
     dev: true
+
+  /lil-gui@0.19.2:
+    resolution: {integrity: sha512-nU8j4ND702ouGfQZoaTN4dfXxacvGOAVK0DtmZBVcUYUAeYQXLQAjAN50igMHiba3T5jZyKEjXZU+Ntm1Qs6ZQ==}
+    dev: false
 
   /locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}

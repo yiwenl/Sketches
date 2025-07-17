@@ -14,7 +14,8 @@
   "dependencies": {
     "@experiments2/alfrid": "workspace:*",
     "@experiments2/asset-loader": "workspace:*",
-    "@experiments2/utils": "workspace:*"
+    "@experiments2/utils": "workspace:*",
+    "lil-gui": "^0.19.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

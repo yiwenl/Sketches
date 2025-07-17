@@ -2,7 +2,7 @@ import { GLTexture, parseObj } from "@experiments2/alfrid";
 import AssetManager from "@experiments2/asset-loader";
 import assetsList from "./assets-list";
 
-export class Assets {
+export default class Assets {
   static _loadedAssets = [];
 
   static async load() {

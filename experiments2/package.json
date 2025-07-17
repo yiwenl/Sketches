@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "gl-matrix": "^3.4.3",
+    "lil-gui": "^0.19.1",
     "object-assign": "^4.1.1",
     "scheduling": "^1.0.0"
   },

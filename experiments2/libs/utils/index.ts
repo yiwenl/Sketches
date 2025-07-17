@@ -79,3 +79,5 @@ export const smootherstep = (min: number, max: number, value: number) => {
   const x = Math.max(0, Math.min(1, (value - min) / (max - min)));
   return x * x * x * (x * (x * 6 - 15) + 10);
 };
+
+export const toGlsl = (v: number) => v / 255;

@@ -6,24 +6,23 @@ import {
   OrbitalControl,
 } from "@experiments2/alfrid";
 import { random } from "@experiments2/utils";
+import GUI from "lil-gui";
 
 import Scheduler from "scheduling";
+import Assets from "./Assets";
+import Config from "./Config";
+import Settings from "./Settings";
 
-import { Assets } from "./Assets";
+let camera, control, dAxis, dCopy, gui;
+const pixelRatio = 2;
 
-let camera, control, dAxis, dCopy;
+Settings.init();
 
-Assets.load().then(() => {
-  console.log(Assets.get("test"));
-  console.log(Assets.get("model"));
-
-  init();
-});
+Assets.load().then(init);
 
 function init() {
   GL.init();
 
-  const pixelRatio = 2;
   GL.setSize(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio);
   document.body.appendChild(GL.canvas);
   GL.canvas.id = "main-canvas";
@@ -40,12 +39,24 @@ function init() {
   control.rx.value = -0.5;
   control.ry.value = -0.5;
 
+  initGui();
+
   Scheduler.addEF(loop);
+}
+
+function initGui() {
+  gui = new GUI();
+  gui.title("Experiment Controls");
+  const { refresh, reset } = Settings;
+
+  gui.addColor(Config, "background").onChange(refresh);
+  gui.add(Settings, "reset").name("Reset Defaults");
 }
 
 function loop() {
   GL.viewport(0, 0, GL.width, GL.height);
-  GL.clear(0, 0, 0, 1);
+  const bg = Config.background;
+  GL.clear(...bg, 1);
   GL.setMatrices(camera);
   dAxis.draw();
 
