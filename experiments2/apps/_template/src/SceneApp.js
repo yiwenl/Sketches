@@ -5,9 +5,15 @@ import {
   FullscreenStrategy,
 } from "./strategies/RenderStrategy";
 
+import vsWen from "./shaders/wen.vert";
+import fsWen from "./shaders/wen.frag";
+
 export default class SceneApp extends Scene {
   constructor() {
     super();
+
+    console.log(vsWen);
+    console.log(fsWen);
 
     // Choose strategy based on configuration
     this.renderStrategy = Config.useTargetSize

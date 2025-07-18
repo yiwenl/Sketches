@@ -4,7 +4,8 @@
   "description": "Web application",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite & pnpm shaders",
+    "shaders": "node scripts/shader-watcher.js",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "echo \"No tests specified\"",
@@ -22,6 +23,7 @@
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0",
-    "vite-plugin-string": "^1.2.3"
+    "vite-plugin-string": "^1.2.3",
+    "chokidar": "^4.0.3"
   }
 }
