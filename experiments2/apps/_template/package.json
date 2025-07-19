@@ -4,8 +4,9 @@
   "description": "Web application",
   "type": "module",
   "scripts": {
-    "dev": "vite & pnpm shaders",
+    "dev": "vite & pnpm shaders & pnpm assets",
     "shaders": "node scripts/shader-watcher.js",
+    "assets": "node scripts/watch-asset.js",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "echo \"No tests specified\"",
@@ -24,6 +25,7 @@
     "typescript": "^5.0.0",
     "vite": "^5.0.0",
     "vite-plugin-string": "^1.2.3",
+    "fs-extra": "^11.3.0",
     "chokidar": "^4.0.3"
   }
 }

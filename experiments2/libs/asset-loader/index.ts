@@ -39,7 +39,14 @@ export class AssetManager {
 
   private static async loadAsset(asset: Asset) {
     switch (asset.type) {
-      case "image":
+      case "png":
+      case "jpg":
+      case "jpeg":
+      case "gif":
+      case "svg":
+      case "webp":
+      case "ico":
+      case "bmp":
         return this.loadImage(asset.url, asset.id);
       case "text":
         return this.loadText(asset.url, asset.id);

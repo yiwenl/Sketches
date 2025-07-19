@@ -27,6 +27,7 @@
     "@types/object-assign": "^4.0.33",
     "chokidar": "^4.0.3",
     "eslint": "^9.0.0",
+    "fs-extra": "^11.3.0",
     "globals": "^15.0.0",
     "prettier": "^3.0.0",
     "typescript": "^5.0.0"

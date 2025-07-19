@@ -11,7 +11,14 @@ export default class Assets {
     this._loadedAssets.forEach((asset) => {
       const { type, source } = asset;
       switch (type) {
-        case "image":
+        case "png":
+        case "jpg":
+        case "jpeg":
+        case "gif":
+        case "svg":
+        case "webp":
+        case "ico":
+        case "bmp":
           asset.data = new GLTexture(source);
           break;
         case "text":

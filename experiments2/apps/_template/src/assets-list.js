@@ -1,4 +1,7 @@
-export default [
-  { id: "test", url: "test.png", type: "image" },
-  { id: "model", url: "model.obj", type: "text" },
+
+const assetsToLoad = [
+	{"id":"test","url":"assets/test.png","type":"png"}
 ];
+
+
+export default assetsToLoad;
