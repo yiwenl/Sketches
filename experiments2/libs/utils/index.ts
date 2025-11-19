@@ -2,7 +2,12 @@ import { saveJson } from "./saveJson";
 import { addFullscreenToggle } from "./fullscreen";
 import { addCapture } from "./capture";
 import { resize } from "./resize";
+import { mat4 } from "gl-matrix";
 export { saveJson, addFullscreenToggle, addCapture, resize };
+
+export const iOS =
+  navigator.userAgent.includes("iPhone") ||
+  navigator.userAgent.includes("iPad");
 
 export const random = (min?: number, max?: number): number => {
   if (min === undefined) {
@@ -12,7 +17,7 @@ export const random = (min?: number, max?: number): number => {
     return Math.random() * min;
   }
 
-  return Math.random() * (max - min + 1) + min;
+  return Math.random() * (max - min) + min;
 };
 
 export const randomGaussian = (a?: number, b?: number, l = 5) => {
@@ -87,3 +92,22 @@ export const smootherstep = (min: number, max: number, value: number) => {
 };
 
 export const toGlsl = (v: number) => v / 255;
+
+export const biasMatrix = mat4.fromValues(
+  0.5,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.5,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.5,
+  0.0,
+  0.5,
+  0.5,
+  0.5,
+  1.0
+);
