@@ -1,0 +1,15 @@
+{
+  "name": "@utils",
+  "version": "1.0.0",
+  "description": "Common utilities for experiments2",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

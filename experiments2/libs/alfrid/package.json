@@ -1,0 +1,20 @@
+{
+  "name": "@alfrid",
+  "version": "1.0.0",
+  "description": "Alfrid WebGL library",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "camera/",
+    "core/",
+    "helper/",
+    "loader/",
+    "math/",
+    "shader/",
+    "utils/"
+  ]
+}
