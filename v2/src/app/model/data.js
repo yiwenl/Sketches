@@ -359,6 +359,11 @@ export default [
     url: "//yiwenl.github.io/Sketches/experiments/orbit01/dist/index.html",
     title: "Multi-body Chaos",
   },
+  {
+    cover: "assets/img/coverSketchThoughts.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/ribbon02/dist/index.html",
+    title: "Thoughts",
+  },
   // {
   //   cover: "assets/img/coverSketchribbon.jpg",
   //   url: "//yiwenl.github.io/Sketches/experiments/ribbon02/dist/index.html",
