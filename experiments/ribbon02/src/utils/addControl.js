@@ -21,7 +21,7 @@ export default (scene) => {
     .onFinishChange(reload);
 
   // gui.add(Config, "extreme").onChange(refresh);
-  gui.add(Config, "usePoseDetection").onChange(reload);
+  // Pose detection removed as per refactoring
   gui.add(Settings, "reset").name("Reset Default Settings");
 
   // dat.GUI.toggleHide();

@@ -23,6 +23,7 @@ out vec3 vNormal;
 out vec3 vColor;
 out vec4 vShadowCoord;
 out float vSkip;
+out float vDist;
 
 // #pragma glslify: curlNoise    = require(./glsl-utils/curlNoise.glsl)
 #pragma glslify: rotate    = require(./glsl-utils/rotate.glsl)
@@ -46,11 +47,16 @@ void main(void) {
     vSkip = 0.0;
 
     vec3 pos = aVertexPosition * vec3(0.0, 1.0, 1.0);
-    pos.yz *= mix(0.5, 1.0, aExtra.x) ;
+    pos.yz *= mix(0.5, 2.0, aExtra.x) ;
 
     float index = aVertexPosition.x;
     vec3 curr = getPos(index, uv);
     vec3 next = getPos(index + 1.0, uv);
+    vDist = distance(curr, next);
+
+    if(vDist > 0.1) {
+        vSkip = 1.0;
+    }
 
 
     vec3 dir = normalize(next - curr);
@@ -71,6 +77,7 @@ void main(void) {
 
     vTextureCoord = aTextureCoord;
     vNormal = n;
+
 
     float g = mix(.8, 1.0, aExtra.y);
     vColor = vec3(1.0) * g;

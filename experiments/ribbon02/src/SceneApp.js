@@ -34,12 +34,10 @@ import generateAOMap from "./generateAOMap";
 import generateBlueNoise from "./generateBlueNoise";
 import applyBlur from "./applyBlur";
 
-// pose detection
-import PoseDetection, { POSE_FOUND, POSE_LOST } from "./PoseDetection";
+
 
 // fluid simulation
 import FluidSimulation from "./fluid-sim";
-import TrackPoint2D from "./TrackPoint2D";
 import TrackPoint3D from "./TrackPoint3D";
 
 const bound = 8;
@@ -49,7 +47,7 @@ class SceneApp extends Scene {
     super();
 
     const minRadius = 8;
-    this.orbitalControl.radius.value = Config.usePoseDetection ? minRadius : 10;
+    this.orbitalControl.radius.value = 10;
     this.orbitalControl.radius.limit(minRadius, 11);
     this.orbitalControl.rx.limit(0.2, -1.0);
 
@@ -66,57 +64,23 @@ class SceneApp extends Scene {
     this._fboPos.unbind();
 
     // fluid
-    const DISSIPATION = 0.98;
+    const DISSIPATION = 0.985;
     this._fluid = new FluidSimulation({
       DENSITY_DISSIPATION: DISSIPATION,
       VELOCITY_DISSIPATION: DISSIPATION,
       PRESSURE_DISSIPATION: DISSIPATION,
     });
 
-    // pose detection
-    if (Config.usePoseDetection) {
-      this._initPoseDetection();
-    }
+
   }
 
-  _initPoseDetection() {
-    const ratio = GL.aspectRatio;
-    this._trackedPoints = [
-      new TrackPoint2D(),
-      new TrackPoint2D(),
-      new TrackPoint2D(),
-    ];
 
-    this._poseDetection = new PoseDetection();
-    this._poseDetection.on(POSE_FOUND, (o) => {
-      o.forEach((p, i) => {
-        if (p.score > 0.4 && i > 0) {
-          this._trackedPoints[i].update(p.pos);
-          const { pos, dir, speed } = this._trackedPoints[i];
-          let f = smoothstep(0.01, 0.1, speed);
-          const adjPos = [pos[0], pos[1]];
-          adjPos[0] = (adjPos[0] - 0.5) / ratio + 0.5;
-          this._fluid.updateFlow(adjPos, dir, mix(2, 6, f), mix(2, 4, f), 1);
-        }
-      });
-
-      const { canvas, video } = this._poseDetection;
-      if (!canvas.classList.contains("ready")) {
-        canvas.classList.add("ready");
-        video.classList.add("ready");
-      }
-    });
-
-    this._poseDetection.on(POSE_LOST, () => {
-      this._trackedPoints.forEach((p) => p.reset());
-    });
-  }
 
   _init() {
     this.resize();
 
     // camera settings
-    const FOV = Config.usePoseDetection ? 70 : 80;
+    const FOV = 80;
     this.camera.setPerspective(FOV * RAD, GL.aspectRatio, 2, 20);
     this._index = 0;
 
@@ -175,7 +139,7 @@ class SceneApp extends Scene {
 
   _initTextures() {
     this._texturePaper = generatePaperTexture();
-    this._textureLookup = Assets.get("lookup");
+    this._textureLookup = Assets.get("lookupFuji");
     this._textureLookup.minFilter = GL.NEAREST;
     this._textureLookup.magFilter = GL.NEAREST;
 
@@ -223,6 +187,7 @@ class SceneApp extends Scene {
   }
 
   update() {
+    this.orbitalControl.ry.value += 0.02;
     this._fluid.update();
 
     // update particles
@@ -270,7 +235,7 @@ class SceneApp extends Scene {
       .uniform("uTime", Scheduler.getElapsedTime() + this._seedTime)
       .uniform("uBound", bound)
       .uniform("uStrength", Config.extreme ? 10 : 1)
-      .uniform("uMaxRadius", Config.usePoseDetection ? 8 : 8)
+      .uniform("uMaxRadius", 8)
       .draw();
 
     this._fboPos.bind();

@@ -54,13 +54,13 @@ void main(void) {
     f = 0.25;
     float s = 0.75;
     vec3 posAdj = pos * vec3(s, 1.0, s);
-    float maxRadius = mix(4.0, 2.0, extra.z);
+    float maxRadius = mix(3.0, 2.0, extra.z);
     float d = distance(posAdj, uCenter);
 
     // pulling force
     dir = -normalize(posAdj - uCenter);
     f = smoothstep(maxRadius - 1.0, maxRadius, d);
-    acc += dir * f * 2.0;
+    acc += dir * f * 5.0;
 
     if(pos.y < minY) {
         acc.y += (minY - pos.y) * 0.1;
