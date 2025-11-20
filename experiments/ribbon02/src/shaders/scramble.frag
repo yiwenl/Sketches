@@ -31,7 +31,7 @@ vec2 _normalize(vec2 v) {
 
 void main(void) {
     vec3 pos = texture(uPosMap, vTextureCoord).xyz;
-    vec3 noise = curlNoise(pos * 0.5 + uTime * 0.15);
+    vec3 noise = curlNoise(pos * 0.25 + uTime * 0.15);
     pos += noise * 0.002;
 
     // fluid

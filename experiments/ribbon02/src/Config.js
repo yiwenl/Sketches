@@ -4,7 +4,7 @@ export default {
   extreme: true,
   autoSave: false,
   useHandDetection: false,
-  usePoseDetection: false,
+
   showThumbnail: false,
   margin: 100,
   thumbnailSize: 256,

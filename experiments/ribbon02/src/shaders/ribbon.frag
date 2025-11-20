@@ -6,6 +6,7 @@ in vec3 vNormal;
 in vec3 vColor;
 in vec4 vShadowCoord;
 in float vSkip;
+in float vDist;
 
 uniform sampler2D uDepthMap;
 uniform vec3 uLight;
@@ -35,7 +36,7 @@ float samplePCF3x3( vec4 sc )
 }
 
 void main(void) {
-    if(vSkip > 0.5) discard;
+    // if(vSkip > 0.5) discard;
     // shadow
     vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
 	float s             = samplePCF3x3(shadowCoord);
@@ -47,4 +48,8 @@ void main(void) {
 
 
     oColor = vec4(color, 1.0);
+    float g = smoothstep(0.2, 0.1, vDist);
+    if(vSkip > 0.5) oColor *= vec4(.8, g, g, 1.0);
+
+    if(vDist > 0.5) discard;
 }

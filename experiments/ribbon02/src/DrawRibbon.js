@@ -44,7 +44,7 @@ export default class DrawRibbon extends Draw {
 
     const totalSets = numSets * numSets;
 
-    for (let i = 0; i < totalSets - 1; i++) {
+    for (let i = 0; i < totalSets - 2; i++) {
       for (let j = 0; j < numSides; j++) {
         addVertex(i, j);
         addVertex(i + 1, j);
