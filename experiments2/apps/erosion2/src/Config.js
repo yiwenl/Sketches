@@ -1,0 +1,18 @@
+export default {
+  numDroplets: 128,
+  splatScale: 1.2996,
+  minSlope: 0.04632,
+  showDroplets: false,
+  showErosion: false,
+  useSimulation: true,
+  noiseStrength: 0.5,
+  useTargetSize: false,
+  autoSave: false,
+  margin: 100,
+  background: [0.086, 0.086, 0.086],
+  gravity: 6,
+  inertia: 0.05,
+  evaporationRate: 1,
+  erosionRate: 0.0262,
+  depositionRate: 5,
+};
