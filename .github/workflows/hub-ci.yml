@@ -5,10 +5,12 @@ on:
     paths:
       - "hub/**"
       - ".github/workflows/hub-ci.yml"
+      - ".github/dependabot.yml"
   push:
     paths:
       - "hub/**"
       - ".github/workflows/hub-ci.yml"
+      - ".github/dependabot.yml"
   workflow_dispatch:
 
 defaults:
