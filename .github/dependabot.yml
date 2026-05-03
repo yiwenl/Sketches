@@ -1,0 +1,9 @@
+# Dependabot only runs for directories listed below. Omit experiments/ to avoid
+# noise on legacy sketches. Add "/experiments2/..." entries if you want updates there.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/hub"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
