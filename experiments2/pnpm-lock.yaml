@@ -83,6 +83,234 @@ importers:
       chokidar:
         specifier: ^4.0.3
         version: 4.0.3
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^5.0.0
+        version: 5.4.19(@types/node@20.19.8)
+      vite-plugin-string:
+        specifier: ^1.2.3
+        version: 1.2.3(vite@5.4.19)
+
+  apps/disorder:
+    dependencies:
+      '@alfrid':
+        specifier: workspace:*
+        version: link:../../libs/alfrid
+      '@asset-loader':
+        specifier: workspace:*
+        version: link:../../libs/asset-loader
+      '@utils':
+        specifier: workspace:*
+        version: link:../../libs/utils
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
+      stats.js:
+        specifier: ^0.17.0
+        version: 0.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.8
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^5.0.0
+        version: 5.4.19(@types/node@20.19.8)
+      vite-plugin-string:
+        specifier: ^1.2.3
+        version: 1.2.3(vite@5.4.19)
+
+  apps/erosion:
+    dependencies:
+      '@alfrid':
+        specifier: workspace:*
+        version: link:../../libs/alfrid
+      '@asset-loader':
+        specifier: workspace:*
+        version: link:../../libs/asset-loader
+      '@utils':
+        specifier: workspace:*
+        version: link:../../libs/utils
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
+      stats.js:
+        specifier: ^0.17.0
+        version: 0.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.8
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^5.0.0
+        version: 5.4.19(@types/node@20.19.8)
+      vite-plugin-string:
+        specifier: ^1.2.3
+        version: 1.2.3(vite@5.4.19)
+
+  apps/erosion2:
+    dependencies:
+      '@alfrid':
+        specifier: workspace:*
+        version: link:../../libs/alfrid
+      '@asset-loader':
+        specifier: workspace:*
+        version: link:../../libs/asset-loader
+      '@utils':
+        specifier: workspace:*
+        version: link:../../libs/utils
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
+      stats.js:
+        specifier: ^0.17.0
+        version: 0.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.8
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^5.0.0
+        version: 5.4.19(@types/node@20.19.8)
+      vite-plugin-string:
+        specifier: ^1.2.3
+        version: 1.2.3(vite@5.4.19)
+
+  apps/erosion3:
+    dependencies:
+      '@alfrid':
+        specifier: workspace:*
+        version: link:../../libs/alfrid
+      '@asset-loader':
+        specifier: workspace:*
+        version: link:../../libs/asset-loader
+      '@utils':
+        specifier: workspace:*
+        version: link:../../libs/utils
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
+      simplex-noise:
+        specifier: ^4.0.3
+        version: 4.0.3
+      stats.js:
+        specifier: ^0.17.0
+        version: 0.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.8
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^5.0.0
+        version: 5.4.19(@types/node@20.19.8)
+      vite-plugin-string:
+        specifier: ^1.2.3
+        version: 1.2.3(vite@5.4.19)
+
+  apps/flowingWires:
+    dependencies:
+      '@alfrid':
+        specifier: workspace:*
+        version: link:../../libs/alfrid
+      '@asset-loader':
+        specifier: workspace:*
+        version: link:../../libs/asset-loader
+      '@utils':
+        specifier: workspace:*
+        version: link:../../libs/utils
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
+      stats.js:
+        specifier: ^0.17.0
+        version: 0.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.8
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^5.0.0
+        version: 5.4.19(@types/node@20.19.8)
+      vite-plugin-string:
+        specifier: ^1.2.3
+        version: 1.2.3(vite@5.4.19)
+
+  apps/frontGarden:
+    dependencies:
+      '@alfrid':
+        specifier: workspace:*
+        version: link:../../libs/alfrid
+      '@asset-loader':
+        specifier: workspace:*
+        version: link:../../libs/asset-loader
+      '@utils':
+        specifier: workspace:*
+        version: link:../../libs/utils
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
+      stats.js:
+        specifier: ^0.17.0
+        version: 0.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.8
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -114,6 +342,12 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.8
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      fs-extra:
+        specifier: ^11.3.0
+        version: 11.3.0
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -1222,6 +1456,10 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
     dev: true
+
+  /simplex-noise@4.0.3:
+    resolution: {integrity: sha512-qSE2I4AngLQG7BXqoZj51jokT4WUXe8mOBrvfOXpci8+6Yu44+/dD5zqDpOx3Ux792eamTd2lLcI8jqFntk/lg==}
+    dev: false
 
   /source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}

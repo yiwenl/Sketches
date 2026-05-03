@@ -26,6 +26,8 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: false,
+    strictPort: false, // Automatically try next available port if 3000 is in use
+    host: true, // Allow access from network (0.0.0.0)
+    open: true,
   },
 });
