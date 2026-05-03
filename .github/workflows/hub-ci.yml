@@ -1,0 +1,34 @@
+name: Hub CI
+
+on:
+  pull_request:
+    paths:
+      - "hub/**"
+      - ".github/workflows/hub-ci.yml"
+  push:
+    paths:
+      - "hub/**"
+      - ".github/workflows/hub-ci.yml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: hub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: hub/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Production build
+        run: npm run build

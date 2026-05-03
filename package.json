@@ -1,0 +1,9 @@
+{
+  "name": "sketches-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix hub",
+    "build": "npm run build --prefix hub",
+    "lint": "npm run lint --prefix hub"
+  }
+}
