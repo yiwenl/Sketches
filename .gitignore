@@ -1,5 +1,23 @@
 node_modules
 .DS_Store
+
+# Next hub build output
+hub/out
+hub/.next
+_site
+
+# Legacy: hub static export copied to repo root (no longer committed)
+/_next/
+/exps/
+/index.html
+/index.txt
+/404.html
+/about.html
+/about.txt
+/favicon.ico
+/.nojekyll
+/coverSketches.jpg
+/assets/
 .sass-cache
 build
 experiments/TextureProj/npm-debug.log
