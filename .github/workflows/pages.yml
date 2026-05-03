@@ -32,12 +32,13 @@ jobs:
         working-directory: hub
         run: npm ci && npm run build
 
-      # Pages must serve both the Next export and committed experiment builds (same as old root deploy).
+      # Pages must serve the Next export plus committed experiment builds under experiments/ and experiments2/.
       - name: Stage site for upload
         run: |
           mkdir -p _site
           cp -R hub/out/. _site/
           cp -R experiments _site/
+          cp -R experiments2 _site/
           touch _site/.nojekyll
 
       - uses: actions/configure-pages@v5
