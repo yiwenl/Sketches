@@ -46,9 +46,9 @@ class SceneApp extends Scene {
   constructor() {
     super();
 
-    const minRadius = 8;
-    this.orbitalControl.radius.value = 10;
-    this.orbitalControl.radius.limit(minRadius, 11);
+    const minRadius = 10;
+    this.orbitalControl.radius.value = 15;
+    this.orbitalControl.radius.limit(minRadius, 20);
     this.orbitalControl.rx.limit(0.2, -1.0);
 
     const { numParticles: s, numSets: t } = Config;
@@ -71,7 +71,6 @@ class SceneApp extends Scene {
       PRESSURE_DISSIPATION: DISSIPATION,
     });
 
-
   }
 
 
@@ -80,7 +79,7 @@ class SceneApp extends Scene {
     this.resize();
 
     // camera settings
-    const FOV = 80;
+    const FOV = 60;
     this.camera.setPerspective(FOV * RAD, GL.aspectRatio, 2, 20);
     this._index = 0;
 
@@ -159,7 +158,7 @@ class SceneApp extends Scene {
     this._fboPos = new FrameBuffer(fboSize, fboSize, oSettings);
     this._fboScrambled = new FrameBuffer(fboSize, fboSize, oSettings);
 
-    this._fboRender = new FrameBuffer(GL.width, GL.height);
+    this._fboRender = new FrameBuffer(GL.width, GL.height, { type: GL.FLOAT });
 
     fboSize = 2048;
     this._fboShadow = new FrameBuffer(fboSize, fboSize, {
@@ -322,6 +321,8 @@ class SceneApp extends Scene {
       .uniform("uNear", near)
       .uniform("uFar", far)
       .draw();
+
+    // this._dCopy.draw(this._textureAO);
   }
 
   resize() {
@@ -331,10 +332,10 @@ class SceneApp extends Scene {
     this.camera?.setAspectRatio?.(GL.aspectRatio);
 
     // resize fbos
-    this._fboRender = new FrameBuffer(GL.width, GL.height);
+    this._fboRender = new FrameBuffer(GL.width, GL.height, { type: GL.FLOAT });
 
-    // console.log(GL.aspectRatio, 9 / 16);
-    console.log(GL.aspectRatio, 4 / 5);
+    console.log(GL.aspectRatio, 9 / 16);
+    // console.log(GL.aspectRatio, 4 / 5);
   }
 }
 

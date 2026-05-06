@@ -16,7 +16,7 @@ void main(void) {
     }
     uv += .5;
     vec4 color = texture(uMap, uv);
-    color.rgb *= .8;
+    color.rgb *= .7;
 
     oColor = color;
 }

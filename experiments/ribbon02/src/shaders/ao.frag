@@ -9,8 +9,8 @@ uniform vec2 uScreenSize;
 uniform float uRadius;
 
 
-#define uNear 6.0
-#define uFar 15.0
+#define uNear 2.0
+#define uFar 20.0
 
 
 const float PI = 3.141592657;

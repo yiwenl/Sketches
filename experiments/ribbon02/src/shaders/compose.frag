@@ -79,7 +79,8 @@ void main(void) {
     color = mix(color, blurredColor, blurAmount);
 
     float ao = texture(uAOMap, vTextureCoord).r;
-    ao = mix(ao, 1.0, .2);
+    ao = smoothstep(0.2, 0.8, ao);
+    // ao = mix(ao, 1.0, .2);
     
     color.rgb *= ao;
 

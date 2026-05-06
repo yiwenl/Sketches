@@ -40,12 +40,25 @@ const initScene = () => {
   canvas.id = "main-canvas";
   document.body.appendChild(canvas);
 
-  GL.init(canvas, { alpha: false, preserveDrawingBuffer: true });
+  GL.init(canvas, {
+    alpha: false,
+    preserveDrawingBuffer: true,
+    colorSpace: "display-p3",
+  });
   const { gl } = GL;
   if (`drawingBufferColorSpace` in gl) {
     gl.drawingBufferColorSpace = "display-p3";
     console.log("Drawing Buffer Color Space:", gl.drawingBufferColorSpace);
   }
+
+  // HDR in WebGL2 is typically done in an offscreen RGBA16F framebuffer,
+  // then tone-mapped into the default drawing buffer.
+  const hasHalfFloatColorBuffer = !!gl.getExtension("EXT_color_buffer_half_float");
+  const hasFloatColorBuffer = !!gl.getExtension("EXT_color_buffer_float");
+  console.log("HDR render target support:", {
+    rgba16f: hasHalfFloatColorBuffer || hasFloatColorBuffer,
+    rgba32f: hasFloatColorBuffer,
+  });
 
   scene = new Scene();
   addFullscreen();
