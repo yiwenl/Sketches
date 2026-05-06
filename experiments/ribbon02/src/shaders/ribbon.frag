@@ -40,16 +40,18 @@ void main(void) {
     // shadow
     vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
 	float s             = samplePCF3x3(shadowCoord);
-    s = mix(s, 1.0, .6);
+    s = mix(s, 1.0, .5);
 
     float d = diffuse(vNormal, uLight, .5);
+    d = pow(d, 1.5) * 1.5;
     vec3 color = vColor * d * s;
-    color = smoothstep(vec3(0.0), vec3(1.0), color) * 1.2;
+    color = smoothstep(vec3(0.0), vec3(1.0), color) * 1.25;
 
 
     oColor = vec4(color, 1.0);
-    float g = smoothstep(0.2, 0.1, vDist);
-    if(vSkip > 0.5) oColor *= vec4(.8, g, g, 1.0);
+    float redDamp = 0.8;
+    float g = smoothstep(0.2, 0.1, vDist) * redDamp;
+    if(vSkip > 0.5) oColor *= vec4(redDamp, g, g, 1.0);
 
     if(vDist > 0.5) discard;
 }

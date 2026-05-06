@@ -1,0 +1,21 @@
+{
+  "name": "particles",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
+    "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "gl-matrix": "^3.4.4",
+    "sharp": "^0.34.5",
+    "stats.js": "^0.17.0",
+    "tweakpane": "^4.0.5"
+  }
+}

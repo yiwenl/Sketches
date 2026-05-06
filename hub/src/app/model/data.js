@@ -364,9 +364,9 @@ export default [
     url: "//yiwenl.github.io/Sketches/experiments/ribbon02/dist/index.html",
     title: "Thoughts",
   },
-  // {
-  //   cover: "assets/img/coverSketchribbon.jpg",
-  //   url: "//yiwenl.github.io/Sketches/experiments/ribbon02/dist/index.html",
-  //   title: "Floating Ribbons",
-  // },
+  {
+    cover: "assets/img/coverSketchFireParticles.jpg",
+    url: "//yiwenl.github.io/Sketches/experiments/webgpu_particles/dist/index.html",
+    title: "Fire Particles",
+  },
 ];
