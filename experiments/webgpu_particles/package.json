@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-basic-ssl": "^2.1.0",
-    "vite": "^7.2.4"
+    "vite": "^7.3.2"
   },
   "dependencies": {
     "gl-matrix": "^3.4.4",
