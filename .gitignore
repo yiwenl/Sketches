@@ -19,7 +19,9 @@ _site
 /coverSketches.jpg
 /assets/
 .sass-cache
-build
+# Anchor to repo root so per-app build outputs (e.g. experiments2/apps/*/build)
+# remain tracked for GitHub Pages deployment.
+/build
 experiments/TextureProj/npm-debug.log
 illum
 experiments/inscript/src  

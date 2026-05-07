@@ -3,8 +3,10 @@ node_modules/
 .pnpm-store/
 
 # Build outputs
-dist/
-build/
+# Anchored to the experiments2 root so per-app builds (apps/*/dist, apps/*/build)
+# remain tracked — GitHub Pages serves them directly.
+/dist/
+/build/
 *.tsbuildinfo
 
 # Environment variables
@@ -67,7 +69,6 @@ jspm_packages/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Storybook build outputs
 .out

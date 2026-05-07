@@ -1,9 +1,20 @@
 import { defineConfig } from "vite";
-import { resolve } from "path";
+import { resolve, basename, dirname } from "path";
+import { fileURLToPath } from "url";
 import string from "vite-plugin-string";
 
-export default defineConfig({
+// Derive the app folder name so the production `base` works on GitHub Pages
+// (https://yiwenl.github.io/Sketches/experiments2/apps/<name>/dist/) without
+// per-app edits. Local dev still serves from `/`.
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const appName = basename(__dirname);
+
+export default defineConfig(({ command }) => ({
   root: ".",
+  base:
+    command === "build"
+      ? `/Sketches/experiments2/apps/${appName}/dist/`
+      : "/",
   build: {
     outDir: "dist",
     emptyOutDir: true,
@@ -30,4 +41,4 @@ export default defineConfig({
     host: true, // Allow access from network (0.0.0.0)
     open: true,
   },
-});
+}));
