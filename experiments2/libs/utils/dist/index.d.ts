@@ -1,0 +1,18 @@
+import { saveJson } from "./saveJson";
+import { addFullscreenToggle } from "./fullscreen";
+import { addCapture } from "./capture";
+import { resize } from "./resize";
+export { saveJson, addFullscreenToggle, addCapture, resize };
+export declare const random: (min?: number, max?: number) => number;
+export declare const randomGaussian: (a?: number, b?: number, l?: number) => number;
+export declare const randomInt: (a?: number, b?: number) => number;
+export declare const pickWithWeights: (elms: any[], weights: number[]) => any;
+export declare const pick: (elms: any[], weights?: number[]) => any;
+export declare const shuffle: (a: any[]) => any[];
+export declare const mix: (a: number, b: number, p: number) => number;
+export declare const clamp: (v: number, min: number, max: number) => number;
+export declare const lerp: (a: number, b: number, p: number) => number;
+export declare const smoothstep: (min: number, max: number, value: number) => number;
+export declare const smootherstep: (min: number, max: number, value: number) => number;
+export declare const toGlsl: (v: number) => number;
+//# sourceMappingURL=index.d.ts.map
