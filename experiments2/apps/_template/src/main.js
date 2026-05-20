@@ -20,8 +20,13 @@ function init() {
   canvas.id = "main-canvas";
   document.body.appendChild(canvas);
 
-  GL.init(canvas, { alpha: false, preserveDrawingBuffer: true });
+  GL.init(canvas, {
+    alpha: true,
+    preserveDrawingBuffer: true,
+    colorSpace: "display-p3",
+  });
   GL.setSize(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio);
+
   new SceneApp();
 
   initGui();

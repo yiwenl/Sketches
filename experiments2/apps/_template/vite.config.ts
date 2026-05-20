@@ -12,9 +12,7 @@ const appName = basename(__dirname);
 export default defineConfig(({ command }) => ({
   root: ".",
   base:
-    command === "build"
-      ? `/Sketches/experiments2/apps/${appName}/dist/`
-      : "/",
+    command === "build" ? `/Sketches/experiments2/apps/${appName}/dist/` : "/",
   build: {
     outDir: "dist",
     emptyOutDir: true,
@@ -36,7 +34,7 @@ export default defineConfig(({ command }) => ({
     },
   },
   server: {
-    port: 3000,
+    port: 5180,
     strictPort: false, // Automatically try next available port if 3000 is in use
     host: true, // Allow access from network (0.0.0.0)
     open: true,
