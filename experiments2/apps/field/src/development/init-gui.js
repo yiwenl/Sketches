@@ -15,6 +15,8 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+gui.add(Config, "viewFromCamera").onChange(refresh);
+
 gui.addColor(Config, "background").onChange(refresh);
 gui.add(Config, "useTargetSize").onChange(reload);
 if (Config.useTargetSize) {

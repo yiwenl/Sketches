@@ -22,10 +22,11 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "chokidar": "^4.0.3",
+    "fs-extra": "^11.3.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0",
-    "vite-plugin-string": "^1.2.3",
-    "fs-extra": "^11.3.0",
-    "chokidar": "^4.0.3"
+    "vite-plugin-glsl": "^1.6.0",
+    "vite-plugin-string": "^1.2.3"
   }
 }

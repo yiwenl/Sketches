@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import { resolve, basename, dirname } from "path";
 import { fileURLToPath } from "url";
-import string from "vite-plugin-string";
+import glsl from "vite-plugin-glsl";
 
 // Derive the app folder name so the production `base` works on GitHub Pages
 // (https://yiwenl.github.io/Sketches/experiments2/apps/<name>/dist/) without
@@ -18,8 +18,8 @@ export default defineConfig(({ command }) => ({
     emptyOutDir: true,
   },
   plugins: [
-    string({
-      include: ["**/*.vert", "**/*.frag"],
+    glsl({
+      include: ["**/*.vert", "**/*.frag", "**/*.glsl"],
     }),
   ],
   resolve: {
