@@ -30,7 +30,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    * @param {GLenum} mUsage the usage of the attribute, static or dynamic
    * @param {GLenum} isInstanced if the attribute is an instanced attrbute
    */
-  this.bufferData = function(
+  this.bufferData = function (
     mData,
     mName,
     mItemSize,
@@ -59,6 +59,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
     }
 
     const itemSize = mItemSize === undefined ? mData[0].length : mItemSize;
+
     return bufferFlattenData(
       bufferData,
       mData,
@@ -69,13 +70,23 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
     );
   };
 
+  this.bufferFlattenData = function (bufferData,
+    mData,
+    mName,
+    itemSize,
+    mUsage,
+    isInstanced) {
+    bufferFlattenData(bufferData, mData, mName, itemSize, mUsage, isInstanced);
+    return this;
+  };
+
   /**
    * Add an instanced attribute
    *
    * @param {array} mData the data
    * @param {GLenum} mName the name of the attribute
    */
-  this.bufferInstance = function(mData, mName) {
+  this.bufferInstance = function (mData, mName) {
     // Assumption that mData is array of array
     // worth checking for full proof ?
     const itemSize = mData[0].length;
@@ -91,12 +102,23 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
   };
 
   /**
+   * Set the number of instances to draw
+   *
+   * @param {number} count the number of instances
+   * @returns {Mesh} this mesh for chaining
+   */
+  this.setInstanceCount = function (count) {
+    this.numInstance = count;
+    return this;
+  };
+
+  /**
    * Add or Update the vertex position attribute
    *
    * @param {array} mData the data of the vertex positions
    * @param {GLenum} mUsage the usage of the attribute, static or dynamic
    */
-  this.bufferVertex = function(mData, mUsage = WebGLConst.STATIC_DRAW) {
+  this.bufferVertex = function (mData, mUsage = WebGLConst.STATIC_DRAW) {
     return this.bufferData(mData, "aVertexPosition", 3, mUsage);
   };
 
@@ -106,7 +128,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    * @param {array} mData the data of the texture coordinate
    * @param {GLenum} mUsage the usage of the attribute, static or dynamic
    */
-  this.bufferTexCoord = function(mData, mUsage = WebGLConst.STATIC_DRAW) {
+  this.bufferTexCoord = function (mData, mUsage = WebGLConst.STATIC_DRAW) {
     return this.bufferData(mData, "aTextureCoord", 2, mUsage);
   };
 
@@ -116,7 +138,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    * @param {array} mData the data of the normal
    * @param {GLenum} mUsage the usage of the attribute, static or dynamic
    */
-  this.bufferNormal = function(mData, mUsage = WebGLConst.STATIC_DRAW) {
+  this.bufferNormal = function (mData, mUsage = WebGLConst.STATIC_DRAW) {
     return this.bufferData(mData, "aNormal", 3, mUsage);
   };
 
@@ -126,7 +148,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    * @param {array} mData the data of the index buffer
    * @param {GLenum} mUsage the usage of the attribute, static or dynamic
    */
-  this.bufferIndex = function(mData, mUsage = WebGLConst.STATIC_DRAW) {
+  this.bufferIndex = function (mData, mUsage = WebGLConst.STATIC_DRAW) {
     _usage = mUsage;
     _indices = new Uint32Array(mData);
     this.numItems = _indices.length;
@@ -139,7 +161,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    *
    * @param {GL} mGL the GLTool instance
    */
-  this.bind = function(mGL) {
+  this.bind = function (mGL) {
     if (mGL !== undefined && _GL !== undefined && mGL !== _GL) {
       console.error(
         "this mesh has been bind to a different WebGL Rendering Context"
@@ -155,7 +177,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
     this.vertexSize = this.getSource("aVertexPosition").length;
   };
 
-  this.unbind = function() {};
+  this.unbind = function () { };
 
   /**
    * Find an attribute by name
@@ -163,7 +185,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    * @param {string} mName the name of the attribute
    * @returns {object} the attribute object
    */
-  this.getAttribute = function(mName) {
+  this.getAttribute = function (mName) {
     return _attributes.find((a) => a.name === mName);
   };
 
@@ -172,7 +194,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    *
    * @returns {array} the array of attributes
    */
-  this.getAttributes = function() {
+  this.getAttributes = function () {
     return _attributes;
   };
 
@@ -182,7 +204,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    * @param {string} mName the name of the attribute
    * @returns {[array]} the source data of the attribute ( array of arrays )
    */
-  this.getSource = function(mName) {
+  this.getSource = function (mName) {
     const attr = this.getAttribute(mName);
     return attr ? attr.source : [];
   };
@@ -191,7 +213,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    * Compute the face data of the mesh
    *
    */
-  this.generateFaces = function() {
+  this.generateFaces = function () {
     _faces = [];
     let ia, ib, ic;
     let a, b, c;
@@ -219,7 +241,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    * Destroy all buffers
    *
    */
-  this.destroy = function() {
+  this.destroy = function () {
     const { gl } = _GL;
     _attributes.forEach((attr) => {
       gl.deleteBuffer(attr.buffer);
@@ -246,7 +268,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    *
    * @returns {array} the vetices data
    */
-  this.__defineGetter__("vertices", function() {
+  this.__defineGetter__("vertices", function () {
     return this.getSource("aVertexPosition");
   });
 
@@ -255,7 +277,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    *
    * @returns {array} the texture coordinate data
    */
-  this.__defineGetter__("coords", function() {
+  this.__defineGetter__("coords", function () {
     return this.getSource("aTextureCoord");
   });
 
@@ -264,7 +286,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    *
    * @returns {array} the normal data
    */
-  this.__defineGetter__("normal", function() {
+  this.__defineGetter__("normal", function () {
     return this.getSource("aNormal");
   });
 
@@ -273,7 +295,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    *
    * @returns {array} the indices data
    */
-  this.__defineGetter__("indices", function() {
+  this.__defineGetter__("indices", function () {
     return _indices;
   });
 
@@ -282,7 +304,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    *
    * @returns {array} the face data
    */
-  this.__defineGetter__("faces", function() {
+  this.__defineGetter__("faces", function () {
     return _faces;
   });
 
@@ -291,7 +313,7 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    *
    * @returns {bool} if has instances
    */
-  this.__defineGetter__("isInstanced", function() {
+  this.__defineGetter__("isInstanced", function () {
     return _isInstanced;
   });
 
@@ -300,8 +322,17 @@ function Mesh(mDrawType = WebGLConst.TRIANGLES) {
    *
    * @returns {number} if has instances
    */
-  this.__defineGetter__("numInstance", function() {
+  this.__defineGetter__("numInstance", function () {
     return _numInstance;
+  });
+
+  /**
+   * Set the number of instances
+   *
+   * @param {number} value the number of instances to draw
+   */
+  this.__defineSetter__("numInstance", function (value) {
+    _numInstance = value;
   });
 
   /**
