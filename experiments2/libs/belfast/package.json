@@ -1,0 +1,17 @@
+{
+  "name": "belfast",
+  "version": "0.1.0",
+  "description": "WebGPU utility library (linked from ../belfast/dist)",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/belfast.cjs",
+  "module": "./dist/belfast.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/belfast.js",
+      "require": "./dist/belfast.cjs"
+    }
+  }
+}
