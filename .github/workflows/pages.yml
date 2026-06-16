@@ -39,6 +39,7 @@ jobs:
           cp -R hub/out/. _site/
           cp -R experiments _site/
           cp -R experiments2 _site/
+          rm -f _site/experiments2/libs/belfast/dist
           touch _site/.nojekyll
 
       - uses: actions/configure-pages@v6
