@@ -5,6 +5,9 @@ name: Deploy GitHub Pages
 on:
   push:
     branches: [main]
+    paths:
+      - "hub/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
