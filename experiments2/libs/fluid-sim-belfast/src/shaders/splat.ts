@@ -1,6 +1,6 @@
 import { COMMON_WGSL } from "./common";
 
-const CURL_NOISE_WGSL = /* wgsl */ `
+export const CURL_NOISE_WGSL = /* wgsl */ `
 fn mod289_v4(x: vec4<f32>) -> vec4<f32> {
   return x - floor(x * (1.0 / 289.0)) * 289.0;
 }

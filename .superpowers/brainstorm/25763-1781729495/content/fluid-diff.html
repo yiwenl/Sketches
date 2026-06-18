@@ -1,0 +1,53 @@
+<h2>3D Fluid Sim 差異比較</h2>
+<p class="subtitle">舊版看起來更有 swirl 的原因主要不是單一參數，而是 force topology、advection 尺度、以及視覺層一起放大了旋渦。</p>
+
+<div class="cards">
+  <div class="card" data-choice="old" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>舊版 webgpu_particles</h3>
+      <p><strong>Force:</strong> 每 frame 8 個 tornado forces，繞 Y 軸分布，方向有上沖與切向旋轉。</p>
+      <p><strong>Solver:</strong> force array 在單一 compute pass 裡累積，density += influence * 0.01。</p>
+      <p><strong>Advection:</strong> backPos = pos - velocity * dt，velocity 對 transport 影響更直接。</p>
+      <p><strong>Visual:</strong> 250k-500k particles sample fluid，density 會再放大 particle response。</p>
+    </div>
+  </div>
+  <div class="card" data-choice="current" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>現版 fluid-sim-3d</h3>
+      <p><strong>Force:</strong> 目前主力是一個中心 upward force；外圈 swirl force 在 main.ts 裡被註解。</p>
+      <p><strong>Solver:</strong> 多個 force 是多次 dispatch，已修掉 uniform overwrite，但仍偏 debug path。</p>
+      <p><strong>Advection:</strong> backPos = pos - velocity * dt / gridSize，transport 明顯比較弱。</p>
+      <p><strong>Visual:</strong> 主要看 z=0 slice / arrows，所以 3D swirl 比粒子版不容易顯現。</p>
+    </div>
+  </div>
+  <div class="card" data-choice="port" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>建議移植方向</h3>
+      <p><strong>先套 solver/force:</strong> 移植 tornado force array、density additive splat、舊版 advection 尺度。</p>
+      <p><strong>保留 debug:</strong> 繼續用 z=0 density/velocity slice 驗證，不急著搬粒子 renderer。</p>
+      <p><strong>下一步:</strong> 加一個 preset：Old Tornado Field，用同一組 GUI 控制 force count/radius/updraft/tangent。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>我建議先做的最小移植</h3>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>會改善</h4>
+      <ul>
+        <li>上沖會更明顯，因為多個 force 同時形成柱狀向上流。</li>
+        <li>swirl 會更像 tornado，而不是單點附近轉動。</li>
+        <li>density 會沿著流累積/拖曳，不只是一個 hard max blob。</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>暫不處理</h4>
+      <ul>
+        <li>不先搬完整 particle renderer。</li>
+        <li>不先做 shadow/glow/post-process。</li>
+        <li>不改成舊版整套 JS architecture。</li>
+      </ul>
+    </div>
+  </div>
+</div>

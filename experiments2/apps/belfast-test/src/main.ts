@@ -25,7 +25,7 @@ import { createSprayAtlas } from "./sprayTexture";
 // ---- Tunables ---------------------------------------------------------------
 
 /** Skip every other splat (keep 1 of N). 2 ≈ halves count and sort cost. */
-const STRIDE = 6;
+const STRIDE = 24 * 2;
 /** Plane size relative to each splat's gaussian radius (this is the "bigger plane" knob). */
 const SIZE_MULTIPLIER = 6.0;
 /** Clamp plane half-size to a fraction of the model span so nothing blows up / vanishes. */
@@ -228,7 +228,7 @@ async function main() {
   });
 
   const { data: planeData, count: INSTANCE_COUNT } = await loadPlanes(
-    `${import.meta.env.BASE_URL}grape.ply`,
+    `${import.meta.env.BASE_URL}studio.ply`,
     atlas.count
   );
 

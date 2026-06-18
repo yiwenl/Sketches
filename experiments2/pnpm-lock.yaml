@@ -369,6 +369,43 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3(vite@8.0.10)
 
+  apps/fluid-particles:
+    dependencies:
+      '@fluid-sim-belfast':
+        specifier: workspace:*
+        version: link:../../libs/fluid-sim-belfast
+      belfast:
+        specifier: workspace:*
+        version: link:../../libs/belfast
+      gl-matrix:
+        specifier: ^3.4.3
+        version: 3.4.3
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
+      scheduling:
+        specifier: ^1.0.0
+        version: 1.4.4
+      stats.js:
+        specifier: ^0.17.0
+        version: 0.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.8
+      '@types/stats.js':
+        specifier: ^0.17.4
+        version: 0.17.4
+      '@webgpu/types':
+        specifier: ^0.1.44
+        version: 0.1.70
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: '>=6.4.2'
+        version: 8.0.10(@types/node@20.19.8)
+
   apps/fluid-sim-3d:
     dependencies:
       '@fluid-sim-belfast':

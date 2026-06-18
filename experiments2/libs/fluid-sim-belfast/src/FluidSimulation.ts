@@ -36,7 +36,7 @@ const passUniforms = UniformBlock.create({
   gridSize: "f32",
   dissipation: "f32",
   timestep: "f32",
-  _pad: "f32",
+  advectionScale: "f32",
 });
 
 const gridUniforms = UniformBlock.create({
@@ -54,12 +54,10 @@ const clearUniforms = UniformBlock.create({
 });
 
 const forceUniforms = UniformBlock.create({
-  gridSize: "f32",
-  dt: "f32",
-  strength: "f32",
-  radius: "f32",
-  center: "vec3f",
-  dir: "vec3f",
+  grid: "vec4f",
+  center: "vec4f",
+  dir: "vec4f",
+  force: "vec4f",
 });
 
 const vorticityUniforms = UniformBlock.create({
@@ -81,6 +79,8 @@ type PendingForce = {
   dir: [number, number, number];
   radius: number;
   strength: number;
+  densityScale: number;
+  noiseStrength: number;
 };
 
 export default class FluidSimulation {
@@ -91,6 +91,7 @@ export default class FluidSimulation {
   private readonly _gridSize: number;
   private readonly _dispatch: [number, number, number];
   private _dt = 1 / 60;
+  private _time = 0;
 
   private readonly _velocity: Texture3DPingPong;
   private readonly _density: Texture3DPingPong;
@@ -101,7 +102,7 @@ export default class FluidSimulation {
   private readonly _gridUniformBuffer: Buffer;
   private readonly _clearUniformBuffer: Buffer;
   private readonly _vorticityUniformBuffer: Buffer;
-  private readonly _forceUniformBuffer: Buffer;
+  private readonly _forceUniformBuffers: Buffer[] = [];
 
   private readonly _advect: Compute;
   private readonly _applyForces: Compute;
@@ -156,12 +157,6 @@ export default class FluidSimulation {
       uniformUsage,
       "fluid-clear-uniforms",
     );
-    this._forceUniformBuffer = Buffer.create(
-      device,
-      Buffer.uniformSize(forceUniforms.byteSize),
-      uniformUsage,
-      "fluid-force-uniforms",
-    );
     this._vorticityUniformBuffer = Buffer.create(
       device,
       Buffer.uniformSize(vorticityUniforms.byteSize),
@@ -186,6 +181,8 @@ export default class FluidSimulation {
     dir: [number, number, number],
     worldRadius: number,
     strength: number,
+    densityScale = 1,
+    noiseStrength = 0,
   ): void {
     const scale = 0.5 / this.maxRadius;
     this._pendingForces.push({
@@ -194,9 +191,11 @@ export default class FluidSimulation {
         worldPos[1] * scale,
         worldPos[2] * scale,
       ],
-      dir: [dir[0] * scale, dir[1] * scale, dir[2] * scale],
+      dir,
       radius: worldRadius * scale,
       strength,
+      densityScale,
+      noiseStrength,
     });
   }
 
@@ -214,7 +213,7 @@ export default class FluidSimulation {
       (mPos[2] - 0.5) * 2 * this.maxRadius,
     ];
     const worldRadius = 0.08 * mRadius * this.maxRadius;
-    this.addForce(worldPos, mDir, worldRadius, 800 * mStrength);
+    this.addForce(worldPos, mDir, worldRadius, 800 * mStrength, 1, _mNoiseStrength);
   }
 
   applyRandomForces(count: number, options: RandomForceOptions = {}): void {
@@ -249,6 +248,7 @@ export default class FluidSimulation {
     if (deltaTime !== undefined) {
       this._dt = Math.min(deltaTime, 0.1);
     }
+    this._time += this._dt;
 
     const pass = encoder.beginComputePass({ label: "fluid-sim" });
 
@@ -311,7 +311,9 @@ export default class FluidSimulation {
     this._passUniformBuffer.destroy();
     this._gridUniformBuffer.destroy();
     this._clearUniformBuffer.destroy();
-    this._forceUniformBuffer.destroy();
+    for (const buffer of this._forceUniformBuffers) {
+      buffer.destroy();
+    }
     this._vorticityUniformBuffer.destroy();
   }
 
@@ -320,7 +322,7 @@ export default class FluidSimulation {
       .set("gridSize", this._gridSize)
       .set("dissipation", dissipation)
       .set("timestep", this._dt)
-      .set("_pad", 0)
+      .set("advectionScale", this.settings.ADVECTION_SCALE)
       .writeToBuffer(this._passUniformBuffer, this._device);
   }
 
@@ -377,21 +379,21 @@ export default class FluidSimulation {
   }
 
   private _flushForces(pass: GPUComputePassEncoder): void {
-    for (const force of this._pendingForces) {
+    for (let i = 0; i < this._pendingForces.length; i++) {
+      const force = this._pendingForces[i];
+      const forceUniformBuffer = this._getForceUniformBuffer(i);
       forceUniforms
-        .set("gridSize", this._gridSize)
-        .set("dt", this._dt)
-        .set("strength", force.strength)
-        .set("radius", force.radius)
-        .set("center", force.center)
-        .set("dir", force.dir)
-        .writeToBuffer(this._forceUniformBuffer, this._device);
+        .set("grid", [this._gridSize, this._time, 0, 0])
+        .set("center", [force.center[0], force.center[1], force.center[2], 0])
+        .set("dir", [force.dir[0], force.dir[1], force.dir[2], force.noiseStrength])
+        .set("force", [this._dt, force.strength, force.radius, force.densityScale])
+        .writeToBuffer(forceUniformBuffer, this._device);
 
       const bindGroup = BindGroup.create(
         this._device,
         this._applyForces.getBindGroupLayout(0),
         [
-          { binding: 0, resource: this._forceUniformBuffer },
+          { binding: 0, resource: forceUniformBuffer },
           { binding: 1, resource: this._velocity.read.view },
           { binding: 2, resource: this._density.read.view },
           { binding: 3, resource: this._velocity.write.storageView },
@@ -404,6 +406,20 @@ export default class FluidSimulation {
       this._density.swap();
     }
     this._pendingForces.length = 0;
+  }
+
+  private _getForceUniformBuffer(index: number): Buffer {
+    let buffer = this._forceUniformBuffers[index];
+    if (!buffer) {
+      buffer = Buffer.create(
+        this._device,
+        Buffer.uniformSize(forceUniforms.byteSize),
+        BufferUsage.uniform,
+        `fluid-force-uniforms-${index}`,
+      );
+      this._forceUniformBuffers[index] = buffer;
+    }
+    return buffer;
   }
 
   private _divergencePass(pass: GPUComputePassEncoder): void {
