@@ -5,6 +5,7 @@ export const MAX_PARTICLE_MAX_SPEED = 11;
 export interface ParticleDataOptions {
   count: number;
   radius: number;
+  baseScale?: number;
   random?: () => number;
 }
 
@@ -19,6 +20,7 @@ export function createSeededRandom(seed: number): () => number {
 export function createParticleData({
   count,
   radius,
+  baseScale = 1,
   random = Math.random,
 }: ParticleDataOptions): Float32Array {
   const data = new Float32Array(count * PARTICLE_FLOATS);
@@ -43,7 +45,7 @@ export function createParticleData({
     data[base + 0] = x;
     data[base + 1] = y;
     data[base + 2] = z;
-    data[base + 3] = (0.018 + random() * 0.042) * 2;
+    data[base + 3] = (0.01 + random() * 0.06) * 2 * baseScale;
     data[base + 4] = tangent[0] * speed;
     data[base + 5] = tangent[1] * speed;
     data[base + 6] = tangent[2] * speed;

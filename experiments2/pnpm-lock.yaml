@@ -118,15 +118,15 @@ importers:
       belfast:
         specifier: workspace:*
         version: link:../../libs/belfast
-      lil-gui:
-        specifier: ^0.19.1
-        version: 0.19.2
       scheduling:
         specifier: ^1.0.0
         version: 1.4.4
       stats.js:
         specifier: ^0.17.0
         version: 0.17.0
+      lil-gui:
+        specifier: ^0.19.1
+        version: 0.19.2
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -374,21 +374,24 @@ importers:
       '@fluid-sim-belfast':
         specifier: workspace:*
         version: link:../../libs/fluid-sim-belfast
+      '@tweakpane/core':
+        specifier: ^2.0.5
+        version: 2.0.5
       belfast:
         specifier: workspace:*
         version: link:../../libs/belfast
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.3
-      lil-gui:
-        specifier: ^0.19.1
-        version: 0.19.2
       scheduling:
         specifier: ^1.0.0
         version: 1.4.4
       stats.js:
         specifier: ^0.17.0
         version: 0.17.0
+      tweakpane:
+        specifier: ^4.0.5
+        version: 4.0.5
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -926,6 +929,10 @@ packages:
       tslib: 2.8.1
     dev: true
     optional: true
+
+  /@tweakpane/core@2.0.5:
+    resolution: {integrity: sha512-punBgD5rKCF5vcNo6BsSOXiDR/NSs9VM7SG65QSLJIxfRaGgj54ree9zQW6bO3pNFf3AogiGgaNODUVQRk9YqQ==}
+    dev: false
 
   /@types/estree@1.0.8:
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
@@ -1466,6 +1473,10 @@ packages:
 
   /lil-gui@0.19.2:
     resolution: {integrity: sha512-nU8j4ND702ouGfQZoaTN4dfXxacvGOAVK0DtmZBVcUYUAeYQXLQAjAN50igMHiba3T5jZyKEjXZU+Ntm1Qs6ZQ==}
+    dev: false
+
+  /tweakpane@4.0.5:
+    resolution: {integrity: sha512-rxEXdSI+ArlG1RyO6FghC4ZUX8JkEfz8F3v1JuteXSV0pEtHJzyo07fcDG+NsJfN5L39kSbCYbB9cBGHyuI/tQ==}
     dev: false
 
   /locate-path@6.0.0:
