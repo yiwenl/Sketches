@@ -1,5 +1,6 @@
 node_modules
 .DS_Store
+feature-request/
 
 # Next hub build output
 hub/out

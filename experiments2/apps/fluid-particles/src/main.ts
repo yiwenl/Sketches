@@ -5,8 +5,8 @@ import {
   Buffer,
   BufferUsage,
   Compute,
-  createPlaneTriangleList,
   createSceneUniformPipelineLayout,
+  depthOnlyTriangles,
   DepthDraw,
   Device,
   Draw,
@@ -17,58 +17,87 @@ import {
   OrbitalControl,
   OrthographicCamera,
   PerspectiveCamera,
+  opaqueTriangles,
   ShadowMap,
+  UniformBlock,
   wgslShadowPcf3x3,
 } from "belfast";
 import FluidSimulation, { SlicePlane } from "@fluid-sim-belfast";
 import { vec3 } from "gl-matrix";
-import GUI from "lil-gui";
-import Stats from "stats.js";
 import Config from "./Config";
 import { createParticleData } from "./particleData";
 import { createParticleShadowRadius } from "./shadowBounds";
 import Settings from "./Settings";
+import cubeDrawShaderSource from "./shaders/cubes-draw.wgsl?raw";
+import cubeShadowShaderCode from "./shaders/cubes-shadow.wgsl?raw";
 import drawShaderSource from "./shaders/particles-draw.wgsl?raw";
 import shadowShaderCode from "./shaders/particles-shadow.wgsl?raw";
 import updateShaderCode from "./shaders/particles-update.wgsl?raw";
+import "./style.css";
 
 const drawShaderCode = `${wgslShadowPcf3x3}\n${drawShaderSource}`;
+const cubeDrawShaderCode = `${wgslShadowPcf3x3}\n${cubeDrawShaderSource}`;
 
-const PARTICLE_COUNT = 500_000;
+const PARTICLE_COUNT = 300_000;
+const CUBE_COUNT = 100_000;
 const WORKGROUP_SIZE = 256;
 const MAX_RADIUS = 9;
+const PARTICLE_TRIANGLE_POSITIONS = new Float32Array([
+  0, 1, 0, -0.8660254, -0.5, 0, 0.8660254, -0.5, 0,
+]);
 const FLUID_VOLUME_EXTENT = MAX_RADIUS * 2;
-const SHADOW_MAP_SIZE = 1024;
+const SHADOW_MAP_SIZE = 1024 * 2;
 const SIMULATION_OVERSHOOT = 1.35;
 const SHADOW_PADDING = 0.75;
 const SHADOW_STRENGTH = 0.65;
 const SHADOW_BIAS = 0.002;
 const LIGHT_POSITION: [number, number, number] = [1, 18, 8];
 const LIGHT_UP: [number, number, number] = [0, 0, -1];
-const HIT_TEST_RADIUS = MAX_RADIUS * 0.75;
+const HIT_TEST_RADIUS = MAX_RADIUS * 0.5;
 const RAD = Math.PI / 180;
+const SIM_PARAMS = {
+  maxRadius: MAX_RADIUS * 1.25,
+  fluidForceScale: 2.8,
+  densityForceScale: 0.02,
+  damping: 0.998,
+  centerForce: 8.4,
+};
+const SIM_PARAMS_SCHEMA = {
+  time: "f32",
+  dt: "f32",
+  maxRadius: "f32",
+  count: "u32",
+  fluidForceScale: "f32",
+  densityForceScale: "f32",
+  damping: "f32",
+  centerForce: "f32",
+} as const;
+const SIM_PARAMS_BYTE_SIZE = Buffer.uniformSize(
+  UniformBlock.create(SIM_PARAMS_SCHEMA).byteSize
+);
+
+const createSimParamsUniforms = (count: number) =>
+  UniformBlock.create(SIM_PARAMS_SCHEMA)
+    .set("time", 0)
+    .set("dt", 1 / 60)
+    .set("maxRadius", SIM_PARAMS.maxRadius)
+    .set("count", count)
+    .set("fluidForceScale", SIM_PARAMS.fluidForceScale)
+    .set("densityForceScale", SIM_PARAMS.densityForceScale)
+    .set("damping", SIM_PARAMS.damping)
+    .set("centerForce", SIM_PARAMS.centerForce);
 
 async function main() {
   await assertWebGPUSupport();
   Settings.init();
 
   const canvas = document.createElement("canvas");
-  canvas.style.cssText =
-    "display:block;width:100vw;height:100vh;touch-action:none;";
+  canvas.className = "app-canvas";
   document.body.appendChild(canvas);
-
-  const stats = new Stats();
-  stats.showPanel(0);
-  stats.dom.style.cssText = "position:fixed;top:0;left:0;z-index:10;";
-  document.body.appendChild(stats.dom);
 
   const label = document.createElement("div");
   label.textContent = `${PARTICLE_COUNT.toLocaleString()} fluid particles`;
-  label.style.cssText =
-    "position:fixed;right:14px;bottom:12px;z-index:10;color:#d8d8d8;" +
-    "font:12px/1.45 ui-sans-serif,system-ui,sans-serif;" +
-    "letter-spacing:0;text-shadow:0 1px 2px rgba(0,0,0,0.7);" +
-    "pointer-events:none;user-select:none;";
+  label.className = "particle-count-label";
   document.body.appendChild(label);
   const {
     fluidTextureSize,
@@ -106,26 +135,75 @@ async function main() {
     count: PARTICLE_COUNT,
     radius: MAX_RADIUS,
   });
+  const initialCubeData = createParticleData({
+    count: CUBE_COUNT,
+    radius: MAX_RADIUS,
+    baseScale: 1,
+  });
 
   const particleBuffers = [
     Buffer.fromData(device, initialData, BufferUsage.storage, "particles-a"),
     Buffer.fromData(device, initialData, BufferUsage.storage, "particles-b"),
   ];
+  const cubeBuffers = [
+    Buffer.fromData(device, initialCubeData, BufferUsage.storage, "cubes-a"),
+    Buffer.fromData(device, initialCubeData, BufferUsage.storage, "cubes-b"),
+  ];
 
-  const { positions } = createPlaneTriangleList(1, 1, 1, "xy");
   const positionBuffer = Buffer.fromData(
     device,
-    positions,
+    PARTICLE_TRIANGLE_POSITIONS,
     BufferUsage.vertex,
-    "particle-quad-positions"
+    "particle-triangle-positions"
   );
-  const mesh = new Mesh(positions.length / 3).addVertexBuffer({
-    buffer: positionBuffer,
-    arrayStride: 12,
-    attributes: [{ shaderLocation: 0, format: "float32x3", offset: 0 }],
-    slot: 0,
-    stepMode: "vertex",
-  });
+  const mesh = new Mesh(PARTICLE_TRIANGLE_POSITIONS.length / 3).addVertexBuffer(
+    {
+      buffer: positionBuffer,
+      arrayStride: 12,
+      attributes: [{ shaderLocation: 0, format: "float32x3", offset: 0 }],
+      slot: 0,
+      stepMode: "vertex",
+    }
+  );
+  const cubeGeometry = Geom.cube({ size: 2 });
+  const cubePositionBuffer = Buffer.fromData(
+    device,
+    cubeGeometry.positions,
+    BufferUsage.vertex,
+    "cube-positions"
+  );
+  const cubeNormalBuffer = Buffer.fromData(
+    device,
+    cubeGeometry.normals,
+    BufferUsage.vertex,
+    "cube-normals"
+  );
+  const cubeIndexBuffer = Buffer.fromData(
+    device,
+    cubeGeometry.indices,
+    BufferUsage.index,
+    "cube-indices"
+  );
+  const cubeMesh = new Mesh(cubeGeometry.positions.length / 3)
+    .addVertexBuffer({
+      buffer: cubePositionBuffer,
+      arrayStride: 12,
+      attributes: [{ shaderLocation: 0, format: "float32x3", offset: 0 }],
+      slot: 0,
+      stepMode: "vertex",
+    })
+    .addVertexBuffer({
+      buffer: cubeNormalBuffer,
+      arrayStride: 12,
+      attributes: [{ shaderLocation: 1, format: "float32x3", offset: 0 }],
+      slot: 1,
+      stepMode: "vertex",
+    })
+    .setIndexBuffer(
+      cubeIndexBuffer,
+      cubeGeometry.indices.length,
+      cubeGeometry.indices instanceof Uint32Array ? "uint32" : "uint16"
+    );
 
   const cameraUniformBuffer = Buffer.create(
     device,
@@ -155,70 +233,12 @@ async function main() {
     { listenerTarget: canvas }
   );
   const params = Config;
-  const gui = new GUI({ title: "Fluid Particles" });
-  gui
-    .add(params, "fluidTextureSize", [32, 64], 1)
-    .name("Fluid texture size")
-    .onChange(() => Settings.reload());
-  gui
-    .add(params, "strength", 10, 200)
-    .name("Force strength")
-    .onChange(() => Settings.refresh());
-  gui
-    .add(params, "radius", 0.2 * MAX_RADIUS, 0.8 * MAX_RADIUS)
-    .name("Force radius")
-    .onChange(() => Settings.refresh());
-  gui
-    .add(params, "advectionScale", 1, 64, 1)
-    .name("Advection scale")
-    .onChange((v: number) => {
-      fluid.settings.ADVECTION_SCALE = v;
-      Settings.refresh();
-    });
-  gui
-    .add(params, "noiseStrength", 0, 1, 0.01)
-    .name("Force noise")
-    .onChange(() => Settings.refresh());
-  gui
-    .add(params, "curl", 0, 60, 1)
-    .name("Curl (vorticity)")
-    .onChange((v: number) => {
-      fluid.settings.CURL = v;
-      Settings.refresh();
-    });
-  gui
-    .add(params, "densityDissipation", 0.9, 1.0, 0.001)
-    .name("Density decay")
-    .onChange((v: number) => {
-      fluid.settings.DENSITY_DISSIPATION = v;
-      Settings.refresh();
-    });
-  gui
-    .add(params, "velocityDissipation", 0.9, 1.0, 0.001)
-    .name("Velocity decay")
-    .onChange((v: number) => {
-      fluid.settings.VELOCITY_DISSIPATION = v;
-      Settings.refresh();
-    });
-  gui
-    .add(params, "pressureIterations", 1, 40, 1)
-    .name("Pressure iters")
-    .onChange((v: number) => {
-      fluid.settings.PRESSURE_ITERATIONS = v;
-      Settings.refresh();
-    });
-  gui
-    .add(params, "showFluidSlice")
-    .name("Show fluid slice")
-    .onChange(() => Settings.refresh());
-  gui
-    .add(params, "showSliceVelocity")
-    .name("Slice velocity")
-    .onChange(() => Settings.refresh());
-  gui
-    .add(params, "showSliceDensity")
-    .name("Slice density")
-    .onChange(() => Settings.refresh());
+  const overlay = import.meta.env.DEV
+    ? new (await import("./DevelopmentOverlay")).DevelopmentOverlay({
+        fluid,
+        maxRadius: MAX_RADIUS,
+      })
+    : null;
 
   let firstHit = true;
   const lastHit = vec3.create();
@@ -256,11 +276,12 @@ async function main() {
   fitOrthographicCameraToSphere({
     camera: lightCamera,
     center: [0, 0, 0],
-    radius: createParticleShadowRadius({
-      maxRadius: MAX_RADIUS,
-      overshootMultiplier: SIMULATION_OVERSHOOT,
-      billboardPadding: SHADOW_PADDING,
-    }),
+    radius:
+      createParticleShadowRadius({
+        maxRadius: MAX_RADIUS,
+        overshootMultiplier: SIMULATION_OVERSHOOT,
+        billboardPadding: SHADOW_PADDING,
+      }) + 1.0,
     eye: LIGHT_POSITION,
     up: LIGHT_UP,
     padding: 1,
@@ -287,38 +308,43 @@ async function main() {
     up: [0, 1, 0],
   });
 
-  const simParamsBuffer = Buffer.create(
+  const particleSimParamsBuffer = Buffer.create(
     device,
-    32,
+    SIM_PARAMS_BYTE_SIZE,
     BufferUsage.uniform,
-    "sim-params"
+    "particle-sim-params"
   );
-  const simParamsData = new ArrayBuffer(32);
-  const simParamsF32 = new Float32Array(simParamsData);
-  const simParamsU32 = new Uint32Array(simParamsData);
-  simParamsF32[2] = MAX_RADIUS * 1.25;
-  simParamsU32[3] = PARTICLE_COUNT;
-  simParamsF32[4] = 2.8;
-  simParamsF32[5] = 0.02;
-  simParamsF32[6] = 0.998; //damping
-  simParamsF32[7] = 8.4; // centerForce
+  const cubeSimParamsBuffer = Buffer.create(
+    device,
+    SIM_PARAMS_BYTE_SIZE,
+    BufferUsage.uniform,
+    "cube-sim-params"
+  );
+  const particleSimParamsUniforms = createSimParamsUniforms(PARTICLE_COUNT);
+  const cubeSimParamsUniforms = createSimParamsUniforms(CUBE_COUNT);
 
   const updateCompute = new Compute(device, updateShaderCode, {
     label: "ParticlesUpdate",
     entryPoint: "cs_main",
   });
-  const createUpdateBindGroup = (readIndex: number, writeIndex: number) =>
+  const createUpdateBindGroup = (
+    buffers: Buffer[],
+    simParamsBuffer: Buffer,
+    readIndex: number,
+    writeIndex: number,
+    label: string
+  ) =>
     BindGroup.create(
       device,
       updateCompute.getBindGroupLayout(0),
       [
         { binding: 0, resource: simParamsBuffer },
-        { binding: 1, resource: particleBuffers[readIndex] },
-        { binding: 2, resource: particleBuffers[writeIndex] },
+        { binding: 1, resource: buffers[readIndex] },
+        { binding: 2, resource: buffers[writeIndex] },
         { binding: 3, resource: fluid.velocity.view },
         { binding: 4, resource: fluid.density.view },
       ],
-      `particles-update-${readIndex}-to-${writeIndex}`
+      `${label}-update-${readIndex}-to-${writeIndex}`
     );
 
   const scene = createSceneUniformPipelineLayout(device, "ParticlesScene");
@@ -368,22 +394,25 @@ async function main() {
     label: "ParticlesShadowDraw",
     layout: shadowPipelineLayout,
     vertexBuffers: mesh.getVertexLayouts(),
-    primitive: { topology: "triangle-list", cullMode: "none" },
-    depthFormat: "depth32float",
-    depthWriteEnabled: true,
-    depthCompare: "less",
+    ...depthOnlyTriangles({ cullMode: "none", depthFormat: "depth32float" }),
+  });
+  const cubeShadowDraw = new DepthDraw(device, cubeShadowShaderCode, {
+    label: "CubesShadowDraw",
+    layout: shadowPipelineLayout,
+    vertexBuffers: cubeMesh.getVertexLayouts(),
+    ...depthOnlyTriangles({ cullMode: "back", depthFormat: "depth32float" }),
   });
   const draw = new Draw(device, drawShaderCode, {
     label: "ParticlesDraw",
     layout: drawPipelineLayout,
     vertexBuffers: mesh.getVertexLayouts(),
-    primitive: { topology: "triangle-list", cullMode: "none" },
-    depthStencil: {
-      format: "depth24plus",
-      depthWriteEnabled: true,
-      depthCompare: "less",
-    },
-    targets: [{ format: device.format }],
+    ...opaqueTriangles({ cullMode: "none", colorFormat: device.format }),
+  });
+  const cubeDraw = new Draw(device, cubeDrawShaderCode, {
+    label: "CubesDraw",
+    layout: drawPipelineLayout,
+    vertexBuffers: cubeMesh.getVertexLayouts(),
+    ...opaqueTriangles({ cullMode: "back", colorFormat: device.format }),
   });
   const sceneBindGroup = BindGroup.create(
     device,
@@ -405,6 +434,14 @@ async function main() {
       particleBindGroupLayout,
       [{ binding: 0, resource: buffer }],
       `particle-draw-${index}`
+    )
+  );
+  const cubeDrawBindGroups = cubeBuffers.map((buffer, index) =>
+    BindGroup.create(
+      device,
+      particleBindGroupLayout,
+      [{ binding: 0, resource: buffer }],
+      `cube-draw-${index}`
     )
   );
   const shadowMap = ShadowMap.create(device, {
@@ -528,15 +565,21 @@ async function main() {
   };
 
   const render = (now: number) => {
-    stats.begin();
+    overlay?.begin();
     device.resize();
     updateAspect();
 
     const dt = Math.min(1 / 30, Math.max(1 / 240, (now - lastTime) / 1000));
     lastTime = now;
-    simParamsF32[0] = now * 0.001;
-    simParamsF32[1] = dt;
-    simParamsBuffer.write(device, simParamsData);
+    const time = now * 0.001;
+    particleSimParamsUniforms
+      .set("time", time)
+      .set("dt", dt)
+      .writeToBuffer(particleSimParamsBuffer, device);
+    cubeSimParamsUniforms
+      .set("time", time)
+      .set("dt", dt)
+      .writeToBuffer(cubeSimParamsBuffer, device);
 
     camera.writeUniformData(cameraUniformData);
     cameraUniformBuffer.write(device, cameraUniformData);
@@ -554,8 +597,25 @@ async function main() {
     const computePass = encoder.beginComputePass({ label: "update-particles" });
     updateCompute.dispatch(
       computePass,
-      createUpdateBindGroup(readIndex, writeIndex),
+      createUpdateBindGroup(
+        particleBuffers,
+        particleSimParamsBuffer,
+        readIndex,
+        writeIndex,
+        "particles"
+      ),
       Math.ceil(PARTICLE_COUNT / WORKGROUP_SIZE)
+    );
+    updateCompute.dispatch(
+      computePass,
+      createUpdateBindGroup(
+        cubeBuffers,
+        cubeSimParamsBuffer,
+        readIndex,
+        writeIndex,
+        "cubes"
+      ),
+      Math.ceil(CUBE_COUNT / WORKGROUP_SIZE)
     );
     computePass.end();
 
@@ -565,6 +625,12 @@ async function main() {
       mesh,
       [lightSceneBindGroup, particleDrawBindGroups[writeIndex]],
       PARTICLE_COUNT
+    );
+    cubeShadowDraw.draw(
+      shadowPass,
+      cubeMesh,
+      [lightSceneBindGroup, cubeDrawBindGroups[writeIndex]],
+      CUBE_COUNT
     );
     shadowPass.end();
 
@@ -583,6 +649,12 @@ async function main() {
       [sceneBindGroup, particleDrawBindGroups[writeIndex], shadowBindGroup],
       PARTICLE_COUNT
     );
+    cubeDraw.draw(
+      pass,
+      cubeMesh,
+      [sceneBindGroup, cubeDrawBindGroups[writeIndex], shadowBindGroup],
+      CUBE_COUNT
+    );
     pass.end();
 
     const slicePass = beginRenderPass(encoder, colorView, {
@@ -600,25 +672,30 @@ async function main() {
     device.gpu.queue.submit([encoder.finish()]);
     readIndex = writeIndex;
 
-    stats.end();
+    overlay?.end();
     requestAnimationFrame(render);
   };
 
   window.addEventListener("beforeunload", () => {
     hitTestor.disconnect();
     control.destroy();
-    gui.destroy();
+    overlay?.destroy();
     densitySlicePlane.destroy();
     velocitySlicePlane.destroy();
     fluid.destroy();
     depthTexture?.destroy();
     cameraUniformBuffer.destroy();
     lightCameraUniformBuffer.destroy();
-    simParamsBuffer.destroy();
+    particleSimParamsBuffer.destroy();
+    cubeSimParamsBuffer.destroy();
     shadowUniformBuffer.destroy();
     shadowMap.destroy();
     positionBuffer.destroy();
+    cubePositionBuffer.destroy();
+    cubeNormalBuffer.destroy();
+    cubeIndexBuffer.destroy();
     particleBuffers.forEach((buffer) => buffer.destroy());
+    cubeBuffers.forEach((buffer) => buffer.destroy());
   });
 
   requestAnimationFrame(render);

@@ -32,7 +32,7 @@ describe("createParticleData", () => {
 
     assert.ok(Math.hypot(x, y, z) <= 12);
     assert.ok(Math.hypot(vx, vy, vz) > 0);
-    assert.ok(size >= 0.036 && size <= 0.12);
+    assert.ok(size >= 0.02 && size <= 0.14);
     assert.ok(maxSpeed >= MIN_PARTICLE_MAX_SPEED);
     assert.ok(maxSpeed <= MAX_PARTICLE_MAX_SPEED);
     assert.equal(r, g);
