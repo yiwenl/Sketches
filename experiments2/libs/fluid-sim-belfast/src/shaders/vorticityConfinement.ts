@@ -22,8 +22,9 @@ fn computeCurl(tex: texture_3d<f32>, c: vec3<i32>, gs: f32) -> vec3<f32> {
   let vT = sampleVec3Offset(tex, c + vec3(0, 1, 0), gs);
   let vD = sampleVec3Offset(tex, c - vec3(0, 0, 1), gs);
   let vF = sampleVec3Offset(tex, c + vec3(0, 0, 1), gs);
+  let curlScale = 0.5 * gs;
 
-  return 0.5 * vec3<f32>(
+  return curlScale * vec3<f32>(
     (vT.z - vB.z) - (vF.y - vD.y),
     (vF.x - vD.x) - (vR.z - vL.z),
     (vR.y - vL.y) - (vT.x - vB.x),
@@ -54,14 +55,10 @@ fn cs_main(@builtin(global_invocation_id) globalId: vec3<u32>) {
   // η = ∇|ω|  →  N = η / |η|
   let eta = vec3<f32>(cR - cL, cT - cB, cF - cD);
   let etaLen = length(eta);
-  if (etaLen < 1e-6) {
-    let v = textureLoad(velocityIn, globalId, 0);
-    textureStore(velocityOut, globalId, v);
-    return;
-  }
-  let N = eta / etaLen;
+  // Add a small epsilon to prevent amplifying microscopic grid noise into full-strength forces
+  let N = eta / (etaLen + 1e-4);
 
-  // Confinement force:  f = ε * (N × ω) * texelSize
+  // Confinement force: f = epsilon * h * (N x omega).
   let texelSize = 1.0 / gs;
   let force = params.curl * cross(N, omega) * texelSize;
 

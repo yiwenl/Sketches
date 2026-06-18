@@ -31,7 +31,7 @@ fn cs_main(@builtin(global_invocation_id) globalId: vec3<u32>) {
   let pF = sampleScalarOffset(pressureIn, c + vec3(0, 0, 1), params.gridSize);
   let v = sampleVec3Offset(velocityIn, c, params.gridSize);
 
-  let grad = vec3(pR - pL, pT - pB, pF - pD);
+  let grad = 0.5 * vec3(pR - pL, pT - pB, pF - pD);
   textureStore(velocityOut, globalId, vec4(v - grad, 0.0));
 }
 `;

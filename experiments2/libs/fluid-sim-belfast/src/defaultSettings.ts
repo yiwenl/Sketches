@@ -4,7 +4,8 @@ export default {
   VELOCITY_DISSIPATION: 0.996,
   PRESSURE_DISSIPATION: 0.996,
   PRESSURE_ITERATIONS: 20,
-  CURL: 20,
+  CURL: 5,
+  ADVECTION_SCALE: 1,
 } as const;
 
 export type FluidSettings = {
@@ -14,5 +15,5 @@ export type FluidSettings = {
   PRESSURE_DISSIPATION: number;
   PRESSURE_ITERATIONS: number;
   CURL: number;
+  ADVECTION_SCALE: number;
 };
-

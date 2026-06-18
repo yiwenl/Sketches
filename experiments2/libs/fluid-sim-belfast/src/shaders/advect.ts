@@ -5,7 +5,7 @@ struct PassParams {
   gridSize: f32,
   dissipation: f32,
   timestep: f32,
-  _pad: f32,
+  advectionScale: f32,
 }
 
 @group(0) @binding(0) var<uniform> params: PassParams;
@@ -25,8 +25,7 @@ fn cs_main(@builtin(global_invocation_id) globalId: vec3<u32>) {
   let pos = (vec3<f32>(globalId) + 0.5) / params.gridSize;
   let vel = textureLoad(velocityIn, globalId, 0).xyz;
 
-  // Scale velocity from grid-space to normalized [0,1] UVW space
-  let backPos = pos - vel * params.timestep / params.gridSize;
+  let backPos = pos - vel * params.timestep * params.advectionScale / params.gridSize;
 
   // Use trilinear interpolation for smooth transport
   let sampled = sampleTrilinear(mapIn, backPos, params.gridSize);
@@ -34,4 +33,3 @@ fn cs_main(@builtin(global_invocation_id) globalId: vec3<u32>) {
   textureStore(mapOut, globalId, sampled * params.dissipation);
 }
 `;
-
