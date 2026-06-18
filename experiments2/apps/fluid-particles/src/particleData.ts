@@ -1,4 +1,6 @@
 export const PARTICLE_FLOATS = 12;
+export const MIN_PARTICLE_MAX_SPEED = 9;
+export const MAX_PARTICLE_MAX_SPEED = 11;
 
 export interface ParticleDataOptions {
   count: number;
@@ -45,7 +47,9 @@ export function createParticleData({
     data[base + 4] = tangent[0] * speed;
     data[base + 5] = tangent[1] * speed;
     data[base + 6] = tangent[2] * speed;
-    data[base + 7] = random();
+    data[base + 7] =
+      MIN_PARTICLE_MAX_SPEED +
+      random() * (MAX_PARTICLE_MAX_SPEED - MIN_PARTICLE_MAX_SPEED);
     data[base + 8] = grey;
     data[base + 9] = grey;
     data[base + 10] = grey;

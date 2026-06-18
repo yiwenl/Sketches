@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  MAX_PARTICLE_MAX_SPEED,
+  MIN_PARTICLE_MAX_SPEED,
   PARTICLE_FLOATS,
   createParticleData,
   createSeededRandom,
@@ -22,6 +24,7 @@ describe("createParticleData", () => {
     const vx = data[4];
     const vy = data[5];
     const vz = data[6];
+    const maxSpeed = data[7];
     const r = data[8];
     const g = data[9];
     const b = data[10];
@@ -30,6 +33,8 @@ describe("createParticleData", () => {
     assert.ok(Math.hypot(x, y, z) <= 12);
     assert.ok(Math.hypot(vx, vy, vz) > 0);
     assert.ok(size >= 0.036 && size <= 0.12);
+    assert.ok(maxSpeed >= MIN_PARTICLE_MAX_SPEED);
+    assert.ok(maxSpeed <= MAX_PARTICLE_MAX_SPEED);
     assert.equal(r, g);
     assert.equal(g, b);
     assert.ok(r >= 0.7 && r <= 1);
