@@ -24,8 +24,10 @@ import FluidSimulation, { SlicePlane } from "@fluid-sim-belfast";
 import { vec3 } from "gl-matrix";
 import GUI from "lil-gui";
 import Stats from "stats.js";
+import Config from "./Config";
 import { createParticleData } from "./particleData";
 import { createParticleShadowRadius } from "./shadowBounds";
+import Settings from "./Settings";
 import drawShaderSource from "./shaders/particles-draw.wgsl?raw";
 import shadowShaderCode from "./shaders/particles-shadow.wgsl?raw";
 import updateShaderCode from "./shaders/particles-update.wgsl?raw";
@@ -35,17 +37,7 @@ const drawShaderCode = `${wgslShadowPcf3x3}\n${drawShaderSource}`;
 const PARTICLE_COUNT = 500_000;
 const WORKGROUP_SIZE = 256;
 const MAX_RADIUS = 9;
-const FLUID_TEXTURE_SIZE = 64;
 const FLUID_VOLUME_EXTENT = MAX_RADIUS * 2;
-const FLUID_EMITTER = {
-  strength: 150,
-  radius: 6,
-  swirlStrength: 0.9,
-  swirlRadius: MAX_RADIUS * 0.35,
-  updraft: 0.55,
-  forceCount: 8,
-  noiseStrength: 0.35,
-};
 const SHADOW_MAP_SIZE = 1024;
 const SIMULATION_OVERSHOOT = 1.35;
 const SHADOW_PADDING = 0.75;
@@ -58,6 +50,7 @@ const RAD = Math.PI / 180;
 
 async function main() {
   await assertWebGPUSupport();
+  Settings.init();
 
   const canvas = document.createElement("canvas");
   canvas.style.cssText =
@@ -77,27 +70,35 @@ async function main() {
     "letter-spacing:0;text-shadow:0 1px 2px rgba(0,0,0,0.7);" +
     "pointer-events:none;user-select:none;";
   document.body.appendChild(label);
+  const {
+    fluidTextureSize,
+    advectionScale,
+    curl,
+    densityDissipation,
+    velocityDissipation,
+    pressureIterations,
+  } = Config;
 
   const device = await Device.create(canvas);
   const fluid = new FluidSimulation(
     device,
     {
-      TEXTURE_SIZE: FLUID_TEXTURE_SIZE,
-      DENSITY_DISSIPATION: 0.95,
-      VELOCITY_DISSIPATION: 0.98,
+      TEXTURE_SIZE: fluidTextureSize,
+      DENSITY_DISSIPATION: densityDissipation,
+      VELOCITY_DISSIPATION: velocityDissipation,
       PRESSURE_DISSIPATION: 0.95,
-      PRESSURE_ITERATIONS: 24,
-      CURL: 6,
-      ADVECTION_SCALE: 16,
+      PRESSURE_ITERATIONS: pressureIterations,
+      CURL: curl,
+      ADVECTION_SCALE: advectionScale,
     },
     MAX_RADIUS
   );
   const densitySlicePlane = new SlicePlane(device, {
-    texSize: FLUID_TEXTURE_SIZE,
+    texSize: fluidTextureSize,
     volumeExtent: FLUID_VOLUME_EXTENT,
   });
   const velocitySlicePlane = new SlicePlane(device, {
-    texSize: FLUID_TEXTURE_SIZE,
+    texSize: fluidTextureSize,
     volumeExtent: FLUID_VOLUME_EXTENT,
   });
 
@@ -153,50 +154,71 @@ async function main() {
     [canvas.width, canvas.height],
     { listenerTarget: canvas }
   );
-  const params = {
-    advectionScale: 16,
-    curl: fluid.settings.CURL,
-    densityDissipation: fluid.settings.DENSITY_DISSIPATION,
-    velocityDissipation: fluid.settings.VELOCITY_DISSIPATION,
-    pressureIterations: fluid.settings.PRESSURE_ITERATIONS,
-    showFluidSlice: true,
-    showSliceVelocity: true,
-    showSliceDensity: true,
-  };
+  const params = Config;
   const gui = new GUI({ title: "Fluid Particles" });
+  gui
+    .add(params, "fluidTextureSize", [32, 64], 1)
+    .name("Fluid texture size")
+    .onChange(() => Settings.reload());
+  gui
+    .add(params, "strength", 10, 200)
+    .name("Force strength")
+    .onChange(() => Settings.refresh());
+  gui
+    .add(params, "radius", 0.2 * MAX_RADIUS, 0.8 * MAX_RADIUS)
+    .name("Force radius")
+    .onChange(() => Settings.refresh());
   gui
     .add(params, "advectionScale", 1, 64, 1)
     .name("Advection scale")
     .onChange((v: number) => {
       fluid.settings.ADVECTION_SCALE = v;
+      Settings.refresh();
     });
+  gui
+    .add(params, "noiseStrength", 0, 1, 0.01)
+    .name("Force noise")
+    .onChange(() => Settings.refresh());
   gui
     .add(params, "curl", 0, 60, 1)
     .name("Curl (vorticity)")
     .onChange((v: number) => {
       fluid.settings.CURL = v;
+      Settings.refresh();
     });
   gui
     .add(params, "densityDissipation", 0.9, 1.0, 0.001)
     .name("Density decay")
     .onChange((v: number) => {
       fluid.settings.DENSITY_DISSIPATION = v;
+      Settings.refresh();
     });
   gui
     .add(params, "velocityDissipation", 0.9, 1.0, 0.001)
     .name("Velocity decay")
     .onChange((v: number) => {
       fluid.settings.VELOCITY_DISSIPATION = v;
+      Settings.refresh();
     });
   gui
     .add(params, "pressureIterations", 1, 40, 1)
     .name("Pressure iters")
     .onChange((v: number) => {
       fluid.settings.PRESSURE_ITERATIONS = v;
+      Settings.refresh();
     });
-  gui.add(params, "showFluidSlice").name("Show fluid slice");
-  gui.add(params, "showSliceVelocity").name("Slice velocity");
-  gui.add(params, "showSliceDensity").name("Slice density");
+  gui
+    .add(params, "showFluidSlice")
+    .name("Show fluid slice")
+    .onChange(() => Settings.refresh());
+  gui
+    .add(params, "showSliceVelocity")
+    .name("Slice velocity")
+    .onChange(() => Settings.refresh());
+  gui
+    .add(params, "showSliceDensity")
+    .name("Slice density")
+    .onChange(() => Settings.refresh());
 
   let firstHit = true;
   const lastHit = vec3.create();
@@ -216,15 +238,15 @@ async function main() {
     if (speed > 0.001 && speed < MAX_RADIUS) {
       const d = vec3.clone(dir);
       vec3.normalize(d, d);
-      const forceStrength = FLUID_EMITTER.strength * (speed * 500.0);
+      const forceStrength = params.strength * (speed * 500.0);
 
       fluid.addForce(
         [hit[0], hit[1], hit[2]],
         [d[0], d[1], d[2]],
-        FLUID_EMITTER.radius,
+        params.radius,
         forceStrength,
         1,
-        FLUID_EMITTER.noiseStrength
+        params.noiseStrength
       );
     }
     vec3.copy(lastHit, hit);

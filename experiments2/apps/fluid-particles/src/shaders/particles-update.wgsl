@@ -63,7 +63,7 @@ fn cs_main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
   vel = (vel + force * params.dt * 0.5) * params.damping;
 
-  let maxSpeed = 10.0;
+  let maxSpeed = particle.velocity.w;
   if(length(vel) > maxSpeed) {
     vel = normalize(vel) * maxSpeed;
   }
