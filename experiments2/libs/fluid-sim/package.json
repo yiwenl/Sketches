@@ -1,0 +1,21 @@
+{
+  "name": "@fluid-sim",
+  "version": "1.0.0",
+  "description": "2D stable-fluids simulation on Belfast/WebGPU",
+  "type": "module",
+  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "node --test src/**/*.test.js"
+  },
+  "dependencies": {
+    "belfast": "workspace:*",
+    "scheduling": "^1.0.0"
+  },
+  "devDependencies": {
+    "@webgpu/types": "^0.1.44",
+    "typescript": "^5.0.0"
+  }
+}

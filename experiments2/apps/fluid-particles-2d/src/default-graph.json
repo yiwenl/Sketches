@@ -1,0 +1,112 @@
+{
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "position": {
+        "x": 76.0018274806364,
+        "y": 116.2878421952411
+      },
+      "data": {},
+      "measured": {
+        "width": 144,
+        "height": 55
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "position": {
+        "x": 1251.9336596538972,
+        "y": 83.2435693775731
+      },
+      "data": {},
+      "measured": {
+        "width": 157,
+        "height": 55
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "gradientMap-1781988264563",
+      "type": "gradientMap",
+      "position": {
+        "x": 590.2581892226642,
+        "y": 130.94009027632404
+      },
+      "data": {
+        "color1": "#00030a",
+        "color2": "#fffbf0"
+      },
+      "measured": {
+        "width": 233,
+        "height": 214
+      }
+    },
+    {
+      "id": "colorNode-1781988285217",
+      "type": "colorNode",
+      "position": {
+        "x": 226.77118822831625,
+        "y": 380.97508793001185
+      },
+      "data": {
+        "color": "#fffbf0"
+      },
+      "measured": {
+        "width": 216,
+        "height": 141
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "colorNode-1781988292191",
+      "type": "colorNode",
+      "position": {
+        "x": 181.61068204416995,
+        "y": 201.43453895401572
+      },
+      "data": {
+        "color": "#00030a"
+      },
+      "measured": {
+        "width": 216,
+        "height": 141
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "gradientMap-1781988264563",
+      "sourceHandle": "source",
+      "target": "end",
+      "id": "xy-edge__gradientMap-1781988264563source-end"
+    },
+    {
+      "source": "start",
+      "target": "gradientMap-1781988264563",
+      "targetHandle": "target",
+      "id": "xy-edge__start-gradientMap-1781988264563target"
+    },
+    {
+      "source": "colorNode-1781988285217",
+      "sourceHandle": "output",
+      "target": "gradientMap-1781988264563",
+      "targetHandle": "color2-in",
+      "id": "xy-edge__colorNode-1781988285217output-gradientMap-1781988264563color2-in"
+    },
+    {
+      "source": "colorNode-1781988292191",
+      "sourceHandle": "output",
+      "target": "gradientMap-1781988264563",
+      "targetHandle": "color1-in",
+      "id": "xy-edge__colorNode-1781988292191output-gradientMap-1781988264563color1-in"
+    }
+  ]
+}

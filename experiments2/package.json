@@ -14,11 +14,13 @@
     "create-app": "node scripts/create-app.js"
   },
   "dependencies": {
+    "@tweakpane/plugin-essentials": "^0.2.1",
     "gl-matrix": "^3.4.3",
     "lil-gui": "^0.19.1",
     "object-assign": "^4.1.1",
     "scheduling": "^1.0.0",
-    "stats.js": "^0.17.0"
+    "stats.js": "^0.17.0",
+    "tweakpane": "^4.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

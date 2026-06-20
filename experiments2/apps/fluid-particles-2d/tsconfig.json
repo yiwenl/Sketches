@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["vite/client", "@webgpu/types"],
+    "baseUrl": ".",
+    "paths": {
+      "belfast": ["../../libs/belfast"],
+      "@fluid-sim-belfast": ["../../libs/fluid-sim-belfast"],
+      "@effect-composer-ui": ["../../libs/effect-composer-ui/src/index.tsx"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", ".tmp-tests", "dist"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

@@ -1,0 +1,98 @@
+.composer-ui-root {
+  font-family: "DM Sans", system-ui, sans-serif;
+
+  --color-bg-app: #15161a;
+  --color-bg-canvas: #101114;
+  --color-surface-base: #1b1d22;
+  --color-surface-raised: #202329;
+  --color-surface-hover: #32343a;
+  --color-border-subtle: #30343b;
+  --color-border-strong: #474c55;
+  --color-text-primary: #f2f3f5;
+  --color-text-secondary: #b3b6be;
+  --color-text-muted: #747983;
+  --color-accent-cyan: #aee6ff;
+  --color-accent-cyan-hover: #c8f0ff;
+  --color-status-debug: #e879f9;
+  --color-status-success: #8ee6c1;
+  --color-status-warning: #f8c77e;
+
+  --spacing-2xs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --shadow-panel-glow: 0 16px 44px -14px rgb(0 0 0 / 28%);
+
+  width: 100%;
+  height: 100%;
+}
+
+.composer-ui-root .react-flow {
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+.composer-ui-root .react-flow__node {
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-base);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-panel-glow);
+}
+
+.composer-ui-root .react-flow__node.selected {
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 0 0 1px var(--color-accent-cyan), var(--shadow-panel-glow);
+}
+
+.composer-ui-root .react-flow__edge-path {
+  stroke: var(--color-border-subtle);
+  stroke-width: 2;
+}
+
+.composer-ui-root .react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--color-accent-cyan);
+  stroke-width: 3.5;
+}
+
+/* Custom Slider */
+.composer-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+}
+.composer-slider:focus {
+  outline: none;
+}
+.composer-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: grab;
+  background: var(--color-surface-hover);
+  border-radius: 2px;
+}
+.composer-slider:active::-webkit-slider-runnable-track {
+  cursor: grabbing;
+}
+.composer-slider::-webkit-slider-thumb {
+  height: 12px;
+  width: 12px;
+  border-radius: 6px;
+  background: var(--color-accent-cyan);
+  cursor: grab;
+  -webkit-appearance: none;
+  margin-top: -4px;
+}
+.composer-slider:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  background: var(--color-accent-cyan-hover);
+}

@@ -1,0 +1,51 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #111;
+  font-family: "DM Sans", sans-serif;
+}
+
+canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+}
+
+.app-canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+}
+
+.particle-count-label {
+  position: fixed;
+  right: 14px;
+  bottom: 12px;
+  z-index: 10;
+  color: #d8d8d8;
+  font: 12px/1.45 "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.stats-panel {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 10 !important;
+}
+
+.overlay-hidden {
+  display: none !important;
+}
