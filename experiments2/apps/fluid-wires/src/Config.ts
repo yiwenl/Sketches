@@ -1,0 +1,18 @@
+export default {
+  fluidTextureSize: 32,
+  strength: 150,
+  radius: 6,
+  noiseStrength: 0.35,
+  advectionScale: 16,
+  curl: 6,
+  densityDissipation: 0.95,
+  velocityDissipation: 0.98,
+  pressureIterations: 24,
+  wireThicknessScale: 1,
+  historyFluidStrength: 0.18,
+  particleGridSize: 64,
+  wireTileCount: 12,
+  showFluidSlice: true,
+  showSliceVelocity: true,
+  showSliceDensity: true,
+};

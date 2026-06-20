@@ -8,7 +8,6 @@ struct Particle {
   posSize: vec4<f32>,
   velocity: vec4<f32>,
   color: vec4<f32>,
-  random: vec4<f32>,
 }
 
 struct ShadowUniforms {
@@ -59,14 +58,7 @@ fn vs_main(input: VertexInput) -> VertexOutput {
   let scale = vec3<f32>(cube.posSize.w * 0.35, cube.posSize.w * 3.2, cube.posSize.w * 0.35);
   let local = input.localPosition * scale;
   let normal = normalize(basis * input.localNormal);
-
-
-  let speed = length(cube.velocity.xyz);
-  var speedScale = smoothstep(0.0, 5.0, speed);
-  let maxScale = mix(1.0, 1.5, pow(cube.random.x, 3.0));
-  speedScale = mix(0.2, maxScale, speedScale);
-
-  let worldPos = cube.posSize.xyz + basis * local * speedScale;
+  let worldPos = cube.posSize.xyz + basis * local;
   let world = vec4<f32>(worldPos, 1.0);
 
   var output: VertexOutput;

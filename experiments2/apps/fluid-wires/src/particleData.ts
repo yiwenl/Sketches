@@ -1,4 +1,4 @@
-export const PARTICLE_FLOATS = 16;
+export const PARTICLE_FLOATS = 12;
 export const MIN_PARTICLE_MAX_SPEED = 9;
 export const MAX_PARTICLE_MAX_SPEED = 11;
 
@@ -56,10 +56,6 @@ export function createParticleData({
     data[base + 9] = grey;
     data[base + 10] = grey;
     data[base + 11] = 1;
-    data[base + 12] = random();
-    data[base + 13] = random();
-    data[base + 14] = random();
-    data[base + 15] = random();
   }
 
   return data;

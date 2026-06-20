@@ -12,13 +12,6 @@ export interface DevelopmentOverlayOptions {
 export class DevelopmentOverlay {
   private readonly stats: Stats;
   private readonly pane: Pane;
-  private visible = true;
-  private readonly handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key.toLowerCase() !== "h" || isEditableTarget(event.target)) {
-      return;
-    }
-    this.setVisible(!this.visible);
-  };
 
   constructor({ fluid, maxRadius }: DevelopmentOverlayOptions) {
     this.stats = new Stats();
@@ -26,9 +19,8 @@ export class DevelopmentOverlay {
     this.stats.dom.classList.add("stats-panel");
     document.body.appendChild(this.stats.dom);
 
-    this.pane = new Pane({ title: "Fluid Particles" });
+    this.pane = new Pane({ title: "Fluid Wires" });
     this.initGui(fluid, maxRadius);
-    window.addEventListener("keydown", this.handleKeyDown);
   }
 
   begin(): void {
@@ -40,21 +32,54 @@ export class DevelopmentOverlay {
   }
 
   destroy(): void {
-    window.removeEventListener("keydown", this.handleKeyDown);
     this.pane.dispose();
     this.stats.dom.remove();
-  }
-
-  private setVisible(visible: boolean): void {
-    this.visible = visible;
-    this.pane.hidden = !visible;
-    this.stats.dom.classList.toggle("overlay-hidden", !visible);
   }
 
   private initGui(fluid: FluidSimulation, maxRadius: number): void {
     const pane = this.pane;
     const params = Config;
 
+    pane
+      .addButton({ title: "Download current settings" })
+      .on("click", () => Settings.downloadCurrentConfig());
+    pane
+      .addBinding(params, "wireThicknessScale", {
+        label: "Wire thickness",
+        min: 0.25,
+        max: 4,
+        step: 0.05,
+      })
+      .on("change", () => Settings.refresh());
+    pane
+      .addBinding(params, "historyFluidStrength", {
+        label: "History fluid",
+        min: 0,
+        max: 2,
+        step: 0.01,
+      })
+      .on("change", () => Settings.refresh());
+    pane
+      .addBinding(params, "particleGridSize", {
+        label: "Particle grid",
+        options: {
+          32: 32,
+          64: 64,
+          96: 96,
+          128: 128,
+        },
+      })
+      .on("change", () => Settings.reload());
+    pane
+      .addBinding(params, "wireTileCount", {
+        label: "History tiles",
+        options: {
+          12: 12,
+          14: 14,
+          16: 16,
+        },
+      })
+      .on("change", () => Settings.reload());
     pane
       .addBinding(params, "fluidTextureSize", {
         label: "Fluid texture size",
@@ -68,7 +93,7 @@ export class DevelopmentOverlay {
       .addBinding(params, "strength", {
         label: "Force strength",
         min: 10,
-        max: 1000,
+        max: 400,
       })
       .on("change", () => Settings.refresh());
     pane
@@ -150,46 +175,5 @@ export class DevelopmentOverlay {
     pane
       .addBinding(params, "showSliceDensity", { label: "Slice density" })
       .on("change", () => Settings.refresh());
-    pane
-      .addButton({ title: "Download current settings" })
-      .on("click", () => downloadCurrentSettings());
   }
-}
-
-function downloadCurrentSettings(): void {
-  const json = JSON.stringify(Config, null, 2);
-  const blob = new Blob([json], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `fluid-particles-settings-${formatTimestamp(new Date())}.json`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-}
-
-function formatTimestamp(date: Date): string {
-  const pad = (value: number) => value.toString().padStart(2, "0");
-  return [
-    date.getFullYear(),
-    pad(date.getMonth() + 1),
-    pad(date.getDate()),
-    pad(date.getHours()),
-    pad(date.getMinutes()),
-    pad(date.getSeconds()),
-  ].join("-");
-}
-
-function isEditableTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) {
-    return false;
-  }
-  const tagName = target.tagName.toLowerCase();
-  return (
-    target.isContentEditable ||
-    tagName === "input" ||
-    tagName === "textarea" ||
-    tagName === "select"
-  );
 }
