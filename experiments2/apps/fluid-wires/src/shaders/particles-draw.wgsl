@@ -8,7 +8,6 @@ struct Particle {
   posSize: vec4<f32>,
   velocity: vec4<f32>,
   color: vec4<f32>,
-  random: vec4<f32>,
 }
 
 struct ShadowUniforms {

@@ -2,7 +2,6 @@ struct Particle {
   posSize: vec4<f32>,
   velocity: vec4<f32>,
   color: vec4<f32>,
-  random: vec4<f32>,
 }
 
 struct SimParams {
@@ -29,17 +28,6 @@ fn textureCoordFromWorld(pos: vec3<f32>) -> vec3<i32> {
   return clamp(coord, vec3<i32>(0), vec3<i32>(dims) - vec3<i32>(1));
 }
 
-fn idleCurlNoise(pos: vec3<f32>, seed: vec4<f32>, time: f32) -> vec3<f32> {
-  let phase = time * 0.18 + seed.w * 6.2831853;
-  let p = pos * 0.32 + seed.xyz * 6.2831853;
-  let curl = vec3<f32>(
-    cos(p.y + phase) - sin(p.z - phase * 1.17),
-    cos(p.z + phase * 1.31) - sin(p.x + phase),
-    cos(p.x + phase * 0.83) - sin(p.y + phase * 1.11),
-  );
-  return normalize(curl + vec3<f32>(0.0001));
-}
-
 @compute @workgroup_size(256)
 fn cs_main(@builtin(global_invocation_id) globalId: vec3<u32>) {
   let i = globalId.x;
@@ -56,13 +44,12 @@ fn cs_main(@builtin(global_invocation_id) globalId: vec3<u32>) {
   let density = max(textureLoad(densityTex, coord, 0).x, 0.0);
   let densityInfluence = 0.2 + density * params.densityForceScale;
   var force = fluidVelocity * params.fluidForceScale * densityInfluence;
-  force += idleCurlNoise(pos * 5.0, particle.random * 0.1, params.time) * 0.8;
 
   let dist = length(pos);
-  let maxRadius = params.maxRadius * 1.2;
+  let maxRadius = params.maxRadius;
   // let f = smoothstep(maxRadius * 0.5, maxRadius, dist);
   // force -= normalize(pos) * f * params.centerForce;
-  let threshold = mix(0.2, 0.5, particle.random.y);
+  let threshold = 0.6;
   if (dist > maxRadius * threshold) {
     var t = smoothstep(maxRadius, maxRadius * threshold, dist);
     t = 1.0 / max(t, 0.001);
@@ -70,14 +57,13 @@ fn cs_main(@builtin(global_invocation_id) globalId: vec3<u32>) {
   }
   
 
-  let velDecay = 1.0 - smoothstep(maxRadius * 0.9, maxRadius, dist) * mix(0.01, 0.04, particle.random.x);
+  let velDecay = 1.0 - smoothstep(maxRadius * 0.9, maxRadius, dist) * 0.03;
   vel *= velDecay;
 
 
-  let forceScale = mix(0.05, 0.02, particle.random.z) * 40.0;
-  vel = (vel + force * params.dt * forceScale) * params.damping;
+  vel = (vel + force * params.dt * 0.25) * params.damping;
 
-  let maxSpeed = particle.velocity.w * 2.0;
+  let maxSpeed = particle.velocity.w;
   if(length(vel) > maxSpeed) {
     vel = normalize(vel) * maxSpeed;
   }
@@ -88,6 +74,5 @@ fn cs_main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     vec4<f32>(pos, particle.posSize.w),
     vec4<f32>(vel, particle.velocity.w),
     particle.color,
-    particle.random,
   );
 }

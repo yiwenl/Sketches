@@ -41,7 +41,3 @@ body {
   left: 0 !important;
   z-index: 10 !important;
 }
-
-.overlay-hidden {
-  display: none !important;
-}

@@ -24,29 +24,32 @@ import {
 } from "belfast";
 import FluidSimulation, { SlicePlane } from "@fluid-sim-belfast";
 import { vec3 } from "gl-matrix";
+import { syncCanvasPixelSize } from "./canvasSize";
 import Config from "./Config";
 import { createParticleData } from "./particleData";
 import { createParticleShadowRadius } from "./shadowBounds";
+import {
+  WIRE_SIDES,
+  createWireGeometry,
+  createWireHistoryData,
+  createWireHistoryLength,
+  createWireHistoryInvocationCount,
+  createWireParticleCount,
+} from "./wireData";
 import Settings from "./Settings";
-import cubeDrawShaderSource from "./shaders/cubes-draw.wgsl?raw";
-import cubeShadowShaderCode from "./shaders/cubes-shadow.wgsl?raw";
-import drawShaderSource from "./shaders/particles-draw.wgsl?raw";
-import shadowShaderCode from "./shaders/particles-shadow.wgsl?raw";
 import updateShaderCode from "./shaders/particles-update.wgsl?raw";
+import wireDrawShaderSource from "./shaders/wires-draw.wgsl?raw";
+import wireHistoryAdvectShaderCode from "./shaders/wires-history-advect.wgsl?raw";
+import wireHistoryWriteShaderCode from "./shaders/wires-history-write.wgsl?raw";
+import wireShadowShaderCode from "./shaders/wires-shadow.wgsl?raw";
 import "./style.css";
 
-const drawShaderCode = `${wgslShadowPcf3x3}\n${drawShaderSource}`;
-const cubeDrawShaderCode = `${wgslShadowPcf3x3}\n${cubeDrawShaderSource}`;
+const wireDrawShaderCode = `${wgslShadowPcf3x3}\n${wireDrawShaderSource}`;
 
-const PARTICLE_COUNT = 300_000;
-const CUBE_COUNT = 100_000;
 const WORKGROUP_SIZE = 256;
 const MAX_RADIUS = 9;
-const PARTICLE_TRIANGLE_POSITIONS = new Float32Array([
-  0, 1, 0, -0.8660254, -0.5, 0, 0.8660254, -0.5, 0,
-]);
 const FLUID_VOLUME_EXTENT = MAX_RADIUS * 2;
-const SHADOW_MAP_SIZE = 1024;
+const SHADOW_MAP_SIZE = 1024 * 2;
 const SIMULATION_OVERSHOOT = 1.35;
 const SHADOW_PADDING = 0.75;
 const SHADOW_STRENGTH = 0.65;
@@ -54,12 +57,6 @@ const SHADOW_BIAS = 0.002;
 const LIGHT_POSITION: [number, number, number] = [1, 18, 8];
 const LIGHT_UP: [number, number, number] = [0, 0, -1];
 const HIT_TEST_RADIUS = MAX_RADIUS * 0.5;
-const RING_FORCE_POINTS = 6;
-const RING_FORCE_RADIUS = HIT_TEST_RADIUS * 0.8;
-const RING_FORCE_POINT_RADIUS = HIT_TEST_RADIUS * 2.8;
-const RING_FORCE_STRENGTH_SCALE = 0.34;
-const RING_FORCE_DENSITY_SCALE = 0.6;
-const RING_FORCE_ROTATION_SPEED = 0.42;
 const RAD = Math.PI / 180;
 const SIM_PARAMS = {
   maxRadius: MAX_RADIUS * 1.25,
@@ -81,6 +78,19 @@ const SIM_PARAMS_SCHEMA = {
 const SIM_PARAMS_BYTE_SIZE = Buffer.uniformSize(
   UniformBlock.create(SIM_PARAMS_SCHEMA).byteSize
 );
+const HISTORY_PARAMS_SCHEMA = {
+  writeSlot: "u32",
+  historyLength: "u32",
+  particleCount: "u32",
+  radiusScale: "f32",
+  dt: "f32",
+  maxRadius: "f32",
+  historyFluidStrength: "f32",
+  densityForceScale: "f32",
+} as const;
+const HISTORY_PARAMS_BYTE_SIZE = Buffer.uniformSize(
+  UniformBlock.create(HISTORY_PARAMS_SCHEMA).byteSize
+);
 
 const createSimParamsUniforms = (count: number) =>
   UniformBlock.create(SIM_PARAMS_SCHEMA)
@@ -93,48 +103,24 @@ const createSimParamsUniforms = (count: number) =>
     .set("damping", SIM_PARAMS.damping)
     .set("centerForce", SIM_PARAMS.centerForce);
 
-function getCanvasPixelSize(canvas: HTMLCanvasElement): [number, number] {
-  const pixelRatio = window.devicePixelRatio || 1;
-  const width = Math.max(1, Math.floor(canvas.clientWidth * pixelRatio));
-  const height = Math.max(1, Math.floor(canvas.clientHeight * pixelRatio));
-  return [width, height];
-}
-
-function resizeCanvasToPixelRatio(canvas: HTMLCanvasElement): void {
-  const [width, height] = getCanvasPixelSize(canvas);
-  canvas.width = width;
-  canvas.height = height;
-}
-
-function rotateAroundX(
-  vector: [number, number, number],
-  angle: number
-): [number, number, number] {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
-  return [
-    vector[0],
-    vector[1] * c - vector[2] * s,
-    vector[1] * s + vector[2] * c,
-  ];
-}
-
-function normalizeVector(
-  vector: [number, number, number]
-): [number, number, number] {
-  const length = Math.hypot(vector[0], vector[1], vector[2]) || 1;
-  return [vector[0] / length, vector[1] / length, vector[2] / length];
-}
-
 async function main() {
   await assertWebGPUSupport();
   Settings.init();
+  const particleCount = createWireParticleCount(Config.particleGridSize);
+  const historyLength = createWireHistoryLength(Config.wireTileCount);
+  const historyInvocationCount = createWireHistoryInvocationCount({
+    particleCount,
+    historyLength,
+  });
 
   const canvas = document.createElement("canvas");
   canvas.className = "app-canvas";
   document.body.appendChild(canvas);
-  resizeCanvasToPixelRatio(canvas);
 
+  const label = document.createElement("div");
+  label.textContent = `${particleCount.toLocaleString()} fluid wires`;
+  label.className = "particle-count-label";
+  document.body.appendChild(label);
   const {
     fluidTextureSize,
     advectionScale,
@@ -168,78 +154,43 @@ async function main() {
   });
 
   const initialData = createParticleData({
-    count: PARTICLE_COUNT,
+    count: particleCount,
     radius: MAX_RADIUS,
   });
-  const initialCubeData = createParticleData({
-    count: CUBE_COUNT,
-    radius: MAX_RADIUS,
-    baseScale: 1,
+  const initialHistoryData = createWireHistoryData({
+    particles: initialData,
+    particleCount,
+    historyLength,
   });
 
   const particleBuffers = [
     Buffer.fromData(device, initialData, BufferUsage.storage, "particles-a"),
     Buffer.fromData(device, initialData, BufferUsage.storage, "particles-b"),
   ];
-  const cubeBuffers = [
-    Buffer.fromData(device, initialCubeData, BufferUsage.storage, "cubes-a"),
-    Buffer.fromData(device, initialCubeData, BufferUsage.storage, "cubes-b"),
-  ];
+  const historyBuffer = Buffer.fromData(
+    device,
+    initialHistoryData,
+    BufferUsage.storage,
+    "wire-history"
+  );
 
-  const positionBuffer = Buffer.fromData(
+  const wireGeometry = createWireGeometry({
+    historyLength,
+    sides: WIRE_SIDES,
+  });
+  const wireNodeSideBuffer = Buffer.fromData(
     device,
-    PARTICLE_TRIANGLE_POSITIONS,
+    wireGeometry.nodeSides,
     BufferUsage.vertex,
-    "particle-triangle-positions"
+    "wire-node-sides"
   );
-  const mesh = new Mesh(PARTICLE_TRIANGLE_POSITIONS.length / 3).addVertexBuffer(
-    {
-      buffer: positionBuffer,
-      arrayStride: 12,
-      attributes: [{ shaderLocation: 0, format: "float32x3", offset: 0 }],
-      slot: 0,
-      stepMode: "vertex",
-    }
-  );
-  const cubeGeometry = Geom.cube({ size: 2 });
-  const cubePositionBuffer = Buffer.fromData(
-    device,
-    cubeGeometry.positions,
-    BufferUsage.vertex,
-    "cube-positions"
-  );
-  const cubeNormalBuffer = Buffer.fromData(
-    device,
-    cubeGeometry.normals,
-    BufferUsage.vertex,
-    "cube-normals"
-  );
-  const cubeIndexBuffer = Buffer.fromData(
-    device,
-    cubeGeometry.indices,
-    BufferUsage.index,
-    "cube-indices"
-  );
-  const cubeMesh = new Mesh(cubeGeometry.positions.length / 3)
-    .addVertexBuffer({
-      buffer: cubePositionBuffer,
-      arrayStride: 12,
-      attributes: [{ shaderLocation: 0, format: "float32x3", offset: 0 }],
-      slot: 0,
-      stepMode: "vertex",
-    })
-    .addVertexBuffer({
-      buffer: cubeNormalBuffer,
-      arrayStride: 12,
-      attributes: [{ shaderLocation: 1, format: "float32x3", offset: 0 }],
-      slot: 1,
-      stepMode: "vertex",
-    })
-    .setIndexBuffer(
-      cubeIndexBuffer,
-      cubeGeometry.indices.length,
-      cubeGeometry.indices instanceof Uint32Array ? "uint32" : "uint16"
-    );
+  const wireMesh = new Mesh(wireGeometry.vertexCount).addVertexBuffer({
+    buffer: wireNodeSideBuffer,
+    arrayStride: 8,
+    attributes: [{ shaderLocation: 0, format: "float32x2", offset: 0 }],
+    slot: 0,
+    stepMode: "vertex",
+  });
 
   const cameraUniformBuffer = Buffer.create(
     device,
@@ -308,39 +259,6 @@ async function main() {
     vec3.copy(lastHit, hit);
   }) as EventListener);
 
-  const addFluidRingForces = (time: number) => {
-    const rotation = time * RING_FORCE_ROTATION_SPEED;
-    const strength = params.strength * RING_FORCE_STRENGTH_SCALE;
-
-    for (let i = 0; i < RING_FORCE_POINTS; i++) {
-      const angle = (i / RING_FORCE_POINTS) * Math.PI * 2;
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-      let rinScale = Math.random() * 0.5 + 0.5;
-      const position: [number, number, number] = [
-        cos * RING_FORCE_RADIUS * rinScale,
-        0,
-        sin * RING_FORCE_RADIUS * rinScale,
-      ];
-      const tangent: [number, number, number] = [-sin, 0, cos];
-      const inward: [number, number, number] = [-cos, 0, -sin];
-      const direction = normalizeVector([
-        tangent[0] + inward[0],
-        tangent[1] + inward[1],
-        tangent[2] + inward[2],
-      ]);
-
-      fluid.addForce(
-        rotateAroundX(position, rotation),
-        rotateAroundX(direction, rotation),
-        RING_FORCE_POINT_RADIUS,
-        strength,
-        RING_FORCE_DENSITY_SCALE,
-        params.noiseStrength
-      );
-    }
-  };
-
   const lightCamera = new OrthographicCamera(-1, 1, -1, 1, 0.1, 100);
   fitOrthographicCameraToSphere({
     camera: lightCamera,
@@ -383,19 +301,39 @@ async function main() {
     BufferUsage.uniform,
     "particle-sim-params"
   );
-  const cubeSimParamsBuffer = Buffer.create(
+  const particleSimParamsUniforms = createSimParamsUniforms(particleCount);
+  const historyParamsBuffer = Buffer.create(
     device,
-    SIM_PARAMS_BYTE_SIZE,
+    HISTORY_PARAMS_BYTE_SIZE,
     BufferUsage.uniform,
-    "cube-sim-params"
+    "wire-history-params"
   );
-  const particleSimParamsUniforms = createSimParamsUniforms(PARTICLE_COUNT);
-  const cubeSimParamsUniforms = createSimParamsUniforms(CUBE_COUNT);
+  const historyParamsUniforms = UniformBlock.create(HISTORY_PARAMS_SCHEMA)
+    .set("writeSlot", 0)
+    .set("historyLength", historyLength)
+    .set("particleCount", particleCount)
+    .set("radiusScale", Config.wireThicknessScale)
+    .set("dt", 1 / 60)
+    .set("maxRadius", SIM_PARAMS.maxRadius)
+    .set("historyFluidStrength", Config.historyFluidStrength)
+    .set("densityForceScale", SIM_PARAMS.densityForceScale);
 
   const updateCompute = new Compute(device, updateShaderCode, {
-    label: "ParticlesUpdate",
+    label: "WireParticlesUpdate",
     entryPoint: "cs_main",
   });
+  const historyWriteCompute = new Compute(device, wireHistoryWriteShaderCode, {
+    label: "WireHistoryWrite",
+    entryPoint: "cs_main",
+  });
+  const historyAdvectCompute = new Compute(
+    device,
+    wireHistoryAdvectShaderCode,
+    {
+      label: "WireHistoryAdvect",
+      entryPoint: "cs_main",
+    }
+  );
   const createUpdateBindGroup = (
     buffers: Buffer[],
     simParamsBuffer: Buffer,
@@ -415,15 +353,42 @@ async function main() {
       ],
       `${label}-update-${readIndex}-to-${writeIndex}`
     );
+  const createHistoryWriteBindGroup = (particleBuffer: Buffer) =>
+    BindGroup.create(
+      device,
+      historyWriteCompute.getBindGroupLayout(0),
+      [
+        { binding: 0, resource: historyParamsBuffer },
+        { binding: 1, resource: particleBuffer },
+        { binding: 2, resource: historyBuffer },
+      ],
+      "wire-history-write"
+    );
+  const historyAdvectBindGroup = BindGroup.create(
+    device,
+    historyAdvectCompute.getBindGroupLayout(0),
+    [
+      { binding: 0, resource: historyParamsBuffer },
+      { binding: 1, resource: historyBuffer },
+      { binding: 2, resource: fluid.velocity.view },
+      { binding: 3, resource: fluid.density.view },
+    ],
+    "wire-history-advect"
+  );
 
   const scene = createSceneUniformPipelineLayout(device, "ParticlesScene");
-  const particleBindGroupLayout = device.gpu.createBindGroupLayout({
-    label: "ParticlesStorageLayout",
+  const wireHistoryBindGroupLayout = device.gpu.createBindGroupLayout({
+    label: "WireHistoryLayout",
     entries: [
       {
         binding: 0,
         visibility: GPUShaderStage.VERTEX,
         buffer: { type: "read-only-storage" },
+      },
+      {
+        binding: 1,
+        visibility: GPUShaderStage.VERTEX,
+        buffer: { type: "uniform" },
       },
     ],
   });
@@ -448,40 +413,28 @@ async function main() {
     ],
   });
   const shadowPipelineLayout = device.gpu.createPipelineLayout({
-    label: "ParticlesShadowPipelineLayout",
-    bindGroupLayouts: [scene.bindGroupLayout, particleBindGroupLayout],
+    label: "WiresShadowPipelineLayout",
+    bindGroupLayouts: [scene.bindGroupLayout, wireHistoryBindGroupLayout],
   });
   const drawPipelineLayout = device.gpu.createPipelineLayout({
-    label: "ParticlesPipelineLayout",
+    label: "WiresPipelineLayout",
     bindGroupLayouts: [
       scene.bindGroupLayout,
-      particleBindGroupLayout,
+      wireHistoryBindGroupLayout,
       shadowBindGroupLayout,
     ],
   });
-  const shadowDraw = new DepthDraw(device, shadowShaderCode, {
-    label: "ParticlesShadowDraw",
+  const wireShadowDraw = new DepthDraw(device, wireShadowShaderCode, {
+    label: "WiresShadowDraw",
     layout: shadowPipelineLayout,
-    vertexBuffers: mesh.getVertexLayouts(),
+    vertexBuffers: wireMesh.getVertexLayouts(),
     ...depthOnlyTriangles({ cullMode: "none", depthFormat: "depth32float" }),
   });
-  const cubeShadowDraw = new DepthDraw(device, cubeShadowShaderCode, {
-    label: "CubesShadowDraw",
-    layout: shadowPipelineLayout,
-    vertexBuffers: cubeMesh.getVertexLayouts(),
-    ...depthOnlyTriangles({ cullMode: "back", depthFormat: "depth32float" }),
-  });
-  const draw = new Draw(device, drawShaderCode, {
-    label: "ParticlesDraw",
+  const wireDraw = new Draw(device, wireDrawShaderCode, {
+    label: "WiresDraw",
     layout: drawPipelineLayout,
-    vertexBuffers: mesh.getVertexLayouts(),
+    vertexBuffers: wireMesh.getVertexLayouts(),
     ...opaqueTriangles({ cullMode: "none", colorFormat: device.format }),
-  });
-  const cubeDraw = new Draw(device, cubeDrawShaderCode, {
-    label: "CubesDraw",
-    layout: drawPipelineLayout,
-    vertexBuffers: cubeMesh.getVertexLayouts(),
-    ...opaqueTriangles({ cullMode: "back", colorFormat: device.format }),
   });
   const sceneBindGroup = BindGroup.create(
     device,
@@ -497,21 +450,14 @@ async function main() {
     0,
     "light-scene-bind-group"
   );
-  const particleDrawBindGroups = particleBuffers.map((buffer, index) =>
-    BindGroup.create(
-      device,
-      particleBindGroupLayout,
-      [{ binding: 0, resource: buffer }],
-      `particle-draw-${index}`
-    )
-  );
-  const cubeDrawBindGroups = cubeBuffers.map((buffer, index) =>
-    BindGroup.create(
-      device,
-      particleBindGroupLayout,
-      [{ binding: 0, resource: buffer }],
-      `cube-draw-${index}`
-    )
+  const wireHistoryBindGroup = BindGroup.create(
+    device,
+    wireHistoryBindGroupLayout,
+    [
+      { binding: 0, resource: historyBuffer },
+      { binding: 1, resource: historyParamsBuffer },
+    ],
+    "wire-history-bind-group"
   );
   const shadowMap = ShadowMap.create(device, {
     label: "ParticlesShadowMap",
@@ -545,6 +491,7 @@ async function main() {
   let lastWidth = 0;
   let lastHeight = 0;
   let readIndex = 0;
+  let historyWriteSlot = 0;
   let lastTime = performance.now();
 
   const updateAspect = () => {
@@ -635,7 +582,8 @@ async function main() {
 
   const render = (now: number) => {
     overlay?.begin();
-    device.resize(...getCanvasPixelSize(canvas));
+    device.resize();
+    syncCanvasPixelSize(canvas, window.devicePixelRatio);
     updateAspect();
 
     const dt = Math.min(1 / 30, Math.max(1 / 240, (now - lastTime) / 1000));
@@ -645,10 +593,12 @@ async function main() {
       .set("time", time)
       .set("dt", dt)
       .writeToBuffer(particleSimParamsBuffer, device);
-    cubeSimParamsUniforms
-      .set("time", time)
+    historyParamsUniforms
+      .set("writeSlot", historyWriteSlot)
+      .set("radiusScale", Config.wireThicknessScale)
       .set("dt", dt)
-      .writeToBuffer(cubeSimParamsBuffer, device);
+      .set("historyFluidStrength", Config.historyFluidStrength)
+      .writeToBuffer(historyParamsBuffer, device);
 
     camera.writeUniformData(cameraUniformData);
     cameraUniformBuffer.write(device, cameraUniformData);
@@ -657,13 +607,15 @@ async function main() {
     const colorView = device.getCurrentTexture().createView();
     const depthView = ensureDepthTexture();
     const encoder = device.gpu.createCommandEncoder({
-      label: "fluid-particles-frame",
+      label: "fluid-wires-frame",
     });
 
-    addFluidRingForces(time);
+    // addFluidEmitterForces(now * 0.001);
     fluid.update(encoder, dt);
 
-    const computePass = encoder.beginComputePass({ label: "update-particles" });
+    const computePass = encoder.beginComputePass({
+      label: "update-wire-particles",
+    });
     updateCompute.dispatch(
       computePass,
       createUpdateBindGroup(
@@ -673,33 +625,26 @@ async function main() {
         writeIndex,
         "particles"
       ),
-      Math.ceil(PARTICLE_COUNT / WORKGROUP_SIZE)
+      Math.ceil(particleCount / WORKGROUP_SIZE)
     );
-    updateCompute.dispatch(
+    historyWriteCompute.dispatch(
       computePass,
-      createUpdateBindGroup(
-        cubeBuffers,
-        cubeSimParamsBuffer,
-        readIndex,
-        writeIndex,
-        "cubes"
-      ),
-      Math.ceil(CUBE_COUNT / WORKGROUP_SIZE)
+      createHistoryWriteBindGroup(particleBuffers[writeIndex]),
+      Math.ceil(particleCount / WORKGROUP_SIZE)
+    );
+    historyAdvectCompute.dispatch(
+      computePass,
+      historyAdvectBindGroup,
+      Math.ceil(historyInvocationCount / WORKGROUP_SIZE)
     );
     computePass.end();
 
     const shadowPass = shadowMap.beginRenderPass(encoder);
-    shadowDraw.draw(
+    wireShadowDraw.draw(
       shadowPass,
-      mesh,
-      [lightSceneBindGroup, particleDrawBindGroups[writeIndex]],
-      PARTICLE_COUNT
-    );
-    cubeShadowDraw.draw(
-      shadowPass,
-      cubeMesh,
-      [lightSceneBindGroup, cubeDrawBindGroups[writeIndex]],
-      CUBE_COUNT
+      wireMesh,
+      [lightSceneBindGroup, wireHistoryBindGroup],
+      particleCount
     );
     shadowPass.end();
 
@@ -712,17 +657,11 @@ async function main() {
         depthStoreOp: "store",
       },
     });
-    draw.draw(
+    wireDraw.draw(
       pass,
-      mesh,
-      [sceneBindGroup, particleDrawBindGroups[writeIndex], shadowBindGroup],
-      PARTICLE_COUNT
-    );
-    cubeDraw.draw(
-      pass,
-      cubeMesh,
-      [sceneBindGroup, cubeDrawBindGroups[writeIndex], shadowBindGroup],
-      CUBE_COUNT
+      wireMesh,
+      [sceneBindGroup, wireHistoryBindGroup, shadowBindGroup],
+      particleCount
     );
     pass.end();
 
@@ -740,6 +679,7 @@ async function main() {
 
     device.gpu.queue.submit([encoder.finish()]);
     readIndex = writeIndex;
+    historyWriteSlot = (historyWriteSlot + 1) % historyLength;
 
     overlay?.end();
     requestAnimationFrame(render);
@@ -756,15 +696,12 @@ async function main() {
     cameraUniformBuffer.destroy();
     lightCameraUniformBuffer.destroy();
     particleSimParamsBuffer.destroy();
-    cubeSimParamsBuffer.destroy();
+    historyParamsBuffer.destroy();
     shadowUniformBuffer.destroy();
     shadowMap.destroy();
-    positionBuffer.destroy();
-    cubePositionBuffer.destroy();
-    cubeNormalBuffer.destroy();
-    cubeIndexBuffer.destroy();
+    wireNodeSideBuffer.destroy();
+    historyBuffer.destroy();
     particleBuffers.forEach((buffer) => buffer.destroy());
-    cubeBuffers.forEach((buffer) => buffer.destroy());
   });
 
   requestAnimationFrame(render);

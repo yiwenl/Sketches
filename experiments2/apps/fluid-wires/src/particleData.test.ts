@@ -9,7 +9,7 @@ import {
 } from "./particleData.js";
 
 describe("createParticleData", () => {
-  it("packs one particle as position/size, velocity, color, and random values", () => {
+  it("packs one particle as position/size, velocity, and grayscale color", () => {
     const data = createParticleData({
       count: 1,
       radius: 12,
@@ -29,7 +29,6 @@ describe("createParticleData", () => {
     const g = data[9];
     const b = data[10];
     const a = data[11];
-    const rand = data.slice(12, 16);
 
     assert.ok(Math.hypot(x, y, z) <= 12);
     assert.ok(Math.hypot(vx, vy, vz) > 0);
@@ -40,11 +39,6 @@ describe("createParticleData", () => {
     assert.equal(g, b);
     assert.ok(r >= 0.7 && r <= 1);
     assert.equal(a, 1);
-    assert.equal(rand.length, 4);
-    for (const value of rand) {
-      assert.ok(value >= 0);
-      assert.ok(value <= 1);
-    }
   });
 
   it("creates the requested number of particles", () => {
