@@ -45,6 +45,7 @@ Currently supported targets:
 | HueSaturation | `saturation-in` | `saturation` |
 | Vignette | `radius-in` | `radius` |
 | Vignette | `strength-in` | `strength` |
+| Color Lookup | `strength-in` | `strength` |
 
 Any other pass that has a numeric parameter with a key in the recognized set will also expose a matching handle automatically.
 

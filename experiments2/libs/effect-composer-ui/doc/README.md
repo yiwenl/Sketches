@@ -19,6 +19,7 @@ These nodes process the image stream from left to right. Connect them in sequenc
 | [Contrast + Brightness](nodes/shader-passes.md#contrastbrightness) | `contrastBrightness` | Combined contrast and brightness control |
 | [Hue + Saturation](nodes/shader-passes.md#huesaturation) | `hueSaturation` | Hue rotation and saturation scaling |
 | [Gradient Map](nodes/shader-passes.md#gradientmap) | `gradientMap` | Remap luminance to a two-colour gradient |
+| [Color Lookup](nodes/shader-passes.md#colorlookup) | `colorLookup` | Apply a PNG LUT map to remap colours |
 
 ### Value Supplier Nodes
 
@@ -27,12 +28,13 @@ These nodes sit freely on the canvas and output a single typed value. Wire them 
 | Node | Type key | Output handle | Accepted by |
 |------|----------|---------------|-------------|
 | [Color](nodes/color-node.md) | `colorNode` | `output` (cyan handle) | `color1-in`, `color2-in` on Gradient Map |
-| [Value](nodes/value-node.md) | `valueNode` | `output` (amber handle) | `contrast-in`, `brightness-in`, `hue-in`, `saturation-in`, etc. on any pass |
+| [Value](nodes/value-node.md) | `valueNode` | `output` (amber handle) | `contrast-in`, `brightness-in`, `hue-in`, `saturation-in`, `strength-in`, etc. on any pass |
+| [Ramp](nodes/ramp-node.md) | `rampNode` | `output` (amber handle) | Any amber named handle; also accepts Value nodes on its own `a-in`, `b-in`, `position-in` |
 
 ## Connection Rules
 
 1. **Image pipeline** — connect the grey right-side handle of one pass node to the grey left-side handle of the next. The pipeline must start at **Start** and end at **End**.
-2. **Value suppliers** — connect the cyan (`Color`) or amber (`Value`) source handle to a named target handle on a pass node. Named handles appear as small coloured dots on the left side of the pass node, below the main image-in handle.
+2. **Value suppliers** — connect the cyan (`Color`) or amber (`Value` / `Ramp`) source handle to a named target handle on a pass node. Named handles appear as small coloured dots on the left side of the pass node, below the main image-in handle.
 3. **Fallback** — when no supplier is connected, pass nodes use their own inline sliders and pickers as the active value.
 
 ## Exporting and Importing
@@ -43,10 +45,10 @@ Use the **Export** button to download the full graph (nodes + edges) as JSON. Us
 
 ```
 ComposerFlow
-├── nodeTypes registry (ShaderPassNode, GradientMapNode, ColorNode, ValueNode, StartNode, EndNode)
+├── nodeTypes registry (ShaderPassNode, GradientMapNode, ColorLookupNode, ColorNode, ValueNode, RampNode, StartNode, EndNode)
 ├── nodes / edges state (React Flow)
 ├── notifyChange()        — traverses the pipeline, resolves supplier values, emits PipelineConfig
 ├── handleParamChange()   — updates node data in place
-├── handleColorNodeChange() / handleValueNodeChange() — update supplier node data + re-emit
+├── handleColorNodeChange() / handleValueNodeChange() / handleRampNodeChange() — update supplier node data + re-emit
 └── Toolbar              — buttons to add any node type
 ```

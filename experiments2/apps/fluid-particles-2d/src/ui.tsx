@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { ComposerFlow, PipelineConfig } from "@effect-composer-ui";
-import { EffectComposer, ShaderPass, createCurvePass, createVignettePass, createFXAAPass, createContrastBrightnessPass, createHueSaturationPass, createGradientMapPass, type Device } from "belfast";
+import { EffectComposer, ShaderPass, createCurvePass, createVignettePass, createFXAAPass, createContrastBrightnessPass, createHueSaturationPass, createGradientMapPass, createColorLookupPass, ColorLookupPass, type Device } from "belfast";
 import contrastShaderCode from "./shaders/contrast.wgsl?raw";
 
 let uiRoot: ReturnType<typeof createRoot> | null = null;
@@ -67,6 +67,7 @@ export function initUI(
         passConfig.type === "contrastBrightness" ? "ContrastBrightnessPass" :
         passConfig.type === "hueSaturation" ? "HueSaturationPass" :
         passConfig.type === "contrast" ? "ContrastPass" :
+        passConfig.type === "colorLookup" ? "ColorLookupPass" :
         passConfig.type === "curve" ? "CurvePass" : "";
 
       if (existingPass && existingPass.name === expectedLabel) {
@@ -89,6 +90,8 @@ export function initUI(
           pass = createHueSaturationPass(device);
         } else if (passConfig.type === "gradientMap") {
           pass = createGradientMapPass(device);
+        } else if (passConfig.type === "colorLookup") {
+          pass = createColorLookupPass(device);
         }
       }
 
@@ -118,6 +121,13 @@ export function initUI(
           const color2 = hexToRgb(passConfig.params.color2 || "#ffffff");
           pass.setUniform("color1", color1);
           pass.setUniform("color2", color2);
+        } else if (passConfig.type === "colorLookup") {
+          const lookupPass = pass as ColorLookupPass;
+          lookupPass.setUniform("strength", passConfig.params.strength ?? 1.0);
+          lookupPass.setUniform("flipY", passConfig.params.flipY ? 1.0 : 0.0);
+          if (passConfig.params.lutDataUrl) {
+            lookupPass.loadLUT(passConfig.params.lutDataUrl);
+          }
         }
         newPasses.push(pass);
       }

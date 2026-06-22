@@ -72,6 +72,7 @@ The `output` handle emits a number and is compatible with any amber named target
 | ContrastBrightness | `brightness-in` | Drives brightness |
 | HueSaturation | `saturation-in` | Drives saturation |
 | Vignette | `radius-in` | Drives vignette radius |
+| Color Lookup | `strength-in` | Drives LUT blend strength |
 
 ## Example: soft contrast ramp
 

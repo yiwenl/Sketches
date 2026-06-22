@@ -5,7 +5,8 @@ export type PassType =
   | "fxaa"
   | "contrastBrightness"
   | "hueSaturation"
-  | "gradientMap";
+  | "gradientMap"
+  | "colorLookup";
 
 export interface PassConfig {
   id: string;

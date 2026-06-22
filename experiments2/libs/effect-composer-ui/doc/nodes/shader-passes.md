@@ -144,3 +144,37 @@ Two small cyan target handles appear on the left side of the node below the main
 
 - **`color1-in`** — replaces Shadow color when a ColorNode is wired in.
 - **`color2-in`** — replaces Highlight color when a ColorNode is wired in.
+
+---
+
+## ColorLookup
+
+**Type key:** `colorLookup`  
+**Component:** `ColorLookupNode`  
+**Toolbar button:** Color Lookup
+
+Applies a PNG LUT (look-up table) map to remap the colours of the image. The host WebGPU app reads `params.lutDataUrl` from the emitted `PipelineConfig`, decodes it with `createImageBitmap`, and uploads it to a `GPUTexture` used by the LUT shader pass.
+
+### Parameters
+
+| Key | Type | Default | Named handle |
+|-----|------|---------|--------------|
+| `lutDataUrl` | `string \| null` | `null` | — |
+| `lutFileName` | `string \| null` | `null` | — |
+| `strength` | `number` | `1.0` | `strength-in` |
+
+`lutDataUrl` is a base64-encoded `data:image/png;base64,…` string. It is fully serializable — export/import round-trips preserve the embedded texture data.  
+`lutFileName` is stored for display purposes only and is not used by the renderer.
+
+### UI
+
+- **Upload area** — click the "Click to upload PNG" button to open the OS file picker (accepts `.png` files only).
+- **Thumbnail** — once a file is loaded, a small preview of the LUT image is shown.
+- **File name + clear** — the selected file name is displayed alongside a "✕" button to remove the map.
+- **Strength slider** — controls blend intensity from `0` (no effect) to `1` (full LUT). A [Value node](value-node.md) or [Ramp node](ramp-node.md) can be wired into `strength-in` to drive this value dynamically.
+
+### Named handle
+
+One small amber target handle appears on the left side of the node below the main image-in handle:
+
+- **`strength-in`** — overrides the inline strength slider when a Value or Ramp node is wired in.
