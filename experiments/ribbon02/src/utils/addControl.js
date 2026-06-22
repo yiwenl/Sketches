@@ -20,9 +20,15 @@ export default (scene) => {
     .name("Ribbon length")
     .onFinishChange(reload);
 
+  gui.addColor(Config, "ribbonColor").name("Ribbon Color").onFinishChange(refresh);
+  gui.addColor(Config, "skipColor").name("Skip Color").onFinishChange(refresh);
+  gui.addColor(Config, "bgColor").name("Background Color").onFinishChange(refresh);
+  gui.add(Config, "blurStrength", 0, 2).name("Blur Strength").onFinishChange(refresh);
+
   // gui.add(Config, "extreme").onChange(refresh);
   // Pose detection removed as per refactoring
   gui.add(Settings, "reset").name("Reset Default Settings");
+  gui.add(oControl, "save").name("Save Settings");
 
   // dat.GUI.toggleHide();
 };

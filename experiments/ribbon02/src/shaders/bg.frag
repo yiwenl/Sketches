@@ -4,6 +4,7 @@ precision highp float;
 in vec2 vTextureCoord;
 uniform sampler2D uMap;
 uniform float uRatio;
+uniform vec3 uBgColor;
 
 out vec4 oColor;
 
@@ -16,6 +17,7 @@ void main(void) {
     }
     uv += .5;
     vec4 color = texture(uMap, uv);
+    color.rgb *= uBgColor;
     color.rgb *= .7;
 
     oColor = color;

@@ -5,6 +5,7 @@ in vec2 vTextureCoord;
 uniform sampler2D uMap;
 uniform vec2 uDirection;
 uniform vec2 uResolution;
+uniform float uBlurStrength;
 
 out vec4 oColor;
 
@@ -21,5 +22,5 @@ vec4 blur9(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) {
 }
 
 void main(void) {
-    oColor = blur9(uMap, vTextureCoord, uResolution, uDirection);
+    oColor = blur9(uMap, vTextureCoord, uResolution, uDirection * uBlurStrength);
 }

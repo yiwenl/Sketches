@@ -80,7 +80,7 @@ class SceneApp extends Scene {
 
     // camera settings
     const FOV = 60;
-    this.camera.setPerspective(FOV * RAD, GL.aspectRatio, 2, 20);
+    this.camera.setPerspective(FOV * RAD, GL.aspectRatio, 2, 25);
     this._index = 0;
 
     this._hit = new TrackPoint3D();
@@ -251,7 +251,11 @@ class SceneApp extends Scene {
     GL.setMatrices(this.camera);
     this._fboRender.bind();
     GL.clear(0, 0, 0, 0);
-    this._drawBg.bindTexture("uMap", this._texturePaper, 0).draw();
+    const bgColor = Config.bgColor.map((v) => v / 255);
+    this._drawBg
+      .bindTexture("uMap", this._texturePaper, 0)
+      .uniform("uBgColor", bgColor)
+      .draw();
     this._drawFloor
       .bindTexture("uDepthMap", this._fboShadow.depthTexture, 0)
       .uniform("uShadowMatrix", this.mtxShadow)
@@ -289,6 +293,8 @@ class SceneApp extends Scene {
       ? this._fboShadow.depthTexture
       : this._fbo.read.getTexture(0);
 
+    const ribbonColor = Config.ribbonColor.map((v) => v / 255);
+    const skipColor = Config.skipColor.map((v) => v / 255);
     this._drawRibbon
       .bindTexture("uPosMap", this._fboScrambled.texture, 0)
       .bindTexture("uDepthMap", tDepth, 1)
@@ -296,6 +302,8 @@ class SceneApp extends Scene {
       .uniform("uLight", this._lightPosition)
       .uniform("uShadowMatrix", this.mtxShadow)
       .uniform("uTime", Scheduler.getElapsedTime())
+      .uniform("uRibbonColor", ribbonColor)
+      .uniform("uSkipColor", skipColor)
       .draw();
   }
 

@@ -75,11 +75,11 @@ void main(void) {
 
     float t = 0.05;
     // Calculate blur amount based on depth difference
-    float blurAmount = smoothstep(uFocus - t, uFocus + t, normalizedDepth) * .8;
+    float blurAmount = smoothstep(uFocus - t, uFocus + t, normalizedDepth);
     color = mix(color, blurredColor, blurAmount);
 
     float ao = texture(uAOMap, vTextureCoord).r;
-    ao = smoothstep(0.2, 0.8, ao);
+    ao = smoothstep(0.3, 0.8, ao);
     // ao = mix(ao, 1.0, .2);
     
     color.rgb *= ao;
@@ -116,9 +116,6 @@ void main(void) {
     oColor.rgb = mix(oColor.rgb, colorAdj, .35);
 
     oColor.rgb *= mix(1.1, 0.5, v);
-    oColor.rgb = clamp(oColor.rgb, vec3(0.0), vec3(1.0));
-    // oColor = vec4(vec3(ao), 1.0);
-    // oColor = vec4(vec3(blurAmount), 1.0);
-
-    // oColor = mix(oColor, blurredColor, step(vTextureCoord.x, .5));
+    // oColor.rgb = clamp(oColor.rgb, vec3(0.0), vec3(1.0));
+    
 }

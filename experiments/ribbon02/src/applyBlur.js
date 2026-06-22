@@ -1,4 +1,5 @@
 import { GL, Draw, FboPingPong, ShaderLibs, Geom } from "alfrid";
+import Config from "./Config";
 
 import fs from "shaders/blur.frag";
 
@@ -30,6 +31,7 @@ export default function (mSource) {
       .bindTexture("uMap", tSource, 0)
       .uniform("uDirection", [1, 0])
       .uniform("uResolution", [width * mul, height * mul])
+      .uniform("uBlurStrength", Config.blurStrength)
       .draw();
 
     fbo.swap();
@@ -39,6 +41,7 @@ export default function (mSource) {
       .bindTexture("uMap", fbo.read.texture, 0)
       .uniform("uDirection", [0, 1])
       .uniform("uResolution", [width * mul, height * mul])
+      .uniform("uBlurStrength", Config.blurStrength)
       .draw();
 
     fbo.swap();
