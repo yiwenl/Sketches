@@ -27,5 +27,7 @@ export default {
     245.98345588235296,
     237.96875
   ],
-  "blurStrength": 0.7
+  "blurStrength": 0.7,
+  "dofRange": 0.06,
+  "dofIntensity": 1
 }

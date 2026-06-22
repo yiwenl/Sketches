@@ -24,6 +24,11 @@ export default (scene) => {
   gui.addColor(Config, "skipColor").name("Skip Color").onFinishChange(refresh);
   gui.addColor(Config, "bgColor").name("Background Color").onFinishChange(refresh);
   gui.add(Config, "blurStrength", 0, 2).name("Blur Strength").onFinishChange(refresh);
+  gui.add(Config, "dofRange", 0.005, 0.3).name("DOF Range").onFinishChange(refresh);
+  gui
+    .add(Config, "dofIntensity", 0, 1.5)
+    .name("DOF Intensity")
+    .onFinishChange(refresh);
 
   // gui.add(Config, "extreme").onChange(refresh);
   // Pose detection removed as per refactoring

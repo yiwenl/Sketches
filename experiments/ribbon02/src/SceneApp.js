@@ -328,6 +328,8 @@ class SceneApp extends Scene {
       .uniform("uRatio", GL.aspectRatio)
       .uniform("uNear", near)
       .uniform("uFar", far)
+      .uniform("uDofRange", Config.dofRange)
+      .uniform("uDofIntensity", Config.dofIntensity)
       .draw();
 
     // this._dCopy.draw(this._textureAO);
