@@ -238,12 +238,14 @@ class SceneApp extends Scene {
       .bindTexture("uPosMap", this._fboPos.texture, 0)
       .bindTexture("uFluidMap", this._fluid.velocity, 1)
       .bindTexture("uDensityMap", this._fluid.density, 2)
+      .bindTexture('uExtraMap', this._fbo.read.getTexture(2), 3)
       .uniform("uCameraMatrix", this._hitTestor.modelMatrix)
       .uniform("uInvertMatrix", mtxInvert)
       .uniform("uTime", Scheduler.getElapsedTime() + this._seedTime)
       .uniform("uBound", bound)
       .uniform("uStrength", Config.extreme ? 10 : 1)
       .uniform("uMaxRadius", 8)
+      .uniform('uNumSets', numSets)
       .draw();
 
     this._fboPos.bind();

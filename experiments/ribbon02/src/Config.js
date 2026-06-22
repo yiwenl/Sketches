@@ -1,6 +1,6 @@
 export default {
-  "numParticles": "56",
-  "numSets": 12,
+  "numParticles": 56,
+  "numSets": 10,
   "extreme": true,
   "autoSave": false,
   "useHandDetection": false,
@@ -23,13 +23,14 @@ export default {
     237.96875
   ],
   "lookupStrength": 0.30519969856819895,
-  "vignetteStrength": 0.55,
-  "cornerDarkStrength": 0.4,
-  "lightFalloff": 0.08892923203397958,
-  "lightFalloffStart": 10.760087689251217,
+  "vignetteStrength": 0.4293758991573611,
+  "cornerDarkStrength": 0.18243474686579433,
+  "lightFalloff": 0.14943481537302186,
+  "lightFalloffStart": 9.181681167363156,
   "skipColor": [
     215,
     39.453500150060044,
     17.257965686274517
-  ]
+  ],
+  "grainStrength": 0
 }

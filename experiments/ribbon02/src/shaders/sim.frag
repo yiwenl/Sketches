@@ -46,7 +46,8 @@ void main(void) {
 
     vec3 acc = vec3(0.0);
     vec3 noise = curlNoise(pos * posOffset - uTime * 0.1);
-    acc += noise;
+    float noiseStrength = mix(1.0, 3.0, fract(extra.x + extra.z));
+    acc += noise * noiseStrength;
 
     vec3 dir;
     float f;
@@ -72,13 +73,10 @@ void main(void) {
     f = smoothstep(5.0, 3.0, d);
     dir = normalize(pos - uTouch);
 
-    float fTime = fract(extra.x + extra.y);
-    float time = uTime * mix(1.0, 2.0, fTime) * 0.5 + extra.z * PI;
-    fTime = smoothstep(-0.5, 1.0, sin(time));
-    acc -= dir * f * fTime * mix(0.5, 2.0, fract(extra.y + extra.z)) * 2.0;
+    acc -= dir * f;
     
-    float speed = mix(2.0, 3.0, extra.x);
-    // float speed = mix(2.0, 4.0, extra.x);
+    // float speed = mix(2.0, 3.0, extra.x);
+    float speed = mix(2.0, 4.0, extra.x);
 
     float t = fract(extra.x + extra.y);
     if( t < 0.015) speed *= mix(4.0, 8.0, t);
