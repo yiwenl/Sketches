@@ -14,14 +14,13 @@ export default (scene) => {
   const gui = new dat.GUI({ width: 300 });
   window.gui = gui;
 
-  gui.add(Config, "numParticles", [32, 48, 64, 96, 128]).onChange(reload);
+  gui.add(Config, "numParticles", [32, 48, 56, 64, 96]).onChange(reload);
   gui
     .add(Config, "numSets", [10, 12, 14, 16])
     .name("Ribbon length")
     .onFinishChange(reload);
 
   gui.addColor(Config, "ribbonColor").name("Ribbon Color").onFinishChange(refresh);
-  gui.addColor(Config, "skipColor").name("Skip Color").onFinishChange(refresh);
   gui.addColor(Config, "bgColor").name("Background Color").onFinishChange(refresh);
   gui
     .add(Config, "lookupStrength", 0, 1)

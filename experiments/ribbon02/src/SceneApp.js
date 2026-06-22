@@ -120,7 +120,7 @@ class SceneApp extends Scene {
     // shadow
     let r = 15;
     this._lightPosition = [0.0, 10, 0.1];
-    vec3.rotateX(this._lightPosition, this._lightPosition, [0, 0, 0], 0.3);
+    vec3.rotateX(this._lightPosition, this._lightPosition, [0, 0, 0], 0.5);
     this._cameraLight = new CameraOrtho();
     this._cameraLight.ortho(-r, r, r, -r, 2, 20);
     this._cameraLight.lookAt(this._lightPosition, [0, 0, 0]);
@@ -138,8 +138,11 @@ class SceneApp extends Scene {
   _initTextures() {
     this._texturePaper = generatePaperTexture();
     this._textureLookup = Assets.get("lookupFuji");
+    this._textureSkipColor = Assets.get("skipColor");
     this._textureLookup.minFilter = GL.NEAREST;
     this._textureLookup.magFilter = GL.NEAREST;
+    this._textureSkipColor.minFilter = GL.NEAREST;
+    this._textureSkipColor.magFilter = GL.NEAREST;
 
     const { numParticles: num, numSets } = Config;
     const oSettings = {
@@ -290,10 +293,10 @@ class SceneApp extends Scene {
       : this._fbo.read.getTexture(0);
 
     const ribbonColor = Config.ribbonColor.map((v) => v / 255);
-    const skipColor = Config.skipColor.map((v) => v / 255);
     this._drawRibbon
       .bindTexture("uPosMap", this._fboScrambled.texture, 0)
       .bindTexture("uDepthMap", tDepth, 1)
+      .bindTexture("uSkipColorMap", this._textureSkipColor, 2)
       .uniform("uIndex", this._index)
       .uniform("uLight", this._lightPosition)
       .uniform("uLightFalloff", Config.lightFalloff)
@@ -301,7 +304,6 @@ class SceneApp extends Scene {
       .uniform("uShadowMatrix", this.mtxShadow)
       .uniform("uTime", Scheduler.getElapsedTime())
       .uniform("uRibbonColor", ribbonColor)
-      .uniform("uSkipColor", skipColor)
       .draw();
   }
 
