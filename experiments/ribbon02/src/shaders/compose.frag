@@ -7,10 +7,11 @@ precision highp float;
 in vec2 vTextureCoord;
 uniform sampler2D uMap;
 uniform sampler2D uAOMap;
-uniform sampler2D uNoiseMap;
 uniform sampler2D uLookupMap;
 uniform float uRatio;
 uniform float uLookupStrength;
+uniform float uVignetteStrength;
+uniform float uCornerDarkStrength;
 
 out vec4 oColor;
 
@@ -72,21 +73,20 @@ void main(void) {
         uv.x *= uRatio;
     }
 
+
+    color.rgb = pow(color.rgb, vec3(1.0/1.6));
+
+    // vignette
     float d = length(uv);
     float v = smoothstep(0.3, 0.8, d);
-    d = smoothstep(0.2, .8, d);
-
-    float n = texture(uNoiseMap, vTextureCoord).r;
-    color.rgb *= mix(1.0 - d * 0.4, 1.0, n);
-    color.rgb = pow(color.rgb, vec3(1.0/1.6));
 
     // dark bottom right
     uv = vTextureCoord;
     uv.y = 1.0 - uv.y;
     d = length(uv);
     d = smoothstep(0.4, 1.2, d);
-    color.rgb -= d * 0.4;
-    color.rgb += 0.05;
+    color.rgb -= d * uCornerDarkStrength;
+
     color.rgb = clamp(color.rgb, vec3(0.0), vec3(1.0));
 
     oColor = lookup(color, uLookupMap, uLookupStrength);
@@ -95,5 +95,5 @@ void main(void) {
     vec3 colorAdj = smoothstep(vec3(0.0), vec3(1.0), oColor.rgb);
     oColor.rgb = mix(oColor.rgb, colorAdj, .35);
 
-    oColor.rgb *= mix(1.05, 0.5, v);
+    oColor.rgb *= mix(1.05, 1.05 - uVignetteStrength, v);
 }

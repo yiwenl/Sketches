@@ -27,6 +27,14 @@ export default (scene) => {
     .name("Lookup Strength")
     .onFinishChange(refresh);
   gui
+    .add(Config, "vignetteStrength", 0, 1.2)
+    .name("Vignette Strength")
+    .onFinishChange(refresh);
+  gui
+    .add(Config, "cornerDarkStrength", 0, 1)
+    .name("Corner Darken")
+    .onFinishChange(refresh);
+  gui
     .add(Config, "lightFalloff", 0, 0.3)
     .name("Light Falloff")
     .onFinishChange(refresh);

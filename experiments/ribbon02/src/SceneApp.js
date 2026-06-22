@@ -31,7 +31,6 @@ import DrawDebugFluid from "./DrawDebugFluid";
 // textures
 import generatePaperTexture from "./generatePaperTexture";
 import generateAOMap from "./generateAOMap";
-import generateBlueNoise from "./generateBlueNoise";
 
 
 
@@ -119,8 +118,8 @@ class SceneApp extends Scene {
 
     // shadow
     let r = 15;
-    this._lightPosition = [0.0, 10, 0.1];
-    vec3.rotateX(this._lightPosition, this._lightPosition, [0, 0, 0], 0.5);
+    this._lightPosition = [0.0, 10, -0.1];
+    vec3.rotateX(this._lightPosition, this._lightPosition, [0, 0, 0], 0.7);
     this._cameraLight = new CameraOrtho();
     this._cameraLight.ortho(-r, r, r, -r, 2, 20);
     this._cameraLight.lookAt(this._lightPosition, [0, 0, 0]);
@@ -151,9 +150,6 @@ class SceneApp extends Scene {
       type: GL.FLOAT,
     };
     this._fbo = new FboPingPong(num, num, oSettings, 4);
-
-    // blue noise
-    this._textureNoise = generateBlueNoise();
 
     // position array
     let fboSize = num * numSets;
@@ -188,7 +184,18 @@ class SceneApp extends Scene {
   }
 
   update() {
-    this.orbitalControl.ry.value += 0.02;
+    // move light with camera
+    this._lightPosition = [0.0, 10, -0.1];
+    vec3.rotateX(this._lightPosition, this._lightPosition, [0, 0, 0], 0.7);
+    vec3.rotateY(this._lightPosition, this._lightPosition, [0, 0, 0], this.orbitalControl.ry.value);
+    this.orbitalControl.ry.value += 0.02; this._cameraLight.lookAt(this._lightPosition, [0, 0, 0]);
+    mat4.mul(
+      this.mtxShadow,
+      this._cameraLight.projection,
+      this._cameraLight.view
+    );
+    mat4.mul(this.mtxShadow, biasMatrix, this.mtxShadow);
+
     this._fluid.update();
 
     // update particles
@@ -318,10 +325,11 @@ class SceneApp extends Scene {
     this._drawCompose
       .bindTexture("uMap", this._fboRender.texture, 0)
       .bindTexture("uAOMap", this._textureAO, 1)
-      .bindTexture("uNoiseMap", this._textureNoise, 2)
-      .bindTexture("uLookupMap", this._textureLookup, 3)
+      .bindTexture("uLookupMap", this._textureLookup, 2)
       .uniform("uRatio", GL.aspectRatio)
       .uniform("uLookupStrength", Config.lookupStrength)
+      .uniform("uVignetteStrength", Config.vignetteStrength)
+      .uniform("uCornerDarkStrength", Config.cornerDarkStrength)
       .draw();
 
     // this._dCopy.draw(this._textureAO);

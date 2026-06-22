@@ -23,6 +23,8 @@ export default {
     237.96875
   ],
   "lookupStrength": 0.30519969856819895,
+  "vignetteStrength": 0.55,
+  "cornerDarkStrength": 0.4,
   "lightFalloff": 0.08892923203397958,
   "lightFalloffStart": 10.760087689251217,
   "skipColor": [
