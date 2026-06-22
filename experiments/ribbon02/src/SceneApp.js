@@ -32,7 +32,6 @@ import DrawDebugFluid from "./DrawDebugFluid";
 import generatePaperTexture from "./generatePaperTexture";
 import generateAOMap from "./generateAOMap";
 import generateBlueNoise from "./generateBlueNoise";
-import applyBlur from "./applyBlur";
 
 
 
@@ -270,9 +269,6 @@ class SceneApp extends Scene {
     // generate ao map
     this._textureAO = generateAOMap(this._fboRender.depthTexture);
 
-    // generate blurred map
-    this._textureBlurredRender = applyBlur(this._fboRender.texture);
-
     // update hit test
     const mtx = mat4.create();
     mat4.rotateY(mtx, mtx, this.orbitalControl.ry.value);
@@ -300,6 +296,8 @@ class SceneApp extends Scene {
       .bindTexture("uDepthMap", tDepth, 1)
       .uniform("uIndex", this._index)
       .uniform("uLight", this._lightPosition)
+      .uniform("uLightFalloff", Config.lightFalloff)
+      .uniform("uLightFalloffStart", Config.lightFalloffStart)
       .uniform("uShadowMatrix", this.mtxShadow)
       .uniform("uTime", Scheduler.getElapsedTime())
       .uniform("uRibbonColor", ribbonColor)
@@ -313,8 +311,6 @@ class SceneApp extends Scene {
     GL.setMatrices(this.camera);
 
     GL.disable(GL.DEPTH_TEST);
-    const { near, far } = this.camera;
-    let focus = (this.orbitalControl.radius.value + 3.2 - near) / (far - near);
 
     // this._dCopy.draw(this._fboRender.getTexture());
     this._drawCompose
@@ -322,14 +318,8 @@ class SceneApp extends Scene {
       .bindTexture("uAOMap", this._textureAO, 1)
       .bindTexture("uNoiseMap", this._textureNoise, 2)
       .bindTexture("uLookupMap", this._textureLookup, 3)
-      .bindTexture("uBlurMap", this._textureBlurredRender, 4)
-      .bindTexture("uDepthMap", this._fboRender.depthTexture, 5)
-      .uniform("uFocus", focus)
       .uniform("uRatio", GL.aspectRatio)
-      .uniform("uNear", near)
-      .uniform("uFar", far)
-      .uniform("uDofRange", Config.dofRange)
-      .uniform("uDofIntensity", Config.dofIntensity)
+      .uniform("uLookupStrength", Config.lookupStrength)
       .draw();
 
     // this._dCopy.draw(this._textureAO);

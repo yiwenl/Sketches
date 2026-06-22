@@ -23,11 +23,17 @@ export default (scene) => {
   gui.addColor(Config, "ribbonColor").name("Ribbon Color").onFinishChange(refresh);
   gui.addColor(Config, "skipColor").name("Skip Color").onFinishChange(refresh);
   gui.addColor(Config, "bgColor").name("Background Color").onFinishChange(refresh);
-  gui.add(Config, "blurStrength", 0, 2).name("Blur Strength").onFinishChange(refresh);
-  gui.add(Config, "dofRange", 0.005, 0.3).name("DOF Range").onFinishChange(refresh);
   gui
-    .add(Config, "dofIntensity", 0, 1.5)
-    .name("DOF Intensity")
+    .add(Config, "lookupStrength", 0, 1)
+    .name("Lookup Strength")
+    .onFinishChange(refresh);
+  gui
+    .add(Config, "lightFalloff", 0, 0.3)
+    .name("Light Falloff")
+    .onFinishChange(refresh);
+  gui
+    .add(Config, "lightFalloffStart", 0, 15)
+    .name("Falloff Start")
     .onFinishChange(refresh);
 
   // gui.add(Config, "extreme").onChange(refresh);
