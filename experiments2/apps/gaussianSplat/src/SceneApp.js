@@ -6,10 +6,8 @@ import {
 } from "./strategies/RenderStrategy";
 
 import {
-  loadGau選項一：極簡公告風（最不帶感情，最快結束話題）
-「好久不見。因為之前的帳號安全性出現問題（已被盜且棄用），現在我會在這個帳號重新開始。之前的舊連結都與我無關了。謝謝大家，很高興能回來。」
-
-  優點： 像是一封正式的搬家通知，完全沒有給別人同情或追問的空間。ssianPly } from "./utils/parseGaussianPly";
+  loadGaussianPly
+} from "./utils/parseGaussianPly";
 import Assets from "./Assets";
 
 import vs from './shaders/splat.vert'
