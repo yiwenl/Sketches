@@ -362,7 +362,7 @@ export default [
   {
     cover: "assets/img/coverSketchThoughts.jpg",
     url: "//yiwenl.github.io/Sketches/experiments/ribbon02/dist/index.html",
-    title: "Thoughts",
+    title: "WeavingThoughts",
   },
   {
     cover: "assets/img/coverSketchFireParticles.jpg",
