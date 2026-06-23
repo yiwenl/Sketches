@@ -6,12 +6,14 @@ in vec2 vTextureCoord;
 uniform sampler2D uPosMap;
 uniform sampler2D uFluidMap;
 uniform sampler2D uDensityMap;
+uniform sampler2D uExtraMap;
 uniform mat4 uInvertMatrix;
 uniform mat4 uCameraMatrix;
 uniform float uTime;
 uniform float uStrength;
 uniform float uBound;
 uniform float uMaxRadius;
+uniform float uNumSets;
 
 out vec4 oColor;
 
@@ -30,6 +32,8 @@ vec2 _normalize(vec2 v) {
 #define minY -3.0
 
 void main(void) {
+    vec2 uvSets = fract(vTextureCoord * uNumSets);
+    vec3 extra = texture(uExtraMap, uvSets).xyz;
     vec3 pos = texture(uPosMap, vTextureCoord).xyz;
     vec3 noise = curlNoise(pos * 0.25 + uTime * 0.15);
     pos += noise * 0.002;
@@ -43,7 +47,9 @@ void main(void) {
     density = smoothstep(0.0, 1.0, density);
     density = mix(0.25, 1.0, density);
 
-    pos += fluid * 0.00001 * density * uStrength;
+    float fluidStrength = mix(1.0, 3.0, fract(extra.x + extra.z));
+
+    pos += fluid * 0.00001 * density * uStrength * fluidStrength;
 
     float d = length(pos);
     if(d > uMaxRadius) {

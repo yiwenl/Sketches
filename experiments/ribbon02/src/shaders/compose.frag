@@ -7,15 +7,11 @@ precision highp float;
 in vec2 vTextureCoord;
 uniform sampler2D uMap;
 uniform sampler2D uAOMap;
-uniform sampler2D uNoiseMap;
 uniform sampler2D uLookupMap;
-uniform sampler2D uBlurMap;
-uniform sampler2D uDepthMap;
 uniform float uRatio;
-
-uniform float uFocus;         // Focus distance
-uniform float uNear;          // Camera near plane
-uniform float uFar;           // Camera far plane
+uniform float uLookupStrength;
+uniform float uVignetteStrength;
+uniform float uCornerDarkStrength;
 
 out vec4 oColor;
 
@@ -62,27 +58,13 @@ vec4 lookup(in vec4 textureColor, in sampler2D lookupTable) {
 }
 
 
-float normalizeDepth(float depth) {
-    return (2.0 * uNear) / (uFar + uNear - depth * (uFar - uNear));
-}
-
-
 void main(void) {
-    float depth = texture(uDepthMap, vTextureCoord).r;
-    float normalizedDepth = normalizeDepth(depth);
     vec4 color = texture(uMap, vTextureCoord);
-    vec4 blurredColor = texture(uBlurMap, vTextureCoord);
-
-    float t = 0.05;
-    // Calculate blur amount based on depth difference
-    float blurAmount = smoothstep(uFocus - t, uFocus + t, normalizedDepth) * .8;
-    color = mix(color, blurredColor, blurAmount);
 
     float ao = texture(uAOMap, vTextureCoord).r;
-    ao = smoothstep(0.2, 0.8, ao);
-    // ao = mix(ao, 1.0, .2);
-    
-    color.rgb *= ao;
+    ao = smoothstep(0.3, 0.8, ao);
+    vec3 aoColor = mix(vec3(0.1, 0.1, 0.09) * 2.0, vec3(1.0), ao);
+    color.rgb *= aoColor;
 
     vec2 uv = vTextureCoord - .5;
     if(uRatio > 1.0) {
@@ -91,34 +73,27 @@ void main(void) {
         uv.x *= uRatio;
     }
 
-    float d = length(uv);
-    float v = smoothstep(0.3, 0.8, d);
-    d = smoothstep(0.2, .8, d);
-
-    float n = texture(uNoiseMap, vTextureCoord).r;
-    color.rgb *= mix(1.0 - d * 0.4, 1.0, n);
-
 
     color.rgb = pow(color.rgb, vec3(1.0/1.6));
+
+    // vignette
+    float d = length(uv);
+    float v = smoothstep(0.3, 0.8, d);
 
     // dark bottom right
     uv = vTextureCoord;
     uv.y = 1.0 - uv.y;
     d = length(uv);
     d = smoothstep(0.4, 1.2, d);
-    color.rgb -= d * 0.4;
-    color.rgb += 0.05;
+    color.rgb -= d * uCornerDarkStrength;
+
     color.rgb = clamp(color.rgb, vec3(0.0), vec3(1.0));
 
-    oColor = lookup(color, uLookupMap, 0.35);
+    oColor = lookup(color, uLookupMap, uLookupStrength);
 
+    // increase contrast a bit 
     vec3 colorAdj = smoothstep(vec3(0.0), vec3(1.0), oColor.rgb);
     oColor.rgb = mix(oColor.rgb, colorAdj, .35);
 
-    oColor.rgb *= mix(1.1, 0.5, v);
-    oColor.rgb = clamp(oColor.rgb, vec3(0.0), vec3(1.0));
-    // oColor = vec4(vec3(ao), 1.0);
-    // oColor = vec4(vec3(blurAmount), 1.0);
-
-    // oColor = mix(oColor, blurredColor, step(vTextureCoord.x, .5));
+    oColor.rgb *= mix(1.05, 1.05 - uVignetteStrength, v);
 }

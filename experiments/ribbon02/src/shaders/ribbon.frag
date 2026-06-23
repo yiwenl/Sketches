@@ -7,13 +7,20 @@ in vec3 vColor;
 in vec4 vShadowCoord;
 in float vSkip;
 in float vDist;
+in vec3 vWsPos;
+in vec3 vExtra;
 
 uniform sampler2D uDepthMap;
+uniform sampler2D uSkipColorMap;
 uniform vec3 uLight;
+uniform vec3 uRibbonColor;
+uniform float uLightFalloff;
+uniform float uLightFalloffStart;
 
 out vec4 oColor;
 
 #pragma glslify: diffuse    = require(./glsl-utils/diffuse.glsl)
+
 float samplePCF3x3( vec4 sc )
 {
     const int s = 2;
@@ -40,18 +47,25 @@ void main(void) {
     // shadow
     vec4 shadowCoord    = vShadowCoord / vShadowCoord.w;
 	float s             = samplePCF3x3(shadowCoord);
-    s = mix(s, 1.0, .5);
+    vec3 shadowColor = mix(vec3(0.74, 0.74, 0.73), vec3(1.0), s);
 
     float d = diffuse(vNormal, uLight, .5);
-    d = pow(d, 1.5) * 1.5;
-    vec3 color = vColor * d * s;
-    color = smoothstep(vec3(0.0), vec3(1.0), color) * 1.25;
-
+    float lightDist = distance(vWsPos, uLight);
+    float falloffDist = max(lightDist - uLightFalloffStart, 0.0);
+    float falloff = 1.0 / (1.0 + falloffDist * uLightFalloff);
+    vec3 color = vColor * uRibbonColor * d * shadowColor * falloff;
 
     oColor = vec4(color, 1.0);
-    float redDamp = 0.8;
-    float g = smoothstep(0.2, 0.1, vDist) * redDamp;
-    if(vSkip > 0.5) oColor *= vec4(redDamp, g, g, 1.0);
+    float fade = smoothstep(0.2, 0.1, vDist);
+    vec2 uv = fract(vExtra.xy);
+    uv = fract(vWsPos.xz);
+    vec3 skipColor = texture(uSkipColorMap, fract(vExtra.xy)).rgb;
+
+    // increase contrast
+    skipColor = smoothstep(vec3(0.0), vec3(1.0), skipColor + 0.1);
+    
+    vec3 skipTint = mix(skipColor, vec3(1.0), fade);
+    if(vSkip > 0.5) oColor *= vec4(skipTint, 1.0);
 
     if(vDist > 0.5) discard;
 }

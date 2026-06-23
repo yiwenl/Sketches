@@ -24,6 +24,8 @@ out vec3 vColor;
 out vec4 vShadowCoord;
 out float vSkip;
 out float vDist;
+out vec3 vExtra;
+out vec3 vWsPos;
 
 // #pragma glslify: curlNoise    = require(./glsl-utils/curlNoise.glsl)
 #pragma glslify: rotate    = require(./glsl-utils/rotate.glsl)
@@ -82,4 +84,6 @@ void main(void) {
     float g = mix(.8, 1.0, aExtra.y);
     vColor = vec3(1.0) * g;
     vShadowCoord = uShadowMatrix * wsPos;
+    vWsPos = wsPos.xyz;
+    vExtra = aExtra;
 }
