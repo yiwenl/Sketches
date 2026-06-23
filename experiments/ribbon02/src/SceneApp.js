@@ -31,6 +31,7 @@ import DrawDebugFluid from "./DrawDebugFluid";
 // textures
 import generatePaperTexture from "./generatePaperTexture";
 import generateAOMap from "./generateAOMap";
+import generateFluidNoiseMap from "./generateFluidNoiseMap";
 
 
 
@@ -46,7 +47,7 @@ class SceneApp extends Scene {
 
     const minRadius = 10;
     this.orbitalControl.radius.value = 15;
-    this.orbitalControl.radius.limit(minRadius, 20);
+    this.orbitalControl.radius.limit(minRadius, 15);
     this.orbitalControl.rx.limit(0.2, -1.0);
 
     const { numParticles: s, numSets: t } = Config;
@@ -117,9 +118,9 @@ class SceneApp extends Scene {
     this._seedTime = random(1000);
 
     // shadow
-    let r = 15;
+    let r = 12;
     this._lightPosition = [0.0, 10, -0.1];
-    vec3.rotateX(this._lightPosition, this._lightPosition, [0, 0, 0], 0.7);
+    vec3.rotateX(this._lightPosition, this._lightPosition, [0, 0, 0], 0.87);
     this._cameraLight = new CameraOrtho();
     this._cameraLight.ortho(-r, r, r, -r, 2, 20);
     this._cameraLight.lookAt(this._lightPosition, [0, 0, 0]);
@@ -184,11 +185,13 @@ class SceneApp extends Scene {
   }
 
   update() {
+    this.orbitalControl.ry.value += 0.02;
+
     // move light with camera
     this._lightPosition = [0.0, 10, -0.1];
     vec3.rotateX(this._lightPosition, this._lightPosition, [0, 0, 0], 0.7);
     vec3.rotateY(this._lightPosition, this._lightPosition, [0, 0, 0], this.orbitalControl.ry.value);
-    this.orbitalControl.ry.value += 0.02; this._cameraLight.lookAt(this._lightPosition, [0, 0, 0]);
+    this._cameraLight.lookAt(this._lightPosition, [0, 0, 0]);
     mat4.mul(
       this.mtxShadow,
       this._cameraLight.projection,
@@ -196,6 +199,26 @@ class SceneApp extends Scene {
     );
     mat4.mul(this.mtxShadow, biasMatrix, this.mtxShadow);
 
+    const time = Scheduler.getElapsedTime() + this._seedTime;
+    const fluidTextureSize = this._fluid.settings.TEXTURE_SIZE;
+    const noiseAmount = Config.fluidNoiseAmount;
+    const textureNoiseVel = generateFluidNoiseMap(
+      "velocity",
+      time,
+      fluidTextureSize,
+      noiseAmount
+    );
+    const textureNoiseDensity = generateFluidNoiseMap(
+      "density",
+      time,
+      fluidTextureSize,
+      noiseAmount
+    );
+    this._fluid.updateFlowWithMap(
+      textureNoiseVel,
+      textureNoiseDensity,
+      Config.fluidFlowMapStrength
+    );
     this._fluid.update();
 
     // update particles
@@ -208,7 +231,6 @@ class SceneApp extends Scene {
       .uniform("uTime", Scheduler.getElapsedTime() + this._seedTime)
       .uniform("uSpeed", 1)
       .uniform("uTouch", [999, 999, 999])
-      .uniform("uNoiseScale", 1)
       .uniform("uCenter", [0, 0.5, 0])
       .draw();
 
@@ -273,7 +295,7 @@ class SceneApp extends Scene {
       .draw();
 
     const g = 0.05;
-    this._dBall.draw(this._hit.pos, [g, g, g], [0.6, 0.05, 0]);
+    // this._dBall.draw(this._hit.pos, [g, g, g], [0.6, 0.05, 0]);
     this._renderRibbon(true);
 
     this._fboRender.unbind();

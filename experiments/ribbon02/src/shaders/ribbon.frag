@@ -56,12 +56,15 @@ void main(void) {
     vec3 color = vColor * uRibbonColor * d * shadowColor * falloff;
 
     oColor = vec4(color, 1.0);
-    float damp = 0.8;
     float fade = smoothstep(0.2, 0.1, vDist);
     vec2 uv = fract(vExtra.xy);
     uv = fract(vWsPos.xz);
-    vec3 skipColor = texture(uSkipColorMap, fract(vExtra.xy)).rgb * 1.4;
-    vec3 skipTint = mix(skipColor, vec3(1.0), fade) * damp;
+    vec3 skipColor = texture(uSkipColorMap, fract(vExtra.xy)).rgb;
+
+    // increase contrast
+    skipColor = smoothstep(vec3(0.0), vec3(1.0), skipColor + 0.1);
+    
+    vec3 skipTint = mix(skipColor, vec3(1.0), fade);
     if(vSkip > 0.5) oColor *= vec4(skipTint, 1.0);
 
     if(vDist > 0.5) discard;

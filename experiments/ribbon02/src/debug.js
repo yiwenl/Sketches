@@ -9,7 +9,9 @@ stats.domElement.style.top = "auto";
 
 let statsVisible = true;
 window.addEventListener("keydown", (e) => {
-  if (!e.shiftKey || e.key.toLowerCase() !== "s") return;
+  const key = e.key.toLowerCase();
+  const shouldToggleStats = (e.shiftKey && key === "s") || key === "h";
+  if (!shouldToggleStats) return;
   statsVisible = !statsVisible;
   stats.domElement.style.display = statsVisible ? "block" : "none";
 });

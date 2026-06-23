@@ -27,6 +27,8 @@ export default {
   "cornerDarkStrength": 0.18243474686579433,
   "lightFalloff": 0.14943481537302186,
   "lightFalloffStart": 9.181681167363156,
+  "fluidNoiseAmount": 1,
+  "fluidFlowMapStrength": 5,
   "skipColor": [
     215,
     39.453500150060044,

@@ -42,6 +42,14 @@ export default (scene) => {
     .add(Config, "lightFalloffStart", 0, 15)
     .name("Falloff Start")
     .onFinishChange(refresh);
+  gui
+    .add(Config, "fluidNoiseAmount", 0, 4)
+    .name("Fluid Noise Amount")
+    .onFinishChange(refresh);
+  gui
+    .add(Config, "fluidFlowMapStrength", 0, 10)
+    .name("Fluid Flow Strength")
+    .onFinishChange(refresh);
 
   // gui.add(Config, "extreme").onChange(refresh);
   // Pose detection removed as per refactoring
