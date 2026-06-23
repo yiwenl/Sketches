@@ -38,8 +38,44 @@ import generateFluidNoiseMap from "./generateFluidNoiseMap";
 // fluid simulation
 import FluidSimulation from "./fluid-sim";
 import TrackPoint3D from "./TrackPoint3D";
+import { HandLandmarkManager } from "digit";
 
 const bound = 8;
+const PALM_INDICES = [0, 5, 9, 13, 17];
+const THUMB_TIP_INDEX = 4;
+const INDEX_TIP_INDEX = 8;
+const PINCH_DISTANCE_THRESHOLD = 0.05;
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+
+const getPalmCenter = (landmarks) => {
+  if (!landmarks || landmarks.length <= 17) {
+    return null;
+  }
+
+  let x = 0;
+  let y = 0;
+  let z = 0;
+  PALM_INDICES.forEach((i) => {
+    x += landmarks[i].x;
+    y += landmarks[i].y;
+    z += landmarks[i].z;
+  });
+
+  const s = 1 / PALM_INDICES.length;
+  return { x: x * s, y: y * s, z: z * s };
+};
+
+const isPinching = (landmarks) => {
+  const thumbTip = landmarks?.[THUMB_TIP_INDEX];
+  const indexTip = landmarks?.[INDEX_TIP_INDEX];
+  if (!thumbTip || !indexTip) {
+    return false;
+  }
+
+  const dx = thumbTip.x - indexTip.x;
+  const dy = thumbTip.y - indexTip.y;
+  return Math.hypot(dx, dy) <= PINCH_DISTANCE_THRESHOLD;
+};
 
 class SceneApp extends Scene {
   constructor() {
@@ -70,8 +106,194 @@ class SceneApp extends Scene {
       PRESSURE_DISSIPATION: DISSIPATION,
     });
 
+    this._handManager = null;
+    this._handPalmState = new Map();
+    this._hasUnloadListener = false;
+    this._isInitializingHandDetection = false;
+    this._initHandDetection = this._initHandDetection.bind(this);
+    this._onHandDetected = this._onHandDetected.bind(this);
+    this._onBeforeUnload = this._onBeforeUnload.bind(this);
+
   }
 
+  async _initHandDetection() {
+    if (
+      !Config.useHandDetection ||
+      this._handManager ||
+      this._isInitializingHandDetection
+    ) {
+      return;
+    }
+
+    this._isInitializingHandDetection = true;
+    let manager = null;
+    try {
+      manager = new HandLandmarkManager({
+        numHands: 2,
+        mirror: true,
+      });
+      this._handManager = manager;
+      await manager.init();
+
+      // If another manager replaced this one while initializing, dispose this stale one.
+      if (this._handManager && this._handManager !== manager) {
+        if (manager.stop) {
+          manager.stop();
+        }
+        if (manager.dispose) {
+          manager.dispose();
+        }
+        return;
+      }
+
+      // Restore manager reference if it was temporarily nulled during async init.
+      if (!this._handManager) {
+        this._handManager = manager;
+      }
+
+      this._ensureCameraOverlay(this._handManager);
+      this._handManager.removeEventListener("hand-detected", this._onHandDetected);
+      this._handManager.addEventListener("hand-detected", this._onHandDetected);
+    } catch (error) {
+      console.error("Failed to initialize hand detection", error);
+      if (this._handManager === manager) {
+        this._destroyHandDetection();
+      }
+    } finally {
+      this._isInitializingHandDetection = false;
+    }
+  }
+
+  _ensureCameraOverlay(manager, retries = 60) {
+    const video = manager?.video || document.getElementById("video");
+    if (video) {
+      this._attachCameraOverlay(video);
+      return;
+    }
+
+    if (retries <= 0) {
+      console.warn("Camera video element not found for overlay");
+      return;
+    }
+
+    requestAnimationFrame(() => this._ensureCameraOverlay(manager, retries - 1));
+  }
+
+  _attachCameraOverlay(video) {
+    if (!video) {
+      return;
+    }
+
+    if (video.parentElement !== document.body) {
+      document.body.appendChild(video);
+    }
+
+    video.muted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+
+    video.style.setProperty("position", "fixed", "important");
+    video.style.setProperty("top", "16px", "important");
+    video.style.setProperty("left", "16px", "important");
+    video.style.setProperty("width", "320px", "important");
+    video.style.setProperty("height", "240px", "important");
+    video.style.setProperty("transform", "scaleX(-1)", "important");
+    video.style.setProperty("object-fit", "cover", "important");
+    video.style.setProperty("border-radius", "8px", "important");
+    video.style.setProperty("border", "1px solid rgba(255, 255, 255, 0.35)", "important");
+    video.style.setProperty("background", "rgba(0, 0, 0, 0.35)", "important");
+    video.style.setProperty("z-index", "2147483647", "important");
+    video.style.setProperty("pointer-events", "none", "important");
+    video.style.setProperty("display", "block", "important");
+    video.style.setProperty("opacity", "1", "important");
+    video.style.setProperty("visibility", "visible", "important");
+  }
+
+  _onHandDetected(e) {
+    const results = e?.detail;
+    const landmarks = results?.landmarks || [];
+    if (landmarks.length === 0) {
+      this._handPalmState.clear();
+      return;
+    }
+
+    const now = performance.now();
+    const handedness = results?.handedness || results?.handednesses || [];
+    const activeKeys = new Set();
+
+    landmarks.forEach((points, i) => {
+      const palm = getPalmCenter(points);
+      if (!palm) {
+        return;
+      }
+
+      const key =
+        handedness?.[i]?.[0]?.categoryName?.toLowerCase?.() || `hand-${i}`;
+      const uv = [clamp01(1 - palm.x), clamp01(1 - palm.y)];
+      const pinching = isPinching(points);
+      const previous = this._handPalmState.get(key);
+      this._handPalmState.set(key, { uv, time: now, pinching });
+      activeKeys.add(key);
+
+      if (!pinching || !previous || !previous.pinching) {
+        return;
+      }
+
+      const dt = Math.max((now - previous.time) / 1000, 1 / 120);
+      const dx = uv[0] - previous.uv[0];
+      const dy = uv[1] - previous.uv[1];
+      const distance = Math.hypot(dx, dy);
+      if (distance < 0.0015) {
+        return;
+      }
+
+      const speed = distance / dt;
+      const force = smoothstep(0.04, 2.0, speed);
+      if (force <= 0) {
+        return;
+      }
+
+      const dir = [dx / distance, dy / distance];
+      this._fluid.updateFlow(
+        uv,
+        dir,
+        mix(1, 4, force),
+        mix(1, 3, force) * 2,
+        1
+      );
+    });
+
+    this._handPalmState.forEach((_, key) => {
+      if (!activeKeys.has(key)) {
+        this._handPalmState.delete(key);
+      }
+    });
+  }
+
+  _destroyHandDetection() {
+    this._isInitializingHandDetection = false;
+    this._handPalmState.clear();
+    if (!this._handManager) {
+      return;
+    }
+
+    const video = this._handManager.video;
+    this._handManager.removeEventListener("hand-detected", this._onHandDetected);
+    if (this._handManager.stop) {
+      this._handManager.stop();
+    }
+    if (this._handManager.dispose) {
+      this._handManager.dispose();
+    }
+    if (video?.parentElement) {
+      video.parentElement.removeChild(video);
+    }
+    this._handManager = null;
+  }
+
+  _onBeforeUnload() {
+    this._destroyHandDetection();
+  }
 
 
   _init() {
@@ -89,6 +311,9 @@ class SceneApp extends Scene {
     this._hitTestor = new HitTestor(mesh, this.camera);
 
     this._hitTestor.on("onHit", (e) => {
+      if (Config.useHandDetection) {
+        return;
+      }
       this._hit.update(e.hit);
       const { pos, prevPos, speed } = this._hit;
       let f = smoothstep(0, 1, speed);
@@ -114,6 +339,14 @@ class SceneApp extends Scene {
     this._hitTestor.on("onUp", (e) => {
       this._hit.reset();
     });
+
+    if (Config.useHandDetection) {
+      this._initHandDetection();
+    }
+    if (!this._hasUnloadListener) {
+      window.addEventListener("beforeunload", this._onBeforeUnload);
+      this._hasUnloadListener = true;
+    }
 
     this._seedTime = random(1000);
 
@@ -367,9 +600,6 @@ class SceneApp extends Scene {
 
     // resize fbos
     this._fboRender = new FrameBuffer(GL.width, GL.height, { type: GL.FLOAT });
-
-    console.log(GL.aspectRatio, 9 / 16);
-    // console.log(GL.aspectRatio, 4 / 5);
   }
 }
 

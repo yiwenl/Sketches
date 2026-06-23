@@ -50,9 +50,9 @@ export default (scene) => {
     .add(Config, "fluidFlowMapStrength", 0, 10)
     .name("Fluid Flow Strength")
     .onFinishChange(refresh);
+  gui.add(Config, "useHandDetection").onFinishChange(reload);
 
   // gui.add(Config, "extreme").onChange(refresh);
-  // Pose detection removed as per refactoring
   gui.add(Settings, "reset").name("Reset Default Settings");
   gui.add(oControl, "save").name("Save Settings");
 
