@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@vitejs/plugin-basic-ssl": "^2.1.0",
-    "vite": "^7.2.4"
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "vite": "^8.0.16"
   },
   "dependencies": {
     "gl-matrix": "^3.4.4",
