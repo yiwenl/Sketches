@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "gl-matrix": "^3.4.4",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.0",
     "stats.js": "^0.17.0",
     "tweakpane": "^4.0.5"
   }
