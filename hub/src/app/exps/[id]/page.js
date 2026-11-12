@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   const index = parseInt(id, 10);
   const { url, title, cover } = SiteData[index];
 
-  const _url = `https:` + url;
+  const _url = new URL(url, "https://yiwenl.github.io").href;
 
   return {
     title: `Sketches | ${title}`,
